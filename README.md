@@ -4,7 +4,7 @@ Explore Unova together with shared multiplayer exploration, item trading and exp
 
 ## Download and play
 
-1. [Download the Windows beta](https://github.com/WhatWasMissing/unova-together/releases/tag/v0.3.2). Choose **Unova-Together-0.3.2-Windows-x64.zip** under Assets.
+1. [Download the Windows beta](https://github.com/WhatWasMissing/unova-together/releases/tag/v0.3.3). Choose **Unova-Together-0.3.3-Windows-x64.zip** under Assets.
 2. Extract the entire folder and run **Start Emulator.cmd**.
 3. Load the [edited Blaze Black 2 Redux Rom](https://drive.google.com/file/d/1ZL4StVex1m6dvdEjG89o7kxOJwdJeR9L/view?usp=sharing). Both players need the same game revision.
 4. Follow [the player guide](docs/PLAYER_GUIDE.md) to connect.

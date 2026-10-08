@@ -82,6 +82,8 @@ If you are setting up the relay yourself, use the separate [server guide](UDP_SE
 5. For a first battle test, use **Practice** from the boss challenge controls. Practice does not award story progress.
 6. After a story battle, check that each game returns to normal play and save each game separately. Check your own badge/story progress before continuing.
 
+Keep C-Gear wireless off while connected. If the wireless warning appears, close it and use the in-game C-Gear power button to turn wireless off. The mod does not forcibly switch it off.
+
 Co-op battles are experimental. Read [known issues](KNOWN_ISSUES.md), including experience gain and special trainer encounters.
 
 ## If a connection or battle gets stuck
