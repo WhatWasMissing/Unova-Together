@@ -11,6 +11,18 @@ Explore Unova together with shared multiplayer exploration, item trading and exp
 
 For different networks, start with [Tailscale setup](docs/TAILSCALE_COOP.md). Its official installer is included. The experimental UDP option requires a server supplied by your group; no default public server is available.
 
+## Features
+
+- **Explore with a teammate:** see each other moving around Unova, find teammates in the Players menu, and teleport to their map.
+- **Trade items in-game:** choose items from your bag and send offers to a teammate, with accept/decline controls.
+- **Co-op trainer battles:** face supported trainers together, including Gym Leaders and Redux teams. NPC encounters can wait for both players; a Solo/Co-op toggle lets you keep playing independently.
+- **Independent saves:** each player keeps their own party and story progress. Back up saves before playing the beta.
+- **Custom camera:** adjust the overworld camera's angle and rotation in Multiplayer → Camera.
+- **Play across networks:** connect through Tailscale, or try the experimental UDP bridge with a server hosted by your group.
+- **In-game multiplayer menus:** access teammates and trading from the game screen; advanced diagnostics stay behind the Debug toggle.
+
+Co-op battles remain experimental: experience gain is disabled, not every trainer event has been verified, and connection problems can interrupt a battle. See [known issues](docs/KNOWN_ISSUES.md).
+
 ## Guides
 
 - [Player setup, playing together and recovery](docs/PLAYER_GUIDE.md)
