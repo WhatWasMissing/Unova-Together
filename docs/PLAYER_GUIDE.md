@@ -4,7 +4,7 @@ Unova Together adds shared exploration, item trading and experimental co-op trai
 
 ## What each player needs
 
-- A Windows x64 PC and the complete Unova Together 0.3.1 ZIP, extracted into a folder.
+- A Windows x64 PC and the complete Unova Together 0.3.2 ZIP, extracted into a folder.
 - Their own ROM and save. Both players must use exactly the same game version, including the same Redux revision.
 - A backup of their save before playing this beta.
 - A connection method below. Tailscale is included; the experimental UDP option also needs Python.
@@ -98,3 +98,7 @@ An interrupted battle cannot be resumed reliably by reconnecting. Avoid saving a
 ## Reporting a problem
 
 Include your Unova Together version, game/Redux version, which PC hosted, connection method, what you were doing and whether one or both players were affected. Mention any low FPS or error message. Capture both players' Debug screens if possible. If RAM snapshots are requested, share them privately; they can contain personal save information.
+
+## Optional camera settings
+
+Open **System → Multiplayer → Camera**. Enable **Adjust game camera (experimental)**, then change tilt, rotation or zoom. These are local visual settings; your teammate can use a different angle. Start with small adjustments. Disable the adjustment to restore the normal camera if buildings obscure the player or the view behaves unexpectedly.

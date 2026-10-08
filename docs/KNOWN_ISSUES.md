@@ -1,8 +1,10 @@
-# Unova Together beta 0.3.1 — known issues
+# Unova Together beta 0.3.2 — known issues
 
 - **Online UDP is experimental.** It has been checked locally, but reliable battle completion between players on different networks has not yet been confirmed. Use Tailscale if it fails.
 - **No public server is supplied.** The UDP option needs a server provided by your group. Player sharing also needs a reachable server; joining a UDP room does not configure that automatically.
 - **Slow or unstable connections can interrupt battles.** A battle may stall or end unexpectedly. Changing the connection method cannot guarantee a fix.
+- **Teammate rendering can flicker.** Camera sample gaps and map transitions can interrupt the displayed sprite. This release does not claim that all camera/rendering issues are fixed.
+- **Wait before retrying a cancelled trade.** Let both players return to Ready before sending another request. Rapid retries can be rejected.
 - **Fast-forward can prevent wireless pairing.** Turn it off before connecting and throughout shared battles.
 - **A disconnected battle cannot reliably resume.** Return to the field and create a new LAN session. Recovery may discard that battle's progress.
 - **Co-op experience gain is disabled to prevent desynchronisation.** Do not expect shared trainer battles to award experience in this beta.
@@ -11,4 +13,4 @@
 - **Some networks block UDP.** The helper may fail even when other internet apps work. Use Tailscale as the fallback.
 - **Python is required for the UDP helper.** Python/tkinter and the dependency installer are separate from the bundled emulator. This release is for Windows x64; it is not an Android emulator build.
 
-Version 0.3.1 improves the instructions and release presentation. It does not change gameplay or fix the issues listed above. See [the player guide](PLAYER_GUIDE.md) for recovery and reporting steps.
+Version 0.3.2 packages the current build and adds embedded project credits. It does not resolve the networking or experience limitations listed above. See [the player guide](PLAYER_GUIDE.md) for recovery and reporting steps.
