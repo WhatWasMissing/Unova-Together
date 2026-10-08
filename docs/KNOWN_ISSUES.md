@@ -1,4 +1,4 @@
-# Unova Together beta 0.3.3 — known issues
+# Unova Together beta 0.3.4 — known issues
 
 - **Online UDP is experimental.** It has been checked locally, but reliable battle completion between players on different networks has not yet been confirmed. Use Tailscale if it fails.
 - **No public server is supplied.** The UDP option needs a server provided by your group. Player sharing also needs a reachable server; joining a UDP room does not configure that automatically.
@@ -13,4 +13,6 @@
 - **Some networks block UDP.** The helper may fail even when other internet apps work. Use Tailscale as the fallback.
 - **Python is required for the UDP helper.** Python/tkinter and the dependency installer are separate from the bundled emulator. This release is for Windows x64; it is not an Android emulator build.
 
-Version 0.3.3 improves movement animation, menu presence and battle AI setup, and adds a C-Gear wireless warning. A crash involving late window/input events was fixed. The reported first-ever ROM-load crash could not be reproduced, so please report it if it recurs. Networking and experience limitations above remain.
+Version 0.3.4 improves movement animation, menu presence and battle AI setup, and adds a C-Gear wireless warning. A crash involving late window/input events was fixed. The reported first-ever ROM-load crash could not be reproduced, so please report it if it recurs. Networking and experience limitations above remain.
+
+Version 0.3.4 also retains the private position anchor through unresolved menu transitions, publishing it only after validated menu ownership.
