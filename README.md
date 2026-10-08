@@ -4,23 +4,24 @@ Explore Unova together with shared multiplayer exploration, item trading and exp
 
 ## Download and play
 
-**Current release: beta 0.3.4.** Older release downloads have been retired. Update both players to this version and restart the player-sharing relay.
+**Current release: beta 0.3.5.** Update both players to this version and restart the player-sharing relay.
 
-1. [Download the Windows beta](https://github.com/WhatWasMissing/unova-together/releases/tag/v0.3.4). Choose **Unova-Together-0.3.4-Windows-x64.zip** under Assets.
-2. Extract the entire folder and run **Start Emulator.cmd**.
+1. [Download the Windows beta](https://github.com/WhatWasMissing/unova-together/releases/tag/v0.3.5). Choose **Unova-Together-0.3.5-Windows-x64.zip** under Assets.
+2. Extract the entire folder and run **Start Unova Together.cmd**. Choose your ROM and select **Play**.
 3. Load the [edited Blaze Black 2 Redux Rom](https://drive.google.com/file/d/1ZL4StVex1m6dvdEjG89o7kxOJwdJeR9L/view?usp=sharing). Both players need the same game revision.
 4. Follow [the player guide](docs/PLAYER_GUIDE.md) to connect.
 
 For different networks, start with [Tailscale setup](docs/TAILSCALE_COOP.md). Its official installer is included. The experimental UDP option requires a server supplied by your group; no default public server is available.
 
-## What changed in 0.3.4
+## What changed in 0.3.5
 
-- Improved teammate walking/running animation.
-- Teammates remain visible in owned game menus, with a menu indicator.
-- Added a warning to turn C-Gear wireless off while connected.
-- Corrected co-op enemy AI setup and fixed a window/input lifetime crash.
+- Added a launcher with official GitHub update checks and checksum-verified installation. The launcher runs without a separate Python installation.
+- Fixed Give item being blocked by an idle co-op observer or the custom trade menu.
+- Improved battle-status recovery and tracking after a field rebuild; camera validity no longer keeps a returned player marked in battle.
+- Different starter choices can pair at verified rival encounters using the host's matching ROM team.
+- Hardened wireless packet, player-list and compressed-ROM input handling.
 
-The exact reported first-load crash could not be reproduced. Co-op experience and online limitations remain listed in [known issues](docs/KNOWN_ISSUES.md).
+All 33 populated Redux rival records passed two-player native startup checks. This does not prove every rival story script or save progression. Intermittent teammate disappearance, co-op experience and online limitations remain listed in [known issues](docs/KNOWN_ISSUES.md).
 
 ## Features
 
@@ -31,6 +32,7 @@ The exact reported first-load crash could not be reproduced. Co-op experience an
 - **Custom camera:** adjust the overworld camera's angle and rotation in Multiplayer → Camera.
 - **Play across networks:** connect through Tailscale, or try the experimental UDP bridge with a server hosted by your group.
 - **In-game multiplayer menus:** access teammates and trading from the game screen; advanced diagnostics stay behind the Debug toggle.
+- **Launcher and updates:** select your ROM, launch the game, and get verified updates from this repository without replacing a running build. [How updates work](docs/LAUNCHER.md).
 
 Co-op battles remain experimental: experience gain is disabled, not every trainer event has been verified, and connection problems can interrupt a battle. See [known issues](docs/KNOWN_ISSUES.md).
 

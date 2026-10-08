@@ -4,7 +4,7 @@ Unova Together adds shared exploration, item trading and experimental co-op trai
 
 ## What each player needs
 
-- A Windows x64 PC and the complete Unova Together 0.3.2 ZIP, extracted into a folder.
+- A Windows x64 PC and the complete Unova Together 0.3.5 ZIP, extracted into a folder.
 - Their own ROM and save. Both players must use exactly the same game version, including the same Redux revision.
 - A backup of their save before playing this beta.
 - A connection method below. Tailscale is included; the experimental UDP option also needs Python.
@@ -14,8 +14,8 @@ ROMs, saves and DS firmware are not included. Preset keyboard/controller binding
 ## Start the game
 
 1. Extract the whole ZIP. Keep its folders together.
-2. Open **Start Emulator.cmd**.
-3. Load your ROM and start from your normal saved game.
+2. Open **Start Unova Together.cmd**. Use **Browse** to select your own ROM, then **Play**. **Start Emulator.cmd** remains available for direct launch.
+3. Start from your normal saved game. The launcher runs without Python; network helper scripts still require it where indicated.
 4. Turn **fast-forward off** before connecting. Keep it off during shared battles.
 5. Open **System → Multiplayer**. Choose a player name different from your friend's.
 
