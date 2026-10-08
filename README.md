@@ -23,3 +23,5 @@ Keep fast-forward off during shared battles and back up your saves. Co-op experi
 ROMs, saves and firmware are not included. Preset controls are included; adjust them under Config → Input if needed. Some emulator windows still use the previous **PokePlay** name; this is expected in this release.
 
 This repository contains player setup material. Matching source is supplied as a separate optional release download under the emulator's GPL-3.0 license; it is not needed to play.
+
+Authorship and attribution: [mvq1303 / WhatWasMissing](AUTHORSHIP.md). Preserve original and upstream credits; do not misrepresent somebody else's work as your own.
