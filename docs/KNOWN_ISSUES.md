@@ -1,5 +1,7 @@
 # Unova Together beta 0.3.5 — known issues
 
+Known major issue is that having a different starter causes rival battles to not engage, will be addressing this shortly.
+
 - **Online UDP is experimental.** It has been checked locally, but reliable battle completion between players on different networks has not yet been confirmed. Use Tailscale if it fails.
 - **No public server is supplied.** The UDP option needs a server provided by your group. Player sharing also needs a reachable server; joining a UDP room does not configure that automatically.
 - **Slow or unstable connections can interrupt battles.** A battle may stall or end unexpectedly. Changing the connection method cannot guarantee a fix.
