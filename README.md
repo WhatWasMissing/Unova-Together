@@ -4,12 +4,23 @@ Explore Unova together with shared multiplayer exploration, item trading and exp
 
 ## Download and play
 
+**Current release: beta 0.3.4.** Older release downloads have been retired. Update both players to this version and restart the player-sharing relay.
+
 1. [Download the Windows beta](https://github.com/WhatWasMissing/unova-together/releases/tag/v0.3.4). Choose **Unova-Together-0.3.4-Windows-x64.zip** under Assets.
 2. Extract the entire folder and run **Start Emulator.cmd**.
 3. Load the [edited Blaze Black 2 Redux Rom](https://drive.google.com/file/d/1ZL4StVex1m6dvdEjG89o7kxOJwdJeR9L/view?usp=sharing). Both players need the same game revision.
 4. Follow [the player guide](docs/PLAYER_GUIDE.md) to connect.
 
 For different networks, start with [Tailscale setup](docs/TAILSCALE_COOP.md). Its official installer is included. The experimental UDP option requires a server supplied by your group; no default public server is available.
+
+## What changed in 0.3.4
+
+- Improved teammate walking/running animation.
+- Teammates remain visible in owned game menus, with a menu indicator.
+- Added a warning to turn C-Gear wireless off while connected.
+- Corrected co-op enemy AI setup and fixed a window/input lifetime crash.
+
+The exact reported first-load crash could not be reproduced. Co-op experience and online limitations remain listed in [known issues](docs/KNOWN_ISSUES.md).
 
 ## Features
 
