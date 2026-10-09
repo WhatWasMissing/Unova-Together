@@ -1,26 +1,34 @@
-# Unova Together beta 0.3.2
+# Unova Together beta 0.3.5
 
-Explore Unova with a friend, share items, and take on trainers together in Pokémon Black 2 and Blaze Black 2 Redux. This Windows beta packages the current build with embedded **mvq1303 / WhatWasMissing** credits and the updated release presentation.
+Download **Unova-Together.exe** and open it. Alternatively, extract **Unova-Together-0.3.5-Windows-x64.zip** and open **Start Unova Together.cmd**. Choose your own matching Black 2/Redux ROM and select **Play**. Update both players and restart the player-sharing relay.
 
-## Download and start
+## Launcher update — 9 October 2026
 
-1. Download **Unova-Together-0.3.2-Windows-x64.zip** and extract the entire folder.
-2. Run **Start Emulator.cmd** and load your own ROM and save. Both players need the same build and game revision.
-3. Follow **docs/PLAYER_GUIDE.md**. The package includes preset controls, connection helpers, the Tailscale installer and guides.
-4. For different networks, use the Tailscale guide first. The UDP option is experimental and requires a server supplied by your group. No public server is included.
+Launcher revision **20261009.8** is included in this refreshed beta.
 
-## What is included
+- Host or join a local LAN game from the launcher. Role and host address are remembered per profile.
+- Clearer connection status and a Retry button. Save and close the game before retrying.
+- A Pokémon-styled launcher, optional menu music, and a Features page with gameplay screenshots.
+- Full emulator settings, working relay checks and local relay hosting.
+- Report a problem creates a local, redacted ZIP for review; nothing is uploaded automatically.
+- Keyboard and XInput controller navigation while the launcher has focus. Physical controller testing is still pending.
+- Clearer in-game MENU indicator for teammates.
 
-- Shared exploration and in-game item trading.
-- Experimental NPC-triggered co-op trainer battles, with independent saves and a Solo/Co-op toggle.
-- Camera tilt, rotation and zoom controls in the Camera tab.
-- Existing recovery controls and Debug tools.
-- Complete matching source as a separate optional download, plus SHA-256 checksums. ROMs, saves and firmware are excluded.
+17 launcher UI checks and 11 service checks passed. Fresh installation and upgrade checks passed with existing emulator settings preserved. Two native instances paired through the launcher; this update does not establish internet battle reliability.
+
+## New and improved
+
+- A Windows launcher with official GitHub release checks and checksum-verified updates. Updates install beside the existing build and retain your emulator settings; ROMs and saves are not overwritten. The launcher does not need a separate Python installation.
+- Give item works while the idle co-op observer is enabled and from the custom trade overlay.
+- Better battle-status recovery: a returned field can clear the battle badge even if the camera projection is temporarily unavailable. Field rebuilds switch tracking to the current owned player object.
+- Different starter choices can agree at verified rival encounters. Both players use the host's matching ROM enemy variant while retaining their own story event and save.
+- Remote trainer sprites are suppressed on local stock menu screens. Your menu status remains available to teammates.
+- Hardened native wireless input, player-list handling and compressed/truncated ROM loading.
 
 ## Before playing
 
-Back up saves and keep fast-forward off while connected. Co-op XP remains disabled to prevent desynchronisation. Internet UDP battle completion, special trainer events and all story/save outcomes have not been exhaustively verified. Teammate rendering can flicker, and unstable connections can interrupt battles. Rapid retries after cancelling a trade can fail; wait for both players to show Ready. See **docs/KNOWN_ISSUES.md** for limitations and recovery.
+Back up your saves. Turn C-Gear wireless and fast-forward off. Co-op EXP gain remains disabled to prevent desynchronisation. The bundled Tailscale installer and setup guide remain available; the UDP bridge is experimental and has no default public server.
 
-This is a beta packaging/credits update, not a claim that the remaining performance and networking issues have been fixed.
+Native cleanup can time out after completion and discard recovered battle progress. An immediate second co-op battle can also fail to reconnect. Let recovery return both games to the field, then recreate native LAN before retrying. Intermittent rendering issues and unverified trainer events remain listed in [known issues](docs/KNOWN_ISSUES.md). Testing details are in [release checks](docs/RELEASE_CHECKS_0.3.5.md); they do not establish every rival story/save branch or reliable internet UDP battle completion.
 
-Made by **mvq1303**, GitHub **WhatWasMissing**. Built on melonDS; upstream credits and GPL licensing are preserved.
+Made by **mvq1303 / WhatWasMissing**, built on melonDS. The matching GPL source download and checksums are included. ROMs, saves and firmware are not included.

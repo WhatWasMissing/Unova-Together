@@ -1,6 +1,20 @@
 # Unova Together beta 0.3.5
 
-Download **Unova-Together-0.3.5-Windows-x64.zip**, extract the entire folder and open **Start Unova Together.cmd**. Choose your own matching Black 2/Redux ROM and select **Play**. Update both players and restart the player-sharing relay.
+Download **Unova-Together.exe** and open it. Alternatively, extract **Unova-Together-0.3.5-Windows-x64.zip** and open **Start Unova Together.cmd**. Choose your own matching Black 2/Redux ROM and select **Play**. Update both players and restart the player-sharing relay.
+
+## Launcher update — 9 October 2026
+
+Launcher revision **20261009.8** is included in this refreshed beta.
+
+- Host or join a local LAN game from the launcher. Role and host address are remembered per profile.
+- Clearer connection status and a Retry button. Save and close the game before retrying.
+- A Pokémon-styled launcher, optional menu music, and a Features page with gameplay screenshots.
+- Full emulator settings, working relay checks and local relay hosting.
+- Report a problem creates a local, redacted ZIP for review; nothing is uploaded automatically.
+- Keyboard and XInput controller navigation while the launcher has focus. Physical controller testing is still pending.
+- Clearer in-game MENU indicator for teammates.
+
+17 launcher UI checks and 11 service checks passed. Fresh installation and upgrade checks passed with existing emulator settings preserved. Two native instances paired through the launcher; this update does not establish internet battle reliability.
 
 ## New and improved
 
