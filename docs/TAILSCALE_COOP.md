@@ -54,6 +54,8 @@ that the native LAN game is joined.
 
 ## Troubleshooting
 
+- **WinError 10013 / access forbidden:** Another VPN or its network filter may block the connection. NordVPN caused this in a beta test. Disconnect other VPNs and check their kill-switch settings, then retry with Tailscale connected. If it persists, check security software and firewall application rules.
+
 - **PC missing/offline:** Log in on that PC, select the invited network and
   check device approval. An accepted user invite is not a connected device.
 - **Connection refused:** The host must connect its local relay first.

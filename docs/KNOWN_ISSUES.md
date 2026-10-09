@@ -3,6 +3,7 @@
 Beta 0.3.7 fixes a captured cached-map failure that caused unresolved positions and stale battle presence. All players need the update; live multi-device confirmation is pending.
 
 
+- **Other VPNs can block connections.** NordVPN caused a tester’s presence-relay connection to fail with WinError 10013. Disconnect other VPNs while using Tailscale; check their kill-switch and network-filter settings if access remains blocked. This is not evidence that the game server is offline.
 - **Online UDP is experimental.** It has been checked locally, but reliable battle completion between players on different networks has not yet been confirmed. Use Tailscale if it fails.
 - **Sometimes players can get stuck reported as "In Battle" or "Unavailable"**. If changing map or going inside does not fix this, save **in game** and restart the emulator through the launcher or portable zip. Do not load a save state.
 - **No public server is supplied.** The UDP option needs a server provided by your group. Player sharing also needs a reachable server; joining a UDP room does not configure that automatically.
