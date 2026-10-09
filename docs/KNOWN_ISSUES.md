@@ -1,7 +1,7 @@
 # Unova Together beta 0.3.5 — known issues
 
 - **Online UDP is experimental.** It has been checked locally, but reliable battle completion between players on different networks has not yet been confirmed. Use Tailscale if it fails.
-- **Sometimes players can get stuck reported as "In Battle" or "Unavailable"**, if changing map or going inside does not fix this, save and restart the emulator through the launcher or portable zip.
+- **Sometimes players can get stuck reported as "In Battle" or "Unavailable"**. If changing map or going inside does not fix this, save **in game** and restart the emulator through the launcher or portable zip. Do not load a save state.
 - **No public server is supplied.** The UDP option needs a server provided by your group. Player sharing also needs a reachable server; joining a UDP room does not configure that automatically.
 - **Slow or unstable connections can interrupt battles.** A battle may stall or end unexpectedly. Changing the connection method cannot guarantee a fix.
 - **Teammate rendering can flicker.** Camera sample gaps and map transitions can interrupt the displayed sprite. This release does not claim that all camera/rendering issues are fixed.
