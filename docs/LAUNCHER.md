@@ -76,3 +76,8 @@ Co-op remembers your role and the last host address for each profile. Retry uses
 Tools → Report a problem prepares a redacted ZIP, then opens a review window. Open the report folder to inspect it, and use Open GitHub issues to submit it yourself. Nothing is uploaded automatically. Reports contain version/checksum information and bounded text logs, not ROMs, saves, RAM dumps or profile credentials.
 
 Keyboard: Tab / Shift+Tab moves focus, Enter selects a focused button, Ctrl+Tab / Ctrl+Shift+Tab changes launcher pages. XInput controllers (Xbox-compatible): D-pad or left stick moves focus, A selects, B returns/closes an owned editor, LB/RB changes pages. Left/right changes a focused dropdown or volume slider. Type addresses with the keyboard. Launcher controller input only runs while its window/editor has foreground focus.
+
+## Updated guides
+
+The launcher checks the official GitHub guides at startup. Use **Setup > Refresh guides** to check again. Updated guides are downloaded independently of the game and kept for offline use. Failed downloads preserve the previous complete set. Opening a guide uses the downloaded copy when available; bundled guides remain the fallback.
+

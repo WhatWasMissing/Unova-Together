@@ -4,8 +4,9 @@ Download **Unova-Together.exe** and open it. Alternatively, extract **Unova-Toge
 
 ## Launcher update — 9 October 2026
 
-Launcher revision **20261009.8** is included in this refreshed beta.
+Launcher revision **20261009.9** is included in this refreshed beta.
 
+- Setup guides refresh from GitHub at startup, independently of game updates. Use Setup → Refresh guides to check again; saved copies remain available offline.
 - Host or join a local LAN game from the launcher. Role and host address are remembered per profile.
 - Clearer connection status and a Retry button. Save and close the game before retrying.
 - A Pokémon-styled launcher, optional menu music, and a Features page with gameplay screenshots.

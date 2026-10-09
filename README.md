@@ -13,7 +13,7 @@ Explore Unova together with shared multiplayer exploration, item trading and exp
 
 For different networks, start with [Tailscale setup](docs/TAILSCALE_COOP.md). Its official installer is included. The experimental UDP option requires a server supplied by your group; no default public server is available.
 
-Launcher revision **20261009.8** adds LAN Host/Join, remembered connections, Retry, report review, controller navigation, optional music and a screenshot-based Features page. [Launcher guide](docs/LAUNCHER.md).
+Launcher revision **20261009.9** adds LAN Host/Join, remembered connections, Retry, report review, controller navigation, optional music and a screenshot-based Features page. [Launcher guide](docs/LAUNCHER.md).
 
 ## What changed in 0.3.5
 
