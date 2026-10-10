@@ -33,6 +33,6 @@ Version 0.3.4 also retains the private position anchor through unresolved menu t
 
 Full HM obstacle traversal, completed Fly travel and save/reload after relearning still need gameplay testing. Fly requires a party member with a move slot without an existing field action. Encounter gifts, scripted legendary encounters and Hidden Grottos are excluded.
 
-## Battle previews (0.3.12)
+## Spectating
 
-Previews require an updated relay and both updated clients. They are optional two-frame-per-second snapshots, without audio or controls. Internet preview testing remains outstanding. Accelerated renderers may provide blank or stale CPU framebuffers; try software rendering.
+Spectate controls have been removed in beta 0.3.13.
