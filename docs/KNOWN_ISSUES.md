@@ -1,4 +1,4 @@
-# Unova Together beta 0.3.7 — known issues
+# Unova Together beta 0.3.9 — known issues
 
 Beta 0.3.7 fixes a captured cached-map failure that caused unresolved positions and stale battle presence. All players need the update; live multi-device confirmation is pending.
 
@@ -26,3 +26,5 @@ Beta 0.3.7 fixes a captured cached-map failure that caused unresolved positions 
 Version 0.3.4 improves movement animation, menu presence and battle AI setup, and adds a C-Gear wireless warning. A crash involving late window/input events was fixed. The reported first-ever ROM-load crash could not be reproduced, so please report it if it recurs. Networking and experience limitations above remain.
 
 Version 0.3.4 also retains the private position anchor through unresolved menu transitions, publishing it only after validated menu ownership.
+
+- **Area battle scenery is experimental.** Generated standard arenas are available; special cinematic scenes remain original. Seasonal/time lighting and animated water are not implemented. Not every encounter has been playtested. Disable the option before launching if a background looks wrong.
