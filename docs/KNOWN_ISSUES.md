@@ -28,3 +28,7 @@ Version 0.3.4 improves movement animation, menu presence and battle AI setup, an
 Version 0.3.4 also retains the private position anchor through unresolved menu transitions, publishing it only after validated menu ownership.
 
 - **Area battle scenery is experimental.** Generated standard arenas are available; special cinematic scenes remain original. Seasonal/time lighting and animated water are not implemented. Not every encounter has been playtested. Disable the option before launching if a background looks wrong.
+
+## Field tools (0.3.11)
+
+Full HM obstacle traversal, completed Fly travel and save/reload after relearning still need gameplay testing. Fly requires a party member with a move slot without an existing field action. Encounter gifts, scripted legendary encounters and Hidden Grottos are excluded.

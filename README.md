@@ -4,9 +4,9 @@ Explore Unova together with shared multiplayer exploration, item trading and exp
 
 ## Download and play
 
-**Current release: beta 0.3.10.** Update both players to this version and restart the player-sharing relay.
+**Current release: beta 0.3.11.** Update both players to this version and restart the player-sharing relay.
 
-1. [Download the Windows beta](https://github.com/WhatWasMissing/unova-together/releases/tag/v0.3.10). Choose **Unova-Together.exe** under Assets. The portable ZIP is also available.
+1. [Download the Windows beta](https://github.com/WhatWasMissing/unova-together/releases/tag/v0.3.11). Choose **Unova-Together.exe** under Assets. The portable ZIP is also available.
 2. Open **Unova-Together.exe**. For the ZIP, extract the entire folder and run **Start Unova Together.cmd**. Choose your ROM and select **Play**.
 3. Load the [edited Blaze Black 2 Redux Rom](https://drive.google.com/file/d/1ZL4StVex1m6dvdEjG89o7kxOJwdJeR9L/view?usp=sharing). Both players need the same game revision.
 4. Follow [the player guide](docs/PLAYER_GUIDE.md) to connect.
@@ -14,6 +14,10 @@ Explore Unova together with shared multiplayer exploration, item trading and exp
 For different networks, start with [Tailscale setup](docs/TAILSCALE_COOP.md). Its official installer is included. The experimental UDP option requires a server supplied by your group; no default public server is available.
 
 Launcher revision **20261010.3** adds LAN Host/Join, remembered connections, Retry, report review, controller navigation, optional music and a screenshot-based Features page. [Launcher guide](docs/LAUNCHER.md).
+
+## What changed in 0.3.11
+
+Find encounters by season, relearn level-up moves for free, and use field HMs without teaching them as battle moves. Open **Players → Game** for the new tools. [Release notes](RELEASE_NOTES_0.3.11.md) · [Field tools guide](docs/FIELD_TOOLS.md). Full HM traversal still needs gameplay testing.
 
 ## What changed in 0.3.10
 
@@ -46,6 +50,8 @@ Fixed battle-presence recovery when the field returns before its player sprite i
 All 33 populated Redux rival records passed two-player native startup checks. This does not prove every rival story script or save progression. Intermittent teammate disappearance, co-op experience and online limitations remain listed in [known issues](docs/KNOWN_ISSUES.md).
 
 ## Features
+
+- **Field tools:** find local encounters by season, relearn level-up moves, and use owned HMs without learned move slots. [Guide](docs/FIELD_TOOLS.md).
 
 - **Following Pokémon:** your first party Pokémon follows your footsteps. All 649 base species have directional sprites.
 - **Party stats:** read each Pokémon’s IVs and EVs from the in-game menu, without editing your save.
