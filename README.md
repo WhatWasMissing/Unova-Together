@@ -4,16 +4,20 @@ Explore Unova together with shared multiplayer exploration, item trading and exp
 
 ## Download and play
 
-**Current release: beta 0.3.9.** Update both players to this version and restart the player-sharing relay.
+**Current release: beta 0.3.10.** Update both players to this version and restart the player-sharing relay.
 
-1. [Download the Windows beta](https://github.com/WhatWasMissing/unova-together/releases/tag/v0.3.9). Choose **Unova-Together.exe** under Assets. The portable ZIP is also available.
+1. [Download the Windows beta](https://github.com/WhatWasMissing/unova-together/releases/tag/v0.3.10). Choose **Unova-Together.exe** under Assets. The portable ZIP is also available.
 2. Open **Unova-Together.exe**. For the ZIP, extract the entire folder and run **Start Unova Together.cmd**. Choose your ROM and select **Play**.
 3. Load the [edited Blaze Black 2 Redux Rom](https://drive.google.com/file/d/1ZL4StVex1m6dvdEjG89o7kxOJwdJeR9L/view?usp=sharing). Both players need the same game revision.
 4. Follow [the player guide](docs/PLAYER_GUIDE.md) to connect.
 
 For different networks, start with [Tailscale setup](docs/TAILSCALE_COOP.md). Its official installer is included. The experimental UDP option requires a server supplied by your group; no default public server is available.
 
-Launcher revision **20261010.2** adds LAN Host/Join, remembered connections, Retry, report review, controller navigation, optional music and a screenshot-based Features page. [Launcher guide](docs/LAUNCHER.md).
+Launcher revision **20261010.3** adds LAN Host/Join, remembered connections, Retry, report review, controller navigation, optional music and a screenshot-based Features page. [Launcher guide](docs/LAUNCHER.md).
+
+## What changed in 0.3.10
+
+All 649 Pokémon now have directional follower sprites, with no party-icon substitutes. View IVs and EVs in **Players → Game → Party stats**, including offline. No new ROM or save is needed. [Release notes](RELEASE_NOTES_0.3.10.md) · [Party stats guide](docs/PARTY_STATS.md) · [Follower guide](docs/FOLLOWING_POKEMON.md).
 
 ## What changed in 0.3.9
 
@@ -43,6 +47,8 @@ All 33 populated Redux rival records passed two-player native startup checks. Th
 
 ## Features
 
+- **Following Pokémon:** your first party Pokémon follows your footsteps. All 649 base species have directional sprites.
+- **Party stats:** read each Pokémon’s IVs and EVs from the in-game menu, without editing your save.
 - **Explore with a teammate:** see each other moving around Unova, find teammates in the Players menu, and teleport to their map.
 - **Trade items in-game:** choose items from your bag and send offers to a teammate, with accept/decline controls.
 - **Co-op trainer battles:** face supported trainers together, including Gym Leaders and Redux teams. NPC encounters can wait for both players; a Solo/Co-op toggle lets you keep playing independently.
