@@ -77,7 +77,7 @@ If you are setting up the relay yourself, use the separate [server guide](UDP_SE
 
 1. Enter the same area and check that both players can see each other move.
 2. Use the in-game **Trade** menu to send items. Stay idle in the overworld with C-Gear wireless off while making an offer. The other player accepts it; save both games after the transfer finishes.
-3. For trainer battles, choose **Co-op** under Multiplayer → Players or in-game Players → Game. Both players should talk to the same trainer and wait for pairing to finish.
+3. For trainer battles, choose **Co-op** under Multiplayer → Players or in-game Players → Tools → Pokémon. Both players should talk to the same trainer and wait for pairing to finish.
 4. To fight alone, choose **Solo** before the encounter. You can stay connected to your friend.
 5. For a first battle test, use **Practice** from the boss challenge controls. Practice does not award story progress.
 6. After a story battle, check that each game returns to normal play and save each game separately. Check your own badge/story progress before continuing.

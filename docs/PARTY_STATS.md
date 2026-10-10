@@ -1,6 +1,6 @@
 # Party IVs and EVs
 
-Open **Players → Game → Party stats**, then choose a Pokémon. This works offline.
+Open **Players → Tools → Pokémon → IVs and EVs**, then choose a Pokémon. This works offline.
 Use the controller's directional buttons and A, or tap a party entry. B returns
 to the party; B again returns to Game. X closes the custom menu.
 

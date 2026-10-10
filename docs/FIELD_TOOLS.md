@@ -1,6 +1,6 @@
 # Encounter finder and move relearning
 
-Open **Players → Game** for both tools. They work offline and use the loaded
+Open **Players → Tools → Pokémon** for both tools. They work offline and use the loaded
 English Black 2 ROM, including compatible Redux changes.
 
 ## Encounter finder
