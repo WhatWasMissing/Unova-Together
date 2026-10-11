@@ -75,3 +75,8 @@ Keyboard: Tab / Shift+Tab moves focus, Enter selects a focused button, Ctrl+Tab 
 
 The launcher checks the official GitHub guides at startup. Use **Setup > Refresh guides** to check again. Updated guides are downloaded independently of the game and kept for offline use. Failed downloads preserve the previous complete set. Opening a guide uses the downloaded copy when available; bundled guides remain the fallback.
 
+
+
+## Games & saves (1.0.3)
+
+Open Manage saves on Play. Slot names save automatically; new slots have separate folders. Back up now and Restore backup use dated entries. Advanced save options contains custom folders and slot removal. See [Gen 5 tools and save verification](LAUNCHER_GEN5_TOOLS.md).

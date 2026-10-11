@@ -1,27 +1,23 @@
-# Unova Together 1.0.2 — Solo XP compensation
+# Unova Together 1.0.3 — Simpler saves and Gen 5 tools
 
-Launcher 1.0.2 and modified melonDS 1.0.2, based on melonDS 1.1. This full release adds **1.65× solo battle XP** to help compensate for XP suppressed in co-op.
+A full release with launcher 1.0.3 and the previously verified modified melonDS 1.0.2 runtime, based on melonDS 1.1. Emulator gameplay is unchanged, including 1.65× solo XP compensation.
 
-Download **Unova-Together.exe**, or extract **Unova-Together-1.0.2-Windows-x64.zip** and run **Start Unova Together.cmd**. Existing players can use launcher Updates. Update both players; existing ROMs and saves need no conversion.
+Download **Unova-Together.exe**, or extract **Unova-Together-1.0.3-Windows-x64.zip** and run **Start Unova Together.cmd**. Existing players can install through launcher Updates. Existing profile settings, ROMs, saves and backups are retained.
 
 ## Changes
 
-- Newly earned solo battle XP is multiplied by 1.65 after the game calculates level scaling, XP sharing, traded bonuses and Lucky Egg bonuses.
-- Fractional XP rounds down per Pokémon; the native 100,000 XP per-award limit remains in force.
-- Existing accumulated XP, reward flags and EV rewards are unchanged. Co-op XP remains suppressed: zero rewards stay zero.
-- Verified ROM identities, native instruction fingerprints and reward bounds protect unsupported contexts.
-- Added reproducible production-dispatch tests, a disposable solo battle runner and the selected Redux Challenge XP-budget calculation.
+- **Games & saves** replaces the profile wording. Play shows the active slot and a Manage saves button.
+- Slot names save automatically. New slots reuse the selected ROM with separate save folders. Advanced folder settings and slot removal are tucked away.
+- **Back up now** and **Restore backup** share one page. Backups have readable dates and reasons; current files are backed up before restore.
+- Added `.save` and numbered instance `.save` support alongside `.sav` and `.dsv`. Contents are preserved without conversion; melonDS normally uses `.sav`.
+- Added read-only English Black 2 ROM/XP-hook checks, a checksum-verified party save comparison and a Redux Challenge XP-budget calculator using the existing 1.65× multiplier.
 
 ## Verification and limits
 
-Genuine solo Cheren victories on disposable saves awarded the badge and applied actual party XP: Servine gained **807 XP** with the boost versus **498 XP** normally. The measured total was 62.05% higher; the earlier level-up affects later Generation V rewards, and per-award rounding applies. The reserve Pokémon received no XP. The fixture used boosted combat stats and the interpreter; this does not validate normal difficulty or an end-to-end JIT battle.
+20 native UI tests, 15 launcher-service tests and 6 installer tests passed. Real Redux save copies were backed up and restored through launcher controls under all four tested filenames (`.save`, `.2.save`, `.sav`, `.dsv`), byte for byte. The replaced saves were preserved and another ROM's save was untouched. A restored `.save` payload, copied to melonDS's normal `.sav` filename, passed normal boot without a save state: Servine retained level 20 and 5,951 XP, and the Cheren badge remained present. Frozen launcher and standalone installer smoke tests passed, including the packaged ROM, save and progression tools.
 
-**Normal save/reload of the boosted result remains unverified.** Automated post-battle save inputs did not write either result to disk; this is recorded as a failed verification step, separate from the completed battles. No save/reload pass is claimed. See **docs/XP_COMPENSATION_BATTLE_TEST.md**.
+ROM checks cover English Black 2 identity and the XP hook, not every multiplayer feature or edited asset. The calculator requires the reviewed Redux Complete 1.4.1 ROM and reports XP-budget equivalents, not playthrough predictions. Save comparison checks party blocks and Pokémon records, not every save block; differing banks are shown without guessing which is latest.
 
-The previously documented Practice completion issue under simulated latency remains unfixed. Physical two-PC/WAN reliability, full Fly travel and relearned-move save/reload are not newly verified. See **docs/KNOWN_ISSUES.md** and the maintenance review.
+Previously documented multiplayer edge cases and physical two-PC/WAN limitations remain. The emulator executable is byte-identical to release 1.0.2. See docs/KNOWN_ISSUES.md and docs/LAUNCHER_GEN5_TOOLS.md.
 
-The complete Windows runtime, matching GPL source and SHA-256 checksums are included. No ROMs, firmware, user saves or private settings are distributed. Unova Together's original contributions are by **mvq1303 / WhatWasMissing**; melonDS and dependency attribution is preserved.
-
-## Subsequent save/reload verification — 11 October 2026
-
-After publication, the same 1.0.2 emulator completed another genuine solo Cheren battle, saved Servine at **5,951 XP / level 20** and the badge through the game UI, and reloaded the same result in a fresh process without a savestate. PKHeX independently verified the written data and checksums. This closes the targeted solo XP persistence gap described above; JIT and full-playthrough behavior remain unverified. See [the follow-up evidence](https://github.com/WhatWasMissing/Unova-Together/blob/main/docs/XP_COMPENSATION_BATTLE_TEST.md). Release binaries, corresponding source archives and checksums are unchanged.
+Complete Windows runtime, matching GPL source and SHA-256 checksums are included. No ROMs, firmware, saves or private settings are distributed. Original contributions by **mvq1303 / WhatWasMissing**; melonDS and dependency attribution is preserved.

@@ -1,0 +1,946 @@
+"""Native launcher UI by mvq1303 / WhatWasMissing. Updater owns installation."""
+from pathlib import Path
+import json, os, queue, re, time, uuid, subprocess, sys, threading, tkinter as tk, webbrowser, zipfile
+import tomlkit
+from tkinter import filedialog, messagebox, ttk
+import unova_updater as updates
+from . import preferences as prefs
+from . import services
+from . import gen5_tools
+from .components import C, F, HERE, THEME, ScrollPage, button, card, emblem, label, set_enabled
+
+class Launcher(tk.Tk):
+    def __init__(self,home,testing=False):
+        super().__init__()
+        self.home=Path(home).resolve();self.root=updates.active_root(self.home,allow_missing=True);self.testing=testing
+        self.config_path=self.home/'.launcher-test.json' if testing else Path(os.environ.get('APPDATA',Path.home()))/'UnovaTogether/launcher.json'
+        self.title('Unova Together');self.geometry('1040x760');self.minsize(860,660);self.configure(bg=C['background'])
+        try:self.iconbitmap(str(HERE/'assets/launcher.ico'))
+        except tk.TclError:pass
+        self.messages=queue.Queue();self.busy=False;self.release=None;self.game=None;self.operation='';self.guides_busy=False
+        self.cancel=threading.Event();self.rom=tk.StringVar();self.auto=tk.BooleanVar(value=True);self.music=tk.BooleanVar(value=False)
+        self.status=tk.StringVar(value='Ready when you are.');self.news_status=tk.StringVar(value='Saved release notes · available offline')
+        self.update_status=tk.StringVar(value='Check GitHub for the latest Windows release.')
+        self.available=tk.StringVar(value='Not checked yet');self.phase=tk.StringVar(value='No download in progress')
+        self.news=self._read_news();self.pages={};self.nav={};self.images=[];self.page_name=''
+        self.preference_values={};self.cheat_choices={};self.profile=None;self.rom_timer=None
+        self.play_profiles=[];self.active_profile_id='';self.repair_release=None;self._switching=False
+        self.presence_process=None;self.lan_request='';self.lan_status_time=0;self.lan_started=0;self.last_lan_action='host';self.lan_was_connected=False
+        self._read_settings();self._init_profiles();self._build();self.show_page('Play');self._rom_changed()
+        self.rom.trace_add('write',lambda *_:self._rom_changed());self.protocol('WM_DELETE_WINDOW',self._close)
+        self.bind('<Control-Tab>',lambda e:self._cycle_page(1));self.bind('<Control-Shift-Tab>',lambda e:self._cycle_page(-1))
+        self.bind_class('Button','<Return>',lambda e:e.widget.invoke())
+        from .controller import Controller
+        self.controller=Controller();self.after(125,self._poll_controller)
+        self.bind('<MouseWheel>',self._wheel);self.after(100,self._poll);self._sync();self._music_changed(save=False)
+        if self.auto.get() and not testing:self.after(300,self.check)
+        if not testing:self.after(600,self.refresh_guides)
+
+    def _build(self):
+        style=ttk.Style(self);style.theme_use('clam')
+        style.configure('TScrollbar',background=C['border'],troughcolor=C['background'],arrowcolor=C['muted'],borderwidth=0)
+        style.configure('TProgressbar',background=C['primary'],troughcolor=C['selection'],borderwidth=0)
+        style.configure('TCheckbutton',background=C['background'],foreground=C['text'],font=(F['body'],11))
+        style.map('TCheckbutton',background=[('active',C['selection'])])
+        self.nav_cursor=tk.PhotoImage(file=HERE/'assets/menu-cursor.png');self.images.append(self.nav_cursor)
+        sidebar=tk.Frame(self,bg=C['nav'],width=THEME['layout']['sidebar']);sidebar.pack(side='left',fill='y');sidebar.pack_propagate(False)
+        emblem(sidebar).pack(anchor='w',padx=23,pady=(27,12))
+        label(sidebar,'UNOVA\nTOGETHER',size=20,bold=True,color=C['surface'],bg=C['nav'],role='display',justify='left').pack(anchor='w',padx=24)
+        tk.Frame(sidebar,bg=C['nav'],height=20).pack()
+        for name in ('Play','Co-op','Features','Profiles','News','Updates','Settings','Tools','Setup'):
+            self.nav[name]=button(sidebar,'Games & saves' if name=='Profiles' else name,lambda n=name:self.show_page(n),kind='nav',anchor='w')
+            self.nav[name].pack(fill='x',padx=12,pady=3)
+        credit=tk.Frame(sidebar,bg=C['nav']);credit.pack(side='bottom',fill='x',padx=24,pady=25)
+        label(credit,'Made by mvq1303',size=10,color=C['surface'],bg=C['nav']).pack(anchor='w')
+        label(credit,'WhatWasMissing\nBuilt on melonDS',size=9,color=C['navText'],bg=C['nav'],justify='left').pack(anchor='w',pady=(5,0))
+        shell=tk.Frame(self,bg=C['background']);shell.pack(side='right',fill='both',expand=True)
+        footer=tk.Frame(shell,bg=C['surface'],height=48,highlightbackground=C['border'],highlightthickness=1);footer.pack(side='bottom',fill='x');footer.pack_propagate(False)
+        self.music_button=button(footer,'Music: off',self._toggle_music);self.music_button.pack(side='right',padx=4)
+        self.footer_version=label(footer,self._version_text(),size=9,color=C['muted'],bg=C['surface'],role='utility');self.footer_version.pack(side='right',padx=18)
+        self.footer_status=label(footer,size=9,bg=C['surface'],textvariable=self.status);self.footer_status.pack(side='left',fill='x',expand=True,padx=18)
+        credits_bar=tk.Frame(shell,bg=C['surface'],highlightbackground=C['border'],highlightthickness=1)
+        credits_bar.pack(side='bottom',fill='x')
+        self.playtester_credit=label(credits_bar,'Playtesters: maxback221 · randomitem19',size=10,color=C['nav'],bg=C['surface'],justify='left')
+        self.playtester_credit.pack(fill='x',padx=18,pady=7)
+        credits_bar.bind('<Configure>',lambda e:self.playtester_credit.configure(wraplength=max(100,e.width-36)),add='+')
+        self.deck=tk.Frame(shell,bg=C['background']);self.deck.pack(fill='both',expand=True,padx=THEME['layout']['padding'],pady=THEME['layout']['padding'])
+        for name in ('Play','Profiles','Co-op','Features','Updates','Settings','Tools','Setup'):self.pages[name]=ScrollPage(self.deck)
+        self.pages['News']=tk.Frame(self.deck,bg=C['background'])
+        self._features_page(self.pages['Features'].content);self._play_page(self.pages['Play'].content);self._updates_page(self.pages['Updates'].content)
+        self._news_page(self.pages['News']);self._settings_page(self.pages['Settings'].content);self._profiles_page(self.pages['Profiles'].content);self._coop_page(self.pages['Co-op'].content);self._tools_page(self.pages['Tools'].content);self._setup_page(self.pages['Setup'].content)
+        self.deck.bind('<Configure>',lambda e:self.footer_status.configure(wraplength=max(220,e.width-175)))
+
+    def _heading(self,parent,kicker,title,subtitle):
+        label(parent,title,size=25,bold=True,role='display').pack(anchor='w')
+        note=label(parent,subtitle,size=10,color=C['muted'],wraplength=700,justify='left');note.pack(anchor='w',pady=(7,16)) if subtitle else None
+        parent.bind('<Configure>',lambda e:note.configure(wraplength=max(280,e.width-12)),add='+')
+
+    def _play_page(self,parent):
+        self._heading(parent,'PLAY','Play','')
+        hero=tk.Frame(parent,bg=C['hero'],height=THEME['layout']['heroHeight']);hero.pack(fill='x');hero.pack_propagate(False)
+        try:
+            picture=tk.PhotoImage(file=HERE/'assets/explore.png');self.images.append(picture)
+        except tk.TclError:picture=None
+        art=tk.Label(hero,image=picture,bg=C['hero'],bd=0);art.pack(side='right',padx=(0,18),pady=18)
+        words=tk.Frame(hero,bg=C['hero']);words.pack(side='left',fill='both',expand=True,padx=24,pady=24)
+        label(words,'BLACK 2 · CO-OP',size=9,bold=True,color=C['accent'],bg=C['hero']).pack(anchor='w')
+        label(words,'Unova\nTogether',size=25,bold=True,color=C['surface'],bg=C['hero'],role='display',justify='left').pack(anchor='w',pady=(10,12))
+        starters=tk.Frame(words,bg=C['hero']);starters.pack(anchor='w')
+        for species in (495,498,501):
+            try:
+                sprite=tk.PhotoImage(file=HERE/f'assets/gen5-{species}.png');self.images.append(sprite)
+                tk.Label(starters,image=sprite,bg=C['hero'],bd=0).pack(side='left')
+            except tk.TclError:pass
+        def fit(e):
+            if e.width<675:art.pack_forget()
+            elif not art.winfo_manager():art.pack(side='right',padx=(0,18),pady=18,before=words)
+        hero.bind('<Configure>',fit)
+        game=card(parent);game.pack(fill='x',pady=(18,15))
+        inner=tk.Frame(game,bg=C['surface']);inner.pack(fill='x',padx=18,pady=16);inner.columnconfigure(0,weight=1)
+        label(inner,'Game ROM',size=9,bold=True,color=C['muted'],bg=C['surface']).grid(row=0,column=0,sticky='w')
+        self.rom_entry=tk.Entry(inner,textvariable=self.rom,font=(F['body'],11),bg=C['background'],fg=C['text'],relief='flat',
+            highlightthickness=2,highlightbackground=C['border'],highlightcolor=C['focus'],insertbackground=C['text'])
+        self.rom_entry.grid(row=1,column=0,sticky='ew',ipady=10,pady=(8,0))
+        button(inner,'Browse',self.browse).grid(row=1,column=1,padx=(8,0),pady=(8,0))
+        self.play=button(inner,'Play',self.launch,kind='primary',width=9);self.play.grid(row=1,column=2,padx=(8,0),pady=(8,0))
+        self.game_hint=label(inner,size=9,color=C['muted'],bg=C['surface']);self.game_hint.grid(row=2,column=0,columnspan=3,sticky='w',pady=(10,0))
+        self.active_slot=tk.StringVar(value='Save slot: '+self._active_profile()['label'])
+        label(inner,textvariable=self.active_slot,size=10,bg=C['surface']).grid(row=3,column=0,sticky='w',pady=(10,0))
+        button(inner,'Manage saves',lambda:self.show_page('Profiles')).grid(row=3,column=1,columnspan=2,sticky='e',pady=(10,0))
+        label(parent,'Full release · Each player keeps their own save.',size=9,color=C['muted']).pack(anchor='w',pady=(6,8))
+
+    def _updates_page(self,parent):
+        self._heading(parent,'UPDATES','Updates','Use the same version as your friend.')
+        self.installed=tk.StringVar(value=self._version_text());versions=card(parent);versions.pack(fill='x')
+        for caption,value in (('INSTALLED',self.installed),('ON GITHUB',self.available)):
+            block=tk.Frame(versions,bg=C['surface']);block.pack(side='left',fill='both',expand=True,padx=22,pady=22)
+            label(block,caption,size=9,bold=True,color=C['muted'],bg=C['surface']).pack(anchor='w')
+            label(block,size=19,bold=True,bg=C['surface'],textvariable=value).pack(anchor='w',pady=(9,0))
+        status=card(parent);status.pack(fill='x',pady=18);inner=tk.Frame(status,bg=C['surface']);inner.pack(fill='x',padx=22,pady=22)
+        label(inner,'OFFICIAL GITHUB UPDATES',size=9,bold=True,color=C['primary'],bg=C['surface']).pack(anchor='w')
+        msg=label(inner,textvariable=self.update_status,size=12,bold=True,bg=C['surface'],wraplength=630,justify='left');msg.pack(anchor='w',pady=(10,17))
+        inner.bind('<Configure>',lambda e:msg.configure(wraplength=max(250,e.width)))
+        self.bar=ttk.Progressbar(inner,maximum=100);self.bar.pack(fill='x',ipady=3)
+        label(inner,textvariable=self.phase,size=9,color=C['muted'],bg=C['surface']).pack(anchor='w',pady=(10,15))
+        actions=tk.Frame(inner,bg=C['surface']);actions.pack(fill='x')
+        self.check_button=button(actions,'Check for updates',self.check);self.check_button.pack(side='left')
+        self.update_button=button(actions,'Install update',self.install_update,kind='primary');self.update_button.pack(side='left',padx=10)
+        self.cancel_button=button(actions,'Cancel download',self.cancel_download);self.cancel_button.pack(side='left')
+        button(parent,'Launcher settings',lambda:self.show_page('Settings')).pack(anchor='w',pady=(0,18))
+        safety=card(parent);safety.pack(fill='x');label(safety,'Your saves are kept',size=12,bold=True,bg=C['surface']).pack(anchor='w',padx=20,pady=(18,10))
+        label(safety,'Verified downloads. Saves, ROMs and settings are kept.',size=10,color=C['muted'],bg=C['surface'],justify='left').pack(anchor='w',padx=20,pady=(0,20))
+
+    def _news_page(self,parent):
+        self._heading(parent,'NEWS','News','')
+        tools=tk.Frame(parent,bg=C['background']);tools.pack(fill='x',pady=(0,16))
+        label(tools,textvariable=self.news_status,size=9,color=C['muted']).pack(side='left')
+        self.refresh_news=button(tools,'Refresh news',self.check);self.refresh_news.pack(side='right')
+        panel=card(parent);panel.pack(fill='both',expand=True)
+        picker_frame=tk.Frame(panel,bg=C['selection']);picker_frame.pack(fill='x',padx=14,pady=(14,10))
+        self.news_picker=tk.Listbox(picker_frame,height=3,font=(F['body'],11),bg=C['selection'],fg=C['text'],selectbackground=C['primary'],selectforeground=C['surface'],
+            activestyle='none',exportselection=False,relief='flat',highlightthickness=2,highlightcolor=C['focus'],highlightbackground=C['selection'])
+        picker_bar=ttk.Scrollbar(picker_frame,command=self.news_picker.yview);picker_bar.pack(side='right',fill='y')
+        self.news_picker.configure(yscrollcommand=picker_bar.set);self.news_picker.pack(fill='x');self.news_picker.bind('<<ListboxSelect>>',self.select_news)
+        content=tk.Frame(panel,bg=C['surface']);content.pack(fill='both',expand=True,padx=18)
+        self.news_text=tk.Text(content,wrap='word',font=(F['body'],11),bg=C['surface'],fg=C['text'],relief='flat',padx=4,pady=10,spacing1=3,spacing3=8,
+            highlightthickness=2,highlightcolor=C['focus'],highlightbackground=C['surface'],cursor='arrow')
+        scroll=ttk.Scrollbar(content,command=self.news_text.yview);scroll.pack(side='right',fill='y');self.news_text.configure(yscrollcommand=scroll.set);self.news_text.pack(fill='both',expand=True)
+        self.news_text.tag_configure('heading',font=(F['body'],17,'bold'),foreground=C['text'],spacing1=10,spacing3=12)
+        self.news_text.tag_configure('subheading',font=(F['body'],12,'bold'),foreground=C['primary'],spacing1=10)
+        self.news_text.bind('<Tab>',lambda e:(e.widget.tk_focusNext().focus_set(),'break')[1])
+        self.news_text.bind('<Shift-Tab>',lambda e:(e.widget.tk_focusPrev().focus_set(),'break')[1])
+        bottom=tk.Frame(panel,bg=C['surface']);bottom.pack(side='bottom',fill='x',padx=18,pady=14,before=content)
+        self.news_link=button(bottom,'Read on GitHub',self.open_news);self.news_link.pack(side='left');self._render_news()
+
+    def _setup_page(self,parent):
+        self._heading(parent,'SETUP','Setup guides','')
+        self.guide_status=tk.StringVar(value='Local guides available offline')
+        button(parent,'Refresh guides',self.refresh_guides).pack(anchor='w',pady=(0,6))
+        label(parent,textvariable=self.guide_status,size=9,color=C['muted']).pack(anchor='w',pady=(0,12))
+        for title,copy,doc in (
+            ('First time playing?','Choose your ROM, connect player sharing, then create a native LAN game.','PLAYER_GUIDE.md'),
+            ('Playing on different networks','Use the Tailscale guide, or try the experimental UDP bridge.','TAILSCALE_COOP.md'),
+            ('Experimental UDP setup','Your group supplies a server. No public server is included.','UDP_SERVER_GUIDE.md'),
+            ('Before reporting a problem','Check the known limitations and recovery advice.','KNOWN_ISSUES.md')):
+            row=card(parent);row.pack(fill='x',pady=(0,12));button(row,'Open guide',lambda d=doc:self.guide(d)).pack(side='right',padx=16,pady=20)
+            text=tk.Frame(row,bg=C['surface']);text.pack(side='left',fill='both',expand=True,padx=18,pady=17)
+            label(text,title,size=12,bold=True,bg=C['surface']).pack(anchor='w')
+            info=label(text,copy,size=10,color=C['muted'],bg=C['surface'],wraplength=470,justify='left');info.pack(anchor='w',pady=(6,0))
+            text.bind('<Configure>',lambda e,w=info:w.configure(wraplength=max(200,e.width)))
+        notice=tk.Frame(parent,bg=C['warningSurface']);notice.pack(fill='x',pady=(5,0))
+        label(notice,'Turn C-Gear wireless and fast-forward off for co-op.',size=10,bold=True,color=C['warning'],bg=C['warningSurface']).pack(anchor='w',padx=18,pady=16)
+
+    def show_page(self,name):
+        if name not in self.pages:return
+        if name=='Profiles':self._save();self._refresh_backups()
+        for page in self.pages.values():page.pack_forget()
+        self.pages[name].pack(fill='both',expand=True);self.page_name=name;self.title('Unova Together · '+('Games & saves' if name=='Profiles' else name))
+        if isinstance(self.pages[name],ScrollPage):self.pages[name].canvas.yview_moveto(0)
+        for key,b in self.nav.items():b.configure(bg=C['selection'] if key==name else C['nav'],fg=C['text'] if key==name else C['navText'],highlightbackground=C['selection'] if key==name else C['nav'],image=self.nav_cursor if key==name else '',compound='left')
+
+    def _wheel(self,event):
+        page=self.pages.get(self.page_name);widget=event.widget
+        if not isinstance(page,ScrollPage):return
+        while widget is not None:
+            if widget==page:page.wheel(event);return
+            widget=getattr(widget,'master',None)
+
+    def _version_text(self):
+        try:return 'Release '+'.'.join(map(str,updates.local_version(self.root)))+' · Launcher 1.0.3'
+        except (OSError,ValueError):return 'Build unavailable'
+
+    def _read_news(self):
+        for path in (self.home/'.updates/news-cache.json',HERE/'assets/news.json'):
+            try:
+                if path.stat().st_size>220000:continue
+                raw=json.loads(path.read_text(encoding='utf-8'))
+                if not isinstance(raw,list):continue
+                news=updates.release_news([{'tag_name':'v'+n['version'],'name':n.get('title'),'body':n.get('body'),'published_at':n.get('date')} for n in raw[:12] if isinstance(n,dict)])
+                if news:return news
+            except (OSError,ValueError,KeyError,TypeError):continue
+        return []
+
+    def _render_news(self):
+        self.news_picker.delete(0,'end')
+        for n in self.news:self.news_picker.insert('end',n['version']+'  ·  '+n['title'])
+        if self.news:self.news_picker.selection_set(0);self.select_news()
+        else:
+            self.news_text.configure(state='normal');self.news_text.delete('1.0','end');self.news_text.insert('end','No saved news yet. Select Refresh news to load official release notes.')
+            self.news_text.configure(state='disabled');set_enabled(self.news_link,False)
+
+    def select_news(self,event=None):
+        chosen=self.news_picker.curselection()
+        if not chosen or chosen[0]>=len(self.news):return
+        n=self.news[chosen[0]];self.news_text.configure(state='normal');self.news_text.delete('1.0','end')
+        self.news_text.insert('end',n['title']+'\n','heading');self.news_text.insert('end','Published '+n['date']+' · Official release notes\n\n')
+        lines=n['body'].splitlines()
+        if lines and lines[0].startswith('# '):lines=lines[1:]
+        for line in lines:
+            heading=line.startswith('#');line=re.sub(r'^#+\s*','',line);line=re.sub(r'\[([^\]]+)\]\([^)]*\)',r'\1',line).replace('**','').replace('`','')
+            self.news_text.insert('end',line+'\n','subheading' if heading else ())
+        self.news_text.configure(state='disabled');self.news_text.yview_moveto(0);set_enabled(self.news_link,True)
+
+    def open_news(self):
+        chosen=self.news_picker.curselection()
+        if chosen and chosen[0]<len(self.news):webbrowser.open(self.news[chosen[0]]['url'])
+
+    def _active_profile(self):
+        return next(i for i in self.play_profiles if i['id']==self.active_profile_id)
+
+    def _init_profiles(self):
+        if not self.play_profiles:
+            item=services.profile(self.rom.get());item['preferences']=dict(self.preference_values)
+            try:
+                runtime=self.root/'builds/current';value=prefs.read_document(runtime).get('Instance0',{}).get('SaveFilePath','')
+                if value:item['save_dir']=str((runtime/value).resolve()) if not Path(value).is_absolute() else value
+            except (OSError,ValueError):pass
+            self.play_profiles=[item]
+        if not any(i['id']==self.active_profile_id for i in self.play_profiles):self.active_profile_id=self.play_profiles[0]['id']
+        item=self._active_profile();item.setdefault('preferences',{});item.setdefault('save_dir','');item.setdefault('player','Player');item.setdefault('label','Game')
+        item.setdefault('network',services.profile()['network'])
+        self.preference_values=dict(item['preferences']);self.rom.set(item['rom'])
+
+    def _field(self,parent,title,variable,row):
+        label(parent,title,size=10,bg=C['surface']).grid(row=row,column=0,sticky='w',pady=7,padx=(0,12))
+        entry=tk.Entry(parent,textvariable=variable,font=(F['body'],11),bg=C['background'],fg=C['text'],relief='flat',highlightthickness=2,highlightbackground=C['border'],highlightcolor=C['focus'])
+        entry.grid(row=row,column=1,sticky='ew',ipady=7,pady=7);return entry
+
+    def _profiles_page(self,parent):
+        self._heading(parent,'YOUR GAMES','Games & saves','Choose a save slot. Each slot keeps its own saves, backups and settings.')
+        box=card(parent);box.pack(fill='x');inner=tk.Frame(box,bg=C['surface']);inner.pack(fill='x',padx=18,pady=18);inner.columnconfigure(1,weight=1)
+        self.profile_picker=ttk.Combobox(inner,state='readonly',values=[i['label'] for i in self.play_profiles]);self.profile_picker.grid(row=0,column=0,columnspan=2,sticky='ew',pady=(0,15));self.profile_picker.current(self.play_profiles.index(self._active_profile()));self.profile_picker.bind('<<ComboboxSelected>>',self._select_profile)
+        item=self._active_profile();self.profile_label=tk.StringVar(value=item['label']);self.player=tk.StringVar(value=item['player']);self.save_dir=tk.StringVar(value=item['save_dir'])
+        self._field(inner,'Save slot name',self.profile_label,1)
+        self.profile_game=tk.StringVar();label(inner,textvariable=self.profile_game,size=10,color=C['muted'],bg=C['surface'],wraplength=550,justify='left').grid(row=2,column=0,columnspan=2,sticky='w',pady=8)
+        button(inner,'Choose game ROM',lambda:self.show_page('Play')).grid(row=3,column=0,sticky='w',pady=4)
+        button(inner,'New save slot',self._new_profile).grid(row=3,column=1,sticky='e',pady=4)
+        self.save_summary=tk.StringVar();label(parent,textvariable=self.save_summary,size=10,color=C['muted'],wraplength=620,justify='left').pack(anchor='w',pady=(16,8))
+        self.backup_button=button(parent,'Back up now',self._backup_now,kind='primary');self.backup_button.pack(anchor='w',pady=(0,14))
+        label(parent,'Restore a backup',size=12,bold=True).pack(anchor='w')
+        self.backup_picker=ttk.Combobox(parent,state='readonly');self.backup_picker.pack(fill='x',pady=(8,10))
+        self.restore_button=button(parent,'Restore backup',self._restore_backup);self.restore_button.pack(anchor='w')
+        label(parent,'Close the game before restoring. Your current save is backed up first.',size=9,color=C['muted'],wraplength=620,justify='left').pack(anchor='w',pady=(8,12))
+        self.profile_advanced=tk.Frame(parent,bg=C['background']);self.profile_advanced.columnconfigure(1,weight=1)
+        self.profile_advanced_visible=False;self.profile_advanced_button=button(parent,'Advanced save options',self._toggle_profile_advanced);self.profile_advanced_button.pack(anchor='w',pady=8)
+        for title,var,row in [('Player name',self.player,0),('Custom save folder',self.save_dir,1)]:
+            self._field(self.profile_advanced,title,var,row)
+        button(self.profile_advanced,'Choose folder',self._browse_save_dir).grid(row=2,column=1,sticky='w',pady=8)
+        label(self.profile_advanced,'Blank uses the ROM folder. Changing folders does not move existing saves.',size=9,color=C['muted'],wraplength=550,justify='left').grid(row=3,column=0,columnspan=2,sticky='w',pady=8)
+        button(self.profile_advanced,'Open backups folder',self._open_backups).grid(row=4,column=0,columnspan=2,sticky='w',pady=8)
+        button(self.profile_advanced,'Remove this slot',self._remove_profile).grid(row=5,column=0,columnspan=2,sticky='w',pady=8)
+        label(self.profile_advanced,'Removing a slot keeps its save files and backups.',size=9,color=C['muted']).grid(row=6,column=0,columnspan=2,sticky='w',pady=8)
+        self._refresh_backups()
+        for variable in (self.profile_label,self.player,self.save_dir):variable.trace_add('write',lambda *_:self._save_profile() if not self._switching else None)
+
+    def _toggle_profile_advanced(self):
+        self.profile_advanced_visible=not self.profile_advanced_visible
+        if self.profile_advanced_visible:self.profile_advanced.pack(fill='x')
+        else:self.profile_advanced.pack_forget()
+        self.profile_advanced_button.configure(text='Hide advanced save options' if self.profile_advanced_visible else 'Advanced save options')
+
+    def _save_profile(self):
+        if self._switching:return
+        item=self._active_profile();item.update(label=self.profile_label.get().strip()[:40] or 'Game',player=self.player.get().strip()[:32] or 'Player',save_dir=self.save_dir.get().strip())
+        selected=self.play_profiles.index(item);self.profile_picker['values']=[i['label'] for i in self.play_profiles];self.profile_picker.current(selected);self.active_slot.set('Save slot: '+item['label']);self._save();self._refresh_backups();self.status.set('Save slot settings saved automatically.')
+
+    def _browse_save_dir(self):
+        value=filedialog.askdirectory(title='Choose this profile’s save folder')
+        if value:self.save_dir.set(value);self._save_profile()
+
+    def _select_profile(self,event=None):
+        index=self.profile_picker.current()
+        if index<0:return
+        self._save();self.active_profile_id=self.play_profiles[index]['id'];self._init_profiles();self._switching=True
+        item=self._active_profile();self.profile_label.set(item['label']);self.player.set(item['player']);self.save_dir.set(item['save_dir'])
+        values=prefs.defaults(self.root/'builds/current');values.update(self.preference_values);self.pause.set(values['pause']);self.filter.set(values['filter']);self.volume.set(values['volume']);self.area_scenery.set(values.get('area_scenery',False));self.companion_interactions.set(values.get('companion_interactions',False))
+        self.lan_slots.set(str(item.get('lan_slots',16)))
+        self.connection_role.set(item['lan_role']);self.last_lan_action=item['lan_role'].lower()
+        self.net_mode.set(item['network']['mode']);self.net_host.set(item['network']['host']);self.net_port.set(str(item['network']['port']));self.net_room.set(item['network']['room'])
+        self._switching=False;self._save();self._refresh_backups();self.status.set('Selected '+item['label']+'.')
+
+    def _new_profile(self):
+        if len(self.play_profiles)>=16:self.status.set('Save slot limit reached (16).');return
+        item=services.profile(rom=self.rom.get(),label='Save slot '+str(len(self.play_profiles)+1));item['save_dir']=str(self.home/'play-profiles'/item['id']/'saves');self.play_profiles.append(item)
+        self.profile_picker['values']=[i['label'] for i in self.play_profiles];self.profile_picker.current(len(self.play_profiles)-1);self._select_profile()
+
+    def _remove_profile(self):
+        if len(self.play_profiles)==1:self.status.set('Keep at least one save slot.');return
+        item=self._active_profile();self.play_profiles.remove(item);self.active_profile_id=self.play_profiles[0]['id'];self.profile_picker['values']=[i['label'] for i in self.play_profiles];self.profile_picker.current(0);self._select_profile();self.status.set('Save slot removed. Saves and backups were kept.')
+
+    def _coop_page(self,parent):
+        self._heading(parent,'PLAY TOGETHER','Co-op','Use matching builds and ROMs.')
+        net=self._active_profile()['network'];self.net_mode=tk.StringVar(value=net['mode']);self.net_host=tk.StringVar(value=net['host']);self.net_port=tk.StringVar(value=str(net['port']));self.net_room=tk.StringVar(value=net['room'])
+        first=card(parent);first.pack(fill='x',pady=(0,12))
+        method=tk.Frame(first,bg=C['surface']);method.pack(fill='x',padx=18,pady=14)
+        label(method,'Connection method',size=12,bold=True,bg=C['surface']).pack(anchor='w')
+        picker=ttk.Combobox(method,textvariable=self.net_mode,values=['Local LAN','Tailscale backup','Internet UDP','Solo'],state='readonly');picker.pack(fill='x',pady=8)
+        self.mode_help=tk.StringVar();label(method,textvariable=self.mode_help,size=10,color=C['muted'],bg=C['surface'],wraplength=590,justify='left').pack(anchor='w')
+        self.mode_action=button(method,'Connection guide',self._connection_guide);self.mode_action.pack(anchor='w',pady=(8,0))
+        self.net_mode.trace_add('write',lambda *_:self._connection_mode_changed());self._connection_mode_changed()
+        second=card(parent);second.pack(fill='x',pady=(0,12))
+        inner=tk.Frame(second,bg=C['surface']);inner.pack(fill='x',padx=18,pady=14);inner.columnconfigure(1,weight=1)
+        label(inner,'Host or join',size=12,bold=True,bg=C['surface']).grid(row=0,column=0,columnspan=2,sticky='w',pady=(0,10))
+        roles=tk.Frame(inner,bg=C['surface']);roles.grid(row=1,column=0,columnspan=2,sticky='w')
+        self.connection_role=tk.StringVar(value=self._active_profile()['lan_role']);self.last_lan_action=self.connection_role.get().lower()
+        for role,text in [('Host','Host on this PC'),('Join','Join a friend')]:
+            ttk.Radiobutton(roles,text=text,value=role,variable=self.connection_role,command=self._connection_role_changed).pack(side='left',padx=(0,16))
+        self._field(inner,'Host address',self.net_host,2);self._field(inner,'Room name',self.net_room,3)
+        label(inner,'Use your host’s IP and the same room name.',size=9,color=C['muted'],bg=C['surface'],wraplength=590,justify='left').grid(row=4,column=0,columnspan=2,sticky='w',pady=6)
+        actions=tk.Frame(inner,bg=C['surface']);actions.grid(row=5,column=0,columnspan=2,sticky='w',pady=8)
+        button(actions,'Save connection',self._save_connection,kind='primary').pack(side='left');self.connection_button=button(actions,'Test connection',self._check_connection);self.connection_button.pack(side='left',padx=8)
+        self.connection_status=tk.StringVar(value='Not tested.')
+        label(inner,textvariable=self.connection_status,size=10,color=C['muted'],bg=C['surface'],wraplength=590,justify='left').grid(row=6,column=0,columnspan=2,sticky='w',pady=6)
+        self.connection_advanced=tk.Frame(inner,bg=C['surface']);self.connection_advanced.columnconfigure(1,weight=1)
+        self._field(self.connection_advanced,'Sharing port',self.net_port,0)
+        self.lan_slots=tk.StringVar(value=str(self._active_profile().get('lan_slots',16)))
+        label(self.connection_advanced,'Lobby size',bg=C['surface']).grid(row=1,column=0,sticky='w')
+        ttk.Combobox(self.connection_advanced,textvariable=self.lan_slots,values=list(range(2,17)),state='readonly',width=5).grid(row=1,column=1,sticky='w')
+        server_actions=tk.Frame(self.connection_advanced,bg=C['surface']);server_actions.grid(row=2,column=0,columnspan=2,sticky='w',pady=8)
+        button(server_actions,'Start sharing here',self._host_presence).pack(side='left');button(server_actions,'Stop sharing here',self._stop_presence).pack(side='left',padx=8)
+        self.advanced_visible=False
+        self.advanced_button=button(inner,'Advanced settings',self._toggle_connection_advanced);self.advanced_button.grid(row=7,column=0,columnspan=2,sticky='w',pady=4)
+        native_actions=tk.Frame(parent,bg=C['background']);native_actions.pack(fill='x',pady=(0,12))
+        self.lan_host_button=button(native_actions,'Host & play',lambda:self._start_lan('host'),kind='primary');self.lan_host_button.pack(side='left')
+        self.lan_join_button=button(native_actions,'Join & play',lambda:self._start_lan('join'));self.lan_join_button.pack(side='left',padx=8)
+        self.lan_retry_button=button(native_actions,'Retry',self._retry_lan);self.lan_retry_button.pack(side='left')
+        self.lan_status=tk.StringVar(value='Choose a ROM on Play, then host or join here.')
+        label(parent,textvariable=self.lan_status,size=10,color=C['muted'],wraplength=590,justify='left').pack(anchor='w',pady=(0,10))
+        third=card(parent);third.pack(fill='x')
+        label(third,'Next: join in-game',size=12,bold=True,bg=C['surface']).pack(anchor='w',padx=18,pady=(14,6))
+        label(third,'Host & play starts a LAN lobby. Your friend uses Join & play.\nTurn C-Gear wireless and fast-forward off.',size=10,color=C['muted'],bg=C['surface'],wraplength=590,justify='left').pack(anchor='w',padx=18,pady=(0,14))
+
+    def _connection_mode_changed(self):
+        mode=self.net_mode.get()
+        self.mode_help.set({'Local LAN':'For computers on the same home network.','Tailscale backup':'Connect both PCs to the same Tailscale network.','Internet UDP':'Experimental. Requires a UDP server.','Solo':'Multiplayer off.'}.get(mode,''))
+        self.mode_action.configure(text='Open internet setup' if mode=='Internet UDP' else 'Open Tailscale guide' if mode=='Tailscale backup' else 'Open play guide')
+
+    def _connection_guide(self):
+        if self.net_mode.get()=='Internet UDP':self._internet_wizard()
+        else:self.guide('TAILSCALE_COOP.md' if self.net_mode.get()=='Tailscale backup' else 'PLAYER_GUIDE.md')
+
+    def _connection_role_changed(self):
+        item=self._active_profile()
+        if self.connection_role.get()=='Host':
+            if self.net_host.get().lower() not in ('localhost','127.0.0.1'):item['join_host']=self.net_host.get()
+            self.net_host.set('127.0.0.1')
+        else:self.net_host.set(item.get('join_host',''))
+        if self.net_host.get():item['network']['host']=self.net_host.get()
+        item['lan_role']=self.connection_role.get();self.last_lan_action=item['lan_role'].lower();self._save()
+
+    def _toggle_connection_advanced(self):
+        self.advanced_visible=not self.advanced_visible
+        if self.advanced_visible:self.connection_advanced.grid(row=8,column=0,columnspan=2,sticky='ew')
+        else:self.connection_advanced.grid_remove()
+        self.advanced_button.configure(text='Hide advanced settings' if self.advanced_visible else 'Advanced settings')
+
+    def _save_connection(self):
+        try:
+            value=services.network({'mode':self.net_mode.get(),'host':self.net_host.get(),'port':self.net_port.get(),'room':self.net_room.get()})
+            self._active_profile()['lan_slots']=int(self.lan_slots.get())
+            self._active_profile()['network']=value;self._active_profile()['lan_role']=self.connection_role.get()
+            if self.connection_role.get()=='Join':self._active_profile()['join_host']=value['host']
+            self._save()
+            services.save_connection(self.root/'builds/current',value,self.player.get())
+            self.status.set('Connection saved. The game applies it when no battle or trade is active.')
+            self.connection_status.set('Saved '+value['host']+':'+str(value['port'])+' · reachability not checked.')
+            return value
+        except (OSError,ValueError) as exc:self.connection_status.set(str(exc));return None
+
+    def _check_connection(self):
+        value=self._save_connection()
+        if value:self.connection_status.set('Checking presence relay…');self._worker('connection',lambda:services.check_relay(value,self._spawn_presence))
+
+    def _internet_wizard(self):
+        try:
+            path=self.root/'Online Co-op.cmd'
+            if not path.is_file():raise ValueError('Internet helper missing. Use Repair game files.')
+            os.startfile(str(path))
+        except (OSError,ValueError) as exc:self.status.set(str(exc))
+
+    def _host_presence(self):
+        if self.presence_process is not None and self.presence_process.poll() is None:
+            self.connection_status.set('This launcher is already hosting a presence relay.');return
+        try:
+            value=services.network({'mode':self.net_mode.get(),'host':'127.0.0.1','port':self.net_port.get(),'room':self.net_room.get()})
+            self._spawn_presence(value['port'])
+            self.net_host.set('127.0.0.1');self._save_connection()
+            self.connection_status.set('Relay starting here on port '+str(value['port'])+'. Check relay to confirm. Guests use this PC’s LAN/Tailscale address. Allow the relay through Windows Firewall if prompted.')
+        except (OSError,ValueError) as exc:self.connection_status.set(str(exc))
+
+    def _spawn_presence(self,port):
+        if self.presence_process is not None and self.presence_process.poll() is None:
+            return
+        exe=self.root/'launcher/Unova Together.exe'
+        command=[str(exe),'--presence-relay',str(port)] if getattr(sys,'frozen',False) else [sys.executable,str(HERE.parent/'unova_launcher.py'),'--presence-relay',str(port)]
+        logs=self.home/'transfer';logs.mkdir(parents=True,exist_ok=True)
+        with (logs/'presence-relay.log').open('ab') as log:
+            self.presence_process=subprocess.Popen(command,cwd=self.root,stdout=log,stderr=log,creationflags=subprocess.CREATE_NO_WINDOW if os.name=='nt' else 0)
+
+    def _stop_presence(self):
+        if self.presence_process is not None and self.presence_process.poll() is None:
+            self.presence_process.terminate();self.connection_status.set('Hosted relay stopped. Players can reconnect after it restarts.')
+        else:self.connection_status.set('This launcher has no hosted relay to stop.')
+
+    def _tools_page(self,parent):
+        self._heading(parent,'KEEP PLAYING','Tools','Game checks, repair and read-only inspection.')
+        button(parent,'Manage saves & backups',lambda:self.show_page('Profiles')).pack(anchor='w',pady=(0,10))
+        self.preflight_text=tk.Text(parent,height=8,wrap='word',font=(F['body'],10),bg=C['surface'],fg=C['text'],relief='flat',padx=12,pady=10,state='disabled');self.preflight_text.pack(fill='x',pady=10)
+        button(parent,'Run launch checks',self._run_checks).pack(anchor='w')
+        button(parent,'Verify installed files',lambda:self._worker('integrity',lambda:services.integrity(self.root))).pack(anchor='w',pady=8)
+        actions=tk.Frame(parent,bg=C['background']);actions.pack(fill='x',pady=15)
+        self.verify_button=button(actions,'Find repair download',self._find_repair);self.verify_button.pack(side='left')
+        self.repair_button=button(actions,'Repair game files',self._repair);self.repair_button.pack(side='left',padx=8)
+        label(parent,'Repair reinstalls game files. Saves are kept.',size=9,color=C['muted'],wraplength=630,justify='left').pack(anchor='w')
+        self.export_button=button(parent,'Report a problem',self._export_diagnostics);self.export_button.pack(anchor='w',pady=15)
+        self._refresh_backups()
+
+        self._heading(parent,'READ-ONLY TOOLS','ROM & progression','Inspect the selected profile ROM and compare Black 2 party saves without changing them.')
+        button(parent,'Check ROM compatibility',self._check_rom).pack(anchor='w',pady=8)
+        self.xp_loss=tk.StringVar(value='0');self.xp_growth=tk.StringVar(value='Medium Slow')
+        options=tk.Frame(parent,bg=C['background']);options.pack(fill='x',pady=8)
+        label(options,'XP lost to co-op (%)',size=10).pack(side='left')
+        ttk.Entry(options,textvariable=self.xp_loss,width=6).pack(side='left',padx=8)
+        ttk.Combobox(options,textvariable=self.xp_growth,values=gen5_tools.GROWTH,state='readonly',width=18).pack(side='left')
+        button(parent,'Calculate Challenge progression',self._calculate_progression).pack(anchor='w',pady=8)
+        button(parent,'Compare two save files',self._compare_saves).pack(anchor='w',pady=8)
+        self.tool_text=tk.Text(parent,height=15,wrap='word',font=('Consolas',10),bg=C['surface'],fg=C['text'],relief='flat',padx=12,pady=10,state='disabled');self.tool_text.pack(fill='x',pady=10)
+
+    def _check_rom(self):
+        rom=self._active_profile()['rom'];self._worker('tool-result',lambda:gen5_tools.compatibility(rom))
+
+    def _calculate_progression(self):
+        rom=self._active_profile()['rom'];loss=self.xp_loss.get();growth=gen5_tools.GROWTH.index(self.xp_growth.get())
+        self._worker('tool-result',lambda:gen5_tools.progression(rom,loss,growth))
+
+    def _compare_saves(self):
+        kinds=[('Save files','*.sav *.save *.dsv'),('All files','*.*')]
+        first=filedialog.askopenfilename(parent=self,title='Choose the first Black 2 save',filetypes=kinds)
+        if not first:return
+        second=filedialog.askopenfilename(parent=self,title='Choose the second Black 2 save',filetypes=kinds)
+        if second:self._worker('tool-result',lambda:gen5_tools.compare_saves(first,second))
+
+    def _refresh_backups(self):
+        item=self._active_profile();self.backup_paths=services.backups(self.home,item);self.backup_picker['values']=[services.backup_label(p) for p in self.backup_paths]
+        if self.backup_paths:self.backup_picker.current(0)
+        else:self.backup_picker.set('No backups yet — select Back up now')
+        count=len(services.save_files(item));self.save_summary.set(f'{count} save file(s) found · {len(self.backup_paths)} backup(s). Save in-game before backing up.' if count else 'No save yet. Play, save in-game, then return here to back it up.')
+        self.profile_game.set('Game: '+(Path(item['rom']).name if item['rom'] else 'Choose a ROM on Play to get started.'));self.active_slot.set('Save slot: '+item['label'])
+        set_enabled(self.restore_button,bool(self.backup_paths))
+
+    def _backup_now(self):
+        try:
+            path=services.backup(self.home,self._active_profile());self.status.set('Save backup created.' if path else 'No .sav/.save/.dsv files found for this profile.');self._refresh_backups()
+        except (OSError,ValueError) as exc:self.status.set(str(exc))
+
+    def _restore_backup(self):
+        try:
+            if prefs.any_running():raise ValueError('Close all melonDS instances before restoring saves.')
+            index=self.backup_picker.current()
+            if not 0<=index<len(self.backup_paths):raise ValueError('Select a save backup first.')
+            count=services.restore(self.home,self._active_profile(),self.backup_paths[index]);self.status.set(f'Restored {count} save file(s). Previous saves were backed up.');self._refresh_backups()
+        except (OSError,ValueError,KeyError,zipfile.BadZipFile) as exc:self.status.set(str(exc))
+
+    def _open_backups(self):
+        path=self.home/'save-backups';path.mkdir(exist_ok=True)
+        try:os.startfile(str(path))
+        except OSError as exc:self.status.set(str(exc))
+
+    def _run_checks(self):
+        try:lines=services.checks(self.root,self._active_profile())
+        except (OSError,ValueError) as exc:lines=['BLOCK: '+str(exc)]
+        self.preflight_text.configure(state='normal');self.preflight_text.delete('1.0','end');self.preflight_text.insert('1.0','\n'.join(lines));self.preflight_text.configure(state='disabled')
+        self.status.set('Launch checks complete. In-game checks are listed explicitly.')
+        return lines
+
+    def _find_repair(self):
+        self.status.set('Looking for this version’s official repair download…')
+        def find():
+            target=updates.installed_version(self.home)
+            return updates.select_latest([r for r in updates.fetch_releases() if target==(0,0,0) or r.get('tag_name','').lstrip('v')=='.'.join(map(str,target))])
+        self._worker('repair-feed',find)
+
+    def _install_with_backup(self,release):
+        if prefs.running(self.root/'builds/current/melonDS.exe'):raise ValueError('Close this build’s emulator before updating or repairing.')
+        for item in self.play_profiles:services.backup(self.home,item,'before-update')
+        return updates.install(self.home,release,self.cancel,lambda done,total:self.messages.put(('progress',done*100/total)))
+
+    def _repair(self):
+        if not self.repair_release:return
+        release=dict(self.repair_release);release['_repair']=True;self.show_page('Updates');self.status.set('Backing up saves and repairing game files…');self._worker('installed',lambda:self._install_with_backup(release))
+
+    def _export_diagnostics(self):
+        value=filedialog.asksaveasfilename(title='Report a problem',defaultextension='.zip',initialfile='Unova-Together-diagnostics.zip',filetypes=[('ZIP archive','*.zip')])
+        if value:self._worker('diagnostics',lambda:services.diagnostics(self.root,Path(value),self.home))
+
+    def _review_report(self,path):
+        window=tk.Toplevel(self);window.title('Review problem report');window.geometry('760x540')
+        label(window,'Review before sharing',size=18,bold=True).pack(anchor='w',padx=16,pady=12)
+        label(window,'Logs are redacted. No ROMs, saves or RAM dumps. Nothing is uploaded.',size=10,wraplength=700).pack(anchor='w',padx=16)
+        text=tk.Text(window,wrap='word',font=(F['utility'],10));text.pack(fill='both',expand=True,padx=16,pady=12)
+        with zipfile.ZipFile(path) as bundle:
+            for name in bundle.namelist():
+                data=bundle.read(name)
+                text.insert('end',name+'\n'+data[:8192].decode('utf-8',errors='replace')+('\n[Preview shortened. Open the ZIP to review this file in full.]' if len(data)>8192 else '')+'\n\n')
+        text.configure(state='disabled')
+        controls=tk.Frame(window,bg=C['background']);controls.pack(fill='x',padx=16,pady=12)
+        button(controls,'Open report folder',lambda:os.startfile(str(path.parent))).pack(side='left')
+        button(controls,'Open GitHub issues',lambda:webbrowser.open('https://github.com/'+updates.REPO+'/issues')).pack(side='left',padx=8)
+        button(controls,'Close',window.destroy).pack(side='right')
+
+    def _apply_save_folder(self,runtime,item):
+        doc=prefs.read_document(runtime);value=item.get('save_dir','')
+        if value:
+            folder=Path(value).expanduser().resolve();folder.mkdir(parents=True,exist_ok=True);value=str(folder)
+        for key in [k for k in doc if re.fullmatch(r'Instance\d+',k)] or ['Instance0']:
+            doc.setdefault(key,tomlkit.table())['SaveFilePath']=value
+        prefs.atomic(Path(runtime)/'melonDS.toml',tomlkit.dumps(doc))
+
+    def _settings_page(self,parent):
+        self._heading(parent,'MAKE IT YOURS','Settings','Applies next launch.')
+        general=card(parent);general.pack(fill='x',pady=(0,18))
+        box=tk.Frame(general,bg=C['surface']);box.pack(fill='x',padx=18,pady=16)
+        label(box,'LAUNCHER & GAME',size=9,bold=True,bg=C['surface']).pack(anchor='w',pady=(0,10))
+        ttk.Checkbutton(box,text='Check for updates on startup',variable=self.auto,command=self._save).pack(anchor='w',pady=4)
+        values=prefs.defaults(self.root/'builds/current');values.update(self.preference_values)
+        self.pause=tk.BooleanVar(value=values['pause']);self.filter=tk.BooleanVar(value=values['filter'])
+        self.volume=tk.IntVar(value=values['volume'])
+        ttk.Checkbutton(box,text='Pause when unfocused (off for co-op)',variable=self.pause,
+            command=lambda:self._preference('pause',self.pause.get())).pack(anchor='w',pady=4)
+        ttk.Checkbutton(box,text='Smooth display filtering',variable=self.filter,
+            command=lambda:self._preference('filter',self.filter.get())).pack(anchor='w',pady=4)
+        self.area_scenery=tk.BooleanVar(value=values.get('area_scenery',False))
+        ttk.Checkbutton(box,text='Nearby battle scenery (experimental)',variable=self.area_scenery,
+            command=lambda:self._preference('area_scenery',self.area_scenery.get())).pack(anchor='w',pady=4)
+        label(box,'Tab / Shift+Tab: move focus · Enter: select · Ctrl+Tab: change page.\nController: D-pad / stick to move, A to select, B to return, LB / RB to change page.',size=9,color=C['muted'],bg=C['surface'],wraplength=620,justify='left').pack(anchor='w',pady=8)
+        label(box,'Game volume',size=10,bg=C['surface']).pack(anchor='w',pady=(10,0))
+        self.volume_slider=tk.Scale(box,from_=0,to=100,orient='horizontal',variable=self.volume,showvalue=True,
+            bg=C['surface'],fg=C['text'],highlightthickness=0,relief='flat',length=320,takefocus=True,
+            command=lambda v:self._preference('volume',int(float(v))))
+        self.volume_slider.pack(anchor='w')
+        button(box,'All emulator settings',self._all_settings).pack(anchor='w',pady=(12,0))
+        label(box,'Controls, display, audio and more.',size=9,color=C['muted'],bg=C['surface'],wraplength=620,justify='left').pack(anchor='w',pady=8)
+        experiments=card(parent);experiments.pack(fill='x',pady=(0,18))
+        experiment_box=tk.Frame(experiments,bg=C['surface']);experiment_box.pack(fill='x',padx=18,pady=16)
+        label(experiment_box,'EXPERIMENTAL',size=9,bold=True,bg=C['surface']).pack(anchor='w',pady=(0,8))
+        self.companion_interactions=tk.BooleanVar(value=values.get('companion_interactions',False))
+        ttk.Checkbutton(experiment_box,text='Companion interactions',variable=self.companion_interactions,
+            command=lambda:self._preference('companion_interactions',self.companion_interactions.get())).pack(anchor='w',pady=4)
+
+        label(experiment_box,'Off by default. Face your follower and press A. Restart the game after enabling.',size=9,color=C['muted'],bg=C['surface'],wraplength=620,justify='left').pack(anchor='w',pady=(6,0))
+        cheats=card(parent);cheats.pack(fill='x')
+        box=tk.Frame(cheats,bg=C['surface']);box.pack(fill='x',padx=18,pady=16)
+        label(box,'OPTIONAL CHEATS',size=9,bold=True,bg=C['surface']).pack(anchor='w')
+        self.cheat_status=label(box,'Choose a ROM on Play to check compatibility.',size=10,color=C['muted'],bg=C['surface'],wraplength=620,justify='left')
+        self.cheat_status.pack(anchor='w',pady=(8,12))
+        self.cheat_vars={};self.cheat_buttons={}
+        for item in prefs.CATALOG['codes']:
+            variable=tk.BooleanVar(value=False);self.cheat_vars[item['id']]=variable
+            control=ttk.Checkbutton(box,text=item['name']+' · '+item['activation'],variable=variable,
+                command=lambda ident=item['id']:self._cheat_changed(ident))
+            control.pack(anchor='w',pady=(8,3));self.cheat_buttons[item['id']]=control
+            label(box,item['note'],size=9,color=C['muted'],bg=C['surface'],wraplength=620,justify='left').pack(anchor='w',padx=22)
+        label(box,'Disable cheats after use. Saved changes are permanent.',
+            size=9,color=C['muted'],bg=C['surface'],wraplength=620,justify='left').pack(anchor='w',pady=(15,8))
+        button(box,'Code sources & licenses',self.cheat_sources).pack(anchor='w')
+
+    def _preference(self,key,value):
+        self.preference_values[key]=value;self._save()
+
+    def _all_settings(self):
+        from .settings_editor import SettingsEditor
+        try:SettingsEditor(self,self.root/'builds/current')
+        except (OSError,ValueError,tomlkit.exceptions.ParseError) as exc:self.status.set('Could not open emulator settings: '+str(exc))
+
+    def _cheat_changed(self,ident):
+        if not self.profile:return
+        self.cheat_choices.setdefault(self.profile['key'],{})[ident]=self.cheat_vars[ident].get()
+        self._save();self.status.set('Cheat choice saved · applies on next launch.')
+
+    def _rom_changed(self):
+        if self.rom_timer is not None:
+            try:self.after_cancel(self.rom_timer)
+            except tk.TclError:pass
+        self.profile=None
+        for control in self.cheat_buttons.values():control.state(['disabled'])
+        self.cheat_status.configure(text='Checking ROM compatibility…' if self.rom.get() else 'Choose a ROM on Play to check compatibility.')
+        self.rom_timer=self.after(250,self._identify_rom);self._sync()
+
+    def _identify_rom(self):
+        self.rom_timer=None;self.profile=prefs.identify(self.rom.get())
+        choices=self.cheat_choices.get(self.profile['key'],{}) if self.profile else {}
+        for ident,control in self.cheat_buttons.items():
+            control.state(['!disabled'] if self.profile else ['disabled']);self.cheat_vars[ident].set(bool(choices.get(ident,False)))
+        text=('Compatible: '+self.profile['profile']+' · off unless selected.' if self.profile else
+            'Cheats unavailable for this ROM. Reviewed: Black 2 USA/Europe and Redux Complete v1.4.1. You can still play normally.')
+        self.cheat_status.configure(text=text)
+
+    def cheat_sources(self):
+        try:os.startfile(str(HERE/'assets/CHEATS-SOURCES.md'))
+        except OSError as exc:self.status.set('Could not open code sources: '+str(exc))
+
+    @staticmethod
+    def cheat_vars_ids():return {item['id'] for item in prefs.CATALOG['codes']}
+
+    def _read_settings(self):
+        try:
+            if self.config_path.stat().st_size>65536:return
+            data=json.loads(self.config_path.read_text(encoding='utf-8'))
+            if isinstance(data.get('rom'),str):self.rom.set(data['rom'])
+            if isinstance(data.get('profiles'),list):self.play_profiles=[services.normalize(i) for i in data['profiles'][:16] if isinstance(i,dict) and re.fullmatch(r'[a-f0-9]{32}',str(i.get('id',''))) and isinstance(i.get('rom'),str)]
+            self.active_profile_id=str(data.get('active_profile',''))
+            if type(data.get('check')) is bool:self.auto.set(data['check'])
+            if type(data.get('music')) is bool:self.music.set(data['music'])
+            if isinstance(data.get('preferences'),dict):self.preference_values={k:v for k,v in data['preferences'].items() if (k in ('pause','filter','area_scenery','companion_interactions') and type(v) is bool) or (k=='volume' and type(v) is int and 0<=v<=100)}
+            if isinstance(data.get('cheats'),dict):self.cheat_choices={k:{ident:flag for ident,flag in v.items() if ident in self.cheat_vars_ids() and type(flag) is bool} for k,v in list(data['cheats'].items())[-32:] if isinstance(k,str) and len(k)<=32 and isinstance(v,dict)}
+        except (OSError,ValueError,AttributeError):pass
+
+    def _save(self):
+        if self._switching:return
+        if self.play_profiles:
+            item=self._active_profile();item['rom']=self.rom.get();item['preferences']=dict(self.preference_values)
+        try:
+            self.config_path.parent.mkdir(parents=True,exist_ok=True);pending=self.config_path.with_suffix('.pending')
+            pending.write_text(json.dumps({'rom':self.rom.get(),'check':self.auto.get(),'music':self.music.get(),'preferences':self.preference_values,'cheats':self.cheat_choices,'profiles':self.play_profiles,'active_profile':self.active_profile_id}),encoding='utf-8');os.replace(pending,self.config_path)
+        except OSError as exc:self.status.set('Could not save settings: '+str(exc))
+
+    def _sync(self):
+        path=Path(self.rom.get());valid=path.is_file() and path.suffix.lower()=='.nds';running=self.game is not None and self.game.poll() is None
+        present=(self.root/'builds/current/melonDS.exe').is_file()
+        set_enabled(self.play,valid and not self.busy and not running and present,'primary')
+        set_enabled(self.lan_host_button,valid and not self.busy and not running and present and self.net_mode.get()!='Solo','primary')
+        set_enabled(self.lan_retry_button,valid and not self.busy and present and self.net_mode.get()!='Solo')
+        set_enabled(self.lan_join_button,valid and not self.busy and not running and present and self.net_mode.get()!='Solo')
+        set_enabled(self.check_button,not self.busy);set_enabled(self.refresh_news,not self.busy)
+        set_enabled(self.update_button,bool(self.release) and not self.busy and not running,'primary')
+        set_enabled(self.connection_button,not self.busy);set_enabled(self.verify_button,not self.busy);set_enabled(self.export_button,not self.busy)
+        set_enabled(self.repair_button,bool(self.repair_release) and not self.busy and not running)
+        set_enabled(self.cancel_button,self.busy and self.operation=='installed' and not self.cancel.is_set())
+        set_enabled(self.backup_button,not self.busy,'primary');set_enabled(self.restore_button,bool(self.backup_paths) and not self.busy and not running)
+        message=('Game running. Save normally before changing builds.' if running else 'Emulator missing. Extract the complete release folder.' if not present else
+            'Choose your own matching Black 2 or Redux ROM.' if not self.rom.get() else 'ROM not found. Browse to an existing .nds file.' if not valid else 'Ready to play.')
+        self.game_hint.configure(text=message)
+
+    def browse(self):
+        path=filedialog.askopenfilename(title='Choose your Pokémon Black 2 / Redux ROM',filetypes=[('Nintendo DS ROM','*.nds')])
+        if path:self.rom.set(path);self._save()
+
+    def _start_lan(self,action):
+        if self.busy or self.game is not None and self.game.poll() is None:return
+        if self.net_mode.get()=='Solo':self.lan_status.set('Choose LAN or an online mode first.');return
+        self.connection_role.set('Host' if action=='host' else 'Join')
+        if action=='host':self._connection_role_changed()
+        self.last_lan_action=action;self._active_profile()['lan_role']=self.connection_role.get()
+        value=self._save_connection()
+        if value:
+            self.lan_status.set('Checking player sharing…')
+            self._worker('lan-'+action,lambda:services.check_relay(value,self._spawn_presence))
+
+    def launch(self,lan_action=None):
+        if self.busy or self.game is not None and self.game.poll() is None:return
+        if lan_action is not None:
+            if lan_action not in ('host','join'):raise ValueError('Unknown LAN action')
+            if self.net_mode.get()=='Solo':self.lan_status.set('Choose LAN or an online mode first.');return
+            if not self.player.get().strip() or len(self.player.get().strip().encode('utf-8'))>31:self.lan_status.set('Player name must fit within 31 UTF-8 bytes.');return
+        path=Path(self.rom.get())
+        if not path.is_file() or path.suffix.lower()!='.nds':return
+        self._save_profile()
+        if self._save_connection() is None:self.show_page('Co-op');return
+        self._save()
+        if any(line.startswith('BLOCK:') for line in self._run_checks()):self.show_page('Tools');return
+        try:
+            exe=self.root/'builds/current/melonDS.exe'
+            self._identify_rom()
+            selected=self.cheat_choices.get(self.profile['key'],{}) if self.profile else {}
+            item=self._active_profile();net=services.network(item['network'])
+            settings=dict(self.preference_values);settings['pause']=False if net['mode']!='Solo' else settings.get('pause',False)
+            prefs.apply(exe.parent,path,settings,selected,self.profile,self.home)
+            self._apply_save_folder(exe.parent,item)
+            env=dict(os.environ);env.update({'UNOVA_PLAYER_NAME':item['player'],'UNOVA_RELAY_HOST':net['host'],'UNOVA_RELAY_PORT':str(net['port']),'UNOVA_RELAY_ROOM':net['room'],'UNOVA_TRAINER_COOP':'0' if net['mode']=='Solo' else '1','UNOVA_AUTO_CONNECT':'0' if net['mode']=='Solo' else '1'})
+            env['UNOVA_EXPERIMENTAL_COMPANION']='1' if settings.get('companion_interactions',False) else '0'
+            env.pop('UNOVA_AREA_CATALOG',None)
+            env.pop('UNOVA_SURROUNDINGS_DIR',None)
+            if settings.get('area_scenery',False):
+                from area_scene_cache import prepare_catalog
+                self.status.set('Preparing battle scenery…');self.update_idletasks()
+                env['UNOVA_AREA_CATALOG']=str(prepare_catalog(path,self.home/'area-scenes'))
+                from battle_surroundings_worker import SurroundingsWorker
+                previous=getattr(self,'surroundings_worker',None)
+                if previous:previous.stop.set()
+                directory=Path(env['UNOVA_AREA_CATALOG']).parent/'nearby'
+                self.surroundings_worker=SurroundingsWorker(path,directory)
+                env['UNOVA_SURROUNDINGS_DIR']=str(directory)
+            for key in ('UNOVA_LAN_ACTION','UNOVA_LAN_HOST','UNOVA_LAN_REQUEST','UNOVA_LAN_SLOTS'):env.pop(key,None)
+            self.lan_request=''
+            if lan_action:
+                self.lan_request=uuid.uuid4().hex;self.lan_started=time.monotonic();self.lan_was_connected=False
+                env.update({'UNOVA_LAN_ACTION':lan_action,'UNOVA_LAN_HOST':net['host'],'UNOVA_LAN_REQUEST':self.lan_request,'UNOVA_LAN_SLOTS':str(item.get('lan_slots',16))})
+                self.lan_status.set('Starting LAN host…' if lan_action=='host' else 'Joining LAN host…')
+            self._stop_music()
+            self.game=subprocess.Popen([str(exe),str(path.resolve())],cwd=exe.parent,env=env)
+            self.status.set('Game running. Save normally before changing builds.');self._sync()
+        except (OSError,ValueError,subprocess.SubprocessError) as exc:self.status.set('Unable to start the game: '+str(exc))
+
+    def guide(self,name='PLAYER_GUIDE.md'):
+        if name not in services.GUIDES:return
+        guide=services.cached_guide(self.home,name) or self.root/'docs'/name
+        try:
+            if guide.is_file():os.startfile(str(guide))
+            else:webbrowser.open('https://github.com/'+updates.REPO+'/blob/main/docs/'+name)
+        except OSError as exc:self.status.set('Could not open the guide: '+str(exc))
+
+    def refresh_guides(self):
+        if self.guides_busy:return
+        self.guides_busy=True;self.guide_status.set('Checking GitHub guides…')
+        def run():
+            try:self.messages.put(('guides',services.refresh_guides(self.home)))
+            except Exception:self.messages.put(('guides-offline',None))
+        threading.Thread(target=run,daemon=True).start()
+
+    def _worker(self,action,task):
+        if self.busy:return
+        self.busy=True;self.operation=action;self.cancel.clear();self._sync()
+        def run():
+            try:self.messages.put((action,task()))
+            except Exception as exc:self.messages.put(('error',str(exc)))
+        threading.Thread(target=run,daemon=True).start()
+
+    def check(self):
+        if self.busy:return
+        self.status.set('Checking official GitHub releases…');self.update_status.set('Checking GitHub…');self.news_status.set('Refreshing official release notes…')
+        self._worker('feed',updates.launcher_feed)
+
+    def install_update(self):
+        if not self.release or self.busy or self.game is not None and self.game.poll() is None:return
+        self.show_page('Updates');self.status.set('Downloading and verifying update…');self.update_status.set('Downloading release '+self.release['version']+'…')
+        self.phase.set('Downloading · verification follows');self.bar['value']=0;release=dict(self.release)
+        self._worker('installed',lambda:self._install_with_backup(release))
+
+    def cancel_download(self):
+        if self.busy and self.operation=='installed':self.cancel.set();self.phase.set('Cancelling · current build remains active');self._sync()
+
+    def _poll(self):
+        try:
+            while True:
+                action,value=self.messages.get_nowait()
+                if action in ('guides','guides-offline'):
+                    self.guides_busy=False;self.guide_status.set('Guides up to date' if action=='guides' else 'Offline · using saved guides');continue
+                if action=='progress':
+                    self.bar['value']=value
+                    if not self.cancel.is_set():self.phase.set('Verifying and preparing update…' if value>=100 else f'Downloading · {value:.0f}%')
+                    continue
+                finished_operation=self.operation;self.busy=False;self.operation=''
+                if action=='tool-result' or action=='error' and finished_operation=='tool-result':
+                    self.tool_text.configure(state='normal');self.tool_text.delete('1.0','end');self.tool_text.insert('1.0',value);self.tool_text.configure(state='disabled');self.status.set('Read-only inspection complete.' if action=='tool-result' else 'Inspection could not complete: '+value);self._sync();continue
+                if action in ('lan-host','lan-join'):
+                    self.connection_status.set(value);self.launch(action[4:]);self._sync();continue
+                if action=='connection':
+                    self.connection_status.set(value);self.status.set('Connection check complete.');self._sync();continue
+                if action=='repair-feed':
+                    self.repair_release=value;self.status.set('Published build available. Repair game files will download and verify it.');self._sync();continue
+                if action=='integrity':
+                    self.status.set(value);self.preflight_text.configure(state='normal');self.preflight_text.delete('1.0','end');self.preflight_text.insert('1.0',value);self.preflight_text.configure(state='disabled');self._sync();continue
+                if action=='diagnostics':
+                    self.status.set('Report prepared. Review before sharing.');self._review_report(Path(value));self._sync();continue
+                if action=='feed':
+                    latest=value['release'];self.available.set('Release '+latest['version']);self.news=value['news'];self._render_news();self.news_status.set('Up to date · official GitHub release notes')
+                    try:
+                        cache=self.home/'.updates/news-cache.json';cache.parent.mkdir(exist_ok=True);pending=cache.with_suffix('.pending')
+                        pending.write_text(json.dumps(self.news),encoding='utf-8');os.replace(pending,cache)
+                    except OSError:self.news_status.set('News refreshed · offline cache could not be saved')
+                    if latest['numbers']>updates.installed_version(self.home):
+                        self.release=latest;self.status.set('Release '+latest['version']+' is available in Updates.');self.update_status.set('A new Windows build is ready to install.');self.nav['Updates'].configure(text='Updates  •')
+                    else:
+                        self.release=None;self.status.set('You have the latest compatible release.');self.update_status.set('You’re up to date.');self.nav['Updates'].configure(text='Updates')
+                elif action=='installed':
+                    self.root=value;self.release=None;self.bar['value']=100;self.installed.set(self._version_text());self.footer_version.configure(text=self._version_text())
+                    self.status.set('Update installed. Play uses the new build.');self.update_status.set('Verified and installed successfully.')
+                    self.phase.set('Ready · Restarting launcher…');self.nav['Updates'].configure(text='Updates')
+                    if not self.testing:self.after(350,self._restart_updated_launcher)
+                else:
+                    self.status.set(value+' Offline play remains available.');self.update_status.set(value);self.phase.set('Current build unchanged')
+                    if finished_operation.startswith('lan-'):self.lan_status.set(value)
+                    if finished_operation=='connection':
+                        self.connection_status.set(value);self.status.set(value)
+                    if finished_operation=='feed':self.news_status.set('Could not refresh · showing saved release notes')
+                self._sync()
+        except queue.Empty:pass
+        self._read_lan_status();self._sync();self.after(100,self._poll)
+
+    def _read_lan_status(self):
+        if not self.lan_request or time.monotonic()-self.lan_status_time<1:return
+        self.lan_status_time=time.monotonic()
+        if self.game is not None and self.game.poll() is not None:
+            self.lan_status.set('Disconnected · game closed. Use Retry to reconnect.');self.lan_request='';return
+        try:
+            path=self.root/'builds/current/launcher-lan-status.json'
+            if path.stat().st_size>8192:return
+            if time.time()-path.stat().st_mtime>5:self.lan_status.set('Status unavailable · the game is not reporting.');return
+            result=json.loads(path.read_text())
+            if not isinstance(result,dict):return
+            if result.get('request')!=self.lan_request:return
+            if not result.get('ok'):self.lan_status.set(result.get('reason','LAN setup failed.'));return
+            if result.get('role')==0:self.lan_status.set('LAN disconnected. Close the game to host or join again.');return
+            players=result.get('players',[])
+            if not isinstance(players,list) or not all(isinstance(p,dict) for p in players):return
+            count=sum(p.get('status') in (1,2) for p in players)
+            if count>=2:self.lan_was_connected=True
+            elif self.lan_was_connected:self.lan_status.set('Disconnected · teammate left. Waiting for reconnect.');return
+            self.lan_status.set('LAN connected · '+str(count)+' players' if count>=2 else 'LAN host ready · waiting for a friend' if result.get('role')==1 else 'LAN joining · waiting for host')
+        except (OSError,ValueError,TypeError):
+            if time.monotonic()-self.lan_started>30:self.lan_status.set('No LAN response. Save and close the game, then Retry.')
+
+    def _retry_lan(self):
+        if self.game is not None and self.game.poll() is None:
+            self.lan_status.set('Save and close the game before retrying.');return
+        self._start_lan(self.last_lan_action)
+
+    def _features_page(self,parent):
+        self._heading(parent,'FEATURES','Features','Gameplay screenshots from the mod.')
+        entries=(
+            ('walking','Walk with a teammate','See your friend on the map. Menu and battle indicators show when they are busy.'),
+            ('items','Give items','Pick a player on your map, choose an item and quantity, then send an offer.'),
+            ('battle','Co-op trainer battles','Take on supported trainers together, or choose solo. Each player keeps their own save. Co-op XP is disabled.'),
+            ('pokemon','Pokémon trades','Offer a party Pokémon and confirm the exchange with your teammate.'),
+            ('camera','Custom camera','Adjust angle, rotation and zoom from the Camera tab.'),
+            ('stats','Party IVs & EVs','Open Unova → Pokémon → IVs and EVs to view each Pokémon’s stats.'))
+        for asset,title,description in entries:
+            panel=card(parent);panel.pack(fill='x',pady=(0,12))
+            image=tk.PhotoImage(file=HERE/f'assets/features/{asset}.png');self.images.append(image)
+            tk.Label(panel,image=image,bg=C['surface'],bd=0).pack(anchor='w',padx=14,pady=(14,8))
+            label(panel,title,size=13,bold=True,bg=C['surface']).pack(anchor='w',padx=14)
+            label(panel,description,size=10,color=C['muted'],bg=C['surface'],wraplength=570,justify='left').pack(anchor='w',padx=14,pady=(6,14))
+        extras=card(parent);extras.pack(fill='x')
+        for title,copy in (
+            ('Following Pokémon','Your first party Pokémon follows your footsteps. All 649 species have directional sprites; no party-icon substitutes.'),
+            ('Players & travel','Find teammates in Players and use Join map / Teleport to map.'),
+            ('LAN & internet play','Host or join from Co-op. Tailscale is supported; the UDP bridge is experimental and needs your own server.'),
+            ('Battle requests','Select a teammate in Unova → Players to invite them to a friendly battle.'),
+            ('Field tools','Open Unova → Pokémon to find encounters by season and relearn level-up moves. Owned HMs work in the field without using battle move slots.'),
+            ('Companion interactions','Enable companion interactions in Settings, then talk to, pet or play with your lead Pokémon from Unova → Pokémon.'),
+            ('Profiles & backups','Separate games and save folders, create backups, and restore them from Tools.'),
+            ('Settings & updates','Edit emulator options, toggle reviewed cheats, read release notes and install verified updates.')):
+            label(extras,title,size=12,bold=True,bg=C['surface']).pack(anchor='w',padx=14,pady=(12,4))
+            label(extras,copy,size=10,color=C['muted'],bg=C['surface'],wraplength=570,justify='left').pack(anchor='w',padx=14,pady=(0,8))
+        button(parent,'Known issues',lambda:self.guide('KNOWN_ISSUES.md')).pack(anchor='w',pady=12)
+
+    def _cycle_page(self,direction):
+        names=list(self.nav);self.show_page(names[(names.index(self.page_name)+direction)%len(names)]);self.nav[self.page_name].focus_set();return 'break'
+
+    def _controller_action(self,action):
+        focused=self.focus_get()
+        if action=='next':self._cycle_page(1)
+        elif action=='previous':self._cycle_page(-1)
+        elif action=='back':
+            if focused and focused.winfo_toplevel()!=self:focused.winfo_toplevel().destroy()
+            else:self.show_page('Play');self.nav['Play'].focus_set()
+        elif action in ('up','down'):
+            widget=focused or self.nav[self.page_name]
+            target=widget.tk_focusPrev() if action=='up' else widget.tk_focusNext()
+            if target:target.focus_set()
+        elif action in ('left','right') and isinstance(focused,ttk.Combobox):
+            values=focused['values'];index=focused.current()
+            if values:focused.current((index+(-1 if action=='left' else 1))%len(values));focused.event_generate('<<ComboboxSelected>>')
+        elif action in ('left','right') and isinstance(focused,tk.Scale):focused.set(focused.get()+(-5 if action=='left' else 5))
+        elif action=='accept' and focused:
+            if hasattr(focused,'invoke'):focused.invoke()
+            elif isinstance(focused,ttk.Combobox):focused.event_generate('<Alt-Down>')
+
+    def _poll_controller(self):
+        active=False
+        if not self.testing and os.name=='nt':
+            import ctypes
+            focused=self.focus_get()
+            if focused:
+                user32=ctypes.windll.user32
+                user32.GetForegroundWindow.restype=ctypes.c_void_p
+                user32.GetAncestor.argtypes=[ctypes.c_void_p,ctypes.c_uint];user32.GetAncestor.restype=ctypes.c_void_p
+                active=user32.GetForegroundWindow()==user32.GetAncestor(focused.winfo_toplevel().winfo_id(),2)
+        for action in sorted(self.controller.poll(active)):self._controller_action(action)
+        self.after(125,self._poll_controller)
+
+    def _toggle_music(self):
+        self.music.set(not self.music.get());self._music_changed()
+
+    def _music_changed(self,save=True):
+        self.music_button.configure(text='Music: on' if self.music.get() else 'Music: off')
+        self._stop_music()
+        if self.music.get() and not self.testing and (self.game is None or self.game.poll() is not None):
+            try:
+                import winsound
+                winsound.PlaySound(str(HERE/'assets/menu-music.wav'),winsound.SND_FILENAME|winsound.SND_ASYNC|winsound.SND_LOOP|winsound.SND_NODEFAULT)
+            except (ImportError,RuntimeError,OSError):
+                self.music.set(False);self.music_button.configure(text='Music: off');self.status.set('Music unavailable.')
+        if save:self._save()
+
+    def _stop_music(self):
+        if self.testing:return
+        try:
+            import winsound
+            winsound.PlaySound(None,0)
+        except (ImportError,RuntimeError):pass
+
+    def _restart_updated_launcher(self):
+        # Restart the installed launcher, preserving the persistent profile/save home.
+        executable=self.root/'launcher/Unova Together.exe'
+        try:
+            if not executable.is_file():raise OSError('Updated launcher executable is missing.')
+            self._save()
+            env=dict(os.environ)
+            # A frozen parent must not lend its temporary PyInstaller runtime to the child.
+            env['PYINSTALLER_RESET_ENVIRONMENT']='1'
+            subprocess.Popen([str(executable),'--home',str(self.home)],cwd=self.root,env=env)
+        except (OSError,ValueError) as exc:
+            self.status.set('Update installed. Could not restart the launcher.')
+            self.update_status.set(str(exc));self.phase.set('Ready · Close and reopen the launcher.')
+            return
+        self.destroy()
+
+    def _close(self):
+        if self.busy and not messagebox.askyesno('Cancel update?','Close the launcher and cancel the current check/download?',parent=self):return
+        self.cancel.set();self._save();self.destroy()
+
+    def destroy(self):
+        # Cancel this Tcl interpreter's UI timers before disposing its widgets.
+        self.cancel.set();self._stop_music()
+        for token in self.tk.call('after','info'):self.after_cancel(token)
+        super().destroy()
