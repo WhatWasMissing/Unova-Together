@@ -1,32 +1,21 @@
-# Unova Together 1.0.0 — Full release
+# Unova Together 1.0.1 — Maintenance release
 
-The feature-complete Windows release of Unova Together, including **launcher 1.0.0** and **modified melonDS 1.0.0**, based on upstream melonDS 1.1.
+Launcher 1.0.1 and modified melonDS 1.0.1, based on melonDS 1.1. This full release packages the post-1.0.0 maintenance review, improved verification tools and current known limitations. Gameplay behavior is unchanged from 1.0.0.
 
-## Play
+Download **Unova-Together.exe**, or extract **Unova-Together-1.0.1-Windows-x64.zip** and run **Start Unova Together.cmd**. Existing players can use launcher Updates. Update both players; existing saves and ROMs need no conversion.
 
-Download **Unova-Together.exe**, or extract **Unova-Together-1.0.0-Windows-x64.zip** and run **Start Unova Together.cmd**. Select your own supported Black 2 or Blaze Black 2 Redux ROM and press Play. Existing players can install this version through launcher Updates. Update every player and restart the presence relay.
+## Maintenance changes
 
-## Included features
+- Cancellation/retry verification now independently boots both radios instead of cloning savestate wireless state.
+- Added a guest-process-loss recovery check and clearer relay/latency evidence names.
+- Added native touch-based NPC move selection and a strict save-input completion check.
+- HM verification accepts an explicit matching ROM; checks passed with JIT enabled and disabled.
+- Included the maintenance review and reproducible verification sources.
 
-- Shared overworld exploration, teammate locations and joining maps.
-- Item offers, direct party Pokémon trades and friendly player battles.
-- Co-op trainer encounters, Solo/Co-op switching and practice rematches, with independent parties and story saves.
-- Directional following Pokémon for all 649 base species and optional companion interactions.
-- IV/EV viewing, seasonal encounter finder, free level-up move relearning and field HMs without learned battle move slots.
-- Custom camera and optional nearby battle scenery generated locally from your ROM.
-- Launcher profiles, LAN Host/Join/Retry, remembered connections, controller navigation, music, emulator settings and optional cheats.
-- Save backups and restore, troubleshooting reports, verified updates and installation repair.
+## Verification and limits
 
-## Final polish
+Local independent-process cancellation/retry passed, including the encrypted UDP relay. Guest loss restored the host checkpoint and released battle allocations. A shared Cheren victory awarded the badge on both games, and separate fresh normal boots verified both saved awards. Saved EXP, levels, moves, IVs and EVs were preserved. This NPC test used disposable boosted combat stats; it does not validate normal difficulty.
 
-Both applications identify as 1.0.0. The launcher uses release wording, current in-game menu paths, a complete feature list and bundled 1.0.0 news. Setup and feature guides now describe the current build. The obsolete flight-preview instructions are removed: that prototype is absent from the current feature set. Upstream melonDS attribution and all project/dependency licenses are retained.
+Co-op XP remains disabled. A simulated 100 ms round trip in Practice exposed asymmetric completion: one peer finished and the other rolled back. That issue is documented and remains unfixed. Physical two-PC/WAN reliability, complete Fly travel and independent save/reload of relearned moves are not newly verified. See **docs/MAINTENANCE_REVIEW_2026-10-11.md** and **docs/KNOWN_ISSUES.md**.
 
-## Known limits
-
-Co-op experience remains disabled to prevent desynchronisation. Saves and story progress remain independent; not every special trainer script has been verified. Keep fast-forward and C-Gear wireless off during native multiplayer. Interrupted battles may require returning to the field and recreating LAN; recovery can discard the interrupted battle's progress.
-
-Tailscale is available for different networks. The optional UDP bridge remains experimental and requires your group's server and Python; there is no bundled public server. Nearby battle scenery and companion interactions remain optional. Companion interactions do not change friendship or HP. The encounter finder covers ordinary encounter tables, excluding gifts, scripted legendaries and Hidden Grottos. Direct Pokémon trades exclude eggs, held Mail and native trade evolutions; use the Union Room for those cases.
-
-See [player guide](https://github.com/WhatWasMissing/Unova-Together/blob/main/docs/PLAYER_GUIDE.md), [known limits](https://github.com/WhatWasMissing/Unova-Together/blob/main/docs/KNOWN_ISSUES.md) and the included release checks for validation details. A full release does not imply every ROM hack, network or special event has been tested.
-
-Made by **mvq1303 / WhatWasMissing**. Playtesters: **maxback221** and **randomitem19**. Built on melonDS; matching GPL source and SHA-256 checksums are included. No ROMs, saves or firmware are bundled.
+The complete Windows runtime, matching GPL source and SHA-256 checksums are included. No ROMs, firmware, user saves or private settings are distributed. Unova Together's original contributions are by **mvq1303 / WhatWasMissing**; melonDS and dependency notices are preserved.

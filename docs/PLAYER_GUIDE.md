@@ -4,7 +4,7 @@ Unova Together adds shared exploration, item trading and co-op trainer battles t
 
 ## What each player needs
 
-- A Windows x64 PC and the Unova Together 1.0.0 EXE or complete ZIP, extracted into a folder.
+- A Windows x64 PC and the Unova Together 1.0.1 EXE or complete ZIP, extracted into a folder.
 - Their own ROM and save. Both players must use exactly the same game version, including the same Redux revision.
 - A backup of their save before playing together.
 - A connection method below. Tailscale is included; the experimental UDP option also needs Python.
