@@ -32,4 +32,4 @@ For different networks use [Tailscale](docs/TAILSCALE_COOP.md). The optional [UD
 
 Matching GPL source and checksums accompany the downloads. No ROMs, saves or firmware are bundled. [Authorship](AUTHORSHIP.md) · [Licensing](LICENSING.md). Playtesters: maxback221 and randomitem19.
 
-Solo battles now award **1.65× XP**; co-op XP remains suppressed. See [XP compensation](docs/XP_COMPENSATION.md) and [measured battle results](docs/XP_COMPENSATION_BATTLE_TEST.md). Boosted XP save/reload remains unverified.
+Solo battles now award **1.65× XP**; co-op XP remains suppressed. See [XP compensation](docs/XP_COMPENSATION.md) and [measured battle results](docs/XP_COMPENSATION_BATTLE_TEST.md). A subsequent published 1.0.2 battle now verifies normal saving and a fresh reload with matching XP, level, moves and badge.

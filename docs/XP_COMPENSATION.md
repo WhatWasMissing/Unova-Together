@@ -29,14 +29,17 @@ initially did not constitute an end-to-end solo battle and save/reload XP test.
 A subsequent genuine solo Cheren battle completed on both the normal and boosted
 builds: 498 XP normally, 807 XP with the multiplier, with the badge awarded and
 actual party XP verified in RAM. See `docs/XP_COMPENSATION_BATTLE_TEST.md`.
-Save/reload remains unverified because the automated save input did not write the
-post-battle result to disk. The battle evidence used the interpreter.
+The original automated save input did not write the post-battle result to disk.
+A subsequent published 1.0.2 battle now verifies the native save, independent
+PKHeX parsing and a fresh normal boot: 5,951 XP / level 20 and the badge persist.
+See the follow-up in `docs/XP_COMPENSATION_BATTLE_TEST.md`. These battle checks
+used the interpreter; end-to-end JIT behavior remains unverified.
 
 The native menu smoke attempts using `Redux.ml1` and `courtyard-check.ml1`
 produced no report and were stopped; they are not counted as passed. Logs are
 retained under `test-fixtures/coop-launcher/xp-165-native-menu*`.
 
-This change is included in the 1.0.2 release candidate. Previous 1.0.1
+This change shipped in the 1.0.2 full release. Previous 1.0.1
 release assets are unchanged.
 The previous local emulator is backed up at
 `builds/backups/xp-165-20261011/melonDS.exe`.

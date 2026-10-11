@@ -34,3 +34,7 @@ The best next use is inspection and stronger test evidence, rather than adding m
 [Current PokEditor v3](https://github.com/turtleisaac/PokEditor) and [DSPRE](https://github.com/DS-Pokemon-Rom-Editor/DSPRE) focus on Gen 4. The historical [PokEditor v1](https://github.com/turtleisaac/PokEditor-v1) had Gen 5 support, but is a legacy project. They are not the first choice for our Black 2 Redux workflow.
 
 Research is based on project documentation and source as checked on 11 October 2026. Compatibility beyond the existing ndspy checks has not been established through editor round-trip testing.
+
+## Subsequent authorized implementation
+
+After this investigation, the user authorized tool downloads and automated use. Frost 5.0.1 has now been downloaded and its actual parser/exporter tested against private Redux copies. A no-op export preserved contained content, and a separate editor-ready copy adds only the missing Fairy type label. See [the verified workflow](GEN5_EDITOR_WORKFLOW.md) for evidence, reproducible tools and remaining gameplay checks. The earlier statements above describe the research stage; they do not describe the completed follow-up.

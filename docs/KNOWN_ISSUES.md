@@ -33,4 +33,4 @@ Direct party Pokémon trades exclude eggs, held Mail and native trade-evolution 
 
 - **Practice can complete asymmetrically under latency.** A local simulated 100 ms round trip left one peer completed and the other rolled back after partner loss. The completion handshake still needs a fix. Verify both peers returned normally before saving; do not treat this maintenance release as a WAN reliability fix.
 
-- **Boosted solo XP save/reload is unverified.** The completed solo battle applied XP and awarded the badge, but automated post-battle save inputs did not write the results to disk. This is an incomplete verification, not an established game save defect.
+- **Boosted solo XP persistence has a targeted pass.** A published 1.0.2 solo Cheren victory saved 5,951 Servine XP / level 20 and the badge, independently parsed with PKHeX, then reloaded in a fresh emulator process. This interpreter fixture does not establish JIT or full-playthrough behavior. See `XP_COMPENSATION_BATTLE_TEST.md`.

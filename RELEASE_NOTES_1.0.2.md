@@ -21,3 +21,7 @@ Genuine solo Cheren victories on disposable saves awarded the badge and applied 
 The previously documented Practice completion issue under simulated latency remains unfixed. Physical two-PC/WAN reliability, full Fly travel and relearned-move save/reload are not newly verified. See **docs/KNOWN_ISSUES.md** and the maintenance review.
 
 The complete Windows runtime, matching GPL source and SHA-256 checksums are included. No ROMs, firmware, user saves or private settings are distributed. Unova Together's original contributions are by **mvq1303 / WhatWasMissing**; melonDS and dependency attribution is preserved.
+
+## Subsequent save/reload verification — 11 October 2026
+
+After publication, the same 1.0.2 emulator completed another genuine solo Cheren battle, saved Servine at **5,951 XP / level 20** and the badge through the game UI, and reloaded the same result in a fresh process without a savestate. PKHeX independently verified the written data and checksums. This closes the targeted solo XP persistence gap described above; JIT and full-playthrough behavior remain unverified. See [the follow-up evidence](https://github.com/WhatWasMissing/Unova-Together/blob/main/docs/XP_COMPENSATION_BATTLE_TEST.md). Release binaries, corresponding source archives and checksums are unchanged.
