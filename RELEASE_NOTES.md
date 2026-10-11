@@ -1,14 +1,24 @@
-# Unova Together beta 0.3.13 — Direct menus and Options fix
+# Unova Together beta 0.4.0
 
-- Switch directly between **Players**, **Pokémon**, **Co-op** and **Settings** using the bottom tabs or **L/R**. **B** or **Close** leaves any main page.
-- Follower controls, the original **Game options** and **Trainer card** are on Settings. Ready/Busy and trainer battle mode are together on Co-op.
-- Fixed the Options shortcut selecting the wrong native menu entry. An unavailable target now cancels safely instead of opening an unrelated screen.
-- Removed the spectate controls.
-- Checkpoint recovery now synchronizes wireless transport membership with the restored radio power state so retries do not retain stale membership.
-- **maxback221** and **randomitem19** are credited as playtesters in the emulator and in a dedicated launcher strip that stays visible when resizing.
+## New experimental options
 
-Use **Updates** in the launcher, or download **Unova-Together.exe** below. Save normally and close the emulator before replacing its build. No new ROM or save is required. Keep every player on the same version.
+Open **Launcher → Settings → Experimental**, enable the features you want, and restart the game. Both are off by default.
 
-Native ROM-backed tests passed for direct navigation, B/Close, item-menu exit, Options, Trainer card, intentionally selecting the wrong native tile, and invalid-target cancellation. Launcher credits were checked at three window sizes. A two-process LAN test entered battle, cancelled back to the field, entered a second battle without restarting, and cancelled cleanly on both games. A powered-checkpoint test verified that transport membership is restored. Existing relay tests and retained story-result checks passed. This update does not add new battle or internet functionality; existing [beta limitations](https://github.com/WhatWasMissing/Unova-Together/blob/main/docs/KNOWN_ISSUES.md) still apply.
+- **Companion interactions:** talk to, pet, and play with your lead Pokémon. Responses reflect its health and friendship. Click its following sprite or open **Unova → Pokémon → My companion**. Interactions do not change HP, friendship or your save.
+- **Latias / Latios flight preview:** steer a pixel-art preview over your current surroundings. D-pad steers, L/R switches mount, and B returns. With HM02, the Fly button opens the original party screen; select a Pokémon and choose Fly to use the game’s own destinations.
 
-Made by **mvq1303 / WhatWasMissing**, built on melonDS. Thank you to playtesters **maxback221** and **randomitem19**. Matching GPL source and SHA-256 checksums are included. No ROMs, saves or firmware are bundled.
+The pause-menu entry is now **Unova**. Players, Pokémon, Co-op and Settings are sibling tabs; settings are no longer presented as part of Players.
+
+## Setup
+
+Download **Unova-Together.exe**, or extract the complete portable ZIP. Update all players, restart the game, and follow the included player guide. No new ROM or save is required. Tailscale remains the fallback for different networks; the UDP bridge requires your own server.
+
+## Known limits
+
+The flight option is a menu preview, not free flight through a 3D Unova region. Native Fly retains its normal story restrictions, and completed Fly travel still needs gameplay testing. Companion interactions require a resolved idle field, and eggs cannot interact. In co-op, XP remains disabled to avoid desync. Keep fast-forward off during native wireless battles.
+
+## Checks
+
+The native ROM-backed menu fixture verifies opt-in gating, Talk/Pet/Play, battle safeguards, unchanged party/bag data, steering and mount switching, the native party shortcut, Options and existing menus. Compiled helper tests cover health/friendship responses, all 649 species and bounded steering. These checks do not establish full ORAS-style flight or completed Fly travel.
+
+Made by mvq1303 / WhatWasMissing. Playtesters: maxback221 and randomitem19. Built on melonDS; corresponding GPL source is included.

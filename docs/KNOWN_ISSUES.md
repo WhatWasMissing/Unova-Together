@@ -36,3 +36,7 @@ Full HM obstacle traversal, completed Fly travel and save/reload after relearnin
 ## Spectating
 
 Spectate controls have been removed in beta 0.3.13.
+
+## Experimental companion and flight options (0.4.0)
+
+Both are off by default in launcher Settings. Soar is a steerable menu preview, not 3D travel through Unova. Its Fly shortcut opens the original party screen and retains native travel restrictions. Completed Fly travel still needs gameplay testing. Companion reactions are read-only and do not increase friendship.
