@@ -46,7 +46,7 @@ Disable and relaunch after use. Disabling does not undo saved items/money. Exist
 
 Disposable tests cover profile switching/preferences, launch environment, automatic pre-update backups, checksum-verified restore/recovery copies, relay protocol checks, diagnostic redaction, damaged-file detection and verified same-version repair/corrupt active runtime recovery. Native ROM-backed menu integration confirmed profile fields and Solo mode reach the emulator, and existing menu checks still pass. The standalone installed launcher was smoke-tested. Real internet pairing/partner revision and C-Gear checks remain in-game; this work is not a new full co-op battle playtest.
 
-Made by mvq1303 / WhatWasMissing. Launcher 1.0.1 is included in the full release.
+Made by mvq1303 / WhatWasMissing. Launcher 1.0.2 is included in the full release.
 
 
 ## Relay addresses and full emulator settings

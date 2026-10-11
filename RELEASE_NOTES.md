@@ -1,21 +1,23 @@
-# Unova Together 1.0.1 — Maintenance release
+# Unova Together 1.0.2 — Solo XP compensation
 
-Launcher 1.0.1 and modified melonDS 1.0.1, based on melonDS 1.1. This full release packages the post-1.0.0 maintenance review, improved verification tools and current known limitations. Gameplay behavior is unchanged from 1.0.0.
+Launcher 1.0.2 and modified melonDS 1.0.2, based on melonDS 1.1. This full release adds **1.65× solo battle XP** to help compensate for XP suppressed in co-op.
 
-Download **Unova-Together.exe**, or extract **Unova-Together-1.0.1-Windows-x64.zip** and run **Start Unova Together.cmd**. Existing players can use launcher Updates. Update both players; existing saves and ROMs need no conversion.
+Download **Unova-Together.exe**, or extract **Unova-Together-1.0.2-Windows-x64.zip** and run **Start Unova Together.cmd**. Existing players can use launcher Updates. Update both players; existing ROMs and saves need no conversion.
 
-## Maintenance changes
+## Changes
 
-- Cancellation/retry verification now independently boots both radios instead of cloning savestate wireless state.
-- Added a guest-process-loss recovery check and clearer relay/latency evidence names.
-- Added native touch-based NPC move selection and a strict save-input completion check.
-- HM verification accepts an explicit matching ROM; checks passed with JIT enabled and disabled.
-- Included the maintenance review and reproducible verification sources.
+- Newly earned solo battle XP is multiplied by 1.65 after the game calculates level scaling, XP sharing, traded bonuses and Lucky Egg bonuses.
+- Fractional XP rounds down per Pokémon; the native 100,000 XP per-award limit remains in force.
+- Existing accumulated XP, reward flags and EV rewards are unchanged. Co-op XP remains suppressed: zero rewards stay zero.
+- Verified ROM identities, native instruction fingerprints and reward bounds protect unsupported contexts.
+- Added reproducible production-dispatch tests, a disposable solo battle runner and the selected Redux Challenge XP-budget calculation.
 
 ## Verification and limits
 
-Local independent-process cancellation/retry passed, including the encrypted UDP relay. Guest loss restored the host checkpoint and released battle allocations. A shared Cheren victory awarded the badge on both games, and separate fresh normal boots verified both saved awards. Saved EXP, levels, moves, IVs and EVs were preserved. This NPC test used disposable boosted combat stats; it does not validate normal difficulty.
+Genuine solo Cheren victories on disposable saves awarded the badge and applied actual party XP: Servine gained **807 XP** with the boost versus **498 XP** normally. The measured total was 62.05% higher; the earlier level-up affects later Generation V rewards, and per-award rounding applies. The reserve Pokémon received no XP. The fixture used boosted combat stats and the interpreter; this does not validate normal difficulty or an end-to-end JIT battle.
 
-Co-op XP remains disabled. A simulated 100 ms round trip in Practice exposed asymmetric completion: one peer finished and the other rolled back. That issue is documented and remains unfixed. Physical two-PC/WAN reliability, complete Fly travel and independent save/reload of relearned moves are not newly verified. See **docs/MAINTENANCE_REVIEW_2026-10-11.md** and **docs/KNOWN_ISSUES.md**.
+**Normal save/reload of the boosted result remains unverified.** Automated post-battle save inputs did not write either result to disk; this is recorded as a failed verification step, separate from the completed battles. No save/reload pass is claimed. See **docs/XP_COMPENSATION_BATTLE_TEST.md**.
 
-The complete Windows runtime, matching GPL source and SHA-256 checksums are included. No ROMs, firmware, user saves or private settings are distributed. Unova Together's original contributions are by **mvq1303 / WhatWasMissing**; melonDS and dependency notices are preserved.
+The previously documented Practice completion issue under simulated latency remains unfixed. Physical two-PC/WAN reliability, full Fly travel and relearned-move save/reload are not newly verified. See **docs/KNOWN_ISSUES.md** and the maintenance review.
+
+The complete Windows runtime, matching GPL source and SHA-256 checksums are included. No ROMs, firmware, user saves or private settings are distributed. Unova Together's original contributions are by **mvq1303 / WhatWasMissing**; melonDS and dependency attribution is preserved.

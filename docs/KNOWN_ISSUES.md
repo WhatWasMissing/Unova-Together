@@ -1,4 +1,4 @@
-# Unova Together 1.0.1 — known limits
+# Unova Together 1.0.2 — known limits
 
 - **Other VPNs can block connections.** NordVPN caused a tester’s presence-relay connection to fail with WinError 10013. Disconnect other VPNs while using Tailscale; check their kill-switch and network-filter settings if access remains blocked. This is not evidence that the game server is offline.
 - **Online UDP is experimental.** It has been checked locally, but reliable battle completion between players on different networks has not yet been confirmed. Use Tailscale if it fails.
@@ -32,3 +32,5 @@ Field HMs retain native story requirements. Fly needs a party member with a move
 Direct party Pokémon trades exclude eggs, held Mail and native trade-evolution entries. Use the Union Room for those cases. Both players must save normally after trades and relearning.
 
 - **Practice can complete asymmetrically under latency.** A local simulated 100 ms round trip left one peer completed and the other rolled back after partner loss. The completion handshake still needs a fix. Verify both peers returned normally before saving; do not treat this maintenance release as a WAN reliability fix.
+
+- **Boosted solo XP save/reload is unverified.** The completed solo battle applied XP and awarded the badge, but automated post-battle save inputs did not write the results to disk. This is an incomplete verification, not an established game save defect.
