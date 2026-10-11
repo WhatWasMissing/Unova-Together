@@ -1,23 +1,20 @@
-# Unova Together 1.0.3 — Simpler saves and Gen 5 tools
+# Unova Together 1.0.4 — Installation storage cleanup
 
-A full release with launcher 1.0.3 and the previously verified modified melonDS 1.0.2 runtime, based on melonDS 1.1. Emulator gameplay is unchanged, including 1.65× solo XP compensation.
-
-Download **Unova-Together.exe**, or extract **Unova-Together-1.0.3-Windows-x64.zip** and run **Start Unova Together.cmd**. Existing players can install through launcher Updates. Existing profile settings, ROMs, saves and backups are retained.
+Full release: launcher 1.0.4 with the unchanged modified melonDS 1.0.2 runtime, based on melonDS 1.1. Download Unova-Together.exe or the Windows ZIP. Existing users can install through launcher Updates.
 
 ## Changes
 
-- **Games & saves** replaces the profile wording. Play shows the active slot and a Manage saves button.
-- Slot names save automatically. New slots reuse the selected ROM with separate save folders. Advanced folder settings and slot removal are tucked away.
-- **Back up now** and **Restore backup** share one page. Backups have readable dates and reasons; current files are backed up before restore.
-- Added `.save` and numbered instance `.save` support alongside `.sav` and `.dsv`. Contents are preserved without conversion; melonDS normally uses `.sav`.
-- Added read-only English Black 2 ROM/XP-hook checks, a checksum-verified party save comparison and a Redux Challenge XP-budget calculator using the existing 1.65× multiplier.
+- Added **Clean old installations** to launcher Tools, with recovered-space feedback.
+- Automatic startup cleanup keeps the active installation, one rollback build and all running builds. Older verified package files are removed; saves, ROMs, backups, custom files and modified files are preserved.
+- Added an installation file receipt so future cleanup can identify packaged files safely. Legacy cleanup uses existing runtime checksum records and matching launcher binaries, retaining unknown files.
+- Reuses identical executable/library files through hardlinks when supported. Changed files and writable configuration are separate; unsupported hardlinks leave normal copies intact.
+- Older standalone EXEs now use an already newer active installation without unpacking an unused older bundle.
+- Records the previous active build for rollback retention. Installation and cleanup share the same lock.
 
-## Verification and limits
+Updates still download a complete checksum-verified release ZIP; this release reduces retained disk usage, not network download size. Small metadata folders and preserved user files may remain for older builds. Older standalone launchers require their launcher sentinel file to delegate to the current installation, so cleanup retains it.
 
-20 native UI tests, 15 launcher-service tests and 6 installer tests passed. Real Redux save copies were backed up and restored through launcher controls under all four tested filenames (`.save`, `.2.save`, `.sav`, `.dsv`), byte for byte. The replaced saves were preserved and another ROM's save was untouched. A restored `.save` payload, copied to melonDS's normal `.sav` filename, passed normal boot without a save state: Servine retained level 20 and 5,951 XP, and the Cheren badge remained present. Frozen launcher and standalone installer smoke tests passed, including the packaged ROM, save and progression tools.
+## Verification
 
-ROM checks cover English Black 2 identity and the XP hook, not every multiplayer feature or edited asset. The calculator requires the reviewed Redux Complete 1.4.1 ROM and reports XP-budget equivalents, not playthrough predictions. Save comparison checks party blocks and Pokémon records, not every save block; differing banks are shown without guessing which is latest.
+Nine storage tests cover retention, save/custom-file preservation, running builds, modified binaries, malformed paths, Windows junctions, process-check failure, hardlink reuse and copy fallback. 21 native UI tests include the working cleanup button; 13 updater and six standalone installer tests pass. Frozen launcher, standalone installation, package integrity, matching source and uploaded digests are checked before/after publication.
 
-Previously documented multiplayer edge cases and physical two-PC/WAN limitations remain. The emulator executable is byte-identical to release 1.0.2. See docs/KNOWN_ISSUES.md and docs/LAUNCHER_GEN5_TOOLS.md.
-
-Complete Windows runtime, matching GPL source and SHA-256 checksums are included. No ROMs, firmware, saves or private settings are distributed. Original contributions by **mvq1303 / WhatWasMissing**; melonDS and dependency attribution is preserved.
+The emulator executable is byte-identical to release 1.0.2; existing gameplay limitations remain. No ROMs, saves, firmware or private settings are distributed. Original contributions by **mvq1303 / WhatWasMissing**, with melonDS and dependency attribution preserved. Matching GPL source and SHA-256 checksums are included.

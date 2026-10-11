@@ -4,6 +4,7 @@ import json, os, queue, re, time, uuid, subprocess, sys, threading, tkinter as t
 import tomlkit
 from tkinter import filedialog, messagebox, ttk
 import unova_updater as updates
+import unova_storage as storage
 from . import preferences as prefs
 from . import services
 from . import gen5_tools
@@ -35,6 +36,7 @@ class Launcher(tk.Tk):
         self.bind('<MouseWheel>',self._wheel);self.after(100,self._poll);self._sync();self._music_changed(save=False)
         if self.auto.get() and not testing:self.after(300,self.check)
         if not testing:self.after(600,self.refresh_guides)
+        if not testing:self.after(2000,self._automatic_cleanup)
 
     def _build(self):
         style=ttk.Style(self);style.theme_use('clam')
@@ -186,7 +188,7 @@ class Launcher(tk.Tk):
             widget=getattr(widget,'master',None)
 
     def _version_text(self):
-        try:return 'Release '+'.'.join(map(str,updates.local_version(self.root)))+' · Launcher 1.0.3'
+        try:return 'Release '+'.'.join(map(str,updates.local_version(self.root)))+' · Launcher 1.0.4'
         except (OSError,ValueError):return 'Build unavailable'
 
     def _read_news(self):
@@ -427,6 +429,8 @@ class Launcher(tk.Tk):
         self.preflight_text=tk.Text(parent,height=8,wrap='word',font=(F['body'],10),bg=C['surface'],fg=C['text'],relief='flat',padx=12,pady=10,state='disabled');self.preflight_text.pack(fill='x',pady=10)
         button(parent,'Run launch checks',self._run_checks).pack(anchor='w')
         button(parent,'Verify installed files',lambda:self._worker('integrity',lambda:services.integrity(self.root))).pack(anchor='w',pady=8)
+        self.cleanup_button=button(parent,'Clean old installations',self._clean_installations);self.cleanup_button.pack(anchor='w',pady=8)
+        label(parent,'Keeps your current build, one previous build, saves and backups.',size=9,color=C['muted'],wraplength=630,justify='left').pack(anchor='w')
         actions=tk.Frame(parent,bg=C['background']);actions.pack(fill='x',pady=15)
         self.verify_button=button(actions,'Find repair download',self._find_repair);self.verify_button.pack(side='left')
         self.repair_button=button(actions,'Repair game files',self._repair);self.repair_button.pack(side='left',padx=8)
@@ -447,6 +451,15 @@ class Launcher(tk.Tk):
 
     def _check_rom(self):
         rom=self._active_profile()['rom'];self._worker('tool-result',lambda:gen5_tools.compatibility(rom))
+
+    def _automatic_cleanup(self):
+        if self.busy:self.after(2000,self._automatic_cleanup);return
+        self._worker('storage-auto',lambda:storage.cleanup(self.home))
+
+    def _clean_installations(self):
+        if self.busy:return
+        self.status.set('Cleaning old installations. Saves and backups are kept…')
+        self._worker('storage-clean',lambda:storage.cleanup(self.home,recheck=True))
 
     def _calculate_progression(self):
         rom=self._active_profile()['rom'];loss=self.xp_loss.get();growth=gen5_tools.GROWTH.index(self.xp_growth.get())
@@ -656,6 +669,7 @@ class Launcher(tk.Tk):
         set_enabled(self.repair_button,bool(self.repair_release) and not self.busy and not running)
         set_enabled(self.cancel_button,self.busy and self.operation=='installed' and not self.cancel.is_set())
         set_enabled(self.backup_button,not self.busy,'primary');set_enabled(self.restore_button,bool(self.backup_paths) and not self.busy and not running)
+        set_enabled(self.cleanup_button,not self.busy)
         message=('Game running. Save normally before changing builds.' if running else 'Emulator missing. Extract the complete release folder.' if not present else
             'Choose your own matching Black 2 or Redux ROM.' if not self.rom.get() else 'ROM not found. Browse to an existing .nds file.' if not valid else 'Ready to play.')
         self.game_hint.configure(text=message)
@@ -769,6 +783,13 @@ class Launcher(tk.Tk):
                     if not self.cancel.is_set():self.phase.set('Verifying and preparing update…' if value>=100 else f'Downloading · {value:.0f}%')
                     continue
                 finished_operation=self.operation;self.busy=False;self.operation=''
+                if action in ('storage-clean','storage-auto'):
+                    message=storage.summary(value)
+                    if action=='storage-clean' or value['removedFiles'] or value['sharedBytes']:
+                        self.status.set(message);self.preflight_text.configure(state='normal');self.preflight_text.delete('1.0','end');self.preflight_text.insert('1.0',message);self.preflight_text.configure(state='disabled')
+                    self._sync();continue
+                if action=='error' and finished_operation.startswith('storage-'):
+                    self.status.set('Cleanup skipped: '+value);self._sync();continue
                 if action=='tool-result' or action=='error' and finished_operation=='tool-result':
                     self.tool_text.configure(state='normal');self.tool_text.delete('1.0','end');self.tool_text.insert('1.0',value);self.tool_text.configure(state='disabled');self.status.set('Read-only inspection complete.' if action=='tool-result' else 'Inspection could not complete: '+value);self._sync();continue
                 if action in ('lan-host','lan-join'):

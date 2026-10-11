@@ -43,9 +43,11 @@ def main():
                      'analyze_redux_xp.py','prepare_release_102.py','check_release_102.py',
                      'stage_release_102.py','package_release_102.py','verify_release_102.py'):
             bundle.write(ROOT/'tools'/name,'tools/'+name)
-        for name in ('XP_COMPENSATION.md','XP_COMPENSATION_BATTLE_TEST.md','LAUNCHER_GEN5_TOOLS.md'):
+        for name in ('XP_COMPENSATION.md','XP_COMPENSATION_BATTLE_TEST.md','LAUNCHER_GEN5_TOOLS.md','LAUNCHER_STORAGE.md'):
             bundle.write(ROOT/'docs'/name,'docs/'+name)
         bundle.write(ROOT/'tools/verify_launcher_gen5_tools.py','tools/verify_launcher_gen5_tools.py')
+        for name in ('unova_storage.py','test_unova_storage.py'):
+            bundle.write(ROOT/'tools'/name,'tools/'+name)
         for name in ('area_scene_cache.py','build_area_battle_scene.py','build_area_battle_catalog.py','install_area_battle_fixture.py','test_area_battle_scene.py','check_rom_asset_overlay.cpp'):
             bundle.write(ROOT/'tools'/name,'tools/'+name)
         for name in ('extract_battle_surroundings.py','field_scene_geometry.py','build_battle_surroundings.py','battle_surroundings_worker.py','test_battle_surroundings.py','verify_battle_surroundings.py','playtest_battle_surroundings.py'):

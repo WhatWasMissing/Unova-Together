@@ -47,6 +47,8 @@ components:
 
 # Unova Together Launcher Design System
 
+Launcher 2026101106: Tools includes Clean old installations beside file verification. It uses the existing native button and persistent feedback panel, reporting recovered space while retaining active/rollback/running builds and user files. Startup cleanup runs asynchronously; the button is disabled while a launcher operation is in progress.
+
 Launcher 2026101105: Games & saves names the profile surface in player language. Play shows the active save slot and a Manage saves action. Slot names persist automatically; a new slot reuses the current ROM with a separate managed folder. Backup and restore share this surface, with readable UTC timestamps and explicit empty states. Custom folder paths, player names and slot removal use Advanced save options. Technical ROM, save and XP inspection stays on Tools. Existing profiles retain their files and settings.
 
 ## Overview

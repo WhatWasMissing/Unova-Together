@@ -43,6 +43,7 @@ def main():
             result['companionExperimentEnabled']=app.companion_interactions.get()
             result['soaringOptionRemoved']='Latias / Latios flight preview' not in credit_text
             result['playtesterCreditsVisible']=all(name in credit_text for name in ('maxback221','randomitem19'))
+            result['cleanupButtonPresent']='Clean old installations' in credit_text
             credit_sizes=[]
             for width,height in ((1040,790),(900,680),(1280,850)):
                 app.geometry(f'{width}x{height}');app.update()

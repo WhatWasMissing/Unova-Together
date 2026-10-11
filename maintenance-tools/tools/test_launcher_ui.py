@@ -43,6 +43,20 @@ class LauncherTests(unittest.TestCase):
         self.app.profile_picker.current(0);self.app._select_profile()
         self.assertEqual(self.app.profile_label.get(),'My adventure');self.assertTrue(self.app.backup_paths)
         self.assertEqual(self.rom.with_suffix('.save').read_bytes(),b'first slot save')
+    def test_cleanup_button_prunes_owned_files_and_keeps_save(self):
+        import unova_storage as storage
+        base=self.home/'.updates/versions'
+        for version in ('1.0.1','1.0.2','1.0.3'):
+            root=base/version/'Unova-Together';(root/'builds/current').mkdir(parents=True)
+            (root/'builds/current/melonDS.exe').write_bytes(b'fixture');(root/'builds/current/VERSION.txt').write_text(version)
+            storage.record_package(root)
+        (self.home/'.updates/active.json').write_text('{"version":"1.0.3"}')
+        self.app.root=base/'1.0.3/Unova-Together'
+        old=base/'1.0.1/Unova-Together';(old/'Redux.save').write_bytes(b'private save')
+        with patch.object(storage,'running_paths',return_value=[]):
+            self.app.cleanup_button.invoke();self.wait()
+        self.assertIn('Cleaned 1 old build',self.app.preflight_text.get('1.0','end'))
+        self.assertEqual((old/'Redux.save').read_bytes(),b'private save');self.assertFalse((old/'builds/current/melonDS.exe').exists())
     def test_pages_keyboard_and_small_window(self):
         self.assertTrue(self.app.news);self.assertGreaterEqual(len(self.app.images),4)
         for size in ('1040x760','860x660'):

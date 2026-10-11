@@ -80,3 +80,8 @@ The launcher checks the official GitHub guides at startup. Use **Setup > Refresh
 ## Games & saves (1.0.3)
 
 Open Manage saves on Play. Slot names save automatically; new slots have separate folders. Back up now and Restore backup use dated entries. Advanced save options contains custom folders and slot removal. See [Gen 5 tools and save verification](LAUNCHER_GEN5_TOOLS.md).
+
+
+## Installation storage (1.0.4)
+
+Use **Tools → Clean old installations** to recover space while keeping the current and previous build, running builds and user data. Cleanup also runs at startup. See [storage details](LAUNCHER_STORAGE.md).
