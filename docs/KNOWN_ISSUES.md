@@ -1,7 +1,4 @@
-# Unova Together beta 0.3.9 — known issues
-
-Beta 0.3.7 fixes a captured cached-map failure that caused unresolved positions and stale battle presence. All players need the update; live multi-device confirmation is pending.
-
+# Unova Together 1.0.0 — known limits
 
 - **Other VPNs can block connections.** NordVPN caused a tester’s presence-relay connection to fail with WinError 10013. Disconnect other VPNs while using Tailscale; check their kill-switch and network-filter settings if access remains blocked. This is not evidence that the game server is offline.
 - **Online UDP is experimental.** It has been checked locally, but reliable battle completion between players on different networks has not yet been confirmed. Use Tailscale if it fails.
@@ -9,7 +6,7 @@ Beta 0.3.7 fixes a captured cached-map failure that caused unresolved positions 
 - **No public server is supplied.** The UDP option needs a server provided by your group. Player sharing also needs a reachable server; joining a UDP room does not configure that automatically.
 - **Slow or unstable connections can interrupt battles.** A battle may stall or end unexpectedly. Changing the connection method cannot guarantee a fix.
 - **Teammate rendering can flicker.** Camera sample gaps and map transitions can interrupt the displayed sprite. This release does not claim that all camera/rendering issues are fixed.
-- **Intermittent menu-dependent disappearance remains unconfirmed.** A beta report recovered before RAM capture. Player-object replacement and battle-status recovery were fixed and tested, but that exact symptom has not been reproduced.
+- **Intermittent menu-dependent disappearance remains unconfirmed.** An earlier report recovered before RAM capture. Player-object replacement and battle-status recovery were fixed and tested, but that exact symptom has not been reproduced.
 - **Different starters:** verified rival script families can agree on the host's enemy variant. All 33 named Redux rival records pass native startup checks; not every different-starter story encounter has been played through to save/reload.
 - **Launcher updates need GitHub access and disk space.** Downloads install beside the previous build. Save normally before switching. An unavailable check does not prevent offline play. Older update folders are retained for recovery.
 - **Wait before retrying a cancelled trade.** Let both players return to Ready before sending another request. Rapid retries can be rejected.
@@ -17,26 +14,19 @@ Beta 0.3.7 fixes a captured cached-map failure that caused unresolved positions 
 - **Native cleanup can time out after completion.** A final local check required guest checkpoint recovery, discarding that guest battle progress. Check both games return normally before saving or starting another encounter.
 - **Fast-forward can prevent wireless pairing.** Turn it off before connecting and throughout shared battles.
 - **A disconnected battle cannot reliably resume.** Return to the field and create a new LAN session. Recovery may discard that battle's progress.
-- **Co-op experience gain is disabled to prevent desynchronisation.** Do not expect shared trainer battles to award experience in this beta.
+- **Co-op experience gain is disabled to prevent desynchronisation.** Do not expect shared trainer battles to award experience in co-op.
 - **Some trainer encounters still need testing.** Not every special event or Redux fight has been played through. Check each player's story progress and save separately after battles.
 - **Single-Pokémon opponents are duplicated for co-op.** When a trainer normally has one Pokémon, a matching copy fills the second enemy position.
 - **Some networks block UDP.** The helper may fail even when other internet apps work. Use Tailscale as the fallback.
 - **Python is required for the UDP helper.** Python/tkinter and the dependency installer are separate from the bundled emulator. This release is for Windows x64; it is not an Android emulator build.
 
-Version 0.3.4 improves movement animation, menu presence and battle AI setup, and adds a C-Gear wireless warning. A crash involving late window/input events was fixed. The reported first-ever ROM-load crash could not be reproduced, so please report it if it recurs. Networking and experience limitations above remain.
 
-Version 0.3.4 also retains the private position anchor through unresolved menu transitions, publishing it only after validated menu ownership.
+## Optional features and field tools
 
-- **Area battle scenery is experimental.** Generated standard arenas are available; special cinematic scenes remain original. Seasonal/time lighting and animated water are not implemented. Not every encounter has been playtested. Disable the option before launching if a background looks wrong.
+Nearby battle scenery remains experimental. Special cinematic scenes keep original backgrounds; not every environment has been playtested. Disable the option if a background looks wrong.
 
-## Field tools (0.3.11)
+Companion interactions are optional and read-only. The former flight preview and spectator controls are removed.
 
-Full HM obstacle traversal, completed Fly travel and save/reload after relearning still need gameplay testing. Fly requires a party member with a move slot without an existing field action. Encounter gifts, scripted legendary encounters and Hidden Grottos are excluded.
+Field HMs retain native story requirements. Fly needs a party member with a move slot without another field action. Full obstacle traversal and every save/reload path have not been separately playtested. Encounter gifts, scripted legendaries and Hidden Grottos are excluded. Relearning offers the current species/form's level-up moves at or below its level.
 
-## Spectating
-
-Spectate controls have been removed in beta 0.3.13.
-
-## Experimental companion and flight options (0.4.0)
-
-Both are off by default in launcher Settings. Soar is a steerable menu preview, not 3D travel through Unova. Its Fly shortcut opens the original party screen and retains native travel restrictions. Completed Fly travel still needs gameplay testing. Companion reactions are read-only and do not increase friendship.
+Direct party Pokémon trades exclude eggs, held Mail and native trade-evolution entries. Use the Union Room for those cases. Both players must save normally after trades and relearning.

@@ -1,1 +1,2 @@
-0.3.13
+Unova Together 1.0.0
+Full release

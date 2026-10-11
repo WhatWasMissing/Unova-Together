@@ -1,92 +1,33 @@
 # Unova Together
 
-Explore Unova together with shared multiplayer exploration, item trading and experimental co-op trainer battles in Pokémon Black 2 and Blaze Black 2 Redux. Built on a modified melonDS emulator. Made by mvq1303.
+**Current release: 1.0.0 — full release.** Made by mvq1303 / WhatWasMissing, built on melonDS.
+
+Explore Unova with friends in supported English Pokémon Black 2 and Blaze Black 2 Redux. Each player uses their own matching ROM and independent save.
 
 ## Download and play
 
-**Current release: beta 0.4.0.** Update both players to this version and restart the player-sharing relay.
+1. [Download version 1.0.0](https://github.com/WhatWasMissing/Unova-Together/releases/tag/v1.0.0). Choose **Unova-Together.exe**, or extract the complete Windows x64 ZIP.
+2. Open the EXE, or run **Start Unova Together.cmd** in the extracted folder. Choose your ROM and select **Play**.
+3. Open launcher **Co-op** to configure your connection and host or join LAN. Follow the [player guide](docs/PLAYER_GUIDE.md).
 
-1. [Download the Windows beta](https://github.com/WhatWasMissing/unova-together/releases/tag/v0.4.0). Choose **Unova-Together.exe** under Assets. The portable ZIP is also available.
-2. Open **Unova-Together.exe**. For the ZIP, extract the entire folder and run **Start Unova Together.cmd**. Choose your ROM and select **Play**.
-3. Load the [edited Blaze Black 2 Redux Rom](https://drive.google.com/file/d/1ZL4StVex1m6dvdEjG89o7kxOJwdJeR9L/view?usp=sharing). Both players need the same game revision.
-4. Follow [the player guide](docs/PLAYER_GUIDE.md) to connect.
-
-For different networks, start with [Tailscale setup](docs/TAILSCALE_COOP.md). Its official installer is included. The experimental UDP option requires a server supplied by your group; no default public server is available.
-
-Launcher revision **20261011.1** adds LAN Host/Join, remembered connections, Retry, report review, controller navigation, optional music and a screenshot-based Features page. [Launcher guide](docs/LAUNCHER.md).
-
-## What changed in 0.4.0
-
-Optional companion interactions and a Latias/Latios flight preview, disabled until enabled in **Launcher → Settings → Experimental**. Open **Unova → Pokémon** in game. [Release notes](RELEASE_NOTES_0.4.0.md) · [Companions and flight preview](docs/COMPANIONS_AND_SOARING.md).
-
-## What changed in 0.3.13
-
-Direct tabs for **Players**, **Pokémon**, **Co-op** and **Settings**, a verified native Options fix, and visible playtester credits. B or Close exits any main page. [Release notes](RELEASE_NOTES_0.3.13.md).
-
-## What changed in 0.3.12
-
-Simpler in-game menus, follower controls and clearer teammate status. Use the **Pokémon** and **Co-op** tabs. [Release notes](RELEASE_NOTES_0.3.12.md) · [Co-op tools guide](docs/COOP_TOOLS.md). Update every player and restart the relay.
-
-## What changed in 0.3.11
-
-Find encounters by season, relearn level-up moves for free, and use field HMs without teaching them as battle moves. Open **Unova → Pokémon** for the new tools. [Release notes](RELEASE_NOTES_0.3.11.md) · [Field tools guide](docs/FIELD_TOOLS.md). Full HM traversal still needs gameplay testing.
-
-## What changed in 0.3.10
-
-All 649 Pokémon now have directional follower sprites, with no party-icon substitutes. View IVs and EVs in **Unova → Pokémon → IVs and EVs**, including offline. No new ROM or save is needed. [Release notes](RELEASE_NOTES_0.3.10.md) · [Party stats guide](docs/PARTY_STATS.md) · [Follower guide](docs/FOLLOWING_POKEMON.md).
-
-## What changed in 0.3.9
-
-Added optional area-based 3D battle scenery, corrected follower identities and fixed the Options shortcut. Enable scenery in launcher Settings; it is generated locally from your ROM. Cheren co-op was tested through completion on both instances at about 59–60 FPS. [Release notes](RELEASE_NOTES_0.3.9.md) · [Scenery guide](docs/AREA_BATTLE_SCENES.md).
-
-## What changed in 0.3.8
-
-Launcher LAN lobbies now support up to 16 connected players, with the host pairing with any one guest. Added traded Pokémon obedience support and fixed stale invitations after cleanup. Larger lobbies use Local LAN or Tailscale; the UDP bridge remains two-player. [Release notes](RELEASE_NOTES_0.3.8.md) · [Lobby guide](docs/LAN_LOBBIES.md).
-
-## What changed in 0.3.7
-
-Corrected live outdoor map tracking, post-battle position recovery and menu map retention. Nearby players no longer rely on cached entry IDs. [Release notes](RELEASE_NOTES_0.3.7.md). All players must update. Live multi-device confirmation is still needed.
-
-## What changed in 0.3.6
-
-Fixed battle-presence recovery when the field returns before its player sprite is resolved, refreshed retained state flags, and corrected misleading “Other map” labels when local position is unavailable. [Release notes](RELEASE_NOTES_0.3.6.md). The latest reported two-player symptom still needs live confirmation.
-
-## What changed in 0.3.5
-
-- Added a launcher with official GitHub update checks and checksum-verified installation. The launcher runs without a separate Python installation.
-- Fixed Give item being blocked by an idle co-op observer or the custom trade menu.
-- Improved battle-status recovery and tracking after a field rebuild; camera validity no longer keeps a returned player marked in battle.
-- Different starter choices can pair at verified rival encounters using the host's matching ROM team.
-- Hardened wireless packet, player-list and compressed-ROM input handling.
-
-All 33 populated Redux rival records passed two-player native startup checks. This does not prove every rival story script or save progression. Intermittent teammate disappearance, co-op experience and online limitations remain listed in [known issues](docs/KNOWN_ISSUES.md).
+The launcher and modified melonDS both ship as version **1.0.0**; the emulator is based on upstream melonDS **1.1**. Update every player and restart the presence relay. Existing ROMs and saves do not need conversion.
 
 ## Features
 
-- **Co-op tools:** Solo/Co-op mode, practice battles, follower controls and clearer status. [Guide](docs/COOP_TOOLS.md).
+- **Explore together:** shared trainer movement, teammate locations and joining maps.
+- **Trade and battle:** item offers, party Pokémon exchanges and friendly PvP from **Unova → Players**.
+- **Trainer co-op:** supported story encounters, Solo/Co-op mode and practice rematches with independent saves.
+- **Pokémon tools:** all 649 directional followers, optional companion interactions, IVs/EVs, seasonal encounters and free level-up move relearning.
+- **Field HMs:** owned HMs work without taking learned battle move slots; native story requirements remain.
+- **Presentation:** custom camera and optional nearby battle scenery built locally from your ROM.
+- **Launcher:** profiles, LAN Host/Join/Retry, controller navigation, music, settings, optional cheats, save backups/restore, diagnostics, verified updates and repair.
 
-- **Field tools:** find local encounters by season, relearn level-up moves, and use owned HMs without learned move slots. [Guide](docs/FIELD_TOOLS.md).
+## Guides and limits
 
-- **Following Pokémon:** your first party Pokémon follows your footsteps. All 649 base species have directional sprites.
-- **Party stats:** read each Pokémon’s IVs and EVs from the in-game menu, without editing your save.
-- **Explore with a teammate:** see each other moving around Unova, find teammates in the Players menu, and teleport to their map.
-- **Trade items in-game:** choose items from your bag and send offers to a teammate, with accept/decline controls.
-- **Co-op trainer battles:** face supported trainers together, including Gym Leaders and Redux teams. NPC encounters can wait for both players; a Solo/Co-op toggle lets you keep playing independently.
-- **Independent saves:** each player keeps their own party and story progress. Back up saves before playing the beta.
-- **Custom camera:** adjust the overworld camera's angle and rotation in Multiplayer → Camera.
-- **Play across networks:** connect through Tailscale, or try the experimental UDP bridge with a server hosted by your group.
-- **In-game multiplayer menus:** access teammates and trading from the game screen; advanced diagnostics stay behind the Debug toggle.
-- **Launcher and updates:** select your ROM, launch the game, and get verified updates from this repository without replacing a running build. [How updates work](docs/LAUNCHER.md).
+[Release notes](RELEASE_NOTES_1.0.0.md) · [Release checks](docs/RELEASE_CHECKS_1.0.0.md) · [Known limits](docs/KNOWN_ISSUES.md)
 
-Co-op battles remain experimental: experience gain is disabled, not every trainer event has been verified, and connection problems can interrupt a battle. See [known issues](docs/KNOWN_ISSUES.md).
+[Launcher](docs/LAUNCHER.md) · [Co-op tools](docs/COOP_TOOLS.md) · [Field tools](docs/FIELD_TOOLS.md) · [Followers](docs/FOLLOWING_POKEMON.md) · [Companions](docs/COMPANIONS_AND_SOARING.md) · [Party stats](docs/PARTY_STATS.md)
 
-## Guides
+For different networks use [Tailscale](docs/TAILSCALE_COOP.md). The optional [UDP bridge](docs/UDP_SERVER_GUIDE.md) remains experimental and needs your group's server; no public server is supplied. Co-op experience is disabled. Keep fast-forward and C-Gear wireless off during native multiplayer. Some special trainer events and network conditions remain unverified; interrupted battle recovery may discard that battle's progress.
 
-- [Player setup, playing together and recovery](docs/PLAYER_GUIDE.md)
-- [Known issues](docs/KNOWN_ISSUES.md)
-- [Tailscale setup](docs/TAILSCALE_COOP.md)
-- [UDP server hosting](docs/UDP_SERVER_GUIDE.md) — only for the person providing a server
-
-Keep fast-forward off during shared battles and back up your saves. Co-op experience gain is disabled, some trainer events remain unverified, and unstable connections can interrupt battles. Internet UDP battle completion is still unverified.
-
-Authorship and attribution: [mvq1303 / WhatWasMissing](AUTHORSHIP.md). Preserve original and upstream credits; do not misrepresent somebody else's work as your own.
+Matching GPL source and checksums accompany the downloads. No ROMs, saves or firmware are bundled. [Authorship](AUTHORSHIP.md) · [Licensing](LICENSING.md). Playtesters: maxback221 and randomitem19.

@@ -1,24 +1,32 @@
-# Unova Together beta 0.4.0
+# Unova Together 1.0.0 — Full release
 
-## New experimental options
+The feature-complete Windows release of Unova Together, including **launcher 1.0.0** and **modified melonDS 1.0.0**, based on upstream melonDS 1.1.
 
-Open **Launcher → Settings → Experimental**, enable the features you want, and restart the game. Both are off by default.
+## Play
 
-- **Companion interactions:** talk to, pet, and play with your lead Pokémon. Responses reflect its health and friendship. Click its following sprite or open **Unova → Pokémon → My companion**. Interactions do not change HP, friendship or your save.
-- **Latias / Latios flight preview:** steer a pixel-art preview over your current surroundings. D-pad steers, L/R switches mount, and B returns. With HM02, the Fly button opens the original party screen; select a Pokémon and choose Fly to use the game’s own destinations.
+Download **Unova-Together.exe**, or extract **Unova-Together-1.0.0-Windows-x64.zip** and run **Start Unova Together.cmd**. Select your own supported Black 2 or Blaze Black 2 Redux ROM and press Play. Existing players can install this version through launcher Updates. Update every player and restart the presence relay.
 
-The pause-menu entry is now **Unova**. Players, Pokémon, Co-op and Settings are sibling tabs; settings are no longer presented as part of Players.
+## Included features
 
-## Setup
+- Shared overworld exploration, teammate locations and joining maps.
+- Item offers, direct party Pokémon trades and friendly player battles.
+- Co-op trainer encounters, Solo/Co-op switching and practice rematches, with independent parties and story saves.
+- Directional following Pokémon for all 649 base species and optional companion interactions.
+- IV/EV viewing, seasonal encounter finder, free level-up move relearning and field HMs without learned battle move slots.
+- Custom camera and optional nearby battle scenery generated locally from your ROM.
+- Launcher profiles, LAN Host/Join/Retry, remembered connections, controller navigation, music, emulator settings and optional cheats.
+- Save backups and restore, troubleshooting reports, verified updates and installation repair.
 
-Download **Unova-Together.exe**, or extract the complete portable ZIP. Update all players, restart the game, and follow the included player guide. No new ROM or save is required. Tailscale remains the fallback for different networks; the UDP bridge requires your own server.
+## Final polish
+
+Both applications identify as 1.0.0. The launcher uses release wording, current in-game menu paths, a complete feature list and bundled 1.0.0 news. Setup and feature guides now describe the current build. The obsolete flight-preview instructions are removed: that prototype is absent from the current feature set. Upstream melonDS attribution and all project/dependency licenses are retained.
 
 ## Known limits
 
-The flight option is a menu preview, not free flight through a 3D Unova region. Native Fly retains its normal story restrictions, and completed Fly travel still needs gameplay testing. Companion interactions require a resolved idle field, and eggs cannot interact. In co-op, XP remains disabled to avoid desync. Keep fast-forward off during native wireless battles.
+Co-op experience remains disabled to prevent desynchronisation. Saves and story progress remain independent; not every special trainer script has been verified. Keep fast-forward and C-Gear wireless off during native multiplayer. Interrupted battles may require returning to the field and recreating LAN; recovery can discard the interrupted battle's progress.
 
-## Checks
+Tailscale is available for different networks. The optional UDP bridge remains experimental and requires your group's server and Python; there is no bundled public server. Nearby battle scenery and companion interactions remain optional. Companion interactions do not change friendship or HP. The encounter finder covers ordinary encounter tables, excluding gifts, scripted legendaries and Hidden Grottos. Direct Pokémon trades exclude eggs, held Mail and native trade evolutions; use the Union Room for those cases.
 
-The native ROM-backed menu fixture verifies opt-in gating, Talk/Pet/Play, battle safeguards, unchanged party/bag data, steering and mount switching, the native party shortcut, Options and existing menus. Compiled helper tests cover health/friendship responses, all 649 species and bounded steering. These checks do not establish full ORAS-style flight or completed Fly travel.
+See [player guide](https://github.com/WhatWasMissing/Unova-Together/blob/main/docs/PLAYER_GUIDE.md), [known limits](https://github.com/WhatWasMissing/Unova-Together/blob/main/docs/KNOWN_ISSUES.md) and the included release checks for validation details. A full release does not imply every ROM hack, network or special event has been tested.
 
-Made by mvq1303 / WhatWasMissing. Playtesters: maxback221 and randomitem19. Built on melonDS; corresponding GPL source is included.
+Made by **mvq1303 / WhatWasMissing**. Playtesters: **maxback221** and **randomitem19**. Built on melonDS; matching GPL source and SHA-256 checksums are included. No ROMs, saves or firmware are bundled.

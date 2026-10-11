@@ -1,6 +1,6 @@
 # Unova Together launcher guide
 
-Start `builds/unova-together-0.3.5/Unova-Together/Start Unova Together.cmd`.
+Open **Unova-Together.exe**, or run **Start Unova Together.cmd** in the extracted portable folder.
 
 ## Play profiles
 
@@ -12,7 +12,7 @@ New profile creates a separate save folder under `play-profiles/<profile>/saves`
 
 Choose Local LAN, Internet UDP, Tailscale backup or Solo. Enter the **presence relay** address, its port (usually 8765) and a shared room name. Save connection, then Check relay. A successful check confirms the presence service—not native wireless, another player's ROM, or battle readiness.
 
-For internet play, Open internet setup wizard starts the existing UDP setup helper. Enter the UDP server/role/credentials there. The launcher does not save authentication keys. Tailscale guide opens the included backup instructions. Both players still host/join the native LAN game inside melonDS's network menu. Launch passes the profile's player/relay fields to the emulator. Solo disables automatic presence connection and trainer co-op for that launch.
+For internet play, Open internet setup wizard starts the existing UDP setup helper. Enter the UDP server/role/credentials there. The launcher does not save authentication keys. Tailscale guide opens the included backup instructions. Use launcher Co-op Host/Join for native LAN, or melonDS's network menu. Launch passes the profile's player/relay fields to the emulator. Solo disables automatic presence connection and trainer co-op for that launch.
 
 Keep both games at normal speed, with C-Gear wireless OFF and matching mod/ROM revisions. Settings keeps game volume and display preferences per profile; the startup update checkbox is shared. Co-op launches keep the emulator running when focus moves away.
 
@@ -46,7 +46,7 @@ Disable and relaunch after use. Disabling does not undo saved items/money. Exist
 
 Disposable tests cover profile switching/preferences, launch environment, automatic pre-update backups, checksum-verified restore/recovery copies, relay protocol checks, diagnostic redaction, damaged-file detection and verified same-version repair/corrupt active runtime recovery. Native ROM-backed menu integration confirmed profile fields and Solo mode reach the emulator, and existing menu checks still pass. The standalone installed launcher was smoke-tested. Real internet pairing/partner revision and C-Gear checks remain in-game; this work is not a new full co-op battle playtest.
 
-Made by mvq1303 / WhatWasMissing. This enhanced launcher is installed locally; GitHub releases have not been changed by this task.
+Made by mvq1303 / WhatWasMissing. Launcher 1.0.0 is included in the full release.
 
 
 ## Relay addresses and full emulator settings
@@ -57,15 +57,9 @@ To host sharing, choose Host presence relay here. The compiled launcher hosts it
 
 Settings → All emulator settings opens a searchable 176-setting catalog and Full configuration tab. Edit controls/hotkeys, display, audio, firmware, networking and paths. Values use TOML syntax (true/false, numbers, quoted strings or arrays). Apply value stages the row; Save settings validates and saves, with a before-edit backup. Close the game before saving. Changes apply next launch. Profile volume/filter/focus and save-folder fields sync with saved config. Profile-managed optional cheats may override cheat-engine paths/switches at launch; manage them on Settings. Pokémon’s save-owned text speed, battle style and sound settings remain in its in-game Options menu.
 
-## Launcher revision 20261009.2
-
-Use the updated single-file app in builds/single-exe/Unova Together.exe. The footer identifies Launcher 20261009.2. The bootstrap repairs older cached launcher revisions even when both are Beta 0.3.5; existing controls/configuration, saves and backups are preserved.
-
-Check relay verifies the actual presence protocol. If localhost has no server, the launcher starts its bundled presence relay and checks it. Guests still enter the host computer address; a remote server cannot be started by this button. Native LAN/UDP pairing is configured separately in-game. Settings → All emulator settings opens the complete searchable configuration editor.
-
 ## Launcher LAN and feature overview
 
-Co-op → Host & play starts the chosen ROM and a two-player native LAN host. Join & play uses Host address to join it. Player sharing is checked first, and local hosting starts the embedded presence server if required. Launch the host before the guest. For different networks, connect both PCs through Tailscale first; the UDP option still needs its separate experimental setup. These controls start a new emulator process; close the launched game before retrying or changing LAN roles.
+Co-op → Host & play starts the chosen ROM and a native LAN lobby with the selected capacity (2–16 players). Join & play uses Host address to join it. Player sharing is checked first, and local hosting starts the embedded presence server if required. Launch the host before the guest. For different networks, connect both PCs through Tailscale first; the UDP option still needs its separate experimental setup. These controls start a new emulator process; close the launched game before retrying or changing LAN roles.
 
 Features contains gameplay screenshots for walking, item gifts, co-op battles, Pokémon trades and the camera, plus short notes on travel, connection methods, player battle controls, profiles/backups and settings/updates. Known issues is linked from the page. Screenshot descriptions do not imply that all trainer events or cross-network battle completion have been verified.
 

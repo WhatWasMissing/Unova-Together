@@ -1,12 +1,12 @@
 # Play Unova Together with a friend
 
-Unova Together adds shared exploration, item trading and experimental co-op trainer battles to Pokémon Black 2 and Blaze Black 2 Redux. Made by mvq1303.
+Unova Together adds shared exploration, item trading and co-op trainer battles to Pokémon Black 2 and Blaze Black 2 Redux. Made by mvq1303.
 
 ## What each player needs
 
-- A Windows x64 PC and the complete Unova Together 0.3.5 ZIP, extracted into a folder.
+- A Windows x64 PC and the Unova Together 1.0.0 EXE or complete ZIP, extracted into a folder.
 - Their own ROM and save. Both players must use exactly the same game version, including the same Redux revision.
-- A backup of their save before playing this beta.
+- A backup of their save before playing together.
 - A connection method below. Tailscale is included; the experimental UDP option also needs Python.
 
 ROMs, saves and DS firmware are not included. Preset keyboard/controller bindings are included; check Config → Input before playing.
@@ -76,15 +76,15 @@ If you are setting up the relay yourself, use the separate [server guide](UDP_SE
 ## Play together
 
 1. Enter the same area and check that both players can see each other move.
-2. Use the in-game **Trade** menu to send items. Stay idle in the overworld with C-Gear wireless off while making an offer. The other player accepts it; save both games after the transfer finishes.
-3. For trainer battles, choose **Co-op** under Multiplayer → Players or the in-game Co-op page. Both players should talk to the same trainer and wait for pairing to finish.
+2. Use the **Unova → Players** menu to send items. Stay idle in the overworld with C-Gear wireless off while making an offer. The other player accepts it; save both games after the transfer finishes.
+3. For trainer battles, choose **Co-op** under **Unova → Co-op**. Both players should talk to the same trainer and wait for pairing to finish.
 4. To fight alone, choose **Solo** before the encounter. You can stay connected to your friend.
 5. For a first battle test, use **Practice** from the boss challenge controls. Practice does not award story progress.
 6. After a story battle, check that each game returns to normal play and save each game separately. Check your own badge/story progress before continuing.
 
 Keep C-Gear wireless off while connected. If the wireless warning appears, close it and use the in-game C-Gear power button to turn wireless off. The mod does not forcibly switch it off.
 
-Co-op battles are experimental. Read [known issues](KNOWN_ISSUES.md), including experience gain and special trainer encounters.
+Read [known issues](KNOWN_ISSUES.md), including experience gain and special trainer encounters.
 
 ## If a connection or battle gets stuck
 
