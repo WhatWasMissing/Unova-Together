@@ -1,16 +1,16 @@
 # Unova Together
 
-**Current release: 1.0.4 — full release.** Made by mvq1303 / WhatWasMissing, built on melonDS.
+**Current release: 1.0.5 — full release.** Made by mvq1303 / WhatWasMissing, built on melonDS.
 
 Explore Unova with friends in supported English Pokémon Black 2 and Blaze Black 2 Redux. Each player uses their own matching ROM and independent save.
 
 ## Download and play
 
-1. [Download version 1.0.4](https://github.com/WhatWasMissing/Unova-Together/releases/tag/v1.0.4). Choose **Unova-Together.exe**, or extract the complete Windows x64 ZIP.
+1. [Download version 1.0.5](https://github.com/WhatWasMissing/Unova-Together/releases/tag/v1.0.5). Choose **Unova-Together.exe**, or extract the complete Windows x64 ZIP.
 2. Open the EXE, or run **Start Unova Together.cmd** in the extracted folder. Choose your ROM and select **Play**.
 3. Open launcher **Co-op** to configure your connection and host or join LAN. Follow the [player guide](docs/PLAYER_GUIDE.md).
 
-Launcher **1.0.4** ships with the unchanged modified melonDS **1.0.2** runtime, based on upstream melonDS **1.1**. Update every player and restart the presence relay. Existing ROMs and saves do not need conversion.
+Launcher **1.0.5** ships with the modified melonDS runtime with the 1.25� XP update, based on upstream melonDS **1.1**. Update every player and restart the presence relay. Existing ROMs and saves do not need conversion.
 
 ## Features
 
@@ -24,7 +24,7 @@ Launcher **1.0.4** ships with the unchanged modified melonDS **1.0.2** runtime, 
 
 ## Guides and limits
 
-[Release notes](RELEASE_NOTES_1.0.4.md) · [Release checks](docs/RELEASE_CHECKS_1.0.4.md) · [Known limits](docs/KNOWN_ISSUES.md)
+[Release notes](RELEASE_NOTES_1.0.5.md) · [Release checks](docs/RELEASE_CHECKS_1.0.5.md) · [Known limits](docs/KNOWN_ISSUES.md)
 
 [Launcher](docs/LAUNCHER.md) · [Co-op tools](docs/COOP_TOOLS.md) · [Field tools](docs/FIELD_TOOLS.md) · [Followers](docs/FOLLOWING_POKEMON.md) · [Companions](docs/COMPANIONS_AND_SOARING.md) · [Party stats](docs/PARTY_STATS.md)
 
@@ -32,4 +32,4 @@ For different networks use [Tailscale](docs/TAILSCALE_COOP.md). The optional [UD
 
 Matching GPL source and checksums accompany the downloads. No ROMs, saves or firmware are bundled. [Authorship](AUTHORSHIP.md) · [Licensing](LICENSING.md). Playtesters: maxback221 and randomitem19.
 
-Solo battles now award **1.65× XP**; co-op XP remains suppressed. See [XP compensation](docs/XP_COMPENSATION.md) and [measured battle results](docs/XP_COMPENSATION_BATTLE_TEST.md). A subsequent published 1.0.4 battle now verifies normal saving and a fresh reload with matching XP, level, moves and badge.
+Solo battles now award **1.65× XP**; co-op XP remains suppressed. See [XP compensation](docs/XP_COMPENSATION.md) and [measured battle results](docs/XP_COMPENSATION_BATTLE_TEST.md). A subsequent published 1.0.5 battle now verifies normal saving and a fresh reload with matching XP, level, moves and badge.

@@ -15,7 +15,7 @@ reward builder, epilogue, output offset and reward bounds. Unknown layouts are
 left alone. The builder returns using a dynamic POP to PC, which terminates the
 JIT block; the same return boundary is handled by the interpreter and JIT.
 
-At 1.65Ã—, the replacement budget balances approximately **39.39% XP lost** to
+At 1.65Ã—, the replacement budget balances approximately **20% XP lost** to
 co-op. This is a budget calculation, not a prediction of an actual playthrough.
 See the selected-multiplier table in
 `research/xp-balance-20261011/REPORT.md` for Redux Challenge examples.
@@ -43,3 +43,5 @@ This change shipped in the 1.0.2 full release. Previous 1.0.1
 release assets are unchanged.
 The previous local emulator is backed up at
 `builds/backups/xp-165-20261011/melonDS.exe`.
+
+The battle measurements above are historical tests of the previous 1.65× release. Version 1.0.5 uses 1.25× and passed updated compiled dispatch checks.
