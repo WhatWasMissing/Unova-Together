@@ -12,7 +12,7 @@ Unova Together by **mvq1303 / WhatWasMissing**, built on melonDS. Published rele
 | Party Pokémon trades | **Unova → Players → teammate → Pokémon trade** | Both players confirm. Eggs, held Mail and native trade evolutions are excluded; use the Union Room for those cases. |
 | Friendly player battles | **Unova → Players → teammate → PvP battle** | Invite a teammate over the native multiplayer connection. |
 | Trainer co-op | **Unova → Co-op → Trainer battles: Co-op** | Both players reach the matching trainer. Supported encounters use each player's party and original story script. Special events are not all verified. |
-| Solo and practice battles | **Unova → Co-op** | Solo retains the connection. Practice rematches give no story rewards. Co-op XP remains disabled; supported solo battles award **1.25× XP**. |
+| Solo and practice battles | **Unova → Co-op → Practice battles** | Search the loaded ROM's NPC trainer list; selected party size and level range are shown. Practice gives no story rewards. Co-op XP remains disabled; supported solo battles award **1.25× XP**. |
 
 ## Following Pokémon and interactions
 
@@ -36,6 +36,7 @@ Interactions are cosmetic and read-only. They do not raise friendship, heal Pok�
 | Seasonal encounters | **Unova → Pokémon → Find wild Pokémon** | Ordinary grass, water and fishing tables from the loaded ROM. Gifts, scripted legendaries and Hidden Grottos are excluded. |
 | Free move relearning | **Unova → Pokémon → Relearn moves** | Current species/form's level-up moves at or below its level. Save normally afterward. |
 | Field HMs without learned move slots | Normal field interactions and native party menu | Own the HM and meet native story requirements. Fly needs a move slot without another field action. |
+| Take flight shortcut | Enable **Settings → Experimental features → Soaring flight**; then open **Unova → Pokémon → Take flight** | Off by default. Opens the native party menu. Choose an eligible Pokémon and use the game's own Fly destinations and landing rules. This is a direct route into native Fly, not free-roaming Soaring. |
 | Solo XP compensation | Automatic on supported profiles | **1.25×** newly awarded solo XP, with native rounding/caps. Existing XP is unchanged; co-op awards remain zero. |
 
 See [field tools](FIELD_TOOLS.md), [party stats](PARTY_STATS.md) and [XP compensation](XP_COMPENSATION.md).

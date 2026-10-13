@@ -840,46 +840,91 @@
  QVariantList Gen5Menu::bossChallenges(const unsigned char* bytes,std::size_t length,QString& reason)
  {
      QVariantList result;reason.clear();
+@@ -578,6 +590,11 @@
+     return result;
+ }
+ 
++QVariantList Gen5Menu::practiceTrainers(const unsigned char* bytes,std::size_t length,QString& reason)
++{
++    return npcTrainers(bytes,length,reason);
++}
++
+ QVariantMap Gen5Menu::trainerSummary(const unsigned char* bytes,std::size_t length,unsigned id,QString& reason)
+ {
+     reason.clear();
+@@ -592,11 +609,16 @@
+         const auto count=trainer.byte(3),type=trainer.byte(0)&3;
+         const auto stride=8+((type&2)?2:0)+((type&1)?8:0);
+         party.check(0,count*stride);
+-        for(unsigned i=0;i<count;++i) if(!party.half(i*stride+2) || party.half(i*stride+2)>100 || !party.half(i*stride+4))
+-            throw std::runtime_error("Invalid NPC Pokemon");
++        QVariantList team;unsigned low=100,high=0;
++        for(unsigned i=0;i<count;++i) {
++            const auto level=party.half(i*stride+2),species=party.half(i*stride+4);
++            if(!level || level>100 || !species) throw std::runtime_error("Invalid NPC Pokemon");
++            low=qMin(low,unsigned(level));high=qMax(high,unsigned(level));
++            team.append(QVariantMap{{"level",level},{"species",species}});
++        }
+         auto name=trainerName(entry(file(rom,{"a","0","0","2"}),382),id);
+         if(name.isEmpty()) name=QString("Trainer #%1").arg(id);
+-        return {{"id",id},{"name",name},{"count",count}};
++        return {{"id",id},{"name",name},{"count",count},{"minLevel",low},{"maxLevel",high},{"team",team}};
+     } catch(const std::exception& error) {reason=QString::fromLatin1(error.what());return {};}
+ }
+ 
 --- a/source/melonDS/src/frontend/qt_sdl/Gen5Menu.h
 +++ b/source/melonDS/src/frontend/qt_sdl/Gen5Menu.h
-@@ -30,6 +30,7 @@
+@@ -30,6 +30,8 @@
      static QVariantList relearnMoves(const unsigned char* rom,std::size_t length,unsigned species,unsigned form,unsigned level,QString& reason);
      static QString moveName(const unsigned char* rom,std::size_t length,unsigned move);
      static QVariantList bossChallenges(const unsigned char* rom,std::size_t length,QString& reason);
++    static QVariantList practiceTrainers(const unsigned char* rom,std::size_t length,QString& reason);
 +    static QVariantMap companionTraits(const unsigned char* rom,std::size_t length,unsigned species,unsigned form);
      static QVariantList npcTrainers(const unsigned char* rom,std::size_t length,QString& reason);
      static QVariantMap trainerSummary(const unsigned char* rom,std::size_t length,unsigned id,QString& reason);
      bool load(const unsigned char* rom,std::size_t length,QString& reason);
 --- a/source/melonDS/src/frontend/qt_sdl/MultiplayerPanel.cpp
 +++ b/source/melonDS/src/frontend/qt_sdl/MultiplayerPanel.cpp
-@@ -380,7 +380,8 @@
+@@ -19,6 +19,7 @@
+ #include <QDialogButtonBox>
+ #include <QTcpSocket>
+ #include <QLineEdit>
++#include <QInputDialog>
+ #include <QSpinBox>
+ #include <QPushButton>
+ #include <QTableWidget>
+@@ -380,7 +381,9 @@
      acceptButton->setEnabled(false); declineButton->setEnabled(false); cancelButton->setEnabled(false); nativeButton->setEnabled(false);
      overlayEnabled = new QCheckBox("Show players",this);
      overlayEnabled->setChecked(true);
 -    companionInteractionsEnabled=qEnvironmentVariable("UNOVA_EXPERIMENTAL_COMPANION")=="1";
 +    companionInteractionsEnabled=FollowerInteraction::enabledByEnvironment();
++    soaringEnabled=qEnvironmentVariable("UNOVA_EXPERIMENTAL_SOARING")=="1";
 +    followerMotionScale=qEnvironmentVariable("UNOVA_FOLLOWER_REDUCED_MOTION")=="1"?0.0:1.0;
      followerEnabled = new QCheckBox("Following Pokémon",this);
      followerEnabled->setChecked(QSettings("PokePlay","Multiplayer").value("followingPokemon",true).toBool());
      shareBattle=false; // Spectating is no longer offered or advertised.
-@@ -676,12 +677,14 @@
+@@ -676,12 +679,17 @@
      refreshNativeCoop(sample);
      const auto romIdentity=sample.value("romIdentity").toString();
      if(menuRomIdentity!=romIdentity) {menuArtwork=Gen5Menu{};menuRomIdentity=romIdentity;
 -        bossList.clear();bossSelection=0;
-+        bossList.clear();bossCatalog.clear();bossSelection=0;presenceRomDigest.clear();companionSceneVisits.clear();
++        bossList.clear();bossCatalog.clear();practiceCatalog.clear();bossSelection=0;presenceRomDigest.clear();companionSceneVisits.clear();
          if(const auto* cart=instance->getNDS()?instance->getNDS()->NDSCartSlot.GetCart():nullptr) {
              QString menuReason;
              if(!menuArtwork.load(cart->GetROM(),cart->GetROMLength(),menuReason))
                  history->appendPlainText("Game menu: "+menuReason);
 -            bossList=Gen5Menu::bossChallenges(cart->GetROM(),cart->GetROMLength(),bossCatalogReason);
 +            bossCatalog=Gen5Menu::bossChallenges(cart->GetROM(),cart->GetROMLength(),bossCatalogReason);
++            QString trainerReason;
++            practiceCatalog=Gen5Menu::practiceTrainers(cart->GetROM(),cart->GetROMLength(),trainerReason);
++            if(practiceCatalog.isEmpty() && !trainerReason.isEmpty()) bossCatalogReason=trainerReason;
 +            filterBossCatalog();
 +            if(!bossCatalog.isEmpty()) presenceRomDigest=bossCatalog.first().toMap().value("digest").toByteArray().toHex();
          }
          instance->gameMenuSurface.publish({});
          if(romIdentity.isEmpty() && !menuMode.isEmpty()) closeGameMenus();
-@@ -689,7 +692,9 @@
+@@ -689,7 +697,9 @@
      if (romIdentity.isEmpty()) { spriteRomIdentity.clear(); maleSprites.clear(); femaleSprites.clear(); }
      else if (spriteRomIdentity!=romIdentity)
      { spriteRomIdentity=romIdentity; loadTrainerSprites();followerSprites.clear();followerTrails.clear();followerSampleTime=-1000;followerSpecies=0;followerForm=0; }
@@ -889,7 +934,7 @@
      refreshFollower();
      if (!sample.value("cgearWirelessActive").toBool()) wirelessWarningShown=false;
      else if (!wirelessWarningShown && menuMode.isEmpty() && menuArtwork.loaded() &&
-@@ -953,6 +958,9 @@
+@@ -953,6 +963,9 @@
      message["inMenu"]=!inBattle && (instance->gameMenuOpen() || currentSample.value("inMenu").toBool());
      message["activity"]=presenceActivity();
      message["nativeLANReady"]=currentSample.value("nativeCoopLANReady").toBool();
@@ -899,7 +944,7 @@
      message["coopStatus"]=coopStatus();
      message["shareBattle"]=shareBattle;
      if (active)
-@@ -962,6 +970,8 @@
+@@ -962,6 +975,8 @@
      if (active) message["avatar"]=trainerChoice->currentIndex();
      message["followerSpecies"]=int(followerSpecies);
      message["followerForm"]=int(followerForm);
@@ -908,7 +953,7 @@
      socket->write(QJsonDocument(message).toJson(QJsonDocument::Compact)+'\n');
      if(relaySocial && shareBattle && inBattle && battleViewers>0 && clock.elapsed()-lastPreviewFrame>=500 && socket->bytesToWrite()<8192) {
          lastPreviewFrame=clock.elapsed();
-@@ -1161,11 +1171,11 @@
+@@ -1161,11 +1176,11 @@
          if (!calibrating && calibration.valid && calibration.map==currentSample.value("map").toInt())
          {
              const auto local=QPointF(currentSample.value("smoothX").toDouble(),currentSample.value("smoothZ").toDouble());
@@ -922,7 +967,7 @@
                  if(sprites.size()!=12) return;
                  PresenceAvatar follower{id+"/follower",{},trail.facing,trail.position,trail.moving,trail.height,sprites};
                  const auto greeting=std::max(followerGreetings.value(id=="local"?selfId:id),id=="local"?companionReactionUntil:qint64(0));
-@@ -1178,19 +1188,20 @@
+@@ -1178,19 +1193,20 @@
                      follower.companionOwnerPosition=position;
                      follower.companionReactionStarted=companionReactionStarted;
                      follower.companionReactionUntil=companionReactionUntil;
@@ -946,7 +991,7 @@
                                 owner.position,owner.height,!owner.inBattle);
              }
              for(auto it=followerTrails.begin();it!=followerTrails.end();)
-@@ -1225,8 +1236,13 @@
+@@ -1225,8 +1241,13 @@
      if(!companionActive()) {companionMessage="Stand idle in the field with your companion.";drawGameMenu();return;}
      if(clock.elapsed()-companionLastAction<800) return;
      companionLastAction=clock.elapsed();
@@ -962,7 +1007,7 @@
      const auto cue=FollowerInteraction::visualCue(companion,action,variation);
      companionReactionStarted=clock.elapsed();companionEmote=cue.emote;companionMotion=cue.motion;
      companionReactionUntil=companion.value("hp").toUInt()?companionReactionStarted+cue.durationMs:0;
-@@ -1269,9 +1285,17 @@
+@@ -1269,9 +1290,17 @@
          if(companion.value("record").toByteArray().left(4)!=first.value("record").toByteArray().left(4)) {
              companionReactionUntil=0;companionEmote.clear();companionMotion.clear();companionMessage.clear();
          }
@@ -980,7 +1025,7 @@
          }
      } catch(const std::exception&) {
          // A transient encryption lock must not make an existing follower blink.
-@@ -1280,19 +1304,21 @@
+@@ -1280,19 +1309,21 @@
      }
  }
  
@@ -1011,7 +1056,7 @@
  }
  
  void MultiplayerPanel::updateOffMapPresenceDebug(bool trackingEnabled,bool localResolved,int localMap,qint64 now,bool localInBattle)
-@@ -1439,7 +1465,12 @@
+@@ -1439,7 +1470,12 @@
      const bool free=interactionId.isEmpty() && pokemonTrade.isEmpty() && itemOffer.isEmpty() &&
          instance->getEmuThread()->pendingPokemonTrade().isEmpty() && !currentSample.value("nativeCoopCanCancel").toBool();
      tradeButton->setEnabled(connected && relayPokemon && eligible && free && availability->currentData()!="busy");
@@ -1025,7 +1070,7 @@
      const bool challengeActive=checkpoint.value("status")=="active";
      checkpointCreate->setEnabled(connected && relayCheckpoints && !challengeActive && !remote.isEmpty() &&
          currentSample.value("status")=="Experimental match");
-@@ -1452,6 +1483,27 @@
+@@ -1452,6 +1488,31 @@
      nativeButton->setText(interactionFrom==selfId ? "Host native wireless session" : "Join native wireless session");
      if(interactionId.isEmpty() && clock.elapsed()>=interactionFeedbackUntil)
          interactionStatus->setText(interactionEligibilityReason());
@@ -1039,13 +1084,17 @@
 +    return {};
 +}
 +
-+void MultiplayerPanel::filterBossCatalog()
++void MultiplayerPanel::filterBossCatalog(bool practiceOnly)
 +{
 +    static const QSet<QString> gyms={"Cheren","Roxie","Burgh","Elesa","Clay","Skyla","Drayden","Marlon"};
 +    static const QSet<QString> league={"Shauntal","Marshal","Grimsley","Caitlin","Iris","Alder","Benga"};
 +    bossList.clear();
-+    for(const auto& record:bossCatalog) {
-+        const auto name=record.toMap().value("name").toString().section(' ',0,0);
++    const auto& source=practiceOnly?practiceCatalog:bossCatalog;
++    for(const auto& record:source) {
++        const auto trainer=record.toMap();
++        const auto fullName=trainer.value("name").toString();
++        if(!trainerSearch.isEmpty() && !fullName.contains(trainerSearch,Qt::CaseInsensitive)) continue;
++        const auto name=fullName.section(' ',0,0);
 +        const int category=gyms.contains(name)?1:name=="Hugh"?2:league.contains(name)?3:4;
 +        if(!bossCategory || bossCategory==category) bossList.append(record);
 +    }
@@ -1053,7 +1102,7 @@
  }
  
  QString MultiplayerPanel::interactionEligibilityReason() const
-@@ -1484,6 +1536,8 @@
+@@ -1484,6 +1545,8 @@
      if(availability->currentData()=="busy")
          return "You are Busy; switch your availability to Ready to request an interaction.";
      if(!relayPokemon || !relayPlayerBattles) return "Restart the updated relay and update both clients for overworld trades and battles.";
@@ -1062,28 +1111,104 @@
      return currentSample.value("nativeCoopLANReady").toBool()?"Ready: trade Pokemon or request a battle here.":"Pokemon trades are ready. Battles also need two players connected to native LAN.";
  }
  
-@@ -1698,10 +1752,12 @@
+@@ -1618,7 +1681,9 @@
+         row("partyStats","IVs and EVs",{8,toolY,240,20},idle);toolY+=24;
+         row("encounters","Find wild Pokemon",{8,toolY,240,20},idle);toolY+=24;
+         row("relearnParty","Relearn moves",{8,toolY,240,20},idle);toolY+=24;
++        if(soaringEnabled) row("soar","Take flight (experimental)",{8,toolY,240,20},idle);
+         hint=idle?"B closes. L/R switches pages.":"Return to the field to use Pokemon tools.";
++        if(soaringEnabled && idle && menuFocus==3) hint="Choose a Pokemon, then use Fly. Landing stays in the game's own map flow.";
+     } else if(menuMode=="coopTools") {
+         title="CO-OP";
+         const bool idle=!currentSample.value("inBattle").toBool() && !currentSample.value("nativeCoopCanCancel").toBool();
+@@ -1697,25 +1762,33 @@
+         if(!currentSample.value("nativeCoopInvitation").toUInt()) hint="Invitation cancelled.";
      } else if(menuMode=="bosses" || menuMode=="rematches") {
          const bool practiceOnly=menuMode=="rematches";
-         title=practiceOnly?"PRACTICE BATTLES":"DEBUG CHALLENGES";
+-        title=practiceOnly?"PRACTICE BATTLES":"DEBUG CHALLENGES";
+-        menuScroll=qBound(0,menuScroll,qMax(0,bossList.size()-4));
+-        for(int i=0;i<4 && i+menuScroll<bossList.size();++i) {
++        title=practiceOnly?"PRACTICE BATTLES":"CO-OP TRAINERS";
 +        static const QStringList categories={"All trainers","Gym leaders","Rivals","League","Other trainers"};
-+        row("bossFilter",categories.value(bossCategory),{8,26,240,17});
-         menuScroll=qBound(0,menuScroll,qMax(0,bossList.size()-4));
-         for(int i=0;i<4 && i+menuScroll<bossList.size();++i) {
++        row("bossFilter",categories.value(bossCategory),{8,25,151,16});
++        row("bossSearch",trainerSearch.isEmpty()?"Search trainers":"Find: "+trainerSearch,{162,25,86,16});
++        menuScroll=qBound(0,menuScroll,qMax(0,bossList.size()-3));
++        for(int i=0;i<3 && i+menuScroll<bossList.size();++i) {
              const int index=i+menuScroll;const auto boss=bossList[index].toMap();
 -            row("boss:"+QString::number(index),(index==bossSelection?"> ":"  ")+boss.value("name").toString(),{8,28+i*25,240,23});
-+            row("boss:"+QString::number(index),(index==bossSelection?"> ":"  ")+boss.value("name").toString(),{8,45+i*20,240,19});
-         }
+-        }
++            row("boss:"+QString::number(index),(index==bossSelection?"> ":"  ")+boss.value("name").toString(),{8,46+i*18,240,17});
++        }
++        if(!bossList.isEmpty()) {
++            const auto trainer=bossList[qBound(0,bossSelection,bossList.size()-1)].toMap();
++            const QString levels=trainer.contains("minLevel")?QString("Lv %1–%2").arg(trainer.value("minLevel").toUInt()).arg(trainer.value("maxLevel").toUInt()):QString("%1 Pokemon").arg(trainer.value("count").toUInt());
++            row("trainerDetails",QString("Party: %1 Pokemon · %2").arg(trainer.value("count").toUInt()).arg(levels),{8,101,240,16},false);
++        } else row("trainerDetails",trainerSearch.isEmpty()?bossCatalogReason:"No trainers match this search.",{8,101,240,16},false);
          const bool cancel=currentSample.value("nativeCoopCanCancel").toBool();
          const bool nativeLANReady=currentSample.value("nativeCoopLANReady").toBool();
-@@ -1907,6 +1963,7 @@
+         const bool canStart=!bossList.isEmpty() && currentSample.value("nativeCoopCanStart").toBool() && nativeLANReady && !coopRequestPending && itemOffer.isEmpty() && pokemonTrade.isEmpty() && instance->getEmuThread()->pendingPokemonTrade().isEmpty();
+-        if(practiceOnly) row(cancel?"cancelBoss":"startBoss",cancel?"Cancel":"Practice",{8,130,240,22},cancel || canStart);
++        if(practiceOnly) row(cancel?"cancelBoss":"startBoss",cancel?"Cancel":"Practice",{8,124,240,22},cancel || canStart);
+         else {
+-            row(cancel?"cancelBoss":"startStoryBoss",cancel?"Cancel":"Story co-op",{8,130,118,22},cancel || canStart);
+-            row("startBoss","Practice",{130,130,118,22},!cancel && canStart);
+-        }
+-        row("bossPrev","<",{8,154,48,14},menuScroll>0);
+-        row(practiceOnly?"coopTools":"players","B Back",{60,154,130,14});
+-        row("bossNext",">",{198,154,50,14},menuScroll+4<bossList.size());
++            row(cancel?"cancelBoss":"startStoryBoss",cancel?"Cancel":"Story co-op",{8,124,118,22},cancel || canStart);
++            row("startBoss","Practice",{130,124,118,22},!cancel && canStart);
++        }
++        row("bossPrev","<",{8,151,48,14},menuScroll>0);
++        row(practiceOnly?"coopTools":"players","B Back",{60,151,130,14});
++        row("bossNext",">",{198,151,50,14},menuScroll+3<bossList.size());
+         if(!nativeLANReady) hint="Connect two players to the same LAN game.";
+-        else if(!bossList.isEmpty()) {const auto boss=bossList[qBound(0,bossSelection,bossList.size()-1)].toMap();hint=QString("Lv %1-%2. Invite your partner; they choose Join.").arg(boss.value("minLevel").toUInt()).arg(boss.value("maxLevel").toUInt());}
++        else if(!bossList.isEmpty()) hint=practiceOnly?"Practice uses this ROM's trainer party; no story rewards.":"Invite your partner; they choose Join in their own game.";
+         else hint=bossCatalogReason;
+     } else if(menuMode=="pokemon") {
+         title="POKEMON TRADE";
+@@ -1860,7 +1933,7 @@
+ void MultiplayerPanel::gameMenuAction(const QString& action)
+ {
+     if(action=="coopTools") {menuMode="coopTools";menuFocus=0;drawGameMenu();return;}
+-    if(action=="rematches") {menuMode="rematches";menuFocus=0;menuScroll=0;drawGameMenu();return;}
++    if(action=="rematches") {trainerSearch.clear();menuMode="rematches";filterBossCatalog(true);menuFocus=0;menuScroll=0;drawGameMenu();return;}
+     if(action=="pokemonTools") {menuMode="pokemonTools";menuFocus=0;drawGameMenu();return;}
+     if(action=="followerOptions") {menuMode="game";menuFocus=0;drawGameMenu();return;}
+     if(action=="greetFollowers") {sendSocial("greet");closeGameMenus();return;}
+@@ -1871,6 +1944,7 @@
+     if(action=="toolsPrev" || action=="toolsNext") {menuScroll+=action=="toolsNext"?4:-4;menuFocus=0;drawGameMenu();return;}
+     if(action.startsWith("encounterInfo:")) {const auto index=action.mid(14).toInt();if(index>=0 && index<encounterRows.size()) {const auto info=encounterRows[index].toMap();fieldToolsReason=info.value("method").toString()+(info.value("invalidRange").toBool()?". ROM has an invalid level range.":". Chance within this encounter method.");}drawGameMenu();return;}
+     if(action=="relearnParty") {refreshPartyStats();menuMode="relearn-party";menuFocus=0;drawGameMenu();return;}
++    if(action=="soar" && soaringEnabled) {closeGameMenus();instance->getEmuThread()->openOriginalGameMenu(1);return;}
+     if(action.startsWith("relearnPokemon:")) {statsSelection=action.mid(15).toInt();refreshFieldTools(false);menuMode="relearn";menuScroll=menuFocus=0;drawGameMenu();return;}
+     if(action=="relearnBack") {menuMode="relearn";fieldToolsReason.clear();menuFocus=0;drawGameMenu();return;}
+     if(action.startsWith("learn:")) {relearnSelection=action.mid(6).toUInt();if(relearnSelection>=unsigned(relearnRows.size())) return;menuMode="relearn-slot";fieldToolsReason="Replace a move with "+relearnRows[relearnSelection].toMap().value("name").toString()+"?";menuFocus=0;drawGameMenu();return;}
+@@ -1905,9 +1979,11 @@
+     }
+     if(action=="recipient") {menuMode="recipient";menuFocus=0;menuScroll=0;}
      else if(action.startsWith("peer:")) {gameItemTarget=action.mid(5);if(menuMode=="recipient") menuMode="trade";}
-     else if(action=="bosses") {menuMode="bosses";menuFocus=0;menuScroll=0;}
-     else if(action=="bossPrev") menuScroll-=4;
-+    else if(action=="bossFilter") {bossCategory=(bossCategory+1)%5;filterBossCatalog();menuFocus=0;}
-     else if(action=="bossNext") menuScroll+=4;
+-    else if(action=="bosses") {menuMode="bosses";menuFocus=0;menuScroll=0;}
+-    else if(action=="bossPrev") menuScroll-=4;
+-    else if(action=="bossNext") menuScroll+=4;
++    else if(action=="bosses") {trainerSearch.clear();menuMode="bosses";filterBossCatalog();menuFocus=0;menuScroll=0;}
++    else if(action=="bossPrev") menuScroll-=3;
++    else if(action=="bossFilter") {bossCategory=(bossCategory+1)%5;filterBossCatalog(menuMode=="rematches");menuFocus=0;}
++    else if(action=="bossSearch") {bool accepted=false;const auto value=QInputDialog::getText(this,"Search trainers","Trainer name or class:",QLineEdit::Normal,trainerSearch,&accepted);if(accepted){trainerSearch=value.trimmed();filterBossCatalog(menuMode=="rematches");menuFocus=0;menuScroll=0;}}
++    else if(action=="bossNext") menuScroll+=3;
      else if(action=="cancelBoss") {closeGameMenus();instance->getEmuThread()->requestNativeCoopCancel();return;}
      else if(action.startsWith("boss:")) bossSelection=action.mid(5).toInt();
+     else if((action=="startBoss" || action=="startStoryBoss") && !bossList.isEmpty() &&
+@@ -2051,7 +2127,7 @@
+     auto moveFocus=[&](int step) {for(int n=0;n<menuRows.size();++n) {menuFocus=(menuFocus+menuRows.size()+step)%menuRows.size();if(menuRows[menuFocus].enabled && menuRows[menuFocus].id!="bagPrev" && menuRows[menuFocus].id!="bagNext") break;}};
+     if(pressed&((1<<6)|(1<<5))) moveFocus(-1);
+     if(pressed&((1<<7)|(1<<4))) moveFocus(1);
+-    if(pressed&((1<<8)|(1<<9))) {int step=(pressed&(1<<8))?1:-1;if(menuMode=="trade") itemChoice->setCurrentIndex(qBound(0,itemChoice->currentIndex()+step,qMax(0,itemChoice->count()-1)));else menuScroll+=step*(menuMode=="bosses"?4:3);}
++    if(pressed&((1<<8)|(1<<9))) {int step=(pressed&(1<<8))?1:-1;if(menuMode=="trade") itemChoice->setCurrentIndex(qBound(0,itemChoice->currentIndex()+step,qMax(0,itemChoice->count()-1)));else menuScroll+=step*(menuMode=="bosses"||menuMode=="rematches"?3:3);}
+     if(pressed&1 && menuFocus<menuRows.size() && menuRows[menuFocus].enabled) gameMenuAction(menuRows[menuFocus].id);
+     else drawGameMenu();
+ }
 --- a/source/melonDS/src/frontend/qt_sdl/MultiplayerPanel.h
 +++ b/source/melonDS/src/frontend/qt_sdl/MultiplayerPanel.h
 @@ -10,6 +10,7 @@
@@ -1094,19 +1219,21 @@
  class ScreenPanel;
  class QCheckBox;
  class QComboBox;
-@@ -43,6 +44,11 @@
+@@ -43,6 +44,13 @@
  private:
      Gen5Menu menuArtwork;
      QVariantList bossList;
 +    QVariantList bossCatalog;
++    QVariantList practiceCatalog;
++    QString trainerSearch;
 +    int bossCategory=0;
-+    void filterBossCatalog();
++    void filterBossCatalog(bool practiceOnly=false);
 +    QString battleCompatibility(const QVariantMap& state) const;
 +    QString presenceRomDigest;
      int bossSelection=0;
      QString bossCatalogReason;
      QString menuRomIdentity;
-@@ -153,10 +159,12 @@
+@@ -153,17 +161,22 @@
      int calibrationMap = -1;
      QCheckBox* overlayEnabled;
      QCheckBox* followerEnabled;
@@ -1121,7 +1248,8 @@
      QMap<QString,PokemonFollowerTrail> followerTrails;
      void refreshFollower();
      bool companionInteractionsEnabled=false;
-@@ -164,6 +172,8 @@
++    bool soaringEnabled=false;
+     QVariantMap companion;
      QString companionMessage;
      qint64 companionReactionUntil=0,companionLastAction=-10000;
      unsigned companionReactionCount=0;
@@ -1130,7 +1258,7 @@
      QString companionEmote, companionMotion;
      qint64 companionReactionStarted=0;
      int companionActionFocus=0;
-@@ -173,7 +183,7 @@
+@@ -173,7 +186,7 @@
      QRectF companionHitBox;
      bool facingCompanion() const;
      void openCompanionDialogue();

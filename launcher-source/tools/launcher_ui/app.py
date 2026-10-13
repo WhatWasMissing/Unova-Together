@@ -365,7 +365,7 @@ class Launcher(tk.Tk):
         if index<0:return
         self._save();self.active_profile_id=self.play_profiles[index]['id'];self._init_profiles();self._switching=True
         item=self._active_profile();self.profile_label.set(item['label']);self.player.set(item['player']);self.save_dir.set(item['save_dir'])
-        values=prefs.defaults(self.root/'builds/current');values.update(self.preference_values);self.pause.set(values['pause']);self.filter.set(values['filter']);self.volume.set(values['volume']);self.area_scenery.set(values.get('area_scenery',False));self.companion_interactions.set(values['companion_interactions']);self.reduced_follower_motion.set(values.get('reduced_follower_motion',False))
+        values=prefs.defaults(self.root/'builds/current');values.update(self.preference_values);self.pause.set(values['pause']);self.filter.set(values['filter']);self.volume.set(values['volume']);self.area_scenery.set(values.get('area_scenery',False));self.companion_interactions.set(values['companion_interactions']);self.reduced_follower_motion.set(values.get('reduced_follower_motion',False));self.soaring.set(values.get('soaring',False))
         self.lan_slots.set(str(item.get('lan_slots',16)))
         self.connection_role.set(item['lan_role']);self.last_lan_action=item['lan_role'].lower()
         self.net_mode.set(item['network']['mode']);self.net_host.set(item['network']['host']);self.net_port.set(str(item['network']['port']));self.net_room.set(item['network']['room'])
@@ -655,6 +655,13 @@ class Launcher(tk.Tk):
         self.volume_slider.pack(anchor='w')
         button(box,'All emulator settings',self._all_settings).pack(anchor='w',pady=(12,0))
         label(box,'Controls, display, audio and more.',size=9,color=C['muted'],bg=C['surface'],wraplength=620,justify='left').pack(anchor='w',pady=8)
+        experiments=card(parent);experiments.pack(fill='x',pady=(0,18))
+        experiment_box=tk.Frame(experiments,bg=C['surface']);experiment_box.pack(fill='x',padx=18,pady=16)
+        label(experiment_box,'EXPERIMENTAL FEATURES',size=9,bold=True,bg=C['surface']).pack(anchor='w',pady=(0,8))
+        self.soaring=tk.BooleanVar(value=values.get('soaring',False))
+        ttk.Checkbutton(experiment_box,text='Soaring flight (experimental, off by default)',variable=self.soaring,
+            command=lambda:self._preference('soaring',self.soaring.get())).pack(anchor='w',pady=4)
+        label(experiment_box,'Adds the Take flight shortcut to Unova → Pokémon. Changes apply next launch.',size=9,color=C['muted'],bg=C['surface'],wraplength=620,justify='left').pack(anchor='w',pady=(2,0))
         followers=card(parent);followers.pack(fill='x',pady=(0,18))
         follower_box=tk.Frame(followers,bg=C['surface']);follower_box.pack(fill='x',padx=18,pady=16)
         label(follower_box,'FOLLOWING POKÉMON',size=9,bold=True,bg=C['surface']).pack(anchor='w',pady=(0,8))
@@ -734,7 +741,7 @@ class Launcher(tk.Tk):
             self.active_profile_id=str(data.get('active_profile',''))
             if type(data.get('check')) is bool:self.auto.set(data['check'])
             if type(data.get('music')) is bool:self.music.set(data['music'])
-            if isinstance(data.get('preferences'),dict):self.preference_values={k:v for k,v in data['preferences'].items() if (k in ('pause','filter','area_scenery','companion_interactions','reduced_follower_motion') and type(v) is bool) or (k=='volume' and type(v) is int and 0<=v<=100)}
+            if isinstance(data.get('preferences'),dict):self.preference_values={k:v for k,v in data['preferences'].items() if (k in ('pause','filter','area_scenery','companion_interactions','reduced_follower_motion','soaring') and type(v) is bool) or (k=='volume' and type(v) is int and 0<=v<=100)}
             if isinstance(data.get('cheats'),dict):self.cheat_choices={k:{ident:flag for ident,flag in v.items() if ident in self.cheat_vars_ids() and type(flag) is bool} for k,v in list(data['cheats'].items())[-32:] if isinstance(k,str) and len(k)<=32 and isinstance(v,dict)}
         except (OSError,ValueError,AttributeError):pass
 
@@ -856,6 +863,7 @@ class Launcher(tk.Tk):
             env['UNOVA_COMPANION_INTERACTIONS']=companion
             env['UNOVA_EXPERIMENTAL_COMPANION']=companion # compatibility with existing released runtimes
             env['UNOVA_FOLLOWER_REDUCED_MOTION']='1' if settings.get('reduced_follower_motion',False) else '0'
+            env['UNOVA_EXPERIMENTAL_SOARING']='1' if settings.get('soaring',False) else '0'
             env.pop('UNOVA_AREA_CATALOG',None)
             env.pop('UNOVA_SURROUNDINGS_DIR',None)
             if settings.get('area_scenery',False):

@@ -23,7 +23,7 @@
     "src/net/LAN.cpp",
     "src/net/LAN.h"
   ],
-  "patchSha256": "33ee94eacdebae05d6df4a33aa3cebc4e45e7f083430eb0d240a374c47ffa79b",
+  "patchSha256": "1f52f256ed03090125f5b7373d1be20945b8c30005d4de1c6adfe84af119afe4",
   "spriteVariants": 743,
   "build": "1.0.7-dev"
 }
