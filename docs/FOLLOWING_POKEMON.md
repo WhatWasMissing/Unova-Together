@@ -2,7 +2,7 @@
 
 The first Pokémon in your party follows your footsteps, roughly one tile behind.
 Change the first party slot to change your follower. Eggs and fainted leads stay
-hidden. Following Pokémon can be switched off in Multiplayer → Players.
+hidden. Following Pokémon default on. Show or hide your own or teammates' followers in **Unova → Settings**.
 
 Followers stop when you stop, follow corners, and reset after a map change or
 teleport. They hide during battles and full-screen game menus. They are cosmetic:
@@ -11,7 +11,7 @@ they do not block movement, change encounters, edit your party or alter saves.
 All 649 species through Generation 5 have directional follower sprites. Generations
 1–4 use the loaded Black 2 ROM's overworld artwork. Gen 5 uses credited hg-engine
 overworld artwork bundled into the emulator. Party icons are never used as followers.
-Repeated standing poses on floating or legless sprites receive a small movement bob.
+Standing sprites without natural idle motion receive a subtle bob with anchored feet. Companion interactions can add short reaction motions; see the [interaction guide](COMPANIONS_AND_SOARING.md).
 Shiny colours and every alternate-form
 or gender-specific appearance are not implemented. Selected native form variants
 (Unown, Deoxys, Burmy/Wormadam, Shellos/Gastrodon, Giratina, Shaymin, Rotom and

@@ -1,4 +1,4 @@
-# Unova Together 1.0.2 — known limits
+# Unova Together 1.0.6 — known limits
 
 - **Other VPNs can block connections.** NordVPN caused a tester’s presence-relay connection to fail with WinError 10013. Disconnect other VPNs while using Tailscale; check their kill-switch and network-filter settings if access remains blocked. This is not evidence that the game server is offline.
 - **Online UDP is experimental.** It has been checked locally, but reliable battle completion between players on different networks has not yet been confirmed. Use Tailscale if it fails.
@@ -25,7 +25,7 @@
 
 Nearby battle scenery remains experimental. Special cinematic scenes keep original backgrounds; not every environment has been playtested. Disable the option if a background looks wrong.
 
-Companion interactions are optional and read-only. The former flight preview and spectator controls are removed.
+Companion interactions are read-only and can be switched off. The updated launcher source/local build enables them by default, preserving saved off choices; the original v1.0.6 download keeps its Experimental toggle. Use R+A or tap the follower; A alone advances game text. The 1.0.6 interaction matrix and input gates passed, but no live ROM interaction session or two-PC interaction playtest was run for that release. See [release checks](RELEASE_CHECKS_1.0.6.md). The former flight preview and spectator controls are removed.
 
 Field HMs retain native story requirements. Fly needs a party member with a move slot without another field action. Full obstacle traversal and every save/reload path have not been separately playtested. Encounter gifts, scripted legendaries and Hidden Grottos are excluded. Relearning offers the current species/form's level-up moves at or below its level.
 
@@ -34,3 +34,5 @@ Direct party Pokémon trades exclude eggs, held Mail and native trade-evolution 
 - **Practice can complete asymmetrically under latency.** A local simulated 100 ms round trip left one peer completed and the other rolled back after partner loss. The completion handshake still needs a fix. Verify both peers returned normally before saving; do not treat this maintenance release as a WAN reliability fix.
 
 - **Boosted solo XP persistence has a targeted pass.** A published 1.0.2 solo Cheren victory saved 5,951 Servine XP / level 20 and the badge, independently parsed with PKHeX, then reloaded in a fresh emulator process. This interpreter fixture does not establish JIT or full-playthrough behavior. See `XP_COMPENSATION_BATTLE_TEST.md`.
+
+The historical 1.0.2 test used 1.65× XP. Current releases use **1.25×**, validated by production-dispatch checks; a fresh end-to-end battle/save/reload test for that multiplier has not been established. Co-op XP remains disabled. Proposed fixes and additions are listed in the [roadmap](ROADMAP.md).

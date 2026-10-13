@@ -8,6 +8,7 @@ import unova_storage as storage
 from . import preferences as prefs
 from . import services
 from . import gen5_tools
+from . import game_routes
 from .components import C, F, HERE, THEME, ScrollPage, button, card, emblem, label, set_enabled
 
 class Launcher(tk.Tk):
@@ -15,28 +16,27 @@ class Launcher(tk.Tk):
         super().__init__()
         self.home=Path(home).resolve();self.root=updates.active_root(self.home,allow_missing=True);self.testing=testing
         self.config_path=self.home/'.launcher-test.json' if testing else Path(os.environ.get('APPDATA',Path.home()))/'UnovaTogether/launcher.json'
-        self.title('Unova Together');self.geometry('1040x760');self.minsize(860,660);self.configure(bg=C['background'])
+        self.title('Pokemon Together');self.geometry('1040x760');self.minsize(860,660);self.configure(bg=C['background'])
         try:self.iconbitmap(str(HERE/'assets/launcher.ico'))
         except tk.TclError:pass
         self.messages=queue.Queue();self.busy=False;self.release=None;self.game=None;self.operation='';self.guides_busy=False
         self.cancel=threading.Event();self.rom=tk.StringVar();self.auto=tk.BooleanVar(value=True);self.music=tk.BooleanVar(value=False)
-        self.status=tk.StringVar(value='Ready when you are.');self.news_status=tk.StringVar(value='Saved release notes · available offline')
+        self.status=tk.StringVar(value='');self.news_status=tk.StringVar(value='Saved release notes · available offline')
         self.update_status=tk.StringVar(value='Check GitHub for the latest Windows release.')
         self.available=tk.StringVar(value='Not checked yet');self.phase=tk.StringVar(value='No download in progress')
         self.news=self._read_news();self.pages={};self.nav={};self.images=[];self.page_name=''
         self.preference_values={};self.cheat_choices={};self.profile=None;self.rom_timer=None
         self.play_profiles=[];self.active_profile_id='';self.repair_release=None;self._switching=False
         self.presence_process=None;self.lan_request='';self.lan_status_time=0;self.lan_started=0;self.last_lan_action='host';self.lan_was_connected=False
-        self._read_settings();self._init_profiles();self._build();self.show_page('Play');self._rom_changed()
+        self.selected_game=tk.StringVar(value=game_routes.GAMES['black2']);self.research_root=tk.StringVar(value=str(self.home/'3ds-coop') if (self.home/'3ds-coop/tools/start_joinable_session.ps1').is_file() else 'F:/pokemon-x-coop' if Path('F:/pokemon-x-coop/tools/start_joinable_session.ps1').is_file() else '');self.research_mode=tk.StringVar(value='Local two players');self.research_address=tk.StringVar(value='127.0.0.1')
+        self.active_mod=None;self.unova_started=False;self.library_buttons={}
+        self._read_settings();self._init_profiles();self._build();self._apply_navigation();self.show_page('Library');self._rom_changed()
         self.rom.trace_add('write',lambda *_:self._rom_changed());self.protocol('WM_DELETE_WINDOW',self._close)
         self.bind('<Control-Tab>',lambda e:self._cycle_page(1));self.bind('<Control-Shift-Tab>',lambda e:self._cycle_page(-1))
         self.bind_class('Button','<Return>',lambda e:e.widget.invoke())
         from .controller import Controller
         self.controller=Controller();self.after(125,self._poll_controller)
         self.bind('<MouseWheel>',self._wheel);self.after(100,self._poll);self._sync();self._music_changed(save=False)
-        if self.auto.get() and not testing:self.after(300,self.check)
-        if not testing:self.after(600,self.refresh_guides)
-        if not testing:self.after(2000,self._automatic_cleanup)
 
     def _build(self):
         style=ttk.Style(self);style.theme_use('clam')
@@ -46,15 +46,16 @@ class Launcher(tk.Tk):
         style.map('TCheckbutton',background=[('active',C['selection'])])
         self.nav_cursor=tk.PhotoImage(file=HERE/'assets/menu-cursor.png');self.images.append(self.nav_cursor)
         sidebar=tk.Frame(self,bg=C['nav'],width=THEME['layout']['sidebar']);sidebar.pack(side='left',fill='y');sidebar.pack_propagate(False)
-        emblem(sidebar).pack(anchor='w',padx=23,pady=(27,12))
-        label(sidebar,'UNOVA\nTOGETHER',size=20,bold=True,color=C['surface'],bg=C['nav'],role='display',justify='left').pack(anchor='w',padx=24)
-        tk.Frame(sidebar,bg=C['nav'],height=20).pack()
-        for name in ('Play','Co-op','Features','Profiles','News','Updates','Settings','Tools','Setup'):
-            self.nav[name]=button(sidebar,'Games & saves' if name=='Profiles' else name,lambda n=name:self.show_page(n),kind='nav',anchor='w')
+        emblem(sidebar,size=48).pack(anchor='w',padx=23,pady=(16,8))
+        label(sidebar,'POKEMON\nTOGETHER',size=18,bold=True,color=C['surface'],bg=C['nav'],role='display',justify='left').pack(anchor='w',padx=24)
+        self.mod_caption=label(sidebar,'MULTIPLAYER MODS',size=9,color=C['navText'],bg=C['nav'],wraplength=150)
+        self.mod_caption.pack(anchor='w',padx=24,pady=(12,8))
+        for name in ('Library','Play','Co-op','Features','Profiles','News','Updates','Settings','Tools','Setup','XPlay','XCoop','XGuides'):
+            self.nav[name]=button(sidebar,game_routes.PAGE_LABELS.get(name,name),lambda n=name:self.show_page(n),kind='nav',anchor='w')
             self.nav[name].pack(fill='x',padx=12,pady=3)
-        credit=tk.Frame(sidebar,bg=C['nav']);credit.pack(side='bottom',fill='x',padx=24,pady=25)
+        credit=tk.Frame(sidebar,bg=C['nav']);credit.pack(side='bottom',fill='x',padx=24,pady=16)
         label(credit,'Made by mvq1303',size=10,color=C['surface'],bg=C['nav']).pack(anchor='w')
-        label(credit,'WhatWasMissing\nBuilt on melonDS',size=9,color=C['navText'],bg=C['nav'],justify='left').pack(anchor='w',pady=(5,0))
+        label(credit,'WhatWasMissing\nBuilt on melonDS / Azahar',size=9,color=C['navText'],bg=C['nav'],justify='left').pack(anchor='w',pady=(5,0))
         shell=tk.Frame(self,bg=C['background']);shell.pack(side='right',fill='both',expand=True)
         footer=tk.Frame(shell,bg=C['surface'],height=48,highlightbackground=C['border'],highlightthickness=1);footer.pack(side='bottom',fill='x');footer.pack_propagate(False)
         self.music_button=button(footer,'Music: off',self._toggle_music);self.music_button.pack(side='right',padx=4)
@@ -66,16 +67,83 @@ class Launcher(tk.Tk):
         self.playtester_credit.pack(fill='x',padx=18,pady=7)
         credits_bar.bind('<Configure>',lambda e:self.playtester_credit.configure(wraplength=max(100,e.width-36)),add='+')
         self.deck=tk.Frame(shell,bg=C['background']);self.deck.pack(fill='both',expand=True,padx=THEME['layout']['padding'],pady=THEME['layout']['padding'])
-        for name in ('Play','Profiles','Co-op','Features','Updates','Settings','Tools','Setup'):self.pages[name]=ScrollPage(self.deck)
+        for name in ('Library','Play','Profiles','Co-op','Features','Updates','Settings','Tools','Setup','XPlay','XCoop','XGuides'):self.pages[name]=ScrollPage(self.deck)
         self.pages['News']=tk.Frame(self.deck,bg=C['background'])
         self._features_page(self.pages['Features'].content);self._play_page(self.pages['Play'].content);self._updates_page(self.pages['Updates'].content)
         self._news_page(self.pages['News']);self._settings_page(self.pages['Settings'].content);self._profiles_page(self.pages['Profiles'].content);self._coop_page(self.pages['Co-op'].content);self._tools_page(self.pages['Tools'].content);self._setup_page(self.pages['Setup'].content)
+        self._library_page(self.pages['Library'].content)
+        self._research_play_page(self.pages['XPlay'].content)
+        self._research_coop_page(self.pages['XCoop'].content)
+        self._research_guides_page(self.pages['XGuides'].content)
         self.deck.bind('<Configure>',lambda e:self.footer_status.configure(wraplength=max(220,e.width-175)))
 
     def _heading(self,parent,kicker,title,subtitle):
-        label(parent,title,size=25,bold=True,role='display').pack(anchor='w')
+        label(parent,title,size=25,bold=True,role='display').pack(anchor='w',pady=(0,0 if subtitle else 16))
         note=label(parent,subtitle,size=10,color=C['muted'],wraplength=700,justify='left');note.pack(anchor='w',pady=(7,16)) if subtitle else None
         parent.bind('<Configure>',lambda e:note.configure(wraplength=max(280,e.width-12)),add='+')
+
+    def _library_page(self,parent):
+        self._heading(parent,'LIBRARY','Mod library','')
+        self.library_details={}
+        for mod,spec in game_routes.MODS.items():
+            row=card(parent);row.pack(fill='x',pady=(0,16))
+            heading=tk.Frame(row,bg=C['hero']);heading.pack(fill='x')
+            label(heading,spec['platform'].upper(),size=9,color=C['accent'],bg=C['hero'],role='utility').pack(anchor='w',padx=20,pady=(14,4))
+            label(heading,spec['name'],size=21,bold=True,color=C['surface'],bg=C['hero'],role='display').pack(anchor='w',padx=20,pady=(0,14))
+            body=tk.Frame(row,bg=C['surface']);body.pack(fill='x',padx=20,pady=16)
+            copy=label(body,spec['description'],size=11,bg=C['surface'],wraplength=580,justify='left');copy.pack(anchor='w')
+            body.bind('<Configure>',lambda e,w=copy:w.configure(wraplength=max(240,e.width)))
+            self.library_details[mod]=tk.StringVar(value=self._version_text() if mod=='black2' else spec['status'])
+            label(body,textvariable=self.library_details[mod],size=9,color=C['muted'],bg=C['surface']).pack(anchor='w',pady=(8,12))
+            self.library_buttons[mod]=button(body,'Open '+spec['name'],lambda key=mod:self._open_mod(key),kind='primary')
+            self.library_buttons[mod].pack(anchor='w')
+
+    def _research_play_page(self,parent):
+        self._heading(parent,'POKEMON X','Pokemon X Together','')
+        self.research_card=card(parent);self.research_card.pack(fill='x')
+        note=label(self.research_card,'Experimental prototype. Switching, fainting replacement and guest rewards are unfinished. Do not save trial progress.',size=10,bg=C['surface'],color=C['warning'],wraplength=600,justify='left')
+        note.pack(anchor='w',padx=18,pady=(18,14))
+        self.research_card.bind('<Configure>',lambda e:note.configure(wraplength=max(260,e.width-40)))
+        label(self.research_card,'Pokemon X mod folder',size=10,bg=C['surface']).pack(anchor='w',padx=18)
+        folder=tk.Frame(self.research_card,bg=C['surface']);folder.pack(fill='x',padx=18,pady=(4,12))
+        self.research_folder_entry=tk.Entry(folder,textvariable=self.research_root,font=(F['body'],11),highlightthickness=2,highlightcolor=C['focus'])
+        self.research_folder_entry.pack(side='left',fill='x',expand=True)
+        button(folder,'Browse',self._browse_research).pack(side='left',padx=(8,0))
+        label(self.research_card,'Launch mode',size=10,bg=C['surface']).pack(anchor='w',padx=18)
+        ttk.Combobox(self.research_card,textvariable=self.research_mode,values=list(game_routes.MODES),state='readonly',font=(F['body'],11)).pack(fill='x',padx=18,pady=(4,12))
+        label(self.research_card,'Host IPv4 address (joining over LAN)',size=10,bg=C['surface']).pack(anchor='w',padx=18)
+        tk.Entry(self.research_card,textvariable=self.research_address,font=(F['body'],11),highlightthickness=2,highlightcolor=C['focus']).pack(fill='x',padx=18,pady=(4,12))
+        self.research_play=button(self.research_card,'Open Pokemon X co-op',self._launch_research,kind='primary')
+        self.research_play.pack(anchor='w',padx=18,pady=(0,18))
+        button(parent,'Connection and controls',lambda:self.show_page('XCoop')).pack(anchor='w',pady=14)
+
+    def _research_coop_page(self,parent):
+        self._heading(parent,'CO-OP','Co-op','')
+        self.research_launch_buttons=[]
+        for title,copy,mode in (
+            ('Two players on this PC','Opens two independent games and the local multiplayer service.','local'),
+            ('Host a LAN room','Your teammate needs the prepared mod and your room credential file.','host'),
+            ('Join a LAN room','Set your friend\'s IPv4 address on Play and copy their room credential into your mod folder.','guest')):
+            row=card(parent);row.pack(fill='x',pady=(0,12))
+            label(row,title,size=13,bold=True,bg=C['surface']).pack(anchor='w',padx=18,pady=(16,6))
+            note=label(row,copy,size=10,color=C['muted'],bg=C['surface'],wraplength=560,justify='left');note.pack(anchor='w',padx=18,pady=(0,10))
+            row.bind('<Configure>',lambda e,w=note:w.configure(wraplength=max(240,e.width-40)))
+            action=button(row,'Start two players' if mode=='local' else 'Host room' if mode=='host' else 'Join room',lambda role=mode:self._launch_research(role),kind='primary')
+            action.pack(anchor='w',padx=18,pady=(0,16));self.research_launch_buttons.append(action)
+        label(parent,'Close previous Pokemon X game windows before starting. F8 invites your teammate; they choose Join battle. F9 on both players enables automatic trainer participation.',size=10,wraplength=590,justify='left').pack(anchor='w',pady=8)
+        button(parent,'LAN guide',lambda:self._research_guide('LAN_AND_ANIMATION_ALPHA.md')).pack(anchor='w',pady=8)
+
+    def _research_guides_page(self,parent):
+        self._heading(parent,'GUIDES','Guides','')
+        for title,doc in (('Trainer co-op and controls','TRAINER_COOP_ALPHA.md'),('LAN setup and player visibility','LAN_AND_ANIMATION_ALPHA.md'),('Native battle menus','NATIVE_SIMULTANEOUS_MENUS.md'),('Connection recovery','SESSION_RESILIENCE.md')):
+            button(parent,title,lambda name=doc:self._research_guide(name)).pack(fill='x',pady=(0,12))
+
+    def _research_guide(self,name):
+        path=Path(self.research_root.get())/name
+        try:
+            if not path.is_file():raise OSError('Guide missing. Choose the prepared Pokemon X folder on Play.')
+            os.startfile(str(path))
+        except OSError as exc:self.status.set(str(exc))
 
     def _play_page(self,parent):
         self._heading(parent,'PLAY','Play','')
@@ -86,7 +154,7 @@ class Launcher(tk.Tk):
         art=tk.Label(hero,image=picture,bg=C['hero'],bd=0);art.pack(side='right',padx=(0,18),pady=18)
         words=tk.Frame(hero,bg=C['hero']);words.pack(side='left',fill='both',expand=True,padx=24,pady=24)
         label(words,'BLACK 2 · CO-OP',size=9,bold=True,color=C['accent'],bg=C['hero']).pack(anchor='w')
-        label(words,'Unova\nTogether',size=25,bold=True,color=C['surface'],bg=C['hero'],role='display',justify='left').pack(anchor='w',pady=(10,12))
+        label(words,'Pokemon\nTogether',size=25,bold=True,color=C['surface'],bg=C['hero'],role='display',justify='left').pack(anchor='w',pady=(10,12))
         starters=tk.Frame(words,bg=C['hero']);starters.pack(anchor='w')
         for species in (495,498,501):
             try:
@@ -97,7 +165,8 @@ class Launcher(tk.Tk):
             if e.width<675:art.pack_forget()
             elif not art.winfo_manager():art.pack(side='right',padx=(0,18),pady=18,before=words)
         hero.bind('<Configure>',fit)
-        game=card(parent);game.pack(fill='x',pady=(18,15))
+        self.ds_hero=hero
+        game=card(parent);self.ds_game_card=game;game.pack(fill='x',pady=(18,15))
         inner=tk.Frame(game,bg=C['surface']);inner.pack(fill='x',padx=18,pady=16);inner.columnconfigure(0,weight=1)
         label(inner,'Game ROM',size=9,bold=True,color=C['muted'],bg=C['surface']).grid(row=0,column=0,sticky='w')
         self.rom_entry=tk.Entry(inner,textvariable=self.rom,font=(F['body'],11),bg=C['background'],fg=C['text'],relief='flat',
@@ -109,7 +178,6 @@ class Launcher(tk.Tk):
         self.active_slot=tk.StringVar(value='Save slot: '+self._active_profile()['label'])
         label(inner,textvariable=self.active_slot,size=10,bg=C['surface']).grid(row=3,column=0,sticky='w',pady=(10,0))
         button(inner,'Manage saves',lambda:self.show_page('Profiles')).grid(row=3,column=1,columnspan=2,sticky='e',pady=(10,0))
-        label(parent,'Full release · Each player keeps their own save.',size=9,color=C['muted']).pack(anchor='w',pady=(6,8))
 
     def _updates_page(self,parent):
         self._heading(parent,'UPDATES','Updates','Use the same version as your friend.')
@@ -173,10 +241,13 @@ class Launcher(tk.Tk):
         label(notice,'Turn C-Gear wireless and fast-forward off for co-op.',size=10,bold=True,color=C['warning'],bg=C['warningSurface']).pack(anchor='w',padx=18,pady=16)
 
     def show_page(self,name):
-        if name not in self.pages:return
+        if name=='Library' and self.active_mod is not None:self._return_library();return
+        if name not in self.visible_pages:return
         if name=='Profiles':self._save();self._refresh_backups()
         for page in self.pages.values():page.pack_forget()
-        self.pages[name].pack(fill='both',expand=True);self.page_name=name;self.title('Unova Together · '+('Games & saves' if name=='Profiles' else name))
+        self.pages[name].pack(fill='both',expand=True);self.page_name=name
+        context=game_routes.MODS[self.active_mod]['name']+' · ' if self.active_mod and name!='Library' else ''
+        self.title('Pokemon Together · '+context+game_routes.PAGE_LABELS.get(name,name))
         if isinstance(self.pages[name],ScrollPage):self.pages[name].canvas.yview_moveto(0)
         for key,b in self.nav.items():b.configure(bg=C['selection'] if key==name else C['nav'],fg=C['text'] if key==name else C['navText'],highlightbackground=C['selection'] if key==name else C['nav'],image=self.nav_cursor if key==name else '',compound='left')
 
@@ -188,7 +259,7 @@ class Launcher(tk.Tk):
             widget=getattr(widget,'master',None)
 
     def _version_text(self):
-        try:return 'Release '+'.'.join(map(str,updates.local_version(self.root)))+' · Launcher 1.0.4'
+        try:return 'Release '+'.'.join(map(str,updates.local_version(self.root)))+' · Launcher 1.0.6'
         except (OSError,ValueError):return 'Build unavailable'
 
     def _read_news(self):
@@ -294,7 +365,7 @@ class Launcher(tk.Tk):
         if index<0:return
         self._save();self.active_profile_id=self.play_profiles[index]['id'];self._init_profiles();self._switching=True
         item=self._active_profile();self.profile_label.set(item['label']);self.player.set(item['player']);self.save_dir.set(item['save_dir'])
-        values=prefs.defaults(self.root/'builds/current');values.update(self.preference_values);self.pause.set(values['pause']);self.filter.set(values['filter']);self.volume.set(values['volume']);self.area_scenery.set(values.get('area_scenery',False));self.companion_interactions.set(values.get('companion_interactions',False))
+        values=prefs.defaults(self.root/'builds/current');values.update(self.preference_values);self.pause.set(values['pause']);self.filter.set(values['filter']);self.volume.set(values['volume']);self.area_scenery.set(values.get('area_scenery',False));self.companion_interactions.set(values['companion_interactions'])
         self.lan_slots.set(str(item.get('lan_slots',16)))
         self.connection_role.set(item['lan_role']);self.last_lan_action=item['lan_role'].lower()
         self.net_mode.set(item['network']['mode']);self.net_host.set(item['network']['host']);self.net_port.set(str(item['network']['port']));self.net_room.set(item['network']['room'])
@@ -572,14 +643,14 @@ class Launcher(tk.Tk):
         self.volume_slider.pack(anchor='w')
         button(box,'All emulator settings',self._all_settings).pack(anchor='w',pady=(12,0))
         label(box,'Controls, display, audio and more.',size=9,color=C['muted'],bg=C['surface'],wraplength=620,justify='left').pack(anchor='w',pady=8)
-        experiments=card(parent);experiments.pack(fill='x',pady=(0,18))
-        experiment_box=tk.Frame(experiments,bg=C['surface']);experiment_box.pack(fill='x',padx=18,pady=16)
-        label(experiment_box,'EXPERIMENTAL',size=9,bold=True,bg=C['surface']).pack(anchor='w',pady=(0,8))
-        self.companion_interactions=tk.BooleanVar(value=values.get('companion_interactions',False))
-        ttk.Checkbutton(experiment_box,text='Companion interactions',variable=self.companion_interactions,
+        followers=card(parent);followers.pack(fill='x',pady=(0,18))
+        follower_box=tk.Frame(followers,bg=C['surface']);follower_box.pack(fill='x',padx=18,pady=16)
+        label(follower_box,'FOLLOWING POKÉMON',size=9,bold=True,bg=C['surface']).pack(anchor='w',pady=(0,8))
+        self.companion_interactions=tk.BooleanVar(value=values['companion_interactions'])
+        ttk.Checkbutton(follower_box,text='Companion interactions',variable=self.companion_interactions,
             command=lambda:self._preference('companion_interactions',self.companion_interactions.get())).pack(anchor='w',pady=4)
 
-        label(experiment_box,'Off by default. Face your follower and press A. Restart the game after enabling.',size=9,color=C['muted'],bg=C['surface'],wraplength=620,justify='left').pack(anchor='w',pady=(6,0))
+        label(follower_box,'On by default. Stop, face your follower and press R+A, or tap it. Changes apply next launch.\nShow or hide followers in Unova → Settings.',size=9,color=C['muted'],bg=C['surface'],wraplength=620,justify='left').pack(anchor='w',pady=(6,0))
         cheats=card(parent);cheats.pack(fill='x')
         box=tk.Frame(cheats,bg=C['surface']);box.pack(fill='x',padx=18,pady=16)
         label(box,'OPTIONAL CHEATS',size=9,bold=True,bg=C['surface']).pack(anchor='w')
@@ -638,6 +709,10 @@ class Launcher(tk.Tk):
         try:
             if self.config_path.stat().st_size>65536:return
             data=json.loads(self.config_path.read_text(encoding='utf-8'))
+            if data.get('selected_game') in game_routes.GAMES.values():self.selected_game.set(data['selected_game'])
+            for key,var in (('research_root',self.research_root),('research_address',self.research_address)):
+                if isinstance(data.get(key),str) and len(data[key])<4096:var.set(data[key])
+            if data.get('research_mode') in game_routes.MODES:self.research_mode.set(data['research_mode'])
             if isinstance(data.get('rom'),str):self.rom.set(data['rom'])
             if isinstance(data.get('profiles'),list):self.play_profiles=[services.normalize(i) for i in data['profiles'][:16] if isinstance(i,dict) and re.fullmatch(r'[a-f0-9]{32}',str(i.get('id',''))) and isinstance(i.get('rom'),str)]
             self.active_profile_id=str(data.get('active_profile',''))
@@ -653,12 +728,16 @@ class Launcher(tk.Tk):
             item=self._active_profile();item['rom']=self.rom.get();item['preferences']=dict(self.preference_values)
         try:
             self.config_path.parent.mkdir(parents=True,exist_ok=True);pending=self.config_path.with_suffix('.pending')
-            pending.write_text(json.dumps({'rom':self.rom.get(),'check':self.auto.get(),'music':self.music.get(),'preferences':self.preference_values,'cheats':self.cheat_choices,'profiles':self.play_profiles,'active_profile':self.active_profile_id}),encoding='utf-8');os.replace(pending,self.config_path)
+            pending.write_text(json.dumps({'selected_game':self.selected_game.get(),'research_root':self.research_root.get(),'research_mode':self.research_mode.get(),'research_address':self.research_address.get(),'rom':self.rom.get(),'check':self.auto.get(),'music':self.music.get(),'preferences':self.preference_values,'cheats':self.cheat_choices,'profiles':self.play_profiles,'active_profile':self.active_profile_id}),encoding='utf-8');os.replace(pending,self.config_path)
         except OSError as exc:self.status.set('Could not save settings: '+str(exc))
 
     def _sync(self):
+        self.library_details['black2'].set(self._version_text())
         path=Path(self.rom.get());valid=path.is_file() and path.suffix.lower()=='.nds';running=self.game is not None and self.game.poll() is None
         present=(self.root/'builds/current/melonDS.exe').is_file()
+        set_enabled(self.research_play,not self.busy,'primary')
+        for control in self.library_buttons.values():set_enabled(control,not self.busy,'primary')
+        for control in self.research_launch_buttons:set_enabled(control,not self.busy,'primary')
         set_enabled(self.play,valid and not self.busy and not running and present,'primary')
         set_enabled(self.lan_host_button,valid and not self.busy and not running and present and self.net_mode.get()!='Solo','primary')
         set_enabled(self.lan_retry_button,valid and not self.busy and present and self.net_mode.get()!='Solo')
@@ -674,11 +753,57 @@ class Launcher(tk.Tk):
             'Choose your own matching Black 2 or Redux ROM.' if not self.rom.get() else 'ROM not found. Browse to an existing .nds file.' if not valid else 'Ready to play.')
         self.game_hint.configure(text=message)
 
+    def _game_selected(self,save=True):
+        mod=next((key for key,spec in game_routes.MODS.items() if spec['game']==self.selected_game.get()),None)
+        if mod is None:return
+        self._open_mod(mod,save=save)
+
+    def _open_mod(self,mod,save=True):
+        if self.busy:self.status.set('Wait for the current operation before changing mods.');return
+        if mod not in game_routes.MODS:return
+        self.active_mod=mod;self.selected_game.set(game_routes.MODS[mod]['game'])
+        self._apply_navigation();self.show_page(game_routes.MODS[mod]['pages'][0])
+        self.nav[self.page_name].focus_set()
+        self.status.set('')
+        if save:self._save()
+        self._sync()
+        if mod=='black2' and not self.unova_started and not self.testing:
+            self.unova_started=True
+            if self.auto.get():self.after(300,lambda:self.check() if self.active_mod=='black2' else None)
+            self.after(600,lambda:self.refresh_guides() if self.active_mod=='black2' else None)
+
+    def _apply_navigation(self):
+        self.visible_pages=('Library',)+game_routes.MODS[self.active_mod]['pages'] if self.active_mod else ('Library',)
+        for name,control in self.nav.items():
+            control.pack_forget()
+            if name in self.visible_pages:control.pack(fill='x',padx=12,pady=2)
+        self.mod_caption.configure(text=game_routes.MODS[self.active_mod]['name'] if self.active_mod else 'MULTIPLAYER MODS')
+        self.footer_version.configure(text=self._version_text() if self.active_mod=='black2' else 'Pokemon X · Prototype' if self.active_mod else 'Multiplayer mod library')
+
+    def _return_library(self):
+        if self.busy:self.status.set('Wait for the current operation before changing mods.');return
+        self.active_mod=None;self._apply_navigation();self.show_page('Library')
+        self.status.set('');self.nav['Library'].focus_set()
+
+    def _browse_research(self):
+        path=filedialog.askdirectory(title='Choose prepared Pokemon X co-op folder')
+        if path:self.research_root.set(path);self._save();self._sync()
+
+    def _launch_research(self,mode=None):
+        if self.busy:return
+        selected=mode or game_routes.MODES[self.research_mode.get()]
+        research_root=self.research_root.get();research_address=self.research_address.get()
+        try:game_routes.research_command(research_root,selected,research_address)
+        except (OSError,ValueError) as error:self.status.set(str(error));return
+        self._save();self.status.set('Starting Pokemon X co-op...')
+        self._worker('research-launch',lambda:game_routes.launch_research(research_root,selected,research_address))
+
     def browse(self):
         path=filedialog.askopenfilename(title='Choose your Pokémon Black 2 / Redux ROM',filetypes=[('Nintendo DS ROM','*.nds')])
         if path:self.rom.set(path);self._save()
 
     def _start_lan(self,action):
+        if self.selected_game.get()==game_routes.GAMES['pokemon-x']:self._launch_research('host' if action=='host' else 'guest');return
         if self.busy or self.game is not None and self.game.poll() is None:return
         if self.net_mode.get()=='Solo':self.lan_status.set('Choose LAN or an online mode first.');return
         self.connection_role.set('Host' if action=='host' else 'Join')
@@ -690,6 +815,7 @@ class Launcher(tk.Tk):
             self._worker('lan-'+action,lambda:services.check_relay(value,self._spawn_presence))
 
     def launch(self,lan_action=None):
+        if self.selected_game.get()==game_routes.GAMES['pokemon-x']:self._launch_research('host' if lan_action=='host' else 'guest' if lan_action=='join' else None);return
         if self.busy or self.game is not None and self.game.poll() is None:return
         if lan_action is not None:
             if lan_action not in ('host','join'):raise ValueError('Unknown LAN action')
@@ -710,7 +836,9 @@ class Launcher(tk.Tk):
             prefs.apply(exe.parent,path,settings,selected,self.profile,self.home)
             self._apply_save_folder(exe.parent,item)
             env=dict(os.environ);env.update({'UNOVA_PLAYER_NAME':item['player'],'UNOVA_RELAY_HOST':net['host'],'UNOVA_RELAY_PORT':str(net['port']),'UNOVA_RELAY_ROOM':net['room'],'UNOVA_TRAINER_COOP':'0' if net['mode']=='Solo' else '1','UNOVA_AUTO_CONNECT':'0' if net['mode']=='Solo' else '1'})
-            env['UNOVA_EXPERIMENTAL_COMPANION']='1' if settings.get('companion_interactions',False) else '0'
+            companion='1' if settings.get('companion_interactions',True) else '0'
+            env['UNOVA_COMPANION_INTERACTIONS']=companion
+            env['UNOVA_EXPERIMENTAL_COMPANION']=companion # compatibility with existing released runtimes
             env.pop('UNOVA_AREA_CATALOG',None)
             env.pop('UNOVA_SURROUNDINGS_DIR',None)
             if settings.get('area_scenery',False):
@@ -792,6 +920,8 @@ class Launcher(tk.Tk):
                     self.status.set('Cleanup skipped: '+value);self._sync();continue
                 if action=='tool-result' or action=='error' and finished_operation=='tool-result':
                     self.tool_text.configure(state='normal');self.tool_text.delete('1.0','end');self.tool_text.insert('1.0',value);self.tool_text.configure(state='disabled');self.status.set('Read-only inspection complete.' if action=='tool-result' else 'Inspection could not complete: '+value);self._sync();continue
+                if action=='research-launch':self.status.set(value);self._sync();continue
+                if action=='error' and finished_operation=='research-launch':self.status.set(value);self._sync();continue
                 if action in ('lan-host','lan-join'):
                     self.connection_status.set(value);self.launch(action[4:]);self._sync();continue
                 if action=='connection':
@@ -856,36 +986,53 @@ class Launcher(tk.Tk):
         self._start_lan(self.last_lan_action)
 
     def _features_page(self,parent):
-        self._heading(parent,'FEATURES','Features','Gameplay screenshots from the mod.')
+        self._heading(parent,'FEATURES','Features','Unova Together · feature guide for release 1.0.6')
+        companion=card(parent);companion.pack(fill='x',pady=(0,12))
+        label(companion,'Companion interactions',size=13,bold=True,bg=C['surface']).pack(anchor='w',padx=14,pady=(14,4))
+        label(companion,'Expanded in 1.0.6 · on by default in this launcher',size=9,color=C['muted'],bg=C['surface']).pack(anchor='w',padx=14)
+        for copy in (
+            'Talk, pet, play, praise, tell a story, ask about today, sit together, show a trick, tell a joke or sing together.',
+            'Five friendship bands, four rotating replies per action and subtle nature cues. Hearts, !, ?, stars and notes accompany peeks, sways, hops, spins and short runs.',
+            'Stop, face your follower and press R+A, or tap its sprite. A alone advances game text. Manage interactions in Settings → Following Pokémon; show or hide followers in Unova → Settings.',
+            'Cosmetic only: HP, friendship, items and saves are unchanged.'):
+            text=label(companion,copy,size=10,bg=C['surface'],wraplength=570,justify='left')
+            text.pack(anchor='w',padx=14,pady=(8,4))
+            companion.bind('<Configure>',lambda e,w=text:w.configure(wraplength=max(240,e.width-32)),add='+')
+        button(companion,'Interaction guide',lambda:self.guide('COMPANIONS_AND_SOARING.md')).pack(anchor='w',padx=14,pady=(8,14))
         entries=(
-            ('walking','Walk with a teammate','See your friend on the map. Menu and battle indicators show when they are busy.'),
-            ('items','Give items','Pick a player on your map, choose an item and quantity, then send an offer.'),
-            ('battle','Co-op trainer battles','Take on supported trainers together, or choose solo. Each player keeps their own save. Co-op XP is disabled.'),
-            ('pokemon','Pokémon trades','Offer a party Pokémon and confirm the exchange with your teammate.'),
-            ('camera','Custom camera','Adjust angle, rotation and zoom from the Camera tab.'),
+            ('walking','Explore together','See teammates and their followers on the map. Unova → Players shows their status and offers Join map / Teleport.'),
+            ('items','Give items','Send an item and quantity from Unova → Players. Your teammate accepts the offer; both players save afterward.'),
+            ('battle','Co-op trainer battles','Choose Solo or Co-op before an encounter. Supported trainers and practice rematches use independent parties and saves. Co-op XP is disabled; interrupted battles may roll back.'),
+            ('pokemon','Pokémon trades & player battles','Exchange party Pokémon or request a friendly battle from Unova → Players. Direct trades exclude eggs, held Mail and trade evolutions.'),
+            ('camera','Custom camera','Adjust tilt, rotation and zoom in System → Multiplayer → Camera. Each player chooses their own view.'),
             ('stats','Party IVs & EVs','Open Unova → Pokémon → IVs and EVs to view each Pokémon’s stats.'))
         for asset,title,description in entries:
             panel=card(parent);panel.pack(fill='x',pady=(0,12))
             image=tk.PhotoImage(file=HERE/f'assets/features/{asset}.png');self.images.append(image)
             tk.Label(panel,image=image,bg=C['surface'],bd=0).pack(anchor='w',padx=14,pady=(14,8))
             label(panel,title,size=13,bold=True,bg=C['surface']).pack(anchor='w',padx=14)
-            label(panel,description,size=10,color=C['muted'],bg=C['surface'],wraplength=570,justify='left').pack(anchor='w',padx=14,pady=(6,14))
+            text=label(panel,description,size=10,color=C['muted'],bg=C['surface'],wraplength=570,justify='left');text.pack(anchor='w',padx=14,pady=(6,14))
+            panel.bind('<Configure>',lambda e,w=text:w.configure(wraplength=max(240,e.width-32)))
         extras=card(parent);extras.pack(fill='x')
         for title,copy in (
-            ('Following Pokémon','Your first party Pokémon follows your footsteps. All 649 species have directional sprites; no party-icon substitutes.'),
-            ('Players & travel','Find teammates in Players and use Join map / Teleport to map.'),
-            ('LAN & internet play','Host or join from Co-op. Tailscale is supported; the UDP bridge is experimental and needs your own server.'),
-            ('Battle requests','Select a teammate in Unova → Players to invite them to a friendly battle.'),
-            ('Field tools','Open Unova → Pokémon to find encounters by season and relearn level-up moves. Owned HMs work in the field without using battle move slots.'),
-            ('Companion interactions','Enable companion interactions in Settings, then talk to, pet or play with your lead Pokémon from Unova → Pokémon.'),
-            ('Profiles & backups','Separate games and save folders, create backups, and restore them from Tools.'),
-            ('Settings & updates','Edit emulator options, toggle reviewed cheats, read release notes and install verified updates.')):
+            ('Following Pokémon','All 649 base species have directional sprites and idle movement. Change your lead to change your follower. Toggle your own or teammate followers, or greet a teammate’s Pokémon, in Unova → Settings. Shiny colours and full form coverage are not included.'),
+            ('Encounter finder & move relearning','Unova → Pokémon lists ordinary wild encounters by season and offers free level-up move relearning. Gifts, scripted legendaries and Hidden Grottos are excluded.'),
+            ('Field HMs','Owned HMs work without occupying battle move slots. Native story requirements still apply; Fly needs an available field-action slot.'),
+            ('Solo XP','Supported solo battles award 1.25× XP automatically. Existing XP is unchanged. Co-op battles award no XP.'),
+            ('Area battle scenery · optional','Generate nearby battle scenery locally from your ROM. Enable Nearby battle scenery in Settings. This remains experimental; special scenes keep original backgrounds, and environments are not all playtested.'),
+            ('LAN & internet play','Host, join and retry from Co-op. Use Tailscale across networks. The UDP bridge is experimental and needs your group’s server and Python; no public server is supplied.'),
+            ('Games & saves','Separate save slots, automatic names and per-slot settings. Back up and restore saves from Games & saves or Tools; old installations can be cleaned while keeping saves and backups.'),
+            ('Gen 5 tools','Check ROM compatibility, compare copied saves and estimate Redux Challenge XP budgets. These tools read data; they do not edit your game.'),
+            ('Settings & maintenance','Controller navigation, music, emulator settings and reviewed optional cheats. Verified updates, repair and reviewed troubleshooting reports are available.')):
             label(extras,title,size=12,bold=True,bg=C['surface']).pack(anchor='w',padx=14,pady=(12,4))
-            label(extras,copy,size=10,color=C['muted'],bg=C['surface'],wraplength=570,justify='left').pack(anchor='w',padx=14,pady=(0,8))
-        button(parent,'Known issues',lambda:self.guide('KNOWN_ISSUES.md')).pack(anchor='w',pady=12)
+            text=label(extras,copy,size=10,color=C['muted'],bg=C['surface'],wraplength=570,justify='left');text.pack(anchor='w',padx=14,pady=(0,8))
+            extras.bind('<Configure>',lambda e,w=text:w.configure(wraplength=max(240,e.width-32)),add='+')
+        guides=tk.Frame(parent,bg=C['background']);guides.pack(fill='x',pady=12)
+        for title,doc in (('Feature guide','FEATURES.md'),('Known issues','KNOWN_ISSUES.md'),('Roadmap','ROADMAP.md')):
+            button(guides,title,lambda name=doc:self.guide(name)).pack(side='left',padx=(0,8))
 
     def _cycle_page(self,direction):
-        names=list(self.nav);self.show_page(names[(names.index(self.page_name)+direction)%len(names)]);self.nav[self.page_name].focus_set();return 'break'
+        names=list(self.visible_pages);self.show_page(names[(names.index(self.page_name)+direction)%len(names)]);self.nav[self.page_name].focus_set();return 'break'
 
     def _controller_action(self,action):
         focused=self.focus_get()
@@ -893,7 +1040,10 @@ class Launcher(tk.Tk):
         elif action=='previous':self._cycle_page(-1)
         elif action=='back':
             if focused and focused.winfo_toplevel()!=self:focused.winfo_toplevel().destroy()
-            else:self.show_page('Play');self.nav['Play'].focus_set()
+            else:
+                first=game_routes.MODS[self.active_mod]['pages'][0] if self.active_mod else 'Library'
+                if self.page_name==first:self._return_library()
+                else:self.show_page(first);self.nav[first].focus_set()
         elif action in ('up','down'):
             widget=focused or self.nav[self.page_name]
             target=widget.tk_focusPrev() if action=='up' else widget.tk_focusNext()
@@ -942,7 +1092,7 @@ class Launcher(tk.Tk):
 
     def _restart_updated_launcher(self):
         # Restart the installed launcher, preserving the persistent profile/save home.
-        executable=self.root/'launcher/Unova Together.exe'
+        executable=Path(sys.executable) if getattr(sys,'frozen',False) else self.root/'launcher/Unova Together.exe'
         try:
             if not executable.is_file():raise OSError('Updated launcher executable is missing.')
             self._save()

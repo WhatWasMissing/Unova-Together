@@ -234,8 +234,27 @@ class LauncherTests(unittest.TestCase):
         with patch('launcher_ui.preferences.running',return_value=False),patch('launcher_ui.app.subprocess.Popen',return_value=proc) as spawn:
             self.app.launch();self.assertEqual(spawn.call_args.kwargs['env']['UNOVA_PLAYER_NAME'],'Tester')
             self.assertEqual(spawn.call_args.kwargs['env']['UNOVA_RELAY_ROOM'],'friends')
+            self.assertEqual(spawn.call_args.kwargs['env']['UNOVA_COMPANION_INTERACTIONS'],'1')
+            self.assertEqual(spawn.call_args.kwargs['env']['UNOVA_EXPERIMENTAL_COMPANION'],'1')
         self.app.game=None;self.app.profile_picker.current(1);self.app._select_profile();self.assertEqual(self.app.volume.get(),75)
         self.assertIn('play-profiles',self.app.save_dir.get())
+
+    def test_companion_default_and_explicit_off_survive_profile_switch_restart_and_launch(self):
+        self.assertTrue(self.app.companion_interactions.get())
+        self.app._preference('companion_interactions',False)
+        first=self.app.active_profile_id
+        self.app._new_profile();self.assertTrue(self.app.companion_interactions.get())
+        self.app.profile_picker.current(0);self.app._select_profile()
+        self.assertEqual(self.app.active_profile_id,first);self.assertFalse(self.app.companion_interactions.get())
+        self.app.destroy();self.app=Launcher(self.home,testing=True);self.app._open_mod('black2',save=False);self.app.update()
+        self.assertFalse(self.app.companion_interactions.get())
+        self.app.rom.set(str(self.rom));self.app.player.set('Tester')
+        proc=MagicMock();proc.poll.return_value=None
+        with patch('launcher_ui.preferences.running',return_value=False),patch('launcher_ui.app.subprocess.Popen',return_value=proc) as spawn:
+            self.app.launch()
+            self.assertEqual(spawn.call_args.kwargs['env']['UNOVA_COMPANION_INTERACTIONS'],'0')
+            self.assertEqual(spawn.call_args.kwargs['env']['UNOVA_EXPERIMENTAL_COMPANION'],'0')
+        self.app.game=None
 
     def test_connection_worker_and_restore_running_guard(self):
         with patch('launcher_ui.services.probe',return_value='Relay reachable'):

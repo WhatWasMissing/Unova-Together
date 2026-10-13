@@ -16,7 +16,7 @@ class LauncherTests(unittest.TestCase):
         (game/'melonDS.exe').write_bytes(b'not a real executable');(game/'VERSION.txt').write_text('0.3.5')
         (game/'melonDS.toml').write_text('# private controls\n')
         self.rom=self.home/'fixture.nds';self.rom.write_bytes(b'disposable ROM placeholder')
-        self.app=Launcher(self.home,testing=True);self.app.update_idletasks();self.app.update()
+        self.app=Launcher(self.home,testing=True);self.app._open_mod('black2',save=False);self.app.update_idletasks();self.app.update()
     def tearDown(self):
         self.app.destroy();self.temp.cleanup()
     def wait(self):
@@ -27,6 +27,58 @@ class LauncherTests(unittest.TestCase):
         base=f'https://github.com/{u.REPO}/releases/download/v{v}/'
         return {'release':{'version':v,'numbers':u.version(v),'name':f'Unova-Together-{v}-Windows-x64.zip','size':100,'url':base+'release.zip','sums':base+'sums.txt'},
                 'news':u.release_news([{'tag_name':'v'+v,'name':'Official release '+v,'body':'## Changes\nReal release notes.','published_at':'2026-10-08'}])}
+    def test_game_selection_keeps_ds_rom_and_profiles_separate(self):
+        from launcher_ui import game_routes
+        self.app.rom.set(str(self.rom));profile=self.app.active_profile_id
+        self.app.selected_game.set(game_routes.GAMES['pokemon-x']);self.app._game_selected();self.app.update()
+        self.assertTrue(self.app.research_card.winfo_ismapped());self.assertFalse(self.app.ds_game_card.winfo_ismapped())
+        self.assertEqual(self.app.rom.get(),str(self.rom));self.assertEqual(self.app.active_profile_id,profile)
+        stored=json.loads(self.app.config_path.read_text());self.assertEqual(stored['selected_game'],game_routes.GAMES['pokemon-x'])
+        if OUTPUT:
+            self.app.attributes('-topmost',True);self.app.lift();self.app.update();time.sleep(.2)
+            x,y=self.app.winfo_rootx(),self.app.winfo_rooty();w,h=self.app.winfo_width(),self.app.winfo_height()
+            ImageGrab.grab(bbox=(x,y,x+w,y+h)).save(OUTPUT/'pokemon-x.png')
+        self.app.selected_game.set(game_routes.GAMES['black2']);self.app._game_selected();self.app.update()
+        self.assertTrue(self.app.ds_game_card.winfo_ismapped());self.assertFalse(self.app.research_card.winfo_ismapped())
+
+    def test_library_is_startup_even_after_last_mod_was_saved(self):
+        from launcher_ui import game_routes
+        self.app.selected_game.set(game_routes.GAMES['pokemon-x']);self.app._save();self.app.destroy()
+        with patch.object(Launcher,'check') as check,patch.object(Launcher,'refresh_guides') as refresh:
+            self.app=Launcher(self.home,testing=True);self.app.update()
+            self.assertEqual(self.app.page_name,'Library');self.assertIsNone(self.app.active_mod)
+            self.assertEqual(self.app.visible_pages,('Library',));check.assert_not_called();refresh.assert_not_called()
+            self.assertEqual(set(self.app.library_buttons),{'black2','pokemon-x'})
+            if OUTPUT:
+                self.app.attributes('-topmost',True);self.app.lift();self.app.update();time.sleep(.2)
+                x,y=self.app.winfo_rootx(),self.app.winfo_rooty()
+                ImageGrab.grab(bbox=(x,y,x+self.app.winfo_width(),y+self.app.winfo_height())).save(OUTPUT/'mod-library.png')
+
+    def test_library_routes_hide_other_mod_pages_and_guard_cross_mod_navigation(self):
+        self.app._return_library();self.app.library_buttons['pokemon-x'].invoke();self.app.update()
+        self.assertEqual(self.app.page_name,'XPlay');self.assertTrue(self.app.research_card.winfo_ismapped())
+        self.assertFalse(self.app.nav['Settings'].winfo_ismapped());self.assertFalse(self.app.nav['Updates'].winfo_ismapped())
+        self.app.show_page('Profiles');self.assertEqual(self.app.page_name,'XPlay')
+        self.app._cycle_page(1);self.assertEqual(self.app.page_name,'XCoop')
+        self.app._controller_action('back');self.assertEqual(self.app.page_name,'XPlay')
+        self.app._controller_action('back');self.assertEqual(self.app.page_name,'Library')
+        self.app.library_buttons['black2'].invoke();self.app.update()
+        self.assertEqual(self.app.page_name,'Play');self.assertTrue(self.app.nav['Settings'].winfo_ismapped())
+        self.assertFalse(self.app.nav['XCoop'].winfo_ismapped())
+
+    def test_mod_switch_waits_for_active_operation_and_missing_x_setup_is_recoverable(self):
+        self.app.busy=True;self.app._open_mod('pokemon-x');self.assertEqual(self.app.active_mod,'black2')
+        self.app.busy=False;self.app._open_mod('pokemon-x');self.app.research_root.set(str(self.home/'missing'))
+        self.app._launch_research();self.assertIn('Choose the prepared',self.app.status.get())
+        self.assertFalse(self.app.busy);self.app._return_library();self.assertEqual(self.app.page_name,'Library')
+
+    def test_selected_3ds_game_dispatches_its_adapter_without_ds_settings(self):
+        from launcher_ui import game_routes
+        self.app.selected_game.set(game_routes.GAMES['pokemon-x'])
+        with patch.object(self.app,'_launch_research') as launch:
+            self.app.launch();launch.assert_called_once_with(None)
+            launch.reset_mock();self.app._start_lan('host');launch.assert_called_once_with('host')
+
     def test_simple_save_slots_auto_save_and_keep_existing_data(self):
         self.app.rom.set(str(self.rom));self.app.show_page('Profiles');self.app.update()
         self.assertFalse(self.app.profile_advanced_visible);self.assertIn('No save yet',self.app.save_summary.get())
@@ -66,7 +118,7 @@ class LauncherTests(unittest.TestCase):
                 self.assertTrue(self.app.pages[page].winfo_ismapped())
                 self.assertGreater(self.app.nav[page].winfo_height(),20)
                 self.assertLessEqual(self.app.nav[page].winfo_rooty()+self.app.nav[page].winfo_height(),self.app.winfo_rooty()+self.app.winfo_height())
-                self.assertEqual(self.app.title(),'Unova Together · '+('Games & saves' if page=='Profiles' else page))
+                self.assertEqual(self.app.title(),'Pokemon Together · Unova Together · '+('Games & saves' if page=='Profiles' else page))
                 visible_actions={'Play':self.app.play,'News':self.app.news_link,'Updates':self.app.cancel_button}
                 if page in visible_actions:
                     w=visible_actions[page];self.assertGreater(w.winfo_height(),25)
@@ -119,6 +171,12 @@ class LauncherTests(unittest.TestCase):
             close.assert_not_called()
             self.assertIn('Could not restart',self.app.status.get())
             self.assertIn('fixture failure',self.app.update_status.get())
+
+    def test_frozen_hub_restart_keeps_shared_launcher_after_mod_update(self):
+        hub=self.home/'Pokemon Together.exe';hub.write_bytes(b'hub fixture')
+        with patch('launcher_ui.app.sys.frozen',True,create=True),patch('launcher_ui.app.sys.executable',str(hub)),patch('launcher_ui.app.subprocess.Popen') as spawn,patch.object(self.app,'destroy'):
+            self.app._restart_updated_launcher()
+            self.assertEqual(spawn.call_args.args[0],[str(hub),'--home',str(self.home)])
     def test_real_installation_ui_success(self):
         raw=io.BytesIO()
         with zipfile.ZipFile(raw,'w') as z:
@@ -176,8 +234,27 @@ class LauncherTests(unittest.TestCase):
         with patch('launcher_ui.preferences.running',return_value=False),patch('launcher_ui.app.subprocess.Popen',return_value=proc) as spawn:
             self.app.launch();self.assertEqual(spawn.call_args.kwargs['env']['UNOVA_PLAYER_NAME'],'Tester')
             self.assertEqual(spawn.call_args.kwargs['env']['UNOVA_RELAY_ROOM'],'friends')
+            self.assertEqual(spawn.call_args.kwargs['env']['UNOVA_COMPANION_INTERACTIONS'],'1')
+            self.assertEqual(spawn.call_args.kwargs['env']['UNOVA_EXPERIMENTAL_COMPANION'],'1')
         self.app.game=None;self.app.profile_picker.current(1);self.app._select_profile();self.assertEqual(self.app.volume.get(),75)
         self.assertIn('play-profiles',self.app.save_dir.get())
+
+    def test_companion_default_and_explicit_off_survive_profile_switch_restart_and_launch(self):
+        self.assertTrue(self.app.companion_interactions.get())
+        self.app._preference('companion_interactions',False)
+        first=self.app.active_profile_id
+        self.app._new_profile();self.assertTrue(self.app.companion_interactions.get())
+        self.app.profile_picker.current(0);self.app._select_profile()
+        self.assertEqual(self.app.active_profile_id,first);self.assertFalse(self.app.companion_interactions.get())
+        self.app.destroy();self.app=Launcher(self.home,testing=True);self.app._open_mod('black2',save=False);self.app.update()
+        self.assertFalse(self.app.companion_interactions.get())
+        self.app.rom.set(str(self.rom));self.app.player.set('Tester')
+        proc=MagicMock();proc.poll.return_value=None
+        with patch('launcher_ui.preferences.running',return_value=False),patch('launcher_ui.app.subprocess.Popen',return_value=proc) as spawn:
+            self.app.launch()
+            self.assertEqual(spawn.call_args.kwargs['env']['UNOVA_COMPANION_INTERACTIONS'],'0')
+            self.assertEqual(spawn.call_args.kwargs['env']['UNOVA_EXPERIMENTAL_COMPANION'],'0')
+        self.app.game=None
 
     def test_connection_worker_and_restore_running_guard(self):
         with patch('launcher_ui.services.probe',return_value='Relay reachable'):

@@ -7,19 +7,19 @@ ROOT=Path(__file__).resolve().parents[1]
 assets=ROOT/'tools/launcher_ui'
 command=[sys.executable,'-m','PyInstaller','--noconfirm','--onedir','--windowed','--noupx',
          '--exclude-module','numpy',
-         '--name','Unova Together','--icon',str(assets/'assets/launcher.ico'),
+         '--name','Pokemon Together','--icon',str(assets/'assets/launcher.ico'),
          '--version-file',str(assets/'windows-version.txt'),
          '--add-data',str(assets/'theme.json')+';launcher_ui',
          '--add-data',str(assets/'assets')+';launcher_ui/assets',
-         '--distpath',str(ROOT/'builds/launcher-styled-dist'),
-         '--workpath',str(ROOT/'test-fixtures/launcher-styled-build-20261008'),
-         '--specpath',str(ROOT/'test-fixtures/launcher-styled-build-20261008'),
+         '--distpath',str(ROOT/'builds/mod-hub/current'),
+         '--workpath',str(ROOT/'test-fixtures/mod-hub-build-20261013'),
+         '--specpath',str(ROOT/'test-fixtures/mod-hub-build-20261013'),
          str(ROOT/'tools/unova_launcher.py')]
 if __name__=='__main__':
     subprocess.run(command,cwd=ROOT,check=True)
-    destination=ROOT/'builds/launcher-styled-dist/Unova Together'
-    (destination/'BUILD_REVISION.txt').write_text('2026101106\n')
-    (destination/'VERSION.txt').write_text('Unova Together Launcher 1.0.4\n')
+    destination=ROOT/'builds/mod-hub/current/Pokemon Together'
+    (destination/'BUILD_REVISION.txt').write_text('2026101302\n')
+    (destination/'VERSION.txt').write_text('Pokemon Together Launcher 1.0.6\n')
     shutil.copy2(Path(sys.base_prefix)/'LICENSE.txt',destination/'Python-LICENSE.txt')
     distribution=metadata.distribution('pyinstaller')
     license_file=next(p for p in distribution.files if str(p).endswith('/COPYING.txt'))

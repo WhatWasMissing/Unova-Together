@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 import hashlib, json, os, platform, re, socket, uuid, zipfile, threading, time
 import urllib.request
 
-GUIDES=('PLAYER_GUIDE.md','KNOWN_ISSUES.md','TAILSCALE_COOP.md','UDP_SERVER_GUIDE.md','LAUNCHER.md','COMPANIONS_AND_SOARING.md','COOP_TOOLS.md','RELEASE_CHECKS_0.3.5.md')
+GUIDES=('PLAYER_GUIDE.md','KNOWN_ISSUES.md','TAILSCALE_COOP.md','UDP_SERVER_GUIDE.md','LAUNCHER.md','COMPANIONS_AND_SOARING.md','COOP_TOOLS.md','RELEASE_CHECKS_1.0.6.md','FEATURES.md','ROADMAP.md')
 
 def refresh_guides(home):
     """Pin a bounded text-only guide set to one official GitHub commit."""

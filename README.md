@@ -22,6 +22,10 @@ Version **1.0.6** adds nature-aware follower interactions to the modified melonD
 - **Presentation:** custom camera and optional nearby battle scenery built locally from your ROM.
 - **Launcher:** simple save slots, Gen 5 ROM/save/XP tools, LAN Host/Join/Retry, controller navigation, music, settings, optional cheats, save backups/restore, diagnostics, verified updates and repair.
 
+See the [complete feature guide](docs/FEATURES.md) for controls, menu paths and limitations, and the [roadmap](docs/ROADMAP.md) for proposed additions. Priorities are battle recovery, easier connection checks, contextual follower reactions and wider trainer coverage.
+
+The launcher update on `main` moves companion interactions to **Settings → Following Pokémon** and enables them by default when no preference has been saved. Explicit off choices are preserved. The v1.0.6 release downloads retain their original launcher and **Settings → Experimental** option; these source/documentation updates do not replace those assets.
+
 ## Guides and limits
 
 [Release notes](RELEASE_NOTES_1.0.6.md) · [Release checks](docs/RELEASE_CHECKS_1.0.6.md) · [Known limits](docs/KNOWN_ISSUES.md)
@@ -32,4 +36,4 @@ For different networks use [Tailscale](docs/TAILSCALE_COOP.md). The optional [UD
 
 Matching GPL source and checksums accompany the downloads. No ROMs, saves or firmware are bundled. [Authorship](AUTHORSHIP.md) · [Licensing](LICENSING.md). Playtesters: maxback221 and randomitem19.
 
-Solo battles now award **1.25× XP**; co-op XP remains suppressed. See [XP compensation](docs/XP_COMPENSATION.md) and [measured battle results](docs/XP_COMPENSATION_BATTLE_TEST.md). A published 1.0.5 battle verified normal saving and a fresh reload with matching XP, level, moves and badge.
+Solo battles award **1.25× XP**; co-op XP remains suppressed. See [XP compensation](docs/XP_COMPENSATION.md) and [measured battle results](docs/XP_COMPENSATION_BATTLE_TEST.md). The current multiplier passed production-dispatch checks. The documented normal save/reload battle test used historical release 1.0.2's 1.65× multiplier; it is not a new 1.0.5/1.0.6 gameplay test.

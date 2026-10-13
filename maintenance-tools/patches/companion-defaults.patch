@@ -1,0 +1,26 @@
+--- a/source/melonDS/src/frontend/qt_sdl/FollowerInteraction.h
++++ b/source/melonDS/src/frontend/qt_sdl/FollowerInteraction.h
+@@ -7,6 +7,12 @@
+ 
+ // Read-only companion scenes. These never award friendship or write save data.
+ namespace FollowerInteraction {
++inline bool enabledByEnvironment() {
++    // A saved launcher choice wins; the old variable supports released launchers.
++    return qEnvironmentVariable("UNOVA_COMPANION_INTERACTIONS",
++        qEnvironmentVariable("UNOVA_EXPERIMENTAL_COMPANION","1"))=="1";
++}
++
+ inline bool available(const QVariantMap& mon) {
+     return mon.value("ok").toBool() && !mon.value("egg").toBool() &&
+         mon.value("species").toUInt()>0 && mon.value("species").toUInt()<=649;
+--- a/source/melonDS/src/frontend/qt_sdl/MultiplayerPanel.cpp
++++ b/source/melonDS/src/frontend/qt_sdl/MultiplayerPanel.cpp
+@@ -380,7 +380,7 @@
+     acceptButton->setEnabled(false); declineButton->setEnabled(false); cancelButton->setEnabled(false); nativeButton->setEnabled(false);
+     overlayEnabled = new QCheckBox("Show players",this);
+     overlayEnabled->setChecked(true);
+-    companionInteractionsEnabled=qEnvironmentVariable("UNOVA_EXPERIMENTAL_COMPANION")=="1";
++    companionInteractionsEnabled=FollowerInteraction::enabledByEnvironment();
+     followerEnabled = new QCheckBox("Following Pokémon",this);
+     followerEnabled->setChecked(QSettings("PokePlay","Multiplayer").value("followingPokemon",true).toBool());
+     shareBattle=false; // Spectating is no longer offered or advertised.

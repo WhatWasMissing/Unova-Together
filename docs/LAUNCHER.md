@@ -1,87 +1,61 @@
-# Unova Together launcher guide
+# Pokémon Together launcher guide
 
-Open **Unova-Together.exe**, or run **Start Unova Together.cmd** in the extracted portable folder.
+Made by **mvq1303 / WhatWasMissing**, built on melonDS. The shared launcher opens **Mod library** on every launch. Choose **Unova Together** for Black 2/Redux, or the separately prepared **Pokémon X Together** experimental prototype. Each mod has its own pages. Use **Mod library** to switch.
 
-## Play profiles
+Open **Start Unova Together.cmd** in the portable Unova folder, **Start Pokémon Together.cmd** in a shared-launcher installation, or the standalone **Unova-Together.exe** download. Choose your own supported ROM on **Play**.
 
-Open Profiles. The first profile keeps your existing ROM and save folder. Select its ROM on Play. Set a profile name and player name, then Save profile. To switch games, select another profile on Profiles.
+## Games & saves
 
-New profile creates a separate save folder under `play-profiles/<profile>/saves`. It does not copy or move existing saves. To continue an existing game, choose the folder containing its matching `.sav` on Profiles. A blank save folder uses the ROM folder. Each profile remembers its game settings and connection. Removing a profile keeps its saves and backups.
+Select **Manage saves** on Play, or open **Games & saves**. Choose a slot or **New save slot** for a separate adventure. Slot names save automatically; new slots receive separate save folders. Existing slots retain their ROMs, settings and folders. **Advanced save options** contains custom folders, player names and slot removal. Changing folders does not move saves; removing a slot keeps its files and backups.
 
-## Co-op setup
+Save normally in-game, then choose **Back up now**. Select a dated entry and **Restore backup** with all melonDS instances closed. Restoration verifies checksums and backs up current files first. Backups preserve matching normal `.sav`, `.save` and `.dsv` files and numbered instance saves; they do not capture unsaved gameplay or savestates. Tools also offers backup and restore. Backups under `save-backups/<profile>` are not pruned automatically. See [Gen 5 tools](LAUNCHER_GEN5_TOOLS.md).
 
-Choose Local LAN, Internet UDP, Tailscale backup or Solo. Enter the **presence relay** address, its port (usually 8765) and a shared room name. Save connection, then Check relay. A successful check confirms the presence service—not native wireless, another player's ROM, or battle readiness.
+## Co-op connections
 
-For internet play, Open internet setup wizard starts the existing UDP setup helper. Enter the UDP server/role/credentials there. The launcher does not save authentication keys. Tailscale guide opens the included backup instructions. Use launcher Co-op Host/Join for native LAN, or melonDS's network menu. Launch passes the profile's player/relay fields to the emulator. Solo disables automatic presence connection and trainer co-op for that launch.
+Choose **Local LAN**, **Tailscale backup**, **Internet UDP** or **Solo**. Player sharing uses a presence-relay address, port (usually 8765) and room. **Save connection** stores them; **Check relay** checks the sharing service. The compiled launcher can host that service without separate Python.
 
-Keep both games at normal speed, with C-Gear wireless OFF and matching mod/ROM revisions. Settings keeps game volume and display preferences per profile; the startup update checkbox is shared. Co-op launches keep the emulator running when focus moves away.
+**Host & play** starts the selected ROM and a native LAN lobby; **Join & play** uses the host address. Launch the host first. The launcher remembers the role/address per save slot. **Retry** uses that role; save normally and close the running game before retrying. Lobby capacity is a native LAN setting, not a guarantee that every mod battle mode supports that many players.
 
-## Save backups and restore
+For different networks, connect both PCs through Tailscale and use the host's Tailscale address. Experimental UDP uses its separate setup helper and needs your group's server, Python and dependencies. No public server is supplied. Do not combine UDP and Tailscale native LAN for one session.
 
-Save normally first. Tools → Back up saves creates a dated, checksummed ZIP for the selected profile. Backups include normal `.sav`/`.dsv` files (and numbered instance saves), not savestates or unsaved gameplay. Updates and repairs automatically back up every profile's existing save files before downloading. Backups are kept under `save-backups/<profile>` and are not pruned automatically.
+Player sharing and native wireless are separate connections: seeing a teammate does not prove battles are ready. Match game/mod revisions, keep normal speed and C-Gear wireless off, and save independently after completed battles/trades. Solo disables automatic sharing/trainer co-op for that launch. See the [player guide](PLAYER_GUIDE.md) and [known limits](KNOWN_ISSUES.md).
 
-To restore, close **all** melonDS instances, select the backup on Tools and press Restore selected. The current on-disk saves are backed up before restoration. A damaged or mismatched backup is rejected. Open backups folder lets you manage archived ZIPs yourself.
+## Following Pokémon
 
-## Launch checks and repair
+In the updated launcher source/local build, **Settings → Following Pokémon → Companion interactions** is enabled by default unless you saved an off choice. It applies on the next game launch. Followers themselves already default on; show or hide your own/teammates' followers in **Unova → Settings**.
 
-Tools → Run launch checks checks the executable, ROM compatibility fingerprint and frame-limit/focus settings. Missing executable/ROM blocks launching. C-Gear, live fast-forward, the partner's game version and ROM revision cannot be verified before connecting; the checks say which steps remain in-game.
+Stop, face the follower and press **R+A**, or tap its sprite. A alone advances normal game text. There are ten interaction actions, friendship/nature-aware replies and short animated reactions. Interactions do not change HP, friendship, items or saves. See the [interaction guide](COMPANIONS_AND_SOARING.md).
 
-Verify installed files compares game executables/DLLs with the installation checksum record. It is an integrity check, not an anti-tamper system. For missing or damaged files, Find repair download finds the official published release matching the installed version (latest if no version can be recovered), then Repair game files downloads and checks its GitHub SHA-256 archive. Repair creates a new side-by-side slot; the old runtime, configuration, profiles, saves and current launcher are preserved. Published game files replace local game customizations, including this local profile integration if it has not yet shipped publicly.
+The published v1.0.6 downloads include the preceding launcher and its **Settings → Experimental** toggle. Enable it and restart in those downloads. Main-branch/local launcher changes do not replace public release assets.
 
-## Troubleshooting
+## Settings and controls
 
-Export troubleshooting bundle creates a ZIP containing version/hash information and at most twenty redacted text-log tails. ROMs, saves, RAM dumps, launcher profiles and credentials are excluded. Review the bundle before sharing; automatic text redaction cannot promise to identify every private detail in arbitrary logs.
+Settings contains per-slot volume, filtering, focus behavior and follower interactions. **Nearby battle scenery** remains explicitly experimental and off by default. It generates a local graphics cache from your ROM; it does not alter ROM/save files.
 
-## Optional cheats
+**All emulator settings** opens a searchable catalog and full configuration editor for controls/hotkeys, display, audio, firmware, networking and paths. Close the game before saving changes. Values use TOML syntax; before-edit backups are created. Pokémon's text speed and battle style remain in its native Options menu.
 
-Choose a supported ROM on Play, then open Settings. The reviewed catalog supports Black 2 USA/Europe and Redux Complete v1.4.1 / Unova Together ARM9 fingerprints. Cheats default off and apply on the next launch.
+Reviewed optional cheats default off and are offered only for supported fingerprints. The catalog explains activation and effects; disabling a cheat does not undo already saved changes. Existing user codes are preserved. The Rare Candy option replaces the first medicine slot. Preserve backups before using it. Source attribution/license is shown in Settings.
 
-- Max money: press Select in the overworld after enabling and launching.
-- Refill repel: press Select in the overworld after enabling and launching.
-- 999 Rare Candies: press L+R in the overworld. This REPLACES the first medicine slot; back up your save first.
+Keyboard: **Tab/Shift+Tab** moves focus, **Enter** activates a button, **Ctrl+Tab/Ctrl+Shift+Tab** changes pages. Xbox-compatible controllers: D-pad/stick moves focus, A selects, B returns/closes an editor, LB/RB changes pages; left/right adjusts a focused dropdown/slider. Controller navigation runs only while the launcher/editor is focused. Addresses still need keyboard input.
 
-Disable and relaunch after use. Disabling does not undo saved items/money. Existing user cheat codes are preserved; turning on the cheat engine also enables any existing codes marked enabled in the copied file. XP/story/battle-changing codes are excluded. Code source attribution and CC BY-SA license are included in Settings.
+## Features, guides and news
 
-## What was verified
+**Features** covers companion actions, exploration, trades, trainer/PvP battles, camera, followers, field tools, solo XP, scenery, saves and maintenance. Existing screenshots illustrate gameplay; they do not establish complete trainer or internet compatibility. **Feature guide**, **Known issues** and **Roadmap** open the detailed guides. Roadmap ideas are separate from shipped features.
 
-Disposable tests cover profile switching/preferences, launch environment, automatic pre-update backups, checksum-verified restore/recovery copies, relay protocol checks, diagnostic redaction, damaged-file detection and verified same-version repair/corrupt active runtime recovery. Native ROM-backed menu integration confirmed profile fields and Solo mode reach the emulator, and existing menu checks still pass. The standalone installed launcher was smoke-tested. Real internet pairing/partner revision and C-Gear checks remain in-game; this work is not a new full co-op battle playtest.
+**Setup → Refresh guides** downloads the official text guides independently of game updates and retains them for offline use. Failed refreshes preserve the previous complete set; bundled guides remain the fallback. **News** shows official GitHub release notes, cached offline.
 
-Made by mvq1303 / WhatWasMissing. Launcher 1.0.2 is included in the full release.
+## Updates, checks and repair
 
+**Updates** downloads official Windows releases, verifies SHA-256 and installs beside the previous runtime. Updates/repairs back up existing save files first. Save normally and close the game before switching.
 
-## Relay addresses and full emulator settings
+**Tools → Run launch checks** checks executable/ROM identity and frame/focus settings. It cannot pre-verify a teammate's game, live C-Gear or every multiplayer event. **Verify installed files** compares executables/DLLs with the integrity record. **Find repair download / Repair game files** restores a checksum-verified published package into a separate slot; published files replace local custom game changes when selected.
 
-Save connection on Co-op applies the address to the updated Multiplayer tab even if Check relay fails. Idle games consume the change within about a second; active battles/trades defer it. Older running builds need to be restarted with this updated build. WinError 10061 means no presence server accepted the connection at that address/port, not that saving the address failed.
+**Tools → Clean old installations** keeps the active and previous build, running builds and user data while pruning recognised older package files. Cleanup also runs at startup. Backups are retained. See [storage details](LAUNCHER_STORAGE.md).
 
-To host sharing, choose Host presence relay here. The compiled launcher hosts it without a separate Python installation. Use Check relay to confirm it started. Guests enter the host PC’s LAN/Tailscale address and matching relay port/room. Allow Windows Firewall access if prompted. Stop hosted relay stops only the process started by this launcher. Closing the launcher leaves its hosted relay running so the game stays connected. Hosting presence does not configure native LAN, UDP wireless or port forwarding. Internet UDP helper prerequisites still apply.
+## Reports and read-only tools
 
-Settings → All emulator settings opens a searchable 176-setting catalog and Full configuration tab. Edit controls/hotkeys, display, audio, firmware, networking and paths. Values use TOML syntax (true/false, numbers, quoted strings or arrays). Apply value stages the row; Save settings validates and saves, with a before-edit backup. Close the game before saving. Changes apply next launch. Profile volume/filter/focus and save-folder fields sync with saved config. Profile-managed optional cheats may override cheat-engine paths/switches at launch; manage them on Settings. Pokémon’s save-owned text speed, battle style and sound settings remain in its in-game Options menu.
+**Tools → Report a problem** creates a redacted troubleshooting ZIP and opens a review window. Inspect it and submit it yourself through GitHub issues. Reports include version/hash information and bounded text logs; ROMs, saves, RAM dumps and credentials are excluded. Nothing is uploaded automatically.
 
-## Launcher LAN and feature overview
+Gen 5 tools check ROM/XP-hook compatibility, compare copied save records and calculate Redux Challenge XP budgets using **1.25× solo XP**. These are read-only tools, not game editors or full compatibility certification.
 
-Co-op → Host & play starts the chosen ROM and a native LAN lobby with the selected capacity (2–16 players). Join & play uses Host address to join it. Player sharing is checked first, and local hosting starts the embedded presence server if required. Launch the host before the guest. For different networks, connect both PCs through Tailscale first; the UDP option still needs its separate experimental setup. These controls start a new emulator process; close the launched game before retrying or changing LAN roles.
-
-Features contains gameplay screenshots for walking, item gifts, co-op battles, Pokémon trades and the camera, plus short notes on travel, connection methods, player battle controls, profiles/backups and settings/updates. Known issues is linked from the page. Screenshot descriptions do not imply that all trainer events or cross-network battle completion have been verified.
-
-## Reconnect, reports and navigation
-
-Co-op remembers your role and the last host address for each profile. Retry uses that role; save normally and close a running game before retrying. A disconnected teammate is reported distinctly from a new lobby waiting for its first guest.
-
-Tools → Report a problem prepares a redacted ZIP, then opens a review window. Open the report folder to inspect it, and use Open GitHub issues to submit it yourself. Nothing is uploaded automatically. Reports contain version/checksum information and bounded text logs, not ROMs, saves, RAM dumps or profile credentials.
-
-Keyboard: Tab / Shift+Tab moves focus, Enter selects a focused button, Ctrl+Tab / Ctrl+Shift+Tab changes launcher pages. XInput controllers (Xbox-compatible): D-pad or left stick moves focus, A selects, B returns/closes an owned editor, LB/RB changes pages. Left/right changes a focused dropdown or volume slider. Type addresses with the keyboard. Launcher controller input only runs while its window/editor has foreground focus.
-
-## Updated guides
-
-The launcher checks the official GitHub guides at startup. Use **Setup > Refresh guides** to check again. Updated guides are downloaded independently of the game and kept for offline use. Failed downloads preserve the previous complete set. Opening a guide uses the downloaded copy when available; bundled guides remain the fallback.
-
-
-
-## Games & saves (1.0.3)
-
-Open Manage saves on Play. Slot names save automatically; new slots have separate folders. Back up now and Restore backup use dated entries. Advanced save options contains custom folders and slot removal. See [Gen 5 tools and save verification](LAUNCHER_GEN5_TOOLS.md).
-
-
-## Installation storage (1.0.4)
-
-Use **Tools → Clean old installations** to recover space while keeping the current and previous build, running builds and user data. Cleanup also runs at startup. See [storage details](LAUNCHER_STORAGE.md).
+See [Features](FEATURES.md), [release checks](RELEASE_CHECKS_1.0.6.md) and the [roadmap](ROADMAP.md) for capability, evidence and future work.

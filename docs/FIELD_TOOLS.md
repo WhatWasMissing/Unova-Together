@@ -44,6 +44,6 @@ otherwise omit. If that Pokémon already knows Fly, its normal Fly entry is
 used. If all four moves already have native field actions, use another party
 Pokémon; this version does not replace an existing field action.
 
-## Beta limitations
+## Gameplay verification limits
 
 Native Fly destination selection and focused HM checks passed. Full obstacle traversal, completed Fly travel and save/reload after relearning still need gameplay testing. Back up your save.

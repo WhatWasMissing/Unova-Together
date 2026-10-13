@@ -6,9 +6,7 @@ Open **Unova** from the game’s pause menu, then choose the **Co-op** tab. Sele
 actions involving another player. These additions need the updated presence
 relay; an older relay still supports its existing features.
 
-- **Followers:** open **Unova → Settings** to toggle
-  your own following Pokémon or hide teammates' followers.
-  Use **Unova → Pokémon → My companion** to talk, pet, play, or greet a teammate’s Pokémon.
+- **Followers:** open **Unova → Settings** to show or hide your own or teammates' followers, or greet a teammate's Pokémon. Stop and face your own follower, then press **R+A**, or tap its sprite, for the ten companion actions. See the [interaction guide](COMPANIONS_AND_SOARING.md) for launcher settings.
 - **Practice battles:** opens the existing challenge catalog. Choose **Practice**
   for a non-progressing battle; it does not award badges or story progress.
 
@@ -30,4 +28,4 @@ other player's story flags or save.
 
 The pause-menu entry is **Unova**. Its four tabs are peers: **Players** for teammate actions, **Pokémon** for party tools, **Co-op** for battle controls, and **Settings** for game options and followers. Use L/R or touch a tab to switch; B closes the menu.
 
-Companion interactions and the Soar preview are described in [Companions and flight preview](COMPANIONS_AND_SOARING.md).
+Current capabilities and restrictions are listed in the [feature guide](FEATURES.md). Proposed improvements are in the [roadmap](ROADMAP.md).

@@ -4,7 +4,7 @@ Unova Together adds shared exploration, item trading and co-op trainer battles t
 
 ## What each player needs
 
-- A Windows x64 PC and the Unova Together 1.0.2 EXE or complete ZIP, extracted into a folder.
+- A Windows x64 PC and the Unova Together 1.0.6 EXE or complete ZIP, extracted into a folder.
 - Their own ROM and save. Both players must use exactly the same game version, including the same Redux revision.
 - A backup of their save before playing together.
 - A connection method below. Tailscale is included; the experimental UDP option also needs Python.
@@ -14,7 +14,7 @@ ROMs, saves and DS firmware are not included. Preset keyboard/controller binding
 ## Start the game
 
 1. Extract the whole ZIP. Keep its folders together.
-2. Open **Start Unova Together.cmd**. Use **Browse** to select your own ROM, then **Play**. **Start Emulator.cmd** remains available for direct launch.
+2. Open **Start Unova Together.cmd**. Choose **Unova Together** from **Mod library**, use **Browse** to select your own ROM, then **Play**. **Start Emulator.cmd** remains available for direct launch.
 3. Start from your normal saved game. The launcher runs without Python; network helper scripts still require it where indicated.
 4. Turn **fast-forward off** before connecting. Keep it off during shared battles.
 5. Open **System → Multiplayer**. Choose a player name different from your friend's.
@@ -26,7 +26,7 @@ Each player keeps their own save. Avoid loading savestates while connected.
 | Where you are playing | Use this |
 | --- | --- |
 | On the same home network | The local setup below |
-| On different networks | [Tailscale setup](TAILSCALE_COOP.md), recommended for this beta |
+| On different networks | [Tailscale setup](TAILSCALE_COOP.md), recommended for different networks |
 | On different networks, with a UDP server address supplied | The experimental UDP setup below |
 
 There is no default public Unova Together server. If nobody has supplied a UDP server, use Tailscale. Do not run the UDP helper and a Tailscale native LAN connection for the same session.
@@ -104,3 +104,9 @@ Include your Unova Together version, game/Redux version, which PC hosted, connec
 ## Optional camera settings
 
 Open **System → Multiplayer → Camera**. Enable **Adjust game camera (experimental)**, then change tilt, rotation or zoom. These are local visual settings; your teammate can use a different angle. Start with small adjustments. Disable the adjustment to restore the normal camera if buildings obscure the player or the view behaves unexpectedly.
+
+## Followers and feature guides
+
+Following Pokémon default on. Manage them in **Unova → Settings**. Face a still follower and press **R+A**, or tap it, for companion actions. The updated launcher defaults interactions on under **Settings → Following Pokémon**; the original v1.0.6 download uses an off-by-default **Settings → Experimental** toggle. A alone advances normal game text.
+
+See [Features](FEATURES.md) for current controls and limits, [Companions](COMPANIONS_AND_SOARING.md) for all ten actions, and [Roadmap](ROADMAP.md) for proposed additions.

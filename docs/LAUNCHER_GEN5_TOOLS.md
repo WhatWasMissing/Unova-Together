@@ -1,14 +1,14 @@
 # Games, saves and Gen 5 tools
 
-Original launcher contributions by mvq1303 / WhatWasMissing. Launcher 1.0.3, build revision 2026101105.
+Original launcher contributions by mvq1303 / WhatWasMissing. These tools remain available in current builds; the verification below records the historical 1.0.3 pass.
 
-Open **Start Unova Together.cmd**. On Play, **Manage saves** opens **Games & saves**.
+Open **Start Unova Together.cmd** and choose **Unova Together** from **Mod library**. On Play, **Manage saves** opens **Games & saves**.
 
 Choose a save slot, or select **New save slot** to start a separate adventure with the selected ROM. New slots get separate save folders automatically. Existing profiles keep their original folders and settings. Names save automatically. Custom save folders and player names are under **Advanced save options**; changing folders does not move existing saves. Removing a slot keeps its files and backups.
 
 After saving in-game, select **Back up now**. Choose a dated backup and select **Restore backup** with all melonDS instances closed. Restore checks file sizes and SHA-256 hashes before writing and backs up current files first. Backup and restore preserve matching ROM-stem `.sav`, `.save` and `.dsv` files, including numbered instance files such as `Redux.2.save`. Saves for other ROM stems are excluded. `.save` support preserves opaque file contents; it does not convert formats. melonDS normally uses `.sav`.
 
-**Tools** contains ROM compatibility checks, a read-only save comparison and a Redux Challenge progression calculator. The ROM checker covers the English Black 2 identity and the solo XP hook's code fingerprints; it does not certify every multiplayer feature or edited asset. The calculator reads exact growth tables and trainer teams from the reviewed Redux Complete 1.4.1 ROM, uses the selected 1.65× multiplier and allows all six growth groups and a missing-XP percentage. It reports XP-budget equivalents from level 5, not predicted playthrough levels. Documented Challenge caps include runtime difficulty shifts. Save comparison verifies both party bank checksums and individual Pokémon checksums, showing species, identity, XP, level, HP and moves; it does not validate every save block or guess which differing bank is newest.
+**Tools** contains ROM compatibility checks, a read-only save comparison and a Redux Challenge progression calculator. The ROM checker covers the English Black 2 identity and the solo XP hook's code fingerprints; it does not certify every multiplayer feature or edited asset. The calculator reads exact growth tables and trainer teams from the reviewed Redux Complete 1.4.1 ROM, uses the current 1.25× multiplier and allows all six growth groups and a missing-XP percentage. It reports XP-budget equivalents from level 5, not predicted playthrough levels. Documented Challenge caps include runtime difficulty shifts. Save comparison verifies both party bank checksums and individual Pokémon checksums, showing species, identity, XP, level, HP and moves; it does not validate every save block or guess which differing bank is newest.
 
 ## Verification on 11 October 2026
 

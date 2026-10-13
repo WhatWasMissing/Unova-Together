@@ -22,16 +22,16 @@ def main():
         from presence_server import run
         asyncio.run(run('0.0.0.0',args.presence_relay));return
     executable=Path(sys.executable if getattr(sys,'frozen',False) else __file__).resolve()
-    home=(args.home or executable.parent.parent).resolve()
+    installed_unova=Path('F:/unova-together')
+    home=(args.home or (installed_unova if (installed_unova/'builds/current/melonDS.exe').is_file() else executable.parent.parent)).resolve()
     root=updates.active_root(home,allow_missing=True)
-    delegate=root/'launcher/Unova Together.exe'
-    if getattr(sys,'frozen',False) and not args.self_test and delegate.is_file() and delegate.resolve()!=executable:
-        subprocess.Popen([str(delegate),'--home',str(home)],cwd=root);return
+    # The shared hub owns navigation. A mod update must not delegate to its older launcher.
     app=Launcher(home,testing=bool(args.self_test))
     if args.self_test:
         def verify():
             app.update_idletasks()
-            result={'title':app.title(),'version':app._version_text(),'playDisabledWithoutROM':str(app.play['state'])=='disabled','updateCheckAvailable':str(app.check_button['state'])=='normal','windowCreated':app.winfo_exists()==1,'pages':list(app.pages),'offlineNews':len(app.news),'artworkLoaded':len(app.images)}
+            result={'title':app.title(),'startupPage':app.page_name,'modLibrary':list(app.library_buttons),'version':app._version_text(),'playDisabledWithoutROM':str(app.play['state'])=='disabled','updateCheckAvailable':str(app.check_button['state'])=='normal','windowCreated':app.winfo_exists()==1,'pages':list(app.pages),'offlineNews':len(app.news),'artworkLoaded':len(app.images)}
+            app._open_mod('black2',save=False)
             def widget_texts(widget):
                 values=[]
                 try: values.append(str(widget.cget('text')))
@@ -41,6 +41,8 @@ def main():
             credit_text='\n'.join(widget_texts(app))
             result['experimentalControlsPresent']='Companion interactions' in credit_text
             result['companionExperimentEnabled']=app.companion_interactions.get()
+            result['followerSettingsPresent']='FOLLOWING POKÉMON' in credit_text
+            result['companionInteractionsEnabled']=app.companion_interactions.get()
             result['soaringOptionRemoved']='Latias / Latios flight preview' not in credit_text
             result['playtesterCreditsVisible']=all(name in credit_text for name in ('maxback221','randomitem19'))
             result['cleanupButtonPresent']='Clean old installations' in credit_text

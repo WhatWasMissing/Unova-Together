@@ -41,6 +41,8 @@ def main():
             credit_text='\n'.join(widget_texts(app))
             result['experimentalControlsPresent']='Companion interactions' in credit_text
             result['companionExperimentEnabled']=app.companion_interactions.get()
+            result['followerSettingsPresent']='FOLLOWING POKÉMON' in credit_text
+            result['companionInteractionsEnabled']=app.companion_interactions.get()
             result['soaringOptionRemoved']='Latias / Latios flight preview' not in credit_text
             result['playtesterCreditsVisible']=all(name in credit_text for name in ('maxback221','randomitem19'))
             result['cleanupButtonPresent']='Clean old installations' in credit_text

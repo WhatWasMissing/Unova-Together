@@ -10,3 +10,11 @@ Frost: https://github.com/FrostFalcon/FrostsGen5Editor
 PKHeX: https://github.com/kwsch/PKHeX
 
 The imported `crypt` function is used only to decode records during verification. The fixture-healing utility is retained as source for that import; it is not called to manufacture a battle or save/reload result.
+
+## Follower defaults and feature review — 13 October 2026
+
+The current launcher source (also in `launcher-source`) has a revised Features page, feature/roadmap guides and normal **Following Pokémon** settings. Companion interactions default on when no preference was saved; explicit off choices survive save-slot switches, restart and launch. The launcher supplies the new `UNOVA_COMPANION_INTERACTIONS` variable and the legacy variable for existing released runtimes.
+
+`patches/companion-defaults.patch` contains the corresponding native change relative to the published **1.0.6 source ZIP**, preserving attribution. From its extracted `Unova-Together-Source` folder, apply the patch with `git apply --ignore-space-change /path/to/companion-defaults.patch`, then build with `source/melonDS/README.md`. This makes direct emulator launches default on too; an explicit new/legacy environment override still controls it. It does not alter the interaction or A-button gates.
+
+Compile the production interaction/default-policy checks with `python tools/test_companion_and_soaring.py` after overlaying these tools onto the source workspace. Launcher checks are `test_launcher_ui.py`, `test_launcher_services.py` and `test_launcher_preferences.py`; use Python 3.12 with TOMLKit and Pillow. No live ROM gameplay session is implied by these tests. Existing public release assets are unchanged.

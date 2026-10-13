@@ -1,47 +1,19 @@
 # Solo XP compensation
 
-Unova Together now multiplies newly awarded solo battle XP by **1.25×** on the
-supported English Black 2 and Redux profiles. This is a native emulator change;
-the launcher needs no additional setting. Existing accumulated XP is untouched.
+Unova Together **1.0.5 and 1.0.6** multiply newly awarded solo battle XP by **1.25×** on supported English Black 2 and Redux profiles. No launcher setting is needed. Existing accumulated XP is unchanged. **Co-op XP remains disabled.**
 
-The multiplier runs after native level scaling, XP sharing, traded Pokémon
-bonuses and Lucky Egg calculations, before reward text and XP application.
-Fractional XP rounds down for each Pokémon. The native 100,000 XP award limit
-remains in force. Flags and EV rewards are preserved. Co-op still suppresses
-XP: its cleared reward records remain zero after multiplication.
+The multiplier runs after native level scaling, XP sharing, traded Pokémon bonuses and Lucky Egg calculations, before reward text/application. Fractional XP rounds down per award. The native 100,000 XP award limit, flags and EV rewards are preserved. Cleared co-op reward records remain zero.
 
-The hook verifies the cartridge identity, instruction mode, RAM layout, caller,
-reward builder, epilogue, output offset and reward bounds. Unknown layouts are
-left alone. The builder returns using a dynamic POP to PC, which terminates the
-JIT block; the same return boundary is handled by the interpreter and JIT.
+At 1.25×, the replacement XP budget balances approximately **20% of the original earned XP being missed** in co-op. This is a budget calculation, not a playthrough prediction. Encounter choices and level-dependent XP feedback affect actual levels. The launcher's Redux Challenge progression calculator uses the same 1.25× rate.
 
-At 1.25×, the replacement budget balances approximately **20% XP lost** to
-co-op. This is a budget calculation, not a prediction of an actual playthrough.
-See the selected-multiplier table in
-`research/xp-balance-20261011/REPORT.md` for Redux Challenge examples.
+## Compatibility and validation
 
-Validation: compiled production-dispatch checks against genuine private Redux
-and English Black 2 overlays cover multiplier rounding, the award cap, unchanged
-flags/EV bytes, zeroed co-op rewards, and refusal of foreign or invalid contexts.
-Existing compiled story return and shutdown tests also pass. These checks do
-initially did not constitute an end-to-end solo battle and save/reload XP test.
+The hook checks cartridge identity, instruction mode, RAM layout, caller, reward-builder/return fingerprints, offsets and reward bounds. Unsupported layouts retain native behavior. The dynamic POP-to-PC return boundary is handled by both interpreter and JIT dispatch.
 
-A subsequent genuine solo Cheren battle completed on both the normal and boosted
-builds: 498 XP normally, 807 XP with the multiplier, with the badge awarded and
-actual party XP verified in RAM. See `docs/XP_COMPENSATION_BATTLE_TEST.md`.
-The original automated save input did not write the post-battle result to disk.
-A subsequent published 1.0.2 battle now verifies the native save, independent
-PKHeX parsing and a fresh normal boot: 5,951 XP / level 20 and the badge persist.
-See the follow-up in `docs/XP_COMPENSATION_BATTLE_TEST.md`. These battle checks
-used the interpreter; end-to-end JIT behavior remains unverified.
+Current 1.25× production-dispatch checks passed against genuine Redux and English Black 2 overlays: rounding, award cap, unchanged flags/EV bytes, zero co-op awards and refusal of invalid contexts. These checks do not establish a new end-to-end JIT or full-playthrough test.
 
-The native menu smoke attempts using `Redux.ml1` and `courtyard-check.ml1`
-produced no report and were stopped; they are not counted as passed. Logs are
-retained under `test-fixtures/coop-launcher/xp-165-native-menu*`.
+## Historical battle and save/reload evidence
 
-This change shipped in the 1.0.2 full release. Previous 1.0.1
-release assets are unchanged.
-The previous local emulator is backed up at
-`builds/backups/xp-165-20261011/melonDS.exe`.
+Release **1.0.2 used 1.65×**, before 1.0.5 reduced it to 1.25×. Its documented solo Cheren test awarded the badge, saved 5,951 Servine XP / level 20 and reloaded those records in a fresh emulator. Independent PKHeX parsing checked the save and Pokémon checksums. The fixture used boosted combat stats and the interpreter; it does not establish normal Challenge difficulty.
 
-The battle measurements above are historical tests of the previous 1.65x release. Version 1.0.5 uses 1.25x and passed updated compiled dispatch checks.
+That historical test verifies the recorded 1.0.2 result. It is **not** a fresh battle/save/reload validation of the current 1.25× release. Failed earlier saving attempts remain documented separately. See [measured battle results](XP_COMPENSATION_BATTLE_TEST.md), [1.0.5 notes](../RELEASE_NOTES_1.0.5.md) and [known limits](KNOWN_ISSUES.md).

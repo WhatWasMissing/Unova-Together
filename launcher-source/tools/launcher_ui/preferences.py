@@ -53,8 +53,9 @@ def defaults(runtime):
         doc=read_document(runtime);instance=doc.get('Instance0',{})
         return {'pause':bool(doc.get('PauseLostFocus',False)),
                 'volume':round(instance.get('Audio',{}).get('Volume',256)*100/256),
-                'filter':bool(doc.get('Screen',{}).get('Filter',True))}
-    except (OSError,ValueError,TypeError,tomlkit.exceptions.ParseError):return {'pause':False,'volume':100,'filter':True}
+                'filter':bool(doc.get('Screen',{}).get('Filter',True)),
+                'companion_interactions':True}
+    except (OSError,ValueError,TypeError,tomlkit.exceptions.ParseError):return {'pause':False,'volume':100,'filter':True,'companion_interactions':True}
 
 def atomic(path,text):
     path=Path(path);path.parent.mkdir(parents=True,exist_ok=True)
