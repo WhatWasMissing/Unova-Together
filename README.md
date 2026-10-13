@@ -1,16 +1,16 @@
 # Unova Together
 
-**Current stable release: 1.0.9.** Adds migration for old client launcher shortcuts and a permanent entry that follows future updates: [downloads](https://github.com/WhatWasMissing/Unova-Together/releases/tag/v1.0.9). Made by mvq1303 / WhatWasMissing, built on melonDS.
+**Current stable release: 1.0.10.** Fixes movement hitching, disappearing followers, idle bobbing and Redux shiny follower colours: [downloads](https://github.com/WhatWasMissing/Unova-Together/releases/tag/v1.0.10). Made by mvq1303 / WhatWasMissing, built on melonDS.
 
 Explore Unova with friends in supported English Pokémon Black 2 and Blaze Black 2 Redux. Each player uses their own matching ROM and independent save.
 
 ## Download and play
 
-1. [Download version 1.0.9](https://github.com/WhatWasMissing/Unova-Together/releases/tag/v1.0.9). Choose **Unova-Together.exe**, or extract the complete Windows x64 ZIP.
+1. [Download version 1.0.10](https://github.com/WhatWasMissing/Unova-Together/releases/tag/v1.0.10). Choose **Unova-Together.exe**, or extract the complete Windows x64 ZIP.
 2. Open the EXE, or run **Start Unova Together.cmd** in the extracted folder. Choose your ROM and select **Play**.
 3. Open launcher **Co-op** to configure your connection and host or join LAN. Follow the [player guide](docs/PLAYER_GUIDE.md).
 
-Version **1.0.9** fixes the original shared-launcher shortcut while retaining the previous gameplay features. Existing ROMs and saves do not need conversion. Clients still running launcher 1.0.5 should install the game update, then run [Repair-Launcher.exe](https://github.com/WhatWasMissing/Unova-Together/releases/download/v1.0.9/Repair-Launcher.exe) once and select their old launcher. Subsequent updates follow the same entry automatically. See the [migration instructions](RELEASE_NOTES_1.0.9.md). Update every player and restart the presence relay.
+Version **1.0.10** fixes the original shared-launcher shortcut while retaining the previous gameplay features. Existing ROMs and saves do not need conversion. Clients still running launcher 1.0.5 should install the game update, then run [Repair-Launcher.exe](https://github.com/WhatWasMissing/Unova-Together/releases/download/v1.0.10/Repair-Launcher.exe) once and select their old launcher. Subsequent updates follow the same entry automatically. See the [migration instructions](RELEASE_NOTES_1.0.10.md). Update every player and restart the presence relay.
 
 ## Features
 
@@ -30,7 +30,7 @@ The release includes 743 normal/shiny follower variants, supported female/forms,
 
 ## Guides and limits
 
-[Release notes](RELEASE_NOTES_1.0.9.md) · [Release checks](docs/RELEASE_CHECKS_1.0.9.md) · [Known limits](docs/KNOWN_ISSUES.md)
+[Release notes](RELEASE_NOTES_1.0.10.md) · [Release checks](docs/RELEASE_CHECKS_1.0.10.md) · [Known limits](docs/KNOWN_ISSUES.md)
 
 [Launcher](docs/LAUNCHER.md) · [Co-op tools](docs/COOP_TOOLS.md) · [Field tools](docs/FIELD_TOOLS.md) · [Followers](docs/FOLLOWING_POKEMON.md) · [Companions](docs/COMPANIONS_AND_SOARING.md) · [Party stats](docs/PARTY_STATS.md)
 

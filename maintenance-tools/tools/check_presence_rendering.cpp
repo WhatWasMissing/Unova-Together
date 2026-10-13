@@ -107,7 +107,7 @@ int main(int argc,char** argv) {
     assert(SamplePresenceMotion(frames,250).value("running").toBool());
     frames.append({250,state(11.6,10)});assert(!SamplePresenceMotion(frames,350).value("running").toBool());
     // Companion art preserves large dimensions and reduced motion suppresses
-    // idle breathing while retaining the image and reaction symbols.
+    // idle bobbing while retaining the image and reaction symbols.
     auto companion=a;companion.id="companion";companion.position={10,10};companion.companion=true;companion.moving=false;
     companion.sprites.clear();QImage large(64,66,QImage::Format_ARGB32);large.fill(Qt::transparent);
     for(int y=2;y<64;++y) for(int x=1;x<63;++x) large.setPixelColor(x,y,Qt::red);
@@ -115,6 +115,22 @@ int main(int argc,char** argv) {
     companion.companionMotionScale=0;
     assert(PresenceAvatarBounds(c,{10,10},companion,false).width()>40);
     assert(DrawPresenceOverlay(c,{10,10},{companion},false,false,0)==DrawPresenceOverlay(c,{10,10},{companion},false,false,700));
+    // Idle frames must translate the art rather than stretch or squash it.
+    companion.companionMotionScale=1;
+    int minTop=192,maxTop=-1,referenceWidth=-1,referenceHeight=-1,referencePixels=-1;
+    for(int time=0;time<1400;time+=100) {
+        auto image=DrawPresenceOverlay(c,{10,10},{companion},false,false,time);
+        int left=256,right=-1,top=192,bottom=-1,pixels=0;
+        for(int y=0;y<192;++y) for(int x=0;x<256;++x) if(image.pixelColor(x,y)==QColor(Qt::red)) {
+            left=std::min(left,x);right=std::max(right,x);top=std::min(top,y);bottom=std::max(bottom,y);++pixels;
+        }
+        assert(pixels>0);
+        if(referenceWidth<0) {referenceWidth=right-left+1;referenceHeight=bottom-top+1;referencePixels=pixels;}
+        assert(right-left+1==referenceWidth && bottom-top+1==referenceHeight && pixels==referencePixels);
+        minTop=std::min(minTop,top);maxTop=std::max(maxTop,top);
+    }
+    assert(maxTop>minTop && maxTop-minTop<=2);
+    companion.companionMotionScale=0;
     companion.companionReactionStarted=0;companion.companionReactionUntil=2000;companion.companionEmote="!";companion.companionMotion="run";
     assert(DrawPresenceOverlay(c,{10,10},{companion},false,false,100)==DrawPresenceOverlay(c,{10,10},{companion},false,false,700));
     // The union of local gait silhouettes makes occlusion independent of

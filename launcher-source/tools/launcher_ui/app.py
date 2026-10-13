@@ -497,7 +497,8 @@ class Launcher(tk.Tk):
     def _spawn_presence(self,port):
         if self.presence_process is not None and self.presence_process.poll() is None:
             return
-        exe=self.root/'launcher/Unova Together.exe'
+        exe=self.root/'launcher/Pokemon Together.exe'
+        if not exe.is_file():exe=self.root/'launcher/Unova Together.exe'
         command=[str(exe),'--presence-relay',str(port)] if getattr(sys,'frozen',False) else [sys.executable,str(HERE.parent/'unova_launcher.py'),'--presence-relay',str(port)]
         logs=self.home/'transfer';logs.mkdir(parents=True,exist_ok=True)
         with (logs/'presence-relay.log').open('ab') as log:

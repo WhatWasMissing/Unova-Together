@@ -9,6 +9,15 @@ class StorageTests(unittest.TestCase):
     def setUp(self):
         self.temp=tempfile.TemporaryDirectory();self.home=Path(self.temp.name)/'home';self.base=self.home/'.updates/versions';self.base.mkdir(parents=True)
     def tearDown(self):self.temp.cleanup()
+    def test_process_detection_includes_shared_launcher_and_bootstrap(self):
+        path=self.base/'1.0.1/Unova-Together/launcher/Pokemon Together.exe'
+        response=subprocess.CompletedProcess([],0,json.dumps({'Name':'Pokemon Together.exe','ExecutablePath':str(path)}),'')
+        with patch.object(s.os,'name','nt'),patch.object(s.subprocess,'run',return_value=response) as run:
+            detected=s.running_paths()
+        self.assertIn(path.resolve(),detected)
+        command=run.call_args.args[0][-1]
+        for name in ('Pokemon Together.exe','Pokemon Together Bootstrap.exe','Repair-Launcher.exe'):
+            self.assertIn(name,command)
     def slot(self,name,receipt=True):
         root=self.base/name/'Unova-Together';(root/'builds/current').mkdir(parents=True);(root/'launcher').mkdir()
         for name,data in {'builds/current/melonDS.exe':b'game','builds/current/shared.dll':b'identical library','builds/current/VERSION.txt':name.split('-')[0].encode(),'builds/current/melonDS.toml':b'# user config','launcher/Unova Together.exe':b'launcher sentinel','launcher/python.dll':b'identical Python','README.md':b'packaged readme'}.items():(root/name).write_bytes(data)

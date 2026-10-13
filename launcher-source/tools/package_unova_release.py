@@ -106,6 +106,8 @@ def main():
             z.write(tailscale/name, 'Unova-Together/setup/Tailscale/'+name)
     source_root = ROOT/'melonDS-source-1.1'
     with zipfile.ZipFile(source, 'x', zipfile.ZIP_DEFLATED, compresslevel=6) as z:
+        for name in ('check_follower_appearance.cpp','check_pokemon_follower.cpp','check_presence_rendering.cpp','test_presence_polling.py','test_party_stats.py','test_unova_storage.py'):
+            z.write(ROOT/'tools'/name,'Unova-Together-Source/tools/'+name)
         z.write(ROOT/'tools/test_launcher_migration.py','Unova-Together-Source/tools/test_launcher_migration.py')
         z.write(ROOT/'tools/test_launcher_versioning.py','Unova-Together-Source/tools/test_launcher_versioning.py')
         for path in sorted(source_root.rglob('*')):

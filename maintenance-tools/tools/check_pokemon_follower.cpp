@@ -69,6 +69,15 @@ int main(int argc,char** argv) {
         ++variants;
     }
     assert(variants==743);
+    // Audino regression: a shiny flag must change rendered pixels, not merely
+    // the returned metadata. Both variants must retain identical geometry.
+    const auto audinoNormal=LoadLocalPokemonSprites(reinterpret_cast<const unsigned char*>(rom.constData()),rom.size(),531,0,2,false).value("frames").toList();
+    const auto audinoShiny=LoadLocalPokemonSprites(reinterpret_cast<const unsigned char*>(rom.constData()),rom.size(),531,0,2,true).value("frames").toList();
+    assert(audinoNormal.size()==12 && audinoShiny.size()==12);
+    for(int i=0;i<12;++i) {
+        const auto normal=audinoNormal[i].value<QImage>(),shiny=audinoShiny[i].value<QImage>();
+        assert(normal.size()==shiny.size() && normal!=shiny);
+    }
     // Identity regressions found by contact-sheet review. These assets depict
     // evolved species, and must never be attached to the earlier evolution.
     assert(PokemonFollowerEntries[507]==922 && PokemonFollowerEntries[506]==0);

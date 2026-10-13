@@ -1,6 +1,6 @@
-# Unova Together 1.0.6 — known limits
+# Unova Together 1.0.10 — known limits
 
-The limits below describe the published release. The **1.0.7-dev source/local build** adds a Practice result/cleanup barrier with a targeted local latency pass, protocol/ROM checks, rematch filters and follower/shop changes. Broader physical-PC, WAN and gameplay testing is still required. See [development evidence](DEVELOPMENT_POLISH_2026-10-13.md).
+Release 1.0.10 fixes the locally reported movement hitching, idle follower disappearance, distorted bobbing and Redux shiny follower colours. The author confirmed those fixes in gameplay. Broader physical-PC, WAN and every-species testing remains limited. See [release checks](RELEASE_CHECKS_1.0.10.md).
 
 - **Other VPNs can block connections.** NordVPN caused a tester’s presence-relay connection to fail with WinError 10013. Disconnect other VPNs while using Tailscale; check their kill-switch and network-filter settings if access remains blocked. This is not evidence that the game server is offline.
 - **Online UDP is experimental.** It has been checked locally, but reliable battle completion between players on different networks has not yet been confirmed. Use Tailscale if it fails.
@@ -27,7 +27,7 @@ The limits below describe the published release. The **1.0.7-dev source/local bu
 
 Nearby battle scenery remains experimental. Special cinematic scenes keep original backgrounds; not every environment has been playtested. Disable the option if a background looks wrong.
 
-Companion interactions are read-only and can be switched off. The updated launcher source/local build enables them by default, preserving saved off choices; the original v1.0.6 download keeps its Experimental toggle. Use R+A or tap the follower; A alone advances game text. The 1.0.6 interaction matrix and input gates passed, but no live ROM interaction session or two-PC interaction playtest was run for that release. See [release checks](RELEASE_CHECKS_1.0.6.md). The former flight preview and spectator controls are removed.
+Companion interactions are in Settings → Following Pokémon and enabled by default when no preference has been saved. Saved off choices are preserved. Use R+A or tap the follower; A alone advances game text. Full free-flight Soaring remains unfinished; the optional flight shortcut must be enabled in experimental launcher settings.
 
 Field HMs retain native story requirements. Fly needs a party member with a move slot without another field action. Full obstacle traversal and every save/reload path have not been separately playtested. Encounter gifts, scripted legendaries and Hidden Grottos are excluded. Relearning offers the current species/form's level-up moves at or below its level.
 
