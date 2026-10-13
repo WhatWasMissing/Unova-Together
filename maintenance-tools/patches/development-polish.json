@@ -3,6 +3,7 @@
   "baselineSha256": "c3833116062ed40811a252ae1945a23a7043694c1984d3c8ae3cc0ac6212dd25",
   "changedNativeFiles": [
     "res/followers.qrc",
+    "res/melon.rc.in",
     "src/frontend/qt_sdl/EmuThread.cpp",
     "src/frontend/qt_sdl/FollowerInteraction.h",
     "src/frontend/qt_sdl/Gen5Menu.cpp",
@@ -23,7 +24,7 @@
     "src/net/LAN.cpp",
     "src/net/LAN.h"
   ],
-  "patchSha256": "1f52f256ed03090125f5b7373d1be20945b8c30005d4de1c6adfe84af119afe4",
+  "patchSha256": "3af56d17457277dd5276fe5b3d97009ba34d1e9dd3f090ebc2a47527ee54944c",
   "spriteVariants": 743,
   "build": "1.0.7-dev"
 }

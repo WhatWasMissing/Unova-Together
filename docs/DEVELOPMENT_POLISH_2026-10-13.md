@@ -1,6 +1,6 @@
 # Development polish — 13 October 2026
 
-Unova Together by **mvq1303 / WhatWasMissing**, built on melonDS. AI-assisted maintenance by OpenAI Codex at the author's request. This is the **1.0.7-dev source/local build**, following the immutable 1.0.6 downloads.
+Unova Together by **mvq1303 / WhatWasMissing**, built on melonDS. AI-assisted maintenance by OpenAI Codex at the author's request. This is the **1.0.7-dev source/local build** and the matching **1.0.7 GitHub prerelease**, following the stable 1.0.6 release. New-build packaging and limits are in [1.0.7 preview checks](RELEASE_CHECKS_1.0.7.md).
 
 ## Changes
 

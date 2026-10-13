@@ -10,7 +10,7 @@ def main():
     delta=[];changed=[]
     with zipfile.ZipFile(BASE) as baseline:
         members=set(baseline.namelist())
-        paths=[p for folder in ('src','res') for p in (SOURCE/folder).rglob('*') if p.is_file() and p.suffix in ('.h','.cpp','.c','.qrc')]
+        paths=[p for folder in ('src','res') for p in (SOURCE/folder).rglob('*') if p.is_file() and (p.suffix in ('.h','.cpp','.c','.qrc') or p.name=='melon.rc.in')]
         for path in sorted(paths):
             relative=path.relative_to(SOURCE).as_posix();member=PREFIX+relative
             previous=baseline.read(member).decode('utf-8-sig').replace('\r\n','\n') if member in members else ''

@@ -1,6 +1,6 @@
 # Unova Together
 
-**Current release: 1.0.6 — full release.** Made by mvq1303 / WhatWasMissing, built on melonDS.
+**Current stable release: 1.0.6.** A **1.0.7 preview** is available as a prerelease for the searchable trainer browser and optional flight shortcut: [preview downloads](https://github.com/WhatWasMissing/Unova-Together/releases/tag/v1.0.7). Made by mvq1303 / WhatWasMissing, built on melonDS.
 
 Explore Unova with friends in supported English Pokémon Black 2 and Blaze Black 2 Redux. Each player uses their own matching ROM and independent save.
 

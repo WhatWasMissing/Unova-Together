@@ -1,6 +1,6 @@
 # Unova Together features
 
-Unova Together by **mvq1303 / WhatWasMissing**, built on melonDS. Published release: **1.0.6**; current source/local build: **1.0.7-dev**. Development changes below are documented in [the validation report](DEVELOPMENT_POLISH_2026-10-13.md) and are not in the existing 1.0.6 downloads. Supported games are reviewed English Pokémon Black 2 and Blaze Black 2 Redux profiles on Windows x64. Every player supplies a matching ROM and uses an independent save.
+Unova Together by **mvq1303 / WhatWasMissing**, built on melonDS. Stable release: **1.0.6**; **1.0.7 is a development preview**. Development changes below are documented in [the validation report](DEVELOPMENT_POLISH_2026-10-13.md) and the [1.0.7 preview checks](RELEASE_CHECKS_1.0.7.md). Supported games are reviewed English Pokémon Black 2 and Blaze Black 2 Redux profiles on Windows x64. Every player supplies a matching ROM and uses an independent save.
 
 ## Explore and play together
 

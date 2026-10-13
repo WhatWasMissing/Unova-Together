@@ -1,25 +1,34 @@
 """Build the attributed standalone Windows launcher, including static assets."""
 from pathlib import Path
-import subprocess, sys, shutil
+import argparse, subprocess, sys, shutil
 from importlib import metadata
 
 ROOT=Path(__file__).resolve().parents[1]
 assets=ROOT/'tools/launcher_ui'
+parser=argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--output-dir',type=Path,default=ROOT/'builds/mod-hub/current')
+parser.add_argument('--work-dir',type=Path,default=ROOT/'test-fixtures/mod-hub-build-20261013')
+parser.add_argument('--revision',default='2026101304')
+parser.add_argument('--version',default='1.0.7')
+args=parser.parse_args()
+output=args.output_dir.resolve();work=args.work_dir.resolve()
+if not output.is_relative_to(ROOT/'builds') or not work.is_relative_to(ROOT/'test-fixtures'):
+    parser.error('Output and work folders must stay inside builds/ and test-fixtures/.')
 command=[sys.executable,'-m','PyInstaller','--noconfirm','--onedir','--windowed','--noupx',
          '--exclude-module','numpy',
          '--name','Pokemon Together','--icon',str(assets/'assets/launcher.ico'),
          '--version-file',str(assets/'windows-version.txt'),
          '--add-data',str(assets/'theme.json')+';launcher_ui',
          '--add-data',str(assets/'assets')+';launcher_ui/assets',
-         '--distpath',str(ROOT/'builds/mod-hub/current'),
-         '--workpath',str(ROOT/'test-fixtures/mod-hub-build-20261013'),
-         '--specpath',str(ROOT/'test-fixtures/mod-hub-build-20261013'),
+         '--distpath',str(output),
+         '--workpath',str(work),
+         '--specpath',str(work),
          str(ROOT/'tools/unova_launcher.py')]
 if __name__=='__main__':
     subprocess.run(command,cwd=ROOT,check=True)
-    destination=ROOT/'builds/mod-hub/current/Pokemon Together'
-    (destination/'BUILD_REVISION.txt').write_text('2026101303\n')
-    (destination/'VERSION.txt').write_text('Pokemon Together Launcher 1.0.6\n')
+    destination=output/'Pokemon Together'
+    (destination/'BUILD_REVISION.txt').write_text(args.revision+'\n')
+    (destination/'VERSION.txt').write_text('Pokemon Together Launcher '+args.version+'\n')
     shutil.copy2(Path(sys.base_prefix)/'LICENSE.txt',destination/'Python-LICENSE.txt')
     distribution=metadata.distribution('pyinstaller')
     license_file=next(p for p in distribution.files if str(p).endswith('/COPYING.txt'))
