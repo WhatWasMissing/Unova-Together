@@ -1,0 +1,32 @@
+{
+  "colors": {
+    "background": "#e8e8e8",
+    "surface": "#ffffff",
+    "nav": "#202020",
+    "hero": "#303030",
+    "primary": "#9b2536",
+    "primaryHover": "#741b29",
+    "text": "#202020",
+    "muted": "#555555",
+    "border": "#9b9b9b",
+    "navText": "#dedede",
+    "accent": "#f4f4f4",
+    "selection": "#dcdcdc",
+    "warning": "#8b5417",
+    "warningSurface": "#fff0d8",
+    "danger": "#a33434",
+    "disabled": "#dce5e5",
+    "disabledText": "#61777d",
+    "focus": "#9b2536"
+  },
+  "fonts": {
+    "display": "Consolas",
+    "body": "Segoe UI",
+    "utility": "Consolas"
+  },
+  "layout": {
+    "sidebar": 198,
+    "padding": 26,
+    "heroHeight": 238
+  }
+}
