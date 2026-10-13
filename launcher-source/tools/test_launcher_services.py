@@ -30,7 +30,10 @@ class ServiceTests(unittest.TestCase):
             def read(self,n):return self.data[:n]
         commit='a'*40
         def response(request,timeout):
-            data=json.dumps({'sha':commit}).encode() if 'api.github.com' in request.full_url else b'# Updated guide\n'
+            if 'api.github.com' in request.full_url:
+                self.assertTrue(request.full_url.endswith('/git/ref/heads/main'))
+                data=json.dumps({'object':{'type':'commit','sha':commit}}).encode()
+            else:data=b'# Updated guide\n'
             return Response(request.full_url,data)
         with patch.object(s.urllib.request,'urlopen',side_effect=response) as fetch:
             self.assertEqual(s.refresh_guides(self.home),commit);self.assertEqual(fetch.call_count,1+len(s.GUIDES))

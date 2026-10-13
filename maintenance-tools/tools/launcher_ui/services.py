@@ -18,7 +18,9 @@ def refresh_guides(home):
             data=response.read(limit+1)
             if len(data)>limit:raise ValueError('Guide download too large')
             return data.decode('utf-8')
-    commit=json.loads(fetch('https://api.github.com/repos/'+REPO+'/commits/main','api.github.com',65536))['sha']
+    reference=json.loads(fetch('https://api.github.com/repos/'+REPO+'/git/ref/heads/main','api.github.com',65536))
+    if reference.get('object',{}).get('type')!='commit':raise ValueError('Invalid guide branch reference')
+    commit=reference['object']['sha']
     if not isinstance(commit,str) or not re.fullmatch('[0-9a-f]{40}',commit):raise ValueError('Invalid guide revision')
     directory=Path(home)/'.updates/guides';directory.mkdir(parents=True,exist_ok=True)
     target=directory/(commit+'.json')
