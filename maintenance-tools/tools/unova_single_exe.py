@@ -2,6 +2,7 @@
 from pathlib import Path
 import argparse, ctypes, json, os, shutil, subprocess, sys
 import unova_updater as updates
+import launcher_migration
 
 def launcher_executable(root):
     path=Path(root)/'launcher/Pokemon Together.exe'
@@ -77,6 +78,9 @@ def main():
         try:root=install_bundle(home,assets/'runtime.zip',metadata)
         finally:
             if os.name=='nt':guard.seek(0);msvcrt.locking(guard.fileno(),msvcrt.LK_UNLCK,1)
+    if not args.self_test:
+        try:launcher_migration.schedule(home,root,default_entry=True)
+        except (OSError,ValueError):pass
     command=[str(launcher_executable(root)),'--home',str(home)]
     if args.self_test:command+=['--self-test',str(args.self_test.resolve())]
     # PyInstaller's child must have its own unpacking lifetime, otherwise the

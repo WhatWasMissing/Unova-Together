@@ -16,6 +16,7 @@ HELPERS = (
     'online_wireless_bridge.py', 'online_udp_protocol.py', 'online_udp_relay.py',
     'online_udp_bridge.py', 'requirements-online-udp.txt', 'setup_tailscale_firewall.ps1',
     'unova_launcher.py', 'unova_updater.py', 'unova_storage.py', 'build_unova_launcher.py',
+    'launcher_migration.py', 'unova_launcher_bootstrap.py', 'build_unova_bootstrap.py',
 )
 COMMANDS = ('Online Co-op.cmd', 'Install UDP Dependencies.cmd', 'Start LAN Presence Relay.cmd')
 DOCS = ('PLAYER_GUIDE.md', 'KNOWN_ISSUES.md', 'TAILSCALE_COOP.md', 'UDP_SERVER_GUIDE.md',
@@ -50,13 +51,14 @@ def main():
     runtime = output/f'Unova-Together-{version}-Windows-x64.zip'
     source = output/f'Unova-Together-{version}-Source.zip'
     standalone=output/'Unova-Together.exe'
+    repair=output/'Repair-Launcher.exe'
     sums=output/f'SHA256SUMS-Unova-Together-{version}.txt'
     release_label=output.name if args.artifact_dir else f'release-{version}'
     stage_root=ROOT/'builds'/release_label
     stage=stage_root/'Unova-Together'
     work_root=ROOT/'test-fixtures'/f'{release_label}-single-exe'
     standalone_dir=stage_root/'standalone'
-    if any(path.exists() for path in (runtime,source,standalone,sums,stage_root,work_root)):
+    if any(path.exists() for path in (runtime,source,standalone,repair,sums,stage_root,work_root)):
         raise RuntimeError('Release output exists; choose a fresh version')
     config = tomllib.loads((current/'melonDS.toml').read_text(encoding='utf-8-sig'))
     controls = ['PauseLostFocus = false', 'LimitFPS = true', 'TargetFPS = 60.0',
@@ -104,6 +106,7 @@ def main():
             z.write(tailscale/name, 'Unova-Together/setup/Tailscale/'+name)
     source_root = ROOT/'melonDS-source-1.1'
     with zipfile.ZipFile(source, 'x', zipfile.ZIP_DEFLATED, compresslevel=6) as z:
+        z.write(ROOT/'tools/test_launcher_migration.py','Unova-Together-Source/tools/test_launcher_migration.py')
         z.write(ROOT/'tools/test_launcher_versioning.py','Unova-Together-Source/tools/test_launcher_versioning.py')
         for path in sorted(source_root.rglob('*')):
             relative = path.relative_to(source_root)
@@ -146,6 +149,7 @@ def main():
         assert json.loads(z.read('Unova-Together/launcher/_internal/launcher_ui/build-info.json'))==launcher_info
         assert z.read('Unova-Together/launcher/VERSION.txt').decode().strip()=='Pokemon Together Launcher '+version
     with zipfile.ZipFile(source) as z:
+        assert 'Unova-Together-Source/tools/test_launcher_migration.py' in z.namelist()
         assert 'Unova-Together-Source/tools/test_launcher_versioning.py' in z.namelist()
         assert 'Unova-Together-Source/tools/test_companion_and_soaring.py' in z.namelist()
         assert 'Unova-Together-Source/tools/test_overworld_companion.py' in z.namelist()
@@ -155,9 +159,10 @@ def main():
         '--runtime-root',str(stage),'--work-dir',str(work_root),'--output-dir',str(standalone_dir),
         *(['--pyinstaller-python',str(args.pyinstaller_python.resolve())] if args.pyinstaller_python else [])],check=True,cwd=ROOT)
     shutil.copy2(standalone_dir/'Unova Together.exe',standalone)
-    sums.write_text(''.join(f'{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.name}\n' for p in (runtime,source,standalone)), encoding='utf-8')
+    shutil.copy2(launcher/'Pokemon Together Bootstrap.exe',repair)
+    sums.write_text(''.join(f'{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.name}\n' for p in (runtime,source,standalone,repair)), encoding='utf-8')
     print(json.dumps({'version':version, 'exeSHA256':hashlib.sha256((current/'melonDS.exe').read_bytes()).hexdigest(),
-        'assets':[{'name':p.name,'bytes':p.stat().st_size} for p in (runtime,source,standalone,sums)],
+        'assets':[{'name':p.name,'bytes':p.stat().st_size} for p in (runtime,source,standalone,repair,sums)],
         'portableControlsVerified':True, 'privateFilesExcluded':True}, indent=2))
 
 if __name__ == '__main__':

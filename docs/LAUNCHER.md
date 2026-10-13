@@ -50,6 +50,8 @@ Keyboard: **Tab/Shift+Tab** moves focus, **Enter** activates a button, **Ctrl+Ta
 
 From launcher 1.0.8, update completion restarts into the new shared Pokémon Together launcher with the same profile/save home. Older compatible hub entry points forward to newer installed hubs without downgrading to legacy per-mod launchers. Release and Launcher labels describe the active game package and the running launcher build separately. Shared launchers older than 1.0.8 need the one-time restart described in [release notes](../RELEASE_NOTES_1.0.8.md).
 
+From 1.0.9, a permanent entry follows the active update folder, keeping the original shortcut target. Existing 1.0.5 clients should install the game update and then run **Repair-Launcher.exe** once, selecting the old shared executable their shortcut opens. If the Unova home is separate from the shared hub, repair asks for that original folder. The original executable is retained as a backup; save/profile directories stay in place. See the [client migration instructions](../RELEASE_NOTES_1.0.9.md).
+
 **Tools → Run launch checks** checks executable/ROM identity and frame/focus settings. It cannot pre-verify a teammate's game, live C-Gear or every multiplayer event. **Verify installed files** compares executables/DLLs with the integrity record. **Find repair download / Repair game files** restores a checksum-verified published package into a separate slot; published files replace local custom game changes when selected.
 
 **Tools → Clean old installations** keeps the active and previous build, running builds and user data while pruning recognised older package files. Cleanup also runs at startup. Backups are retained. See [storage details](LAUNCHER_STORAGE.md).

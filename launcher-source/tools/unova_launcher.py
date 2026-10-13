@@ -7,6 +7,7 @@ from pathlib import Path
 import subprocess
 import sys
 import unova_updater as updates
+import launcher_migration
 
 from launcher_ui.app import Launcher
 from launcher_ui import versioning
@@ -38,6 +39,11 @@ def main():
     executable=Path(sys.executable if getattr(sys,'frozen',False) else __file__).resolve()
     home=installation_home(executable,args.home)
     root=updates.active_root(home,allow_missing=True)
+    if getattr(sys,'frozen',False) and not args.self_test:
+        try:
+            launcher_migration.register_entry(home,executable,root)
+            launcher_migration.schedule(home,root)
+        except (OSError,ValueError):pass
     # Only a newer shared hub can take over; old per-mod launchers cannot replace it.
     if handoff_updated_launcher(home, root, sys.argv[1:]):return
     app=Launcher(home,testing=bool(args.self_test))

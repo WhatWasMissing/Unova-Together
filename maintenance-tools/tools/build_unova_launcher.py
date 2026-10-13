@@ -9,8 +9,9 @@ assets=ROOT/'tools/launcher_ui'
 parser=argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--output-dir',type=Path,default=ROOT/'builds/mod-hub/current')
 parser.add_argument('--work-dir',type=Path,default=ROOT/'test-fixtures/mod-hub-build-20261013')
-parser.add_argument('--revision',default='2026101305')
+parser.add_argument('--revision',default='2026101306')
 parser.add_argument('--version',default=versioning.current_version())
+parser.add_argument('--bootstrap',type=Path,help='Built permanent launcher entry / client repair executable')
 args=parser.parse_args()
 output=args.output_dir.resolve();work=args.work_dir.resolve()
 if not output.is_relative_to(ROOT/'builds') or not work.is_relative_to(ROOT/'test-fixtures'):
@@ -37,6 +38,7 @@ if __name__=='__main__':
     (destination/'BUILD_REVISION.txt').write_text(args.revision+'\n')
     (destination/'VERSION.txt').write_text('Pokemon Together Launcher '+args.version+'\n')
     (destination/'BUILD_INFO.json').write_text(json.dumps(build_info),encoding='utf-8')
+    if args.bootstrap:shutil.copy2(args.bootstrap,destination/'Pokemon Together Bootstrap.exe')
     shutil.copy2(Path(sys.base_prefix)/'LICENSE.txt',destination/'Python-LICENSE.txt')
     distribution=metadata.distribution('pyinstaller')
     license_file=next(p for p in distribution.files if str(p).endswith('/COPYING.txt'))

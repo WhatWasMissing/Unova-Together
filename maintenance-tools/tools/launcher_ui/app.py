@@ -5,6 +5,7 @@ import tomlkit
 from tkinter import filedialog, messagebox, ttk
 import unova_updater as updates
 import unova_storage as storage
+import launcher_migration
 from . import preferences as prefs
 from . import services
 from . import gen5_tools
@@ -1123,6 +1124,8 @@ class Launcher(tk.Tk):
             executable=versioning.restart_executable(self.root)
             if not executable.is_file():raise OSError('Updated launcher executable is missing.')
             self._save()
+            try:launcher_migration.schedule(self.home,self.root)
+            except (OSError,ValueError):pass
             env=dict(os.environ)
             # A frozen parent must not lend its temporary PyInstaller runtime to the child.
             env['PYINSTALLER_RESET_ENVIRONMENT']='1'

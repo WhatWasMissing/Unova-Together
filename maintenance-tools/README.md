@@ -1,5 +1,7 @@
 # Maintenance tool source snapshots
 
+**Client migration 1.0.9:** `launcher-source/tools/launcher_migration.py` and `unova_launcher_bootstrap.py` implement the permanent entry and repair utility. Build the bootstrap with `build_unova_bootstrap.py`, then pass its executable through `build_unova_launcher.py --bootstrap`. The 1.0.9 native patch contains version/credit labels only and records the 1.0.8 source baseline checksum. Existing 1.0.5 clients run the repair utility once; subsequent launches follow their active update slot.
+
 **Launcher 1.0.8:** the current launcher overlay fixes update handoff and reads the running build's embedded identity. `patches/launcher-version-1.0.8.patch` updates only the native resource/credit labels on the published 1.0.7 source; its JSON records the baseline archive checksum. Use the complete 1.0.8 source download for a direct rebuild. Older shared launchers need the one-time startup step in `RELEASE_NOTES_1.0.8.md`.
 
 **Current development delta:** `patches/development-polish.patch` supersedes the companion-defaults patch and applies directly to the published 1.0.6 source ZIP. Copy `assets/followers/variants` to `source/melonDS/res/followers/variants` and overlay the tools. See `docs/DEVELOPMENT_POLISH_2026-10-13.md` in the repository for reconstruction, validation and limitations. Asset credits/terms remain beside the variant folder.

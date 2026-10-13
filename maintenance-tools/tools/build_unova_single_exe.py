@@ -21,6 +21,8 @@ def main():
     assets=work/'single-exe';assets.mkdir(exist_ok=True)
     source=work/'Corresponding-Source.zip'
     with zipfile.ZipFile(source,'w',zipfile.ZIP_DEFLATED,compresslevel=6) as bundle:
+        for name in ('launcher_migration.py','unova_launcher_bootstrap.py','build_unova_bootstrap.py','test_launcher_migration.py'):
+            bundle.write(ROOT/'tools'/name,'tools/'+name)
         bundle.write(ROOT/'tools/test_launcher_versioning.py','tools/test_launcher_versioning.py')
         primary=ROOT/'melonDS-source-1.1'
         for directory,dirs,names in os.walk(primary):
