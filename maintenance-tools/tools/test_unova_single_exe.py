@@ -1,7 +1,7 @@
 """Test persistent single-EXE extraction with tiny disposable payloads."""
 from pathlib import Path
 import hashlib, json, tempfile, unittest, zipfile
-from unova_single_exe import install_bundle
+from unova_single_exe import install_bundle, launcher_executable
 import unova_updater as updates
 
 class BundleTests(unittest.TestCase):
@@ -14,7 +14,7 @@ class BundleTests(unittest.TestCase):
         with zipfile.ZipFile(self.archive,'w') as z:
             z.writestr('Unova-Together/builds/current/melonDS.exe',b'game')
             z.writestr('Unova-Together/builds/current/VERSION.txt',version)
-            z.writestr('Unova-Together/launcher/Unova Together.exe',b'launcher')
+            z.writestr('Unova-Together/launcher/Pokemon Together.exe',b'launcher')
             z.writestr('Unova-Together/launcher/BUILD_REVISION.txt',str(revision))
             if unsafe:z.writestr('Unova-Together/private.sav',b'private')
         return {'version':version,'sha256':hashlib.sha256(self.archive.read_bytes()).hexdigest(),'launcher_revision':revision}
@@ -32,6 +32,7 @@ class BundleTests(unittest.TestCase):
         self.assertEqual(install_bundle(self.home,self.archive,self.bundle('0.3.5',revision=1)),new)
     def test_first_install_and_second_run_preserve_config_backups(self):
         root=install_bundle(self.home,self.archive,self.metadata)
+        self.assertEqual(launcher_executable(root).name,'Pokemon Together.exe')
         config=root/'builds/current/melonDS.toml';config.write_text('# user settings\n')
         backup=self.home/'save-backups/user.zip';backup.parent.mkdir();backup.write_bytes(b'save backup')
         self.assertEqual(install_bundle(self.home,self.archive,self.metadata),root)

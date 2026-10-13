@@ -1,20 +1,15 @@
-# Unova Together 1.0.4 — Installation storage cleanup
+# Unova Together 1.0.8 — Launcher update fix
 
-Full release: launcher 1.0.4 with the unchanged modified melonDS 1.0.2 runtime, based on melonDS 1.1. Download Unova-Together.exe or the Windows ZIP. Existing users can install through launcher Updates.
+Fixes the case where installing a mod update showed the new release number while reopening the old shared launcher.
 
-## Changes
+- Updates restart into the installed Pokémon Together launcher. Opening an earlier compatible hub forwards to a newer installed hub, preserving the same profile/save home and mod library.
+- The Updates page and footer read the running launcher's embedded build metadata. Windows file/product versions and packaged launcher metadata come from the requested build version.
+- Handoff rejects older launchers, legacy per-mod launchers and invalid metadata. Equal versions do not loop on startup. A failed handoff leaves the current launcher available.
+- Portable launchers use their own installation folder. Shared shortcuts and update handoffs pass the original home explicitly, avoiding an unrelated hardcoded drive path.
+- Corrected the emulator's version/credit labels. Gameplay is unchanged from 1.0.7, including the optional experimental native-Fly shortcut; ORAS-style free-flight Soaring remains unfinished.
 
-- Added **Clean old installations** to launcher Tools, with recovered-space feedback.
-- Automatic startup cleanup keeps the active installation, one rollback build and all running builds. Older verified package files are removed; saves, ROMs, backups, custom files and modified files are preserved.
-- Added an installation file receipt so future cleanup can identify packaged files safely. Legacy cleanup uses existing runtime checksum records and matching launcher binaries, retaining unknown files.
-- Reuses identical executable/library files through hardlinks when supported. Changed files and writable configuration are separate; unsupported hardlinks leave normal copies intact.
-- Older standalone EXEs now use an already newer active installation without unpacking an unused older bundle.
-- Records the previous active build for rollback retention. Installation and cleanup share the same lock.
+## Upgrading a launcher older than 1.0.8
 
-Updates still download a complete checksum-verified release ZIP; this release reduces retained disk usage, not network download size. Small metadata folders and preserved user files may remain for older builds. Older standalone launchers require their launcher sentinel file to delegate to the current installation, so cleanup retains it.
+Older shared launchers cannot apply this restart fix to their already-running code. After installing 1.0.8 through Updates, close the launcher and run **launcher/Pokemon Together.exe** inside the new `.updates/versions/1.0.8/Unova-Together` folder with `--home` pointing to your original installation. A new portable installation or the standalone download also opens the corrected launcher. Keep the same home to retain profiles and backups. Future updates from this launcher switch automatically.
 
-## Verification
-
-Nine storage tests cover retention, save/custom-file preservation, running builds, modified binaries, malformed paths, Windows junctions, process-check failure, hardlink reuse and copy fallback. 21 native UI tests include the working cleanup button; 13 updater and six standalone installer tests pass. Frozen launcher, standalone installation, package integrity, matching source and uploaded digests are checked before/after publication.
-
-The emulator executable is byte-identical to release 1.0.2; existing gameplay limitations remain. No ROMs, saves, firmware or private settings are distributed. Original contributions by **mvq1303 / WhatWasMissing**, with melonDS and dependency attribution preserved. Matching GPL source and SHA-256 checksums are included.
+The release includes the Windows runtime, matching GPL source, standalone launcher and SHA-256 manifest. No ROM, firmware, save or RAM capture is distributed. Original Unova Together contributions by **mvq1303 / WhatWasMissing**, built on melonDS; upstream/dependency notices remain included.

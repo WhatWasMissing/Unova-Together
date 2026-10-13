@@ -3,27 +3,33 @@ from pathlib import Path
 from importlib import metadata as package_metadata
 import argparse, hashlib, json, os, subprocess, sys, zipfile
 import unova_updater as updates
+from launcher_ui import versioning
 
 ROOT=Path(__file__).resolve().parents[1]
 PRIVATE={'.nds','.gba','.sav','.save','.dsv','.ramdump','.ml1','.ml2','.ml3','.ml4','.ml5','.ml6','.ml7','.ml8','.pem','.key','.pyc'}
 
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('--runtime-root',type=Path)
+    parser=argparse.ArgumentParser();parser.add_argument('--runtime-root',type=Path);parser.add_argument('--work-dir',type=Path);parser.add_argument('--output-dir',type=Path);parser.add_argument('--pyinstaller-python',type=Path)
     parser.add_argument('--launcher-source',type=Path,help='Matching source archive for a retained frozen launcher')
     args=parser.parse_args()
     installed=args.runtime_root.resolve() if args.runtime_root else ROOT/'builds/unova-together-0.3.5/Unova-Together'
     if not installed.is_relative_to(ROOT/'builds'):raise ValueError('Runtime must be staged under builds')
-    work=ROOT/'test-fixtures/single-exe-build-20261009';work.mkdir(parents=True,exist_ok=True)
+    work=(args.work_dir.resolve() if args.work_dir else ROOT/'test-fixtures/single-exe-build-20261009')
+    if not work.is_relative_to(ROOT/'test-fixtures'):raise ValueError('Single-EXE work directory must stay within test-fixtures')
+    if args.work_dir and work.exists() and any(work.iterdir()):raise FileExistsError('Single-EXE work directory must be fresh')
+    work.mkdir(parents=True,exist_ok=True)
     assets=work/'single-exe';assets.mkdir(exist_ok=True)
     source=work/'Corresponding-Source.zip'
     with zipfile.ZipFile(source,'w',zipfile.ZIP_DEFLATED,compresslevel=6) as bundle:
+        bundle.write(ROOT/'tools/test_launcher_versioning.py','tools/test_launcher_versioning.py')
         primary=ROOT/'melonDS-source-1.1'
         for directory,dirs,names in os.walk(primary):
             dirs[:]=[d for d in dirs if d not in {'.git','build','__pycache__','test-fixtures','diagnostics'}]
             for name in sorted(names):
                 path=Path(directory)/name
                 if path.is_symlink() or path.suffix.lower() in PRIVATE|{'.exe','.dll','.obj','.o','.a','.log'}:continue
-                bundle.write(path,'source/melonDS/'+path.relative_to(primary).as_posix())
+                relative=path.relative_to(primary).as_posix()
+                bundle.write(path,'source/melonDS/'+relative)
         for path in sorted((ROOT/'tools/launcher_ui').rglob('*')):
             if path.is_file() and '__pycache__' not in path.parts:bundle.write(path,'tools/launcher_ui/'+path.relative_to(ROOT/'tools/launcher_ui').as_posix())
         for name in ('unova_launcher.py','unova_updater.py','unova_single_exe.py','build_unova_launcher.py','build_unova_single_exe.py','generate_launcher_settings.py','test_launcher_all_settings.py','test_launcher_ui.py','test_launcher_services.py','test_launcher_preferences.py','test_unova_updater.py','test_unova_single_exe.py','verify_launcher_native_lan.py','verify_lan_coop.py','check_battle_presence.cpp','check_field_zone.cpp','check_presence_rendering.cpp','test_presence_server.py','presence_server.py','check_lan_group_pair.cpp','test_gen5_obedience.py','check_obedience_patch.cpp'):
@@ -102,14 +108,21 @@ def main():
         assert not any('/.updates/' in n or '/diagnostics/' in n or '/save-backups/' in n for n in bundle.namelist())
     metadata={'version':'.'.join(map(str,updates.local_version(installed))),'sha256':hashlib.sha256(archive.read_bytes()).hexdigest(),'launcher_revision':int((installed/'launcher/BUILD_REVISION.txt').read_text().strip())}
     (assets/'bundle.json').write_text(json.dumps(metadata))
+    versioning.write_windows_version(ROOT/'tools/launcher_ui/windows-version.txt',work/'windows-version.txt',metadata['version'])
     (work/'package-report.json').write_text(json.dumps({**metadata,'archive_bytes':archive.stat().st_size,'files':len(entries),'source_included':True,'private_files_excluded':True},indent=2))
-    subprocess.run([sys.executable,'-m','PyInstaller','--noconfirm','--onefile','--windowed','--noupx',
+    output=(args.output_dir.resolve() if args.output_dir else ROOT/'builds/single-exe')
+    if not output.is_relative_to(ROOT/'builds'):raise ValueError('Single-EXE output must stay within builds')
+    if args.output_dir and output.exists() and any(output.iterdir()):raise FileExistsError('Single-EXE output directory must be fresh')
+    output.mkdir(parents=True,exist_ok=True)
+    pyinstaller_python=args.pyinstaller_python.resolve() if args.pyinstaller_python else Path(sys.executable)
+    if not pyinstaller_python.is_file():raise FileNotFoundError('PyInstaller Python executable does not exist')
+    subprocess.run([str(pyinstaller_python),'-m','PyInstaller','--noconfirm','--onefile','--windowed','--noupx',
         '--name','Unova Together','--icon',str(ROOT/'tools/launcher_ui/assets/launcher.ico'),
-        '--version-file',str(ROOT/'tools/launcher_ui/windows-version.txt'),
-        '--add-data',str(assets)+';single-exe','--distpath',str(ROOT/'builds/single-exe'),
+        '--version-file',str(work/'windows-version.txt'),
+        '--add-data',str(assets)+';single-exe','--distpath',str(output),
         '--workpath',str(work/'pyinstaller'),'--specpath',str(work),str(ROOT/'tools/unova_single_exe.py')],check=True,cwd=ROOT)
-    executable=ROOT/'builds/single-exe/Unova Together.exe'
-    (ROOT/'builds/single-exe/SHA256SUMS.txt').write_text(hashlib.sha256(executable.read_bytes()).hexdigest()+'  '+executable.name+'\n')
+    executable=output/'Unova Together.exe'
+    (output/'SHA256SUMS.txt').write_text(hashlib.sha256(executable.read_bytes()).hexdigest()+'  '+executable.name+'\n')
     print(json.dumps({'exe':str(executable),'bytes':executable.stat().st_size,'runtime_sha256':metadata['sha256'],'source_included':True}))
 
 if __name__=='__main__':main()

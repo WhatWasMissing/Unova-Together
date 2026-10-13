@@ -1,5 +1,7 @@
 # Maintenance tool source snapshots
 
+**Launcher 1.0.8:** the current launcher overlay fixes update handoff and reads the running build's embedded identity. `patches/launcher-version-1.0.8.patch` updates only the native resource/credit labels on the published 1.0.7 source; its JSON records the baseline archive checksum. Use the complete 1.0.8 source download for a direct rebuild. Older shared launchers need the one-time startup step in `RELEASE_NOTES_1.0.8.md`.
+
 **Current development delta:** `patches/development-polish.patch` supersedes the companion-defaults patch and applies directly to the published 1.0.6 source ZIP. Copy `assets/followers/variants` to `source/melonDS/res/followers/variants` and overlay the tools. See `docs/DEVELOPMENT_POLISH_2026-10-13.md` in the repository for reconstruction, validation and limitations. Asset credits/terms remain beside the variant folder.
 
 Unova Together maintenance by mvq1303 / WhatWasMissing, built on melonDS. These helper sources are covered by the repository GPL license. Preserve upstream attribution. Frost and PKHeX are separate tools downloaded from their official projects; their binaries and source are not vendored here.

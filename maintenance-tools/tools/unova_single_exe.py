@@ -3,6 +3,11 @@ from pathlib import Path
 import argparse, ctypes, json, os, shutil, subprocess, sys
 import unova_updater as updates
 
+def launcher_executable(root):
+    path=Path(root)/'launcher/Pokemon Together.exe'
+    if not path.is_file():raise ValueError('Cached shared launcher is missing. Remove this bundle slot and run again.')
+    return path
+
 def install_bundle(home,payload,metadata):
     home=Path(home).resolve();home.mkdir(parents=True,exist_ok=True)
     version='.'.join(map(str,updates.version(metadata['version'])))
@@ -42,7 +47,7 @@ def install_bundle(home,payload,metadata):
             import unova_storage as storage
             storage.share_binaries(extracted,current);storage.record_package(extracted)
             Path(temp).rename(target)
-    if not (root/'launcher/Unova Together.exe').is_file():raise ValueError('Cached launcher is missing. Remove this bundle slot and run again.')
+    launcher_executable(root)
     if activate:
         import unova_storage as storage
         storage.remember_previous(home,current,slot)
@@ -72,7 +77,7 @@ def main():
         try:root=install_bundle(home,assets/'runtime.zip',metadata)
         finally:
             if os.name=='nt':guard.seek(0);msvcrt.locking(guard.fileno(),msvcrt.LK_UNLCK,1)
-    command=[str(root/'launcher/Unova Together.exe'),'--home',str(home)]
+    command=[str(launcher_executable(root)),'--home',str(home)]
     if args.self_test:command+=['--self-test',str(args.self_test.resolve())]
     # PyInstaller's child must have its own unpacking lifetime, otherwise the
     # game can outlive the temporary bootstrap extraction directory.

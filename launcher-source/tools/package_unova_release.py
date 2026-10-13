@@ -15,18 +15,19 @@ HELPERS = (
     'ensure_presence_relay.py', 'run-python.cmd', 'online_wireless_relay.py',
     'online_wireless_bridge.py', 'online_udp_protocol.py', 'online_udp_relay.py',
     'online_udp_bridge.py', 'requirements-online-udp.txt', 'setup_tailscale_firewall.ps1',
-    'unova_launcher.py', 'unova_updater.py', 'build_unova_launcher.py',
+    'unova_launcher.py', 'unova_updater.py', 'unova_storage.py', 'build_unova_launcher.py',
 )
 COMMANDS = ('Online Co-op.cmd', 'Install UDP Dependencies.cmd', 'Start LAN Presence Relay.cmd')
 DOCS = ('PLAYER_GUIDE.md', 'KNOWN_ISSUES.md', 'TAILSCALE_COOP.md', 'UDP_SERVER_GUIDE.md',
         'LAUNCHER.md', 'COMPANIONS_AND_SOARING.md', 'COOP_TOOLS.md', 'FEATURES.md',
-        'ROADMAP.md', 'RELEASE_CHECKS_1.0.6.md')
+        'ROADMAP.md', 'SOARING_DESIGN.md')
 FORBIDDEN = {'.nds', '.sav', '.dsv', '.ramdump', '.ml1', '.ml2', '.ml3', '.ml4', '.ml8', '.pem', '.key'}
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--version', required=True)
     parser.add_argument('--runtime-root',type=Path,help='Verified staged runtime; avoids replacing a running beta')
+    parser.add_argument('--launcher-root',type=Path,help='Built launcher directory; avoids replacing the current launcher')
     parser.add_argument('--artifact-dir',type=Path,help='Fresh output directory beneath downloads/releases')
     parser.add_argument('--pyinstaller-python',type=Path,help='Python environment with PyInstaller for the standalone download')
     args = parser.parse_args()
@@ -36,6 +37,9 @@ def main():
     current = args.runtime_root.resolve() if args.runtime_root else ROOT/'builds/current'
     if not current.is_relative_to(ROOT/'builds'):
         raise ValueError('Runtime must be staged within workspace builds')
+    launcher = args.launcher_root.resolve() if args.launcher_root else ROOT/'builds/mod-hub/current/Pokemon Together'
+    if not launcher.is_relative_to(ROOT/'builds'):
+        raise ValueError('Launcher must be staged within workspace builds')
     repo = ROOT/'tools/unova-together-release'
     output = args.artifact_dir.resolve() if args.artifact_dir else ROOT/'downloads/releases'
     if not output.is_relative_to(ROOT/'downloads/releases'):
@@ -86,14 +90,13 @@ def main():
         for name in COMMANDS:
             z.write(ROOT/name, 'Unova-Together/'+name)
         z.writestr('Unova-Together/Start Emulator.cmd', '@echo off\r\ncd /d "%~dp0builds\\current"\r\nstart "" melonDS.exe\r\n')
-        launcher=ROOT/'builds/mod-hub/current/Pokemon Together'
         assert (launcher/'Pokemon Together.exe').is_file()
         for path in sorted(launcher.rglob('*')):
             if path.is_file():z.write(path,'Unova-Together/launcher/'+path.relative_to(launcher).as_posix())
-        z.writestr('Unova-Together/Start Unova Together.cmd','@echo off\r\ncd /d "%~dp0"\r\nstart "" "launcher\\Pokemon Together.exe"\r\n')
-        for name in DOCS:
+        z.writestr('Unova-Together/Start Unova Together.cmd','@echo off\r\ncd /d "%~dp0"\r\nstart "" "launcher\\Pokemon Together.exe" --home "%~dp0."\r\n')
+        for name in (*DOCS, f'RELEASE_CHECKS_{version}.md'):
             z.write(repo/'docs'/name, 'Unova-Together/docs/'+name)
-        z.write(repo/'RELEASE_NOTES_1.0.6.md', 'Unova-Together/RELEASE_NOTES_1.0.6.md')
+        z.write(repo/f'RELEASE_NOTES_{version}.md', f'Unova-Together/RELEASE_NOTES_{version}.md')
         for name in ('README.md', 'LICENSE', 'LICENSING.md', 'AUTHORSHIP.md'):
             z.write(repo/name, 'Unova-Together/'+name)
         z.writestr('Unova-Together/START HERE.md', '# Start here\n\nRun **Start Unova Together.cmd**, choose your own ROM and select Play. The launcher checks official GitHub releases and offers verified updates. Follow docs/PLAYER_GUIDE.md to connect. Both players need matching ROMs/builds and independent saves.\n')
@@ -101,6 +104,7 @@ def main():
             z.write(tailscale/name, 'Unova-Together/setup/Tailscale/'+name)
     source_root = ROOT/'melonDS-source-1.1'
     with zipfile.ZipFile(source, 'x', zipfile.ZIP_DEFLATED, compresslevel=6) as z:
+        z.write(ROOT/'tools/test_launcher_versioning.py','Unova-Together-Source/tools/test_launcher_versioning.py')
         for path in sorted(source_root.rglob('*')):
             relative = path.relative_to(source_root)
             if not path.is_file() or any(part in {'.git', 'build', '__pycache__'} for part in relative.parts):
@@ -136,8 +140,13 @@ def main():
         assert all(k in {'PauseLostFocus','LimitFPS','TargetFPS','MP','JIT'} or k.startswith('Instance') for k in packed)
         assert not any('/source/' in n for n in z.namelist())
         assert 'Unova-Together/docs/COMPANIONS_AND_SOARING.md' in z.namelist()
-        assert 'Unova-Together/RELEASE_NOTES_1.0.6.md' in z.namelist()
+        assert f'Unova-Together/RELEASE_NOTES_{version}.md' in z.namelist()
+        launcher_info=json.loads(z.read('Unova-Together/launcher/BUILD_INFO.json'))
+        assert launcher_info['product']=='pokemon-together' and launcher_info['version']==version
+        assert json.loads(z.read('Unova-Together/launcher/_internal/launcher_ui/build-info.json'))==launcher_info
+        assert z.read('Unova-Together/launcher/VERSION.txt').decode().strip()=='Pokemon Together Launcher '+version
     with zipfile.ZipFile(source) as z:
+        assert 'Unova-Together-Source/tools/test_launcher_versioning.py' in z.namelist()
         assert 'Unova-Together-Source/tools/test_companion_and_soaring.py' in z.namelist()
         assert 'Unova-Together-Source/tools/test_overworld_companion.py' in z.namelist()
     stage_root.mkdir(parents=True)

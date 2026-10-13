@@ -1,16 +1,16 @@
 # Unova Together
 
-**Current stable release: 1.0.6.** A **1.0.7 preview** is available as a prerelease for the searchable trainer browser and optional flight shortcut: [preview downloads](https://github.com/WhatWasMissing/Unova-Together/releases/tag/v1.0.7). Made by mvq1303 / WhatWasMissing, built on melonDS.
+**Current stable release: 1.0.8.** Fixes shared-launcher update handoff and version reporting: [downloads](https://github.com/WhatWasMissing/Unova-Together/releases/tag/v1.0.8). Made by mvq1303 / WhatWasMissing, built on melonDS.
 
 Explore Unova with friends in supported English Pokémon Black 2 and Blaze Black 2 Redux. Each player uses their own matching ROM and independent save.
 
 ## Download and play
 
-1. [Download version 1.0.6](https://github.com/WhatWasMissing/Unova-Together/releases/tag/v1.0.6). Choose **Unova-Together.exe**, or extract the complete Windows x64 ZIP.
+1. [Download version 1.0.8](https://github.com/WhatWasMissing/Unova-Together/releases/tag/v1.0.8). Choose **Unova-Together.exe**, or extract the complete Windows x64 ZIP.
 2. Open the EXE, or run **Start Unova Together.cmd** in the extracted folder. Choose your ROM and select **Play**.
 3. Open launcher **Co-op** to configure your connection and host or join LAN. Follow the [player guide](docs/PLAYER_GUIDE.md).
 
-Version **1.0.6** adds nature-aware follower interactions to the modified melonDS 1.1 runtime. Existing ROMs and saves do not need conversion. Update every player and restart the presence relay.
+Version **1.0.8** fixes launcher updates and version labels while retaining the 1.0.7 gameplay features. Existing ROMs and saves do not need conversion. Launchers older than 1.0.8 need a one-time restart into the new shared executable; see the [upgrade instructions](RELEASE_NOTES_1.0.8.md). Update every player and restart the presence relay.
 
 ## Features
 
@@ -24,13 +24,13 @@ Version **1.0.6** adds nature-aware follower interactions to the modified melonD
 
 See the [complete feature guide](docs/FEATURES.md) for controls, menu paths and limitations, and the [roadmap](docs/ROADMAP.md) for proposed additions. Priorities are battle recovery, easier connection checks, contextual follower reactions and wider trainer coverage.
 
-The launcher update on `main` moves companion interactions to **Settings → Following Pokémon** and enables them by default when no preference has been saved. Explicit off choices are preserved. The v1.0.6 release downloads retain their original launcher and **Settings → Experimental** option; these source/documentation updates do not replace those assets.
+Companion interactions are in **Settings → Following Pokémon** and enabled by default when no preference has been saved. Explicit off choices are preserved.
 
-The **1.0.7-dev** source/local build adds 743 normal/shiny follower variants, supported female/forms, sprite stability fixes, contextual dialogue, reduced motion, co-op compatibility/readiness checks, rematch filters and **₽10 Super Repels**. Practice completion passed a targeted local latency test; broader recovery/network playtesting remains required. See [changes, evidence and source reconstruction](docs/DEVELOPMENT_POLISH_2026-10-13.md).
+The release includes 743 normal/shiny follower variants, supported female/forms, sprite stability fixes, contextual dialogue, reduced motion, co-op compatibility/readiness checks, rematch filters and **₽10 Super Repels**. Practice completion passed a targeted local latency test; broader recovery/network playtesting remains required. The searchable trainer browser and experimental native-Fly shortcut from 1.0.7 are included; full free-flight Soaring is not implemented. See [changes, evidence and source reconstruction](docs/DEVELOPMENT_POLISH_2026-10-13.md).
 
 ## Guides and limits
 
-[Release notes](RELEASE_NOTES_1.0.6.md) · [Release checks](docs/RELEASE_CHECKS_1.0.6.md) · [Known limits](docs/KNOWN_ISSUES.md)
+[Release notes](RELEASE_NOTES_1.0.8.md) · [Release checks](docs/RELEASE_CHECKS_1.0.8.md) · [Known limits](docs/KNOWN_ISSUES.md)
 
 [Launcher](docs/LAUNCHER.md) · [Co-op tools](docs/COOP_TOOLS.md) · [Field tools](docs/FIELD_TOOLS.md) · [Followers](docs/FOLLOWING_POKEMON.md) · [Companions](docs/COMPANIONS_AND_SOARING.md) · [Party stats](docs/PARTY_STATS.md)
 

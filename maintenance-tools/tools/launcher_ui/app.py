@@ -9,6 +9,7 @@ from . import preferences as prefs
 from . import services
 from . import gen5_tools
 from . import game_routes
+from . import versioning
 from .components import C, F, HERE, THEME, ScrollPage, button, card, emblem, label, set_enabled
 
 class Launcher(tk.Tk):
@@ -259,7 +260,7 @@ class Launcher(tk.Tk):
             widget=getattr(widget,'master',None)
 
     def _version_text(self):
-        try:return 'Release '+'.'.join(map(str,updates.local_version(self.root)))+' · Launcher 1.0.6'
+        try:return 'Release '+'.'.join(map(str,updates.local_version(self.root)))+' · Launcher '+versioning.current_version()
         except (OSError,ValueError):return 'Build unavailable'
 
     def _read_news(self):
@@ -1118,8 +1119,8 @@ class Launcher(tk.Tk):
 
     def _restart_updated_launcher(self):
         # Restart the installed launcher, preserving the persistent profile/save home.
-        executable=Path(sys.executable) if getattr(sys,'frozen',False) else self.root/'launcher/Unova Together.exe'
         try:
+            executable=versioning.restart_executable(self.root)
             if not executable.is_file():raise OSError('Updated launcher executable is missing.')
             self._save()
             env=dict(os.environ)

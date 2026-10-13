@@ -10,7 +10,7 @@ MODES={'Local two players':'local','LAN host':'host','LAN guest':'guest'}
 MODS={
     'black2':{'name':'Unova Together','game':GAMES['black2'],'platform':'Nintendo DS',
         'description':'Black 2 / Redux',
-        'status':'Preview 1.0.7','pages':('Play','Co-op','Features','Profiles','News','Updates','Settings','Tools','Setup')},
+        'status':'Available','pages':('Play','Co-op','Features','Profiles','News','Updates','Settings','Tools','Setup')},
     'pokemon-x':{'name':'Pokemon X Together','game':GAMES['pokemon-x'],'platform':'Nintendo 3DS',
         'description':'Exploration and trainer battles',
         'status':'Experimental prototype','pages':('XPlay','XCoop','XGuides')},

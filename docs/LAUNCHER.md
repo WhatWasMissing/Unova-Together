@@ -48,6 +48,8 @@ Keyboard: **Tab/Shift+Tab** moves focus, **Enter** activates a button, **Ctrl+Ta
 
 **Updates** downloads official Windows releases, verifies SHA-256 and installs beside the previous runtime. Updates/repairs back up existing save files first. Save normally and close the game before switching.
 
+From launcher 1.0.8, update completion restarts into the new shared Pokémon Together launcher with the same profile/save home. Older compatible hub entry points forward to newer installed hubs without downgrading to legacy per-mod launchers. Release and Launcher labels describe the active game package and the running launcher build separately. Shared launchers older than 1.0.8 need the one-time restart described in [release notes](../RELEASE_NOTES_1.0.8.md).
+
 **Tools → Run launch checks** checks executable/ROM identity and frame/focus settings. It cannot pre-verify a teammate's game, live C-Gear or every multiplayer event. **Verify installed files** compares executables/DLLs with the integrity record. **Find repair download / Repair game files** restores a checksum-verified published package into a separate slot; published files replace local custom game changes when selected.
 
 **Tools → Clean old installations** keeps the active and previous build, running builds and user data while pruning recognised older package files. Cleanup also runs at startup. Backups are retained. See [storage details](LAUNCHER_STORAGE.md).

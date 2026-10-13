@@ -155,8 +155,10 @@ class LauncherTests(unittest.TestCase):
         with patch('launcher_ui.app.os.startfile') as open_doc:self.app.guide();open_doc.assert_called_once_with(str(doc))
         with patch('launcher_ui.app.webbrowser.open') as open_web:self.app.guide('KNOWN_ISSUES.md');self.assertIn(u.REPO,open_web.call_args.args[0])
     def test_restart_uses_updated_launcher_and_same_home(self):
-        launcher=self.app.root/'launcher/Unova Together.exe'
+        launcher=self.app.root/'launcher/Pokemon Together.exe'
         launcher.parent.mkdir(exist_ok=True);launcher.write_bytes(b'fixture launcher')
+        from launcher_ui import versioning
+        (launcher.parent/'BUILD_INFO.json').write_text(json.dumps({'schema':1,'product':versioning.PRODUCT,'version':versioning.current_version()}))
         with patch('launcher_ui.app.subprocess.Popen') as spawn,patch.object(self.app,'destroy') as close:
             self.app._restart_updated_launcher()
             self.assertEqual(spawn.call_args.args[0],[str(launcher),'--home',str(self.home)])
@@ -164,8 +166,10 @@ class LauncherTests(unittest.TestCase):
             self.assertEqual(spawn.call_args.kwargs['env']['PYINSTALLER_RESET_ENVIRONMENT'],'1')
             close.assert_called_once()
     def test_restart_failure_keeps_launcher_open(self):
-        launcher=self.app.root/'launcher/Unova Together.exe'
+        launcher=self.app.root/'launcher/Pokemon Together.exe'
         launcher.parent.mkdir(exist_ok=True);launcher.write_bytes(b'fixture launcher')
+        from launcher_ui import versioning
+        (launcher.parent/'BUILD_INFO.json').write_text(json.dumps({'schema':1,'product':versioning.PRODUCT,'version':versioning.current_version()}))
         with patch('launcher_ui.app.subprocess.Popen',side_effect=OSError('fixture failure')),patch.object(self.app,'destroy') as close:
             self.app._restart_updated_launcher()
             close.assert_not_called()

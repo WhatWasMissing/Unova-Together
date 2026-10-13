@@ -2,12 +2,26 @@
 from __future__ import annotations
 import argparse
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
 import unova_updater as updates
 
 from launcher_ui.app import Launcher
+from launcher_ui import versioning
+
+def handoff_updated_launcher(home, root, arguments):
+    if not getattr(sys, 'frozen', False):return False
+    executable = versioning.updated_launcher(root, newer_only=True)
+    if executable is None:return False
+    env = dict(os.environ, PYINSTALLER_RESET_ENVIRONMENT='1')
+    try:subprocess.Popen([str(executable), *arguments, '--home', str(home)], cwd=root, env=env)
+    except OSError:return False
+    return True
+
+def installation_home(executable, requested=None):
+    return (requested or Path(executable).parent.parent).resolve()
 
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('--home',type=Path);parser.add_argument('--self-test',type=Path)
@@ -22,10 +36,10 @@ def main():
         from presence_server import run
         asyncio.run(run('0.0.0.0',args.presence_relay));return
     executable=Path(sys.executable if getattr(sys,'frozen',False) else __file__).resolve()
-    installed_unova=Path('F:/unova-together')
-    home=(args.home or (installed_unova if (installed_unova/'builds/current/melonDS.exe').is_file() else executable.parent.parent)).resolve()
+    home=installation_home(executable,args.home)
     root=updates.active_root(home,allow_missing=True)
-    # The shared hub owns navigation. A mod update must not delegate to its older launcher.
+    # Only a newer shared hub can take over; old per-mod launchers cannot replace it.
+    if handoff_updated_launcher(home, root, sys.argv[1:]):return
     app=Launcher(home,testing=bool(args.self_test))
     if args.self_test:
         def verify():

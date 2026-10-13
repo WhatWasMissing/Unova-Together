@@ -1,4 +1,4 @@
-# Unified patches need a single-space prefix on blank context lines.
-maintenance-tools/patches/*.patch text eol=lf whitespace=-blank-at-eol
+# Unified patches need a space prefix on blank and tab-indented context lines.
+maintenance-tools/patches/*.patch text eol=lf whitespace=-blank-at-eol,-space-before-tab
 # Retain the upstream credits exactly, including their existing spacing.
 maintenance-tools/assets/followers/CREDITS.md text whitespace=-blank-at-eol

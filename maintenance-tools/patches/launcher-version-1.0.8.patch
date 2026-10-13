@@ -1,0 +1,46 @@
+--- a/source/melonDS/res/melon.rc.in
++++ b/source/melonDS/res/melon.rc.in
+@@ -6,8 +6,8 @@
+ 
+ //include version information in .exe, modify these values to match your needs
+ 1 VERSIONINFO
+-FILEVERSION 1,0,7,0
+-PRODUCTVERSION 1,0,7,0
++FILEVERSION 1,0,8,0
++PRODUCTVERSION 1,0,8,0
+ FILETYPE VFT_APP
+ {
+   BLOCK "StringFileInfo"
+@@ -15,14 +15,14 @@
+ 		BLOCK "040904E4"
+ 		{
+ 			VALUE "CompanyName", "Melon Factory of Kuribo64"
+-			VALUE "FileVersion", "1.0.7"
++			VALUE "FileVersion", "1.0.8"
+ 			VALUE "FileDescription", "Unova Together - modified melonDS 1.1"
+ 			VALUE "InternalName", "SDnolem"
+ 			VALUE "LegalCopyright", "2016-2025 melonDS team; 2026 mvq1303 (Unova Together contributions)"
+ 			VALUE "LegalTrademarks", ""
+ 			VALUE "OriginalFilename", "melonDS.exe"
+ 			VALUE "ProductName", "Unova Together"
+-			VALUE "ProductVersion", "1.0.7"
++			VALUE "ProductVersion", "1.0.8"
+ 		}
+ 	}
+   BLOCK "VarFileInfo"
+--- a/source/melonDS/src/frontend/qt_sdl/ProjectCredits.h
++++ b/source/melonDS/src/frontend/qt_sdl/ProjectCredits.h
+@@ -11,10 +11,10 @@
+ namespace ProjectCredits
+ {
+ inline constexpr char Name[] = "Unova Together";
+-inline constexpr char Version[] = "1.0.2";
+-inline constexpr char WindowTitle[] = "Unova Together 1.0.2";
++inline constexpr char Version[] = "1.0.8";
++inline constexpr char WindowTitle[] = "Unova Together 1.0.8";
+ inline constexpr char Html[] =
+-    "<b>Unova Together 1.0.2</b> — Created by <b>mvq1303</b> · "
++    "<b>Unova Together 1.0.8</b> — Created by <b>mvq1303</b> · "
+     "<a href=\"https://github.com/WhatWasMissing/Unova-Together\">GitHub: WhatWasMissing</a>"
+     "<br>Playtesters: maxback221 · randomitem19";
+ }
