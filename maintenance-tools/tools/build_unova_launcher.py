@@ -18,7 +18,7 @@ command=[sys.executable,'-m','PyInstaller','--noconfirm','--onedir','--windowed'
 if __name__=='__main__':
     subprocess.run(command,cwd=ROOT,check=True)
     destination=ROOT/'builds/mod-hub/current/Pokemon Together'
-    (destination/'BUILD_REVISION.txt').write_text('2026101302\n')
+    (destination/'BUILD_REVISION.txt').write_text('2026101303\n')
     (destination/'VERSION.txt').write_text('Pokemon Together Launcher 1.0.6\n')
     shutil.copy2(Path(sys.base_prefix)/'LICENSE.txt',destination/'Python-LICENSE.txt')
     distribution=metadata.distribution('pyinstaller')

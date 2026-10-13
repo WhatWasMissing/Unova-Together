@@ -59,3 +59,5 @@ Keyboard: **Tab/Shift+Tab** moves focus, **Enter** activates a button, **Ctrl+Ta
 Gen 5 tools check ROM/XP-hook compatibility, compare copied save records and calculate Redux Challenge XP budgets using **1.25× solo XP**. These are read-only tools, not game editors or full compatibility certification.
 
 See [Features](FEATURES.md), [release checks](RELEASE_CHECKS_1.0.6.md) and the [roadmap](ROADMAP.md) for capability, evidence and future work.
+
+The development launcher adds **Co-op → Check readiness**, combining selected build/profile checks with the latest presence test result and explicit in-game requirements. **Settings → Following Pokémon → Reduced follower motion** applies on launch and preserves sprites and reaction symbols.

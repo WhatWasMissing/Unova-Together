@@ -9,8 +9,8 @@ class ServiceTests(unittest.TestCase):
     def test_companion_preference_preserves_explicit_choices_and_rejects_removed_options(self):
         item=s.profile();self.assertNotIn('companion_interactions',item['preferences'])
         self.assertNotIn('soaring_preview',item['preferences'])
-        item['preferences']={'companion_interactions':True,'soaring_preview':False}
-        self.assertEqual(s.normalize(item)['preferences'],{'companion_interactions':True})
+        item['preferences']={'companion_interactions':True,'reduced_follower_motion':True,'soaring_preview':False}
+        self.assertEqual(s.normalize(item)['preferences'],{'companion_interactions':True,'reduced_follower_motion':True})
         item['preferences']={'companion_interactions':False}
         self.assertEqual(s.normalize(item)['preferences'],{'companion_interactions':False})
         item['preferences']={'companion_interactions':'true','soaring_preview':1}

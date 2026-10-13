@@ -1,0 +1,7 @@
+{
+  "profile": "product-admin", "sourceRoots": ["."], "locale": "en-GB",
+  "canonicalMap": "UX-CONTRACT.md", "requiredCapabilities": ["Form", "Scrollbar", "Toast"],
+  "requiredCommands": ["unit", "ui"],
+  "commands": {"unit": "python ../test_unova_updater.py", "ui": "python ../test_launcher_ui.py"},
+  "evidence": {"failurePaths": "../test_launcher_ui.py"}
+}

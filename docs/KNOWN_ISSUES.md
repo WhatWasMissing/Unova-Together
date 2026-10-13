@@ -1,5 +1,7 @@
 # Unova Together 1.0.6 — known limits
 
+The limits below describe the published release. The **1.0.7-dev source/local build** adds a Practice result/cleanup barrier with a targeted local latency pass, protocol/ROM checks, rematch filters and follower/shop changes. Broader physical-PC, WAN and gameplay testing is still required. See [development evidence](DEVELOPMENT_POLISH_2026-10-13.md).
+
 - **Other VPNs can block connections.** NordVPN caused a tester’s presence-relay connection to fail with WinError 10013. Disconnect other VPNs while using Tailscale; check their kill-switch and network-filter settings if access remains blocked. This is not evidence that the game server is offline.
 - **Online UDP is experimental.** It has been checked locally, but reliable battle completion between players on different networks has not yet been confirmed. Use Tailscale if it fails.
 - **Sometimes players can get stuck reported as "In Battle" or "Unavailable"**. If changing map or going inside does not fix this, save **in game** and restart the emulator through the launcher or portable zip. Do not load a save state.

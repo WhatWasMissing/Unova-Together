@@ -34,13 +34,13 @@ def progression(path,loss=0,growth=3):
     if digest(path)!=REDUX:raise ValueError('Challenge caps are verified for Redux Complete 1.4.1 only. Select the reviewed original ROM.')
     rom=load_rom(path);tables=ndspy.narc.NARC(rom.getFileByName('a/0/1/7')).files
     table=struct.unpack('<101I',tables[growth]);trainers=ndspy.narc.NARC(rom.getFileByName('a/0/9/1')).files;parties=ndspy.narc.NARC(rom.getFileByName('a/0/9/2')).files
-    lines=[f'Redux Challenge • {GROWTH[growth]} • 1.65× solo XP • {loss:g}% earned XP lost to co-op','Checkpoint       Cap   XP-budget level   Stored trainer team']
+    lines=[f'Redux Challenge • {GROWTH[growth]} • 1.25× solo XP • {loss:g}% earned XP lost to co-op','Checkpoint       Cap   XP-budget level   Stored trainer team']
     for name,tid,cap in BOSSES:
-        xp=int(table[5]+(table[cap]-table[5])*1.65*(1-loss/100));level=min(100,bisect.bisect_right(table,xp)-1)
+        xp=int(table[5]+(table[cap]-table[5])*1.25*(1-loss/100));level=min(100,bisect.bisect_right(table,xp)-1)
         record=trainers[tid];stride=8+(2 if record[0]&2 else 0)+(8 if record[0]&1 else 0)
         members=[f'#{struct.unpack_from("<H",parties[tid],i*stride+4)[0]&2047} L{struct.unpack_from("<H",parties[tid],i*stride+2)[0]}' for i in range(record[3])]
         lines.append(f'{name:16} {cap:3}   {level:3}               '+', '.join(members))
-    lines+=['','Budget equivalent from level 5, not a playthrough prediction. Uses exact ROM growth thresholds and documented displayed Challenge caps. Stored team levels omit runtime difficulty shifts.','Lost XP is a share of earned XP, not battle count. Encounter choices, level-dependent award feedback, per-award rounding and the award cap are not simulated. 1.65× offsets about 39.39% missing XP.']
+    lines+=['','Budget equivalent from level 5, not a playthrough prediction. Uses exact ROM growth thresholds and documented displayed Challenge caps. Stored team levels omit runtime difficulty shifts.','Lost XP is a share of earned XP, not battle count. Encounter choices, level-dependent award feedback, per-award rounding and the award cap are not simulated. 1.25× offsets about 20% missing XP.']
     return '\n'.join(lines)
 
 def crypt(data,seed):

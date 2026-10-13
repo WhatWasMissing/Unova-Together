@@ -1,0 +1,709 @@
+{
+  "source": "melonDS Config.cpp defaults and legacy mapping",
+  "settings": {
+    "Instance0.Keyboard.A": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Keyboard.B": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Keyboard.Select": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Keyboard.Start": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Keyboard.Right": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Keyboard.Left": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Keyboard.Up": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Keyboard.Down": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Keyboard.R": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Keyboard.L": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Keyboard.X": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Keyboard.Y": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Joystick.A": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Joystick.B": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Joystick.Select": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Joystick.Start": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Joystick.Right": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Joystick.Left": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Joystick.Up": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Joystick.Down": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Joystick.R": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Joystick.L": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Joystick.X": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Joystick.Y": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Keyboard.HK_Lid": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Keyboard.HK_Mic": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Keyboard.HK_Pause": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Keyboard.HK_Reset": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Keyboard.HK_FastForward": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Keyboard.HK_FrameLimitToggle": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Keyboard.HK_FullscreenToggle": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Keyboard.HK_SwapScreens": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Keyboard.HK_SwapScreenEmphasis": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Keyboard.HK_SolarSensorDecrease": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Keyboard.HK_SolarSensorIncrease": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Keyboard.HK_FrameStep": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Keyboard.HK_PowerButton": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Keyboard.HK_VolumeUp": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Keyboard.HK_VolumeDown": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Keyboard.HK_GuitarGripGreen": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Keyboard.HK_GuitarGripRed": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Keyboard.HK_GuitarGripYellow": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Keyboard.HK_GuitarGripBlue": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Joystick.HK_Lid": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Joystick.HK_Mic": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Joystick.HK_Pause": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Joystick.HK_Reset": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Joystick.HK_FastForward": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Joystick.HK_FrameLimitToggle": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Joystick.HK_FullscreenToggle": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Joystick.HK_SwapScreens": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Joystick.HK_SwapScreenEmphasis": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Joystick.HK_SolarSensorDecrease": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Joystick.HK_SolarSensorIncrease": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Joystick.HK_FrameStep": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Joystick.HK_PowerButton": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Joystick.HK_VolumeUp": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Joystick.HK_VolumeDown": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Joystick.HK_GuitarGripGreen": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Joystick.HK_GuitarGripRed": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Joystick.HK_GuitarGripYellow": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.Joystick.HK_GuitarGripBlue": {
+      "type": "int",
+      "default": -1
+    },
+    "Instance0.JoystickID": {
+      "type": "int",
+      "default": 0
+    },
+    "Instance0.Window0.ScreenRotation": {
+      "type": "int",
+      "default": 0
+    },
+    "Instance0.Window0.ScreenGap": {
+      "type": "int",
+      "default": 0
+    },
+    "Instance0.Window0.ScreenLayout": {
+      "type": "int",
+      "default": 0
+    },
+    "Instance0.Window0.ScreenSwap": {
+      "type": "bool",
+      "default": false
+    },
+    "Instance0.Window0.ScreenSizing": {
+      "type": "int",
+      "default": 0
+    },
+    "Instance0.Window0.IntegerScaling": {
+      "type": "bool",
+      "default": false
+    },
+    "Instance0.Window0.ScreenAspectTop": {
+      "type": "int",
+      "default": 0
+    },
+    "Instance0.Window0.ScreenAspectBot": {
+      "type": "int",
+      "default": 0
+    },
+    "Screen.Filter": {
+      "type": "bool",
+      "default": true
+    },
+    "Screen.UseGL": {
+      "type": "bool",
+      "default": false
+    },
+    "Screen.VSync": {
+      "type": "bool",
+      "default": false
+    },
+    "Screen.VSyncInterval": {
+      "type": "int",
+      "default": 1
+    },
+    "3D.Renderer": {
+      "type": "int",
+      "default": 0
+    },
+    "3D.Soft.Threaded": {
+      "type": "bool",
+      "default": true
+    },
+    "3D.GL.ScaleFactor": {
+      "type": "int",
+      "default": 1
+    },
+    "3D.GL.BetterPolygons": {
+      "type": "bool",
+      "default": false
+    },
+    "3D.GL.HiresCoordinates": {
+      "type": "bool",
+      "default": true
+    },
+    "LimitFPS": {
+      "type": "bool",
+      "default": true
+    },
+    "MaxFPS": {
+      "type": "int",
+      "default": 0
+    },
+    "AudioSync": {
+      "type": "bool",
+      "default": false
+    },
+    "Instance0.Window0.ShowOSD": {
+      "type": "bool",
+      "default": true
+    },
+    "Emu.ConsoleType": {
+      "type": "int",
+      "default": 0
+    },
+    "Emu.DirectBoot": {
+      "type": "bool",
+      "default": true
+    },
+    "JIT.Enable": {
+      "type": "bool",
+      "default": false
+    },
+    "JIT.MaxBlockSize": {
+      "type": "int",
+      "default": 32
+    },
+    "JIT.BranchOptimisations": {
+      "type": "bool",
+      "default": true
+    },
+    "JIT.LiteralOptimisations": {
+      "type": "bool",
+      "default": true
+    },
+    "JIT.FastMemory": {
+      "type": "bool",
+      "default": true
+    },
+    "Emu.ExternalBIOSEnable": {
+      "type": "bool",
+      "default": false
+    },
+    "DS.BIOS9Path": {
+      "type": "str",
+      "default": ""
+    },
+    "DS.BIOS7Path": {
+      "type": "str",
+      "default": ""
+    },
+    "DS.FirmwarePath": {
+      "type": "str",
+      "default": ""
+    },
+    "DSi.BIOS9Path": {
+      "type": "str",
+      "default": ""
+    },
+    "DSi.BIOS7Path": {
+      "type": "str",
+      "default": ""
+    },
+    "DSi.FirmwarePath": {
+      "type": "str",
+      "default": ""
+    },
+    "DSi.NANDPath": {
+      "type": "str",
+      "default": ""
+    },
+    "DLDI.Enable": {
+      "type": "bool",
+      "default": false
+    },
+    "DLDI.ImagePath": {
+      "type": "str",
+      "default": "dldi.bin"
+    },
+    "DLDI.ImageSize": {
+      "type": "int",
+      "default": 0
+    },
+    "DLDI.ReadOnly": {
+      "type": "bool",
+      "default": false
+    },
+    "DLDI.FolderSync": {
+      "type": "bool",
+      "default": false
+    },
+    "DLDI.FolderPath": {
+      "type": "str",
+      "default": ""
+    },
+    "DSi.SD.Enable": {
+      "type": "bool",
+      "default": false
+    },
+    "DSi.SD.ImagePath": {
+      "type": "str",
+      "default": "dsisd.bin"
+    },
+    "DSi.SD.ImageSize": {
+      "type": "int",
+      "default": 0
+    },
+    "DSi.SD.ReadOnly": {
+      "type": "bool",
+      "default": false
+    },
+    "DSi.SD.FolderSync": {
+      "type": "bool",
+      "default": false
+    },
+    "DSi.SD.FolderPath": {
+      "type": "str",
+      "default": ""
+    },
+    "Instance0.Firmware.OverrideSettings": {
+      "type": "bool",
+      "default": false
+    },
+    "Instance0.Firmware.Username": {
+      "type": "str",
+      "default": "melonDS"
+    },
+    "Instance0.Firmware.Language": {
+      "type": "int",
+      "default": 1
+    },
+    "Instance0.Firmware.BirthdayMonth": {
+      "type": "int",
+      "default": 1
+    },
+    "Instance0.Firmware.BirthdayDay": {
+      "type": "int",
+      "default": 1
+    },
+    "Instance0.Firmware.FavouriteColour": {
+      "type": "int",
+      "default": 0
+    },
+    "Instance0.Firmware.Message": {
+      "type": "str",
+      "default": ""
+    },
+    "Instance0.Firmware.MAC": {
+      "type": "str",
+      "default": ""
+    },
+    "MP.AudioMode": {
+      "type": "int",
+      "default": 1
+    },
+    "MP.RecvTimeout": {
+      "type": "int",
+      "default": 25
+    },
+    "LAN.Device": {
+      "type": "str",
+      "default": ""
+    },
+    "LAN.DirectMode": {
+      "type": "bool",
+      "default": false
+    },
+    "Savestate.RelocSRAM": {
+      "type": "bool",
+      "default": false
+    },
+    "Audio.Interpolation": {
+      "type": "int",
+      "default": 0
+    },
+    "Audio.BitDepth": {
+      "type": "int",
+      "default": 0
+    },
+    "Instance0.Audio.Volume": {
+      "type": "int",
+      "default": 256
+    },
+    "Instance0.Audio.DSiVolumeSync": {
+      "type": "bool",
+      "default": false
+    },
+    "Mic.InputType": {
+      "type": "int",
+      "default": 1
+    },
+    "Mic.Device": {
+      "type": "str",
+      "default": ""
+    },
+    "Mic.WavPath": {
+      "type": "str",
+      "default": ""
+    },
+    "LastROMFolder": {
+      "type": "str",
+      "default": ""
+    },
+    "LastBIOSFolder": {
+      "type": "str",
+      "default": ""
+    },
+    "RecentROM[0]": {
+      "type": "str",
+      "default": ""
+    },
+    "RecentROM[1]": {
+      "type": "str",
+      "default": ""
+    },
+    "RecentROM[2]": {
+      "type": "str",
+      "default": ""
+    },
+    "RecentROM[3]": {
+      "type": "str",
+      "default": ""
+    },
+    "RecentROM[4]": {
+      "type": "str",
+      "default": ""
+    },
+    "RecentROM[5]": {
+      "type": "str",
+      "default": ""
+    },
+    "RecentROM[6]": {
+      "type": "str",
+      "default": ""
+    },
+    "RecentROM[7]": {
+      "type": "str",
+      "default": ""
+    },
+    "RecentROM[8]": {
+      "type": "str",
+      "default": ""
+    },
+    "RecentROM[9]": {
+      "type": "str",
+      "default": ""
+    },
+    "Instance0.SaveFilePath": {
+      "type": "str",
+      "default": ""
+    },
+    "Instance0.SavestatePath": {
+      "type": "str",
+      "default": ""
+    },
+    "Instance0.CheatFilePath": {
+      "type": "str",
+      "default": ""
+    },
+    "Instance0.EnableCheats": {
+      "type": "bool",
+      "default": false
+    },
+    "Mouse.Hide": {
+      "type": "bool",
+      "default": false
+    },
+    "Mouse.HideSeconds": {
+      "type": "int",
+      "default": 5
+    },
+    "PauseLostFocus": {
+      "type": "bool",
+      "default": false
+    },
+    "UITheme": {
+      "type": "str",
+      "default": ""
+    },
+    "Instance0.RTC.Offset": {
+      "type": "int",
+      "default": 0
+    },
+    "Instance0.DS.Battery.LevelOkay": {
+      "type": "bool",
+      "default": true
+    },
+    "Instance0.DSi.Battery.Level": {
+      "type": "int",
+      "default": 15
+    },
+    "Instance0.DSi.Battery.Charging": {
+      "type": "bool",
+      "default": true
+    },
+    "Instance0.DSi.FullBIOSBoot": {
+      "type": "bool",
+      "default": false
+    },
+    "Gdb.Enabled": {
+      "type": "bool",
+      "default": false
+    },
+    "Instance0.Gdb.ARM7.Port": {
+      "type": "int",
+      "default": 3334
+    },
+    "Instance0.Gdb.ARM9.Port": {
+      "type": "int",
+      "default": 3333
+    },
+    "Instance0.Gdb.ARM7.BreakOnStartup": {
+      "type": "bool",
+      "default": false
+    },
+    "Instance0.Gdb.ARM9.BreakOnStartup": {
+      "type": "bool",
+      "default": false
+    },
+    "DSi.Camera0.InputType": {
+      "type": "int",
+      "default": 0
+    },
+    "DSi.Camera0.ImagePath": {
+      "type": "str",
+      "default": ""
+    },
+    "DSi.Camera0.DeviceName": {
+      "type": "str",
+      "default": ""
+    },
+    "DSi.Camera0.XFlip": {
+      "type": "bool",
+      "default": false
+    },
+    "DSi.Camera1.InputType": {
+      "type": "int",
+      "default": 0
+    },
+    "DSi.Camera1.ImagePath": {
+      "type": "str",
+      "default": ""
+    },
+    "DSi.Camera1.DeviceName": {
+      "type": "str",
+      "default": ""
+    },
+    "DSi.Camera1.XFlip": {
+      "type": "bool",
+      "default": false
+    },
+    "MP.FrameWaitBudget": {
+      "type": "int",
+      "default": 8
+    },
+    "LAN.HostNumPlayers": {
+      "type": "int",
+      "default": 16
+    },
+    "DSi.DSP.HLE": {
+      "type": "bool",
+      "default": true
+    },
+    "TargetFPS": {
+      "type": "float",
+      "default": 60.0
+    },
+    "FastForwardFPS": {
+      "type": "float",
+      "default": 1000.0
+    },
+    "SlowmoFPS": {
+      "type": "float",
+      "default": 30.0
+    },
+    "RecentROM": {
+      "type": "array",
+      "default": []
+    }
+  }
+}

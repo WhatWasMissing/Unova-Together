@@ -241,6 +241,8 @@ class LauncherTests(unittest.TestCase):
 
     def test_companion_default_and_explicit_off_survive_profile_switch_restart_and_launch(self):
         self.assertTrue(self.app.companion_interactions.get())
+        self.assertFalse(self.app.reduced_follower_motion.get())
+        self.app._preference('reduced_follower_motion',True)
         self.app._preference('companion_interactions',False)
         first=self.app.active_profile_id
         self.app._new_profile();self.assertTrue(self.app.companion_interactions.get())
@@ -248,12 +250,14 @@ class LauncherTests(unittest.TestCase):
         self.assertEqual(self.app.active_profile_id,first);self.assertFalse(self.app.companion_interactions.get())
         self.app.destroy();self.app=Launcher(self.home,testing=True);self.app._open_mod('black2',save=False);self.app.update()
         self.assertFalse(self.app.companion_interactions.get())
+        self.assertTrue(self.app.reduced_follower_motion.get())
         self.app.rom.set(str(self.rom));self.app.player.set('Tester')
         proc=MagicMock();proc.poll.return_value=None
         with patch('launcher_ui.preferences.running',return_value=False),patch('launcher_ui.app.subprocess.Popen',return_value=proc) as spawn:
             self.app.launch()
             self.assertEqual(spawn.call_args.kwargs['env']['UNOVA_COMPANION_INTERACTIONS'],'0')
             self.assertEqual(spawn.call_args.kwargs['env']['UNOVA_EXPERIMENTAL_COMPANION'],'0')
+            self.assertEqual(spawn.call_args.kwargs['env']['UNOVA_FOLLOWER_REDUCED_MOTION'],'1')
         self.app.game=None
 
     def test_connection_worker_and_restore_running_guard(self):

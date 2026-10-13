@@ -56,6 +56,15 @@ int main() {
   }
  }
  assert(combinations==5000 && sawRun);
+ p["type1"]=10;p["type2"]=10;
+ const QVariantMap context{{"area","Undella Bay"},{"hour",23},{"month",4},{"recentBattle",true}};
+ const auto beforeContext=p;std::set<QString> contexts;
+ for(unsigned i=1;i<80;i+=2) contexts.insert(FollowerInteraction::contextNote(p,context,i));
+ assert(contexts.size()>=10 && p==beforeContext);
+ bool water=false,night=false,battle=false;
+ for(const auto& line:contexts) {water|=line.contains("water");night|=line.contains("night");battle|=line.contains("battle");}
+ assert(water && night && battle);
+ assert(FollowerInteraction::contextNote(p,context,0).isEmpty());
  p["nature"]=0;const auto firstNature=FollowerInteraction::reaction(p,"talk");
  p["nature"]=1;assert(FollowerInteraction::reaction(p,"talk")!=firstNature);
  p["egg"]=true;assert(!FollowerInteraction::available(p));

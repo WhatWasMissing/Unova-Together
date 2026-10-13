@@ -1,6 +1,6 @@
 # Unova Together features
 
-Unova Together by **mvq1303 / WhatWasMissing**, built on melonDS. Current game release: **1.0.6**. Supported games are reviewed English Pokémon Black 2 and Blaze Black 2 Redux profiles on Windows x64. Every player supplies a matching ROM and uses an independent save.
+Unova Together by **mvq1303 / WhatWasMissing**, built on melonDS. Published release: **1.0.6**; current source/local build: **1.0.7-dev**. Development changes below are documented in [the validation report](DEVELOPMENT_POLISH_2026-10-13.md) and are not in the existing 1.0.6 downloads. Supported games are reviewed English Pokémon Black 2 and Blaze Black 2 Redux profiles on Windows x64. Every player supplies a matching ROM and uses an independent save.
 
 ## Explore and play together
 
@@ -16,11 +16,13 @@ Unova Together by **mvq1303 / WhatWasMissing**, built on melonDS. Current game r
 
 ## Following Pokémon and interactions
 
-Your lead Pokémon follows roughly one tile behind you. All **649 base species** have directional sprites and idle movement. Eggs and fainted leads stay hidden. **Unova → Settings** contains **My follower**, **Teammate followers** and **Greet teammate's Pokémon**. Shiny colours and every alternate form or gender appearance are not yet covered.
+Your lead Pokémon follows roughly one tile behind you. All **649 base species** have directional sprites and idle movement. The development build includes **743 assets** with normal/shiny palettes and supported female/form variations; unsupported forms use base art. Larger art keeps its original dimensions. Eggs and fainted leads stay hidden. **Unova → Settings** contains **My follower**, **Teammate followers** and **Greet teammate's Pokémon**. Launcher Settings adds reduced follower motion. See [coverage and credits](FOLLOWER_VARIANTS.md).
 
 Stop, face your follower and hold **R** while pressing **A**, or click/tap its sprite. A alone remains available to advance ordinary game text.
 
 The ten actions are **Talk, Pet, Play, Praise, Tell a story, Ask about today, Sit together, Show a trick, Tell a joke** and **Sing together**. Each action has four rotating replies across five friendship bands. Nickname, health and nature influence the response; nature shows through tone and behavior. Reactions use hearts, question/exclamation marks, stars, notes and ellipses, with peeking, swaying, hopping, spinning and short runs.
+
+Development dialogue also uses area, DS time/season, loaded-ROM Pokémon types and recent battles, with separate visit counts for each Pokémon/action. Weather and battle-result-specific dialogue remain future work.
 
 Interactions are cosmetic and read-only. They do not raise friendship, heal Pokémon, award items or alter saves. They are blocked during movement, battles, native menus and co-op preparation. See the [interaction guide](COMPANIONS_AND_SOARING.md).
 
@@ -37,6 +39,8 @@ Interactions are cosmetic and read-only. They do not raise friendship, heal Pok�
 | Solo XP compensation | Automatic on supported profiles | **1.25×** newly awarded solo XP, with native rounding/caps. Existing XP is unchanged; co-op awards remain zero. |
 
 See [field tools](FIELD_TOOLS.md), [party stats](PARTY_STATS.md) and [XP compensation](XP_COMPENSATION.md).
+
+**Development shops:** Super Repels cost **₽10**, the lowest positive native price, and appear in active ordinary money-shop catalogs. Original ROM files remain unchanged.
 
 ## Presentation
 

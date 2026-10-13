@@ -1,6 +1,8 @@
 # Unova Together roadmap
 
-Maintained for **mvq1303 / WhatWasMissing**, built on melonDS. Reviewed against release **1.0.6** and current source on **13 October 2026**. These are proposals and priorities, not release promises. Implemented capabilities are listed in [Features](FEATURES.md).
+Maintained for **mvq1303 / WhatWasMissing**, built on melonDS. Published release **1.0.6**; current source/local build **1.0.7-dev**, reviewed **13 October 2026**. Implemented capabilities are listed in [Features](FEATURES.md).
+
+Development work now includes the Practice result/cleanup barrier (targeted local latency pass), protocol/ROM readiness, rematch categories, contextual session dialogue, 743 normal/shiny female/form assets, sprite stability, reduced motion and ₽10 Super Repels. See [validation and remaining playtests](DEVELOPMENT_POLISH_2026-10-13.md). The priorities below describe areas to continue validating or expanding; they are not release promises.
 
 ## 1. Make shared battles and recovery reliable
 
@@ -27,7 +29,7 @@ An invite-code service or hosted relay could simplify internet setup later. That
 - Expand shiny, alternate-form and gender sprite coverage when matching, correctly credited assets are available.
 - Add options for idle bob strength, reduced motion and reaction frequency.
 
-The ten actions, five friendship bands, subtle nature cues and animated reactions already exist. Contextual dialogue, memories and friendship/item rewards do not. Keep interactions read-only unless persistent effects are separately designed and validated. The new launcher moves interactions out of Experimental and defaults them on while preserving explicit choices.
+The ten actions, five friendship bands, subtle nature cues and animated reactions already exist. Development dialogue now has area/calendar/type context and per-Pokémon/action session visit counts. Weather, outcome-specific scenes, permanent memories and friendship/item rewards remain future work. Keep interactions read-only unless persistent effects are separately designed and validated. The launcher moves interactions out of Experimental and defaults them on while preserving explicit choices.
 
 ## 4. Make progression and trainer co-op easier to follow
 

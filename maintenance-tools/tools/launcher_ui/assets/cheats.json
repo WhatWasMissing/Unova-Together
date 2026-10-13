@@ -1,0 +1,32 @@
+{
+  "source": "https://github.com/libretro/libretro-database",
+  "license": "CC-BY-SA-4.0",
+  "profiles": {
+    "8edfc3483e1744fba7814264630e427c721f4f983e17507af3d196618a7e88d9": "Black 2 (USA/Europe)",
+    "9ae8bd45702fad226d5605872fd7634b972d5217c6eb24529326ddc6e968c8ba": "Redux Complete v1.4.1 / Unova Together"
+  },
+  "codes": [
+    {
+      "id": "money",
+      "name": "Max money",
+      "activation": "Press Select in the overworld",
+      "note": "Sets money to 9,999,999. Money remains after disabling.",
+      "words": "94000130 FFFB0000 6209A338 00000000 B209A338 00000000 00021738 0098967F D2000000 00000000"
+    },
+    {
+      "id": "repel",
+      "name": "Refill repel",
+      "activation": "Press Select in the overworld",
+      "note": "Sets remaining repel steps to 255.",
+      "words": "94000130 FFFB0000 6209A338 00000000 B209A338 00000000 20021F65 000000FF D2000000 00000000"
+    },
+    {
+      "id": "candy",
+      "name": "999 Rare Candies",
+      "activation": "Press L + R in the overworld",
+      "note": "Replaces the FIRST medicine slot. Back up your save; disable after use.",
+      "words": "94000130 FCFF0000 6209A338 00000000 B209A338 00000000 00019210 03E70032 D2000000 00000000",
+      "adaptation": "Adapted from the All Medicines code: one Rare Candy slot instead of every medicine."
+    }
+  ]
+}

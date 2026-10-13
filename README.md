@@ -26,6 +26,8 @@ See the [complete feature guide](docs/FEATURES.md) for controls, menu paths and 
 
 The launcher update on `main` moves companion interactions to **Settings → Following Pokémon** and enables them by default when no preference has been saved. Explicit off choices are preserved. The v1.0.6 release downloads retain their original launcher and **Settings → Experimental** option; these source/documentation updates do not replace those assets.
 
+The **1.0.7-dev** source/local build adds 743 normal/shiny follower variants, supported female/forms, sprite stability fixes, contextual dialogue, reduced motion, co-op compatibility/readiness checks, rematch filters and **₽10 Super Repels**. Practice completion passed a targeted local latency test; broader recovery/network playtesting remains required. See [changes, evidence and source reconstruction](docs/DEVELOPMENT_POLISH_2026-10-13.md).
+
 ## Guides and limits
 
 [Release notes](RELEASE_NOTES_1.0.6.md) · [Release checks](docs/RELEASE_CHECKS_1.0.6.md) · [Known limits](docs/KNOWN_ISSUES.md)

@@ -365,7 +365,7 @@ class Launcher(tk.Tk):
         if index<0:return
         self._save();self.active_profile_id=self.play_profiles[index]['id'];self._init_profiles();self._switching=True
         item=self._active_profile();self.profile_label.set(item['label']);self.player.set(item['player']);self.save_dir.set(item['save_dir'])
-        values=prefs.defaults(self.root/'builds/current');values.update(self.preference_values);self.pause.set(values['pause']);self.filter.set(values['filter']);self.volume.set(values['volume']);self.area_scenery.set(values.get('area_scenery',False));self.companion_interactions.set(values['companion_interactions'])
+        values=prefs.defaults(self.root/'builds/current');values.update(self.preference_values);self.pause.set(values['pause']);self.filter.set(values['filter']);self.volume.set(values['volume']);self.area_scenery.set(values.get('area_scenery',False));self.companion_interactions.set(values['companion_interactions']);self.reduced_follower_motion.set(values.get('reduced_follower_motion',False))
         self.lan_slots.set(str(item.get('lan_slots',16)))
         self.connection_role.set(item['lan_role']);self.last_lan_action=item['lan_role'].lower()
         self.net_mode.set(item['network']['mode']);self.net_host.set(item['network']['host']);self.net_port.set(str(item['network']['port']));self.net_room.set(item['network']['room'])
@@ -421,6 +421,18 @@ class Launcher(tk.Tk):
         third=card(parent);third.pack(fill='x')
         label(third,'Next: join in-game',size=12,bold=True,bg=C['surface']).pack(anchor='w',padx=18,pady=(14,6))
         label(third,'Host & play starts a LAN lobby. Your friend uses Join & play.\nTurn C-Gear wireless and fast-forward off.',size=10,color=C['muted'],bg=C['surface'],wraplength=590,justify='left').pack(anchor='w',padx=18,pady=(0,14))
+        readiness=card(parent);readiness.pack(fill='x',pady=(12,0))
+        label(readiness,'Battle readiness',size=12,bold=True,bg=C['surface']).pack(anchor='w',padx=18,pady=(14,6))
+        self.coop_checks=tk.StringVar(value='Run checks for this profile. Test connection above checks the presence relay. In-game readiness checks native LAN and partner agreement.')
+        label(readiness,textvariable=self.coop_checks,size=10,bg=C['surface'],wraplength=590,justify='left').pack(anchor='w',padx=18,pady=6)
+        button(readiness,'Check readiness',self._coop_readiness).pack(anchor='w',padx=18,pady=(6,14))
+
+    def _coop_readiness(self):
+        lines=self._run_checks()
+        lines.insert(0,'BUILD: '+self._version_text())
+        lines.append('PRESENCE: '+self.connection_status.get())
+        lines.append('IN-GAME: Unova → Players checks protocol and ROM agreement; System → Multiplayer shows native LAN readiness.')
+        self.coop_checks.set('\n'.join(lines))
 
     def _connection_mode_changed(self):
         mode=self.net_mode.get()
@@ -651,6 +663,10 @@ class Launcher(tk.Tk):
             command=lambda:self._preference('companion_interactions',self.companion_interactions.get())).pack(anchor='w',pady=4)
 
         label(follower_box,'On by default. Stop, face your follower and press R+A, or tap it. Changes apply next launch.\nShow or hide followers in Unova → Settings.',size=9,color=C['muted'],bg=C['surface'],wraplength=620,justify='left').pack(anchor='w',pady=(6,0))
+        self.reduced_follower_motion=tk.BooleanVar(value=values.get('reduced_follower_motion',False))
+        ttk.Checkbutton(follower_box,text='Reduced follower motion',variable=self.reduced_follower_motion,
+            command=lambda:self._preference('reduced_follower_motion',self.reduced_follower_motion.get())).pack(anchor='w',pady=(8,4))
+        label(follower_box,'Keeps reaction symbols; disables decorative bobbing and reaction movement.',size=9,color=C['muted'],bg=C['surface'],wraplength=620,justify='left').pack(anchor='w')
         cheats=card(parent);cheats.pack(fill='x')
         box=tk.Frame(cheats,bg=C['surface']);box.pack(fill='x',padx=18,pady=16)
         label(box,'OPTIONAL CHEATS',size=9,bold=True,bg=C['surface']).pack(anchor='w')
@@ -718,7 +734,7 @@ class Launcher(tk.Tk):
             self.active_profile_id=str(data.get('active_profile',''))
             if type(data.get('check')) is bool:self.auto.set(data['check'])
             if type(data.get('music')) is bool:self.music.set(data['music'])
-            if isinstance(data.get('preferences'),dict):self.preference_values={k:v for k,v in data['preferences'].items() if (k in ('pause','filter','area_scenery','companion_interactions') and type(v) is bool) or (k=='volume' and type(v) is int and 0<=v<=100)}
+            if isinstance(data.get('preferences'),dict):self.preference_values={k:v for k,v in data['preferences'].items() if (k in ('pause','filter','area_scenery','companion_interactions','reduced_follower_motion') and type(v) is bool) or (k=='volume' and type(v) is int and 0<=v<=100)}
             if isinstance(data.get('cheats'),dict):self.cheat_choices={k:{ident:flag for ident,flag in v.items() if ident in self.cheat_vars_ids() and type(flag) is bool} for k,v in list(data['cheats'].items())[-32:] if isinstance(k,str) and len(k)<=32 and isinstance(v,dict)}
         except (OSError,ValueError,AttributeError):pass
 
@@ -839,6 +855,7 @@ class Launcher(tk.Tk):
             companion='1' if settings.get('companion_interactions',True) else '0'
             env['UNOVA_COMPANION_INTERACTIONS']=companion
             env['UNOVA_EXPERIMENTAL_COMPANION']=companion # compatibility with existing released runtimes
+            env['UNOVA_FOLLOWER_REDUCED_MOTION']='1' if settings.get('reduced_follower_motion',False) else '0'
             env.pop('UNOVA_AREA_CATALOG',None)
             env.pop('UNOVA_SURROUNDINGS_DIR',None)
             if settings.get('area_scenery',False):
@@ -986,13 +1003,13 @@ class Launcher(tk.Tk):
         self._start_lan(self.last_lan_action)
 
     def _features_page(self,parent):
-        self._heading(parent,'FEATURES','Features','Unova Together · feature guide for release 1.0.6')
+        self._heading(parent,'FEATURES','Features','Unova Together · current development build')
         companion=card(parent);companion.pack(fill='x',pady=(0,12))
         label(companion,'Companion interactions',size=13,bold=True,bg=C['surface']).pack(anchor='w',padx=14,pady=(14,4))
         label(companion,'Expanded in 1.0.6 · on by default in this launcher',size=9,color=C['muted'],bg=C['surface']).pack(anchor='w',padx=14)
         for copy in (
             'Talk, pet, play, praise, tell a story, ask about today, sit together, show a trick, tell a joke or sing together.',
-            'Five friendship bands, four rotating replies per action and subtle nature cues. Hearts, !, ?, stars and notes accompany peeks, sways, hops, spins and short runs.',
+            'Five friendship bands, subtle nature cues and session visit counts. Area, calendar, Pokémon type and recent battles add context. Hearts, !, ?, stars and notes accompany peeks, sways, hops, spins and short runs.',
             'Stop, face your follower and press R+A, or tap its sprite. A alone advances game text. Manage interactions in Settings → Following Pokémon; show or hide followers in Unova → Settings.',
             'Cosmetic only: HP, friendship, items and saves are unchanged.'):
             text=label(companion,copy,size=10,bg=C['surface'],wraplength=570,justify='left')
@@ -1015,7 +1032,8 @@ class Launcher(tk.Tk):
             panel.bind('<Configure>',lambda e,w=text:w.configure(wraplength=max(240,e.width-32)))
         extras=card(parent);extras.pack(fill='x')
         for title,copy in (
-            ('Following Pokémon','All 649 base species have directional sprites and idle movement. Change your lead to change your follower. Toggle your own or teammate followers, or greet a teammate’s Pokémon, in Unova → Settings. Shiny colours and full form coverage are not included.'),
+            ('Following Pokémon','649 base species plus supported female and form variants: 743 directional assets with normal and shiny palettes. Larger art retains its original dimensions. Unsupported forms use base art. Reduced follower motion is available in Settings.'),
+            ('Super Repels','Super Repels cost ₽10, the lowest positive price supported by the game. Available in active ordinary money shops. ROM files and saves are not edited.'),
             ('Encounter finder & move relearning','Unova → Pokémon lists ordinary wild encounters by season and offers free level-up move relearning. Gifts, scripted legendaries and Hidden Grottos are excluded.'),
             ('Field HMs','Owned HMs work without occupying battle move slots. Native story requirements still apply; Fly needs an available field-action slot.'),
             ('Solo XP','Supported solo battles award 1.25× XP automatically. Existing XP is unchanged. Co-op battles award no XP.'),

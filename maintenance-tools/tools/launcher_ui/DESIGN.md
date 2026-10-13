@@ -1,7 +1,7 @@
 ---
 version: alpha
-name: "Unova Together launcher"
-description: "A Gen 5-inspired Windows starting point for a shared adventure."
+name: "Pokemon Together multiplayer mod library"
+description: "A shared Windows home for multiplayer Pokemon mods with independent game workspaces."
 colors:
   background: "#e8e8e8"
   surface: "#ffffff"
@@ -138,3 +138,41 @@ Gen 5 visual revision: monochrome framed menu panels, dark navigation, berry-red
 Launcher 20261009.7: Features is a scrollable native page with actual gameplay screenshots and short capability/limitation descriptions. Co-op owns Host & play / Join & play. Native launch requests use a random per-process identity and atomic status reports; old or unrelated status files are ignored. Buttons are disabled while a launched game is running. Hosting sets localhost player sharing and joining retains the chosen host. Native LAN and presence setup remain distinct.
 
 Launcher 20261009.8: per-profile LAN role and previous join host survive host/join switching and restart. Retry uses the last role, refuses to restart a running game and asks the player to save/close first. Native status distinguishes starting, host waiting, joining, connected, teammate disconnected, stale status and game closed. Reports are prepared locally, redacted, and shown for review with a manual GitHub issues link; nothing is uploaded. Keyboard focus uses Tab, Enter and Ctrl+Tab; focused XInput controller navigation uses D-pad/stick, A, B and shoulder buttons. Background emulator input is not intercepted.
+
+
+## Pokemon Together game routing (20261012)
+
+The launcher name is Pokemon Together; original Unova Together/mvq1303 and upstream
+credits stay intact. Existing runtime theme.json remains the token owner. The new
+Play selector uses the shared native readonly Combobox and existing card/button
+styles. Black 2/Redux retains the DS ROM, profiles, settings and update workflow.
+Pokemon X shows a separate prepared-research-folder, launch-mode and guest IPv4
+form. It opens only the corresponding fixed 3DS script; no DS settings or save
+migration are applied. The two routes persist independently in the existing
+launcher configuration. Missing setup and invalid addresses produce persistent
+footer feedback. Research launch runs asynchronously and disables duplicate launch.
+
+The 3DS adapter is a research integration, not support for arbitrary 3DS games or
+a ROM/save distribution. Its original checkpoints and privately dumped ROM stay
+in the selected preparation folder. DS release updates retain their current
+repository/layout and do not silently update the 3DS emulator. The menu uses native
+Windows popup behavior and keyboard focus. Verify both game selections, profile
+preservation, bad setup recovery, and existing page/navigation tests.
+
+## Shared mod library (20261013)
+
+Every launch opens Mod library, regardless of the last selected mod. Framed library
+panels reuse the monochrome game-menu identity, display typography and berry-red
+Open actions from theme.json. Each panel names the mod, platform, capability and
+release status. No setup wizard or first-run modal is involved.
+Copy is limited to names, short capability labels, actions and necessary guidance.
+The idle status footer is empty; no slogans or greeting text appear.
+
+game_routes.MODS owns stable IDs, visible page sets and library metadata. The hub
+sidebar exposes Mod library plus the active mod's pages. Unova retains its existing
+native forms, saves, update policy and tooling. Pokemon X has separate Play, Co-op
+and Guides pages; no Unova settings, save editors or updater controls appear there.
+Future mods add registry metadata and their own adapter/pages rather than overloading
+Unova navigation. English native desktop controls remain canonical. ScrollPage owns
+page scrolling; components.button owns keyboard focus, hover and disabled states;
+the existing persistent footer owns errors and operation progress.

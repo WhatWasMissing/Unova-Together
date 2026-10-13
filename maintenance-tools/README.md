@@ -1,5 +1,7 @@
 # Maintenance tool source snapshots
 
+**Current development delta:** `patches/development-polish.patch` supersedes the companion-defaults patch and applies directly to the published 1.0.6 source ZIP. Copy `assets/followers/variants` to `source/melonDS/res/followers/variants` and overlay the tools. See `docs/DEVELOPMENT_POLISH_2026-10-13.md` in the repository for reconstruction, validation and limitations. Asset credits/terms remain beside the variant folder.
+
 Unova Together maintenance by mvq1303 / WhatWasMissing, built on melonDS. These helper sources are covered by the repository GPL license. Preserve upstream attribution. Frost and PKHeX are separate tools downloaded from their official projects; their binaries and source are not vendored here.
 
 These are follow-up helpers developed after the immutable 1.0.2 release assets. Copy this `tools` directory over the corresponding-source workspace `tools` directory to use the updated helpers. ROMs, saves and private fixtures are deliberately excluded. The native battle/reload runners require the private fixture layout documented in the matching source and are not general-purpose player utilities.

@@ -12,13 +12,14 @@ All 649 species through Generation 5 have directional follower sprites. Generati
 1–4 use the loaded Black 2 ROM's overworld artwork. Gen 5 uses credited hg-engine
 overworld artwork bundled into the emulator. Party icons are never used as followers.
 Standing sprites without natural idle motion receive a subtle bob with anchored feet. Companion interactions can add short reaction motions; see the [interaction guide](COMPANIONS_AND_SOARING.md).
-Shiny colours and every alternate-form
-or gender-specific appearance are not implemented. Selected native form variants
-(Unown, Deoxys, Burmy/Wormadam, Shellos/Gastrodon, Giratina, Shaymin, Rotom and
-Basculin) use their available overworld variants.
+The 1.0.7-dev source/local build has 743 assets with normal/shiny palettes,
+supported female appearances and alternate forms. Unsupported forms use base
+art. Large sprites keep 64-pixel dimensions with transparent animation headroom.
+See [coverage and provenance](FOLLOWER_VARIANTS.md). Published 1.0.6 assets retain
+their earlier appearance coverage.
 
 Teammates can see your follower when both use this build and the host runs its
-updated presence relay. The relay sends only species and form numbers alongside
+updated presence relay. The relay sends species, form, gender and shiny metadata alongside
 existing presence updates; each emulator loads its own follower graphics. Older relays
 can still connect but discard this optional follower information.
 
@@ -26,7 +27,8 @@ can still connect but discard this optional follower information.
 
 `tools/check_pokemon_follower.cpp` validates the breadcrumb path and decodes all
 649 species from both retail Black 2 and Redux Complete 1.4.1. Each species has
-12 non-empty, bounded 32×32 display frames. The same tests cover stopping,
+12 non-empty, bounded display frames. Development checks also decode all 743
+variants with normal/shiny palettes and 32/64-pixel widths. The same tests cover stopping,
 corners, map changes, warps, invalidation and lead changes. Relay tests validate
 optional metadata and reject invalid species/form values.
 

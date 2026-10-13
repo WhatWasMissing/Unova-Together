@@ -1,0 +1,1839 @@
+--- a/source/melonDS/res/followers.qrc
++++ b/source/melonDS/res/followers.qrc
+@@ -155,4 +155,747 @@
+ <file alias="647.btx">followers/647.btx</file>
+ <file alias="648.btx">followers/648.btx</file>
+ <file alias="649.btx">followers/649.btx</file>
++<file alias="variants/1-0-2.btx">followers/variants/1-0-2.btx</file>
++<file alias="variants/2-0-2.btx">followers/variants/2-0-2.btx</file>
++<file alias="variants/3-0-2.btx">followers/variants/3-0-2.btx</file>
++<file alias="variants/3-0-1.btx">followers/variants/3-0-1.btx</file>
++<file alias="variants/4-0-2.btx">followers/variants/4-0-2.btx</file>
++<file alias="variants/5-0-2.btx">followers/variants/5-0-2.btx</file>
++<file alias="variants/6-0-2.btx">followers/variants/6-0-2.btx</file>
++<file alias="variants/7-0-2.btx">followers/variants/7-0-2.btx</file>
++<file alias="variants/8-0-2.btx">followers/variants/8-0-2.btx</file>
++<file alias="variants/9-0-2.btx">followers/variants/9-0-2.btx</file>
++<file alias="variants/10-0-2.btx">followers/variants/10-0-2.btx</file>
++<file alias="variants/11-0-2.btx">followers/variants/11-0-2.btx</file>
++<file alias="variants/12-0-2.btx">followers/variants/12-0-2.btx</file>
++<file alias="variants/13-0-2.btx">followers/variants/13-0-2.btx</file>
++<file alias="variants/14-0-2.btx">followers/variants/14-0-2.btx</file>
++<file alias="variants/15-0-2.btx">followers/variants/15-0-2.btx</file>
++<file alias="variants/16-0-2.btx">followers/variants/16-0-2.btx</file>
++<file alias="variants/17-0-2.btx">followers/variants/17-0-2.btx</file>
++<file alias="variants/18-0-2.btx">followers/variants/18-0-2.btx</file>
++<file alias="variants/19-0-2.btx">followers/variants/19-0-2.btx</file>
++<file alias="variants/20-0-2.btx">followers/variants/20-0-2.btx</file>
++<file alias="variants/21-0-2.btx">followers/variants/21-0-2.btx</file>
++<file alias="variants/22-0-2.btx">followers/variants/22-0-2.btx</file>
++<file alias="variants/23-0-2.btx">followers/variants/23-0-2.btx</file>
++<file alias="variants/24-0-2.btx">followers/variants/24-0-2.btx</file>
++<file alias="variants/25-0-2.btx">followers/variants/25-0-2.btx</file>
++<file alias="variants/25-0-1.btx">followers/variants/25-0-1.btx</file>
++<file alias="variants/26-0-2.btx">followers/variants/26-0-2.btx</file>
++<file alias="variants/27-0-2.btx">followers/variants/27-0-2.btx</file>
++<file alias="variants/28-0-2.btx">followers/variants/28-0-2.btx</file>
++<file alias="variants/29-0-2.btx">followers/variants/29-0-2.btx</file>
++<file alias="variants/30-0-2.btx">followers/variants/30-0-2.btx</file>
++<file alias="variants/31-0-2.btx">followers/variants/31-0-2.btx</file>
++<file alias="variants/32-0-2.btx">followers/variants/32-0-2.btx</file>
++<file alias="variants/33-0-2.btx">followers/variants/33-0-2.btx</file>
++<file alias="variants/34-0-2.btx">followers/variants/34-0-2.btx</file>
++<file alias="variants/35-0-2.btx">followers/variants/35-0-2.btx</file>
++<file alias="variants/36-0-2.btx">followers/variants/36-0-2.btx</file>
++<file alias="variants/37-0-2.btx">followers/variants/37-0-2.btx</file>
++<file alias="variants/38-0-2.btx">followers/variants/38-0-2.btx</file>
++<file alias="variants/39-0-2.btx">followers/variants/39-0-2.btx</file>
++<file alias="variants/40-0-2.btx">followers/variants/40-0-2.btx</file>
++<file alias="variants/41-0-2.btx">followers/variants/41-0-2.btx</file>
++<file alias="variants/42-0-2.btx">followers/variants/42-0-2.btx</file>
++<file alias="variants/43-0-2.btx">followers/variants/43-0-2.btx</file>
++<file alias="variants/44-0-2.btx">followers/variants/44-0-2.btx</file>
++<file alias="variants/45-0-2.btx">followers/variants/45-0-2.btx</file>
++<file alias="variants/46-0-2.btx">followers/variants/46-0-2.btx</file>
++<file alias="variants/47-0-2.btx">followers/variants/47-0-2.btx</file>
++<file alias="variants/48-0-2.btx">followers/variants/48-0-2.btx</file>
++<file alias="variants/49-0-2.btx">followers/variants/49-0-2.btx</file>
++<file alias="variants/50-0-2.btx">followers/variants/50-0-2.btx</file>
++<file alias="variants/51-0-2.btx">followers/variants/51-0-2.btx</file>
++<file alias="variants/52-0-2.btx">followers/variants/52-0-2.btx</file>
++<file alias="variants/53-0-2.btx">followers/variants/53-0-2.btx</file>
++<file alias="variants/54-0-2.btx">followers/variants/54-0-2.btx</file>
++<file alias="variants/55-0-2.btx">followers/variants/55-0-2.btx</file>
++<file alias="variants/56-0-2.btx">followers/variants/56-0-2.btx</file>
++<file alias="variants/57-0-2.btx">followers/variants/57-0-2.btx</file>
++<file alias="variants/58-0-2.btx">followers/variants/58-0-2.btx</file>
++<file alias="variants/59-0-2.btx">followers/variants/59-0-2.btx</file>
++<file alias="variants/60-0-2.btx">followers/variants/60-0-2.btx</file>
++<file alias="variants/61-0-2.btx">followers/variants/61-0-2.btx</file>
++<file alias="variants/62-0-2.btx">followers/variants/62-0-2.btx</file>
++<file alias="variants/63-0-2.btx">followers/variants/63-0-2.btx</file>
++<file alias="variants/64-0-2.btx">followers/variants/64-0-2.btx</file>
++<file alias="variants/65-0-2.btx">followers/variants/65-0-2.btx</file>
++<file alias="variants/66-0-2.btx">followers/variants/66-0-2.btx</file>
++<file alias="variants/67-0-2.btx">followers/variants/67-0-2.btx</file>
++<file alias="variants/68-0-2.btx">followers/variants/68-0-2.btx</file>
++<file alias="variants/69-0-2.btx">followers/variants/69-0-2.btx</file>
++<file alias="variants/70-0-2.btx">followers/variants/70-0-2.btx</file>
++<file alias="variants/71-0-2.btx">followers/variants/71-0-2.btx</file>
++<file alias="variants/72-0-2.btx">followers/variants/72-0-2.btx</file>
++<file alias="variants/73-0-2.btx">followers/variants/73-0-2.btx</file>
++<file alias="variants/74-0-2.btx">followers/variants/74-0-2.btx</file>
++<file alias="variants/75-0-2.btx">followers/variants/75-0-2.btx</file>
++<file alias="variants/76-0-2.btx">followers/variants/76-0-2.btx</file>
++<file alias="variants/77-0-2.btx">followers/variants/77-0-2.btx</file>
++<file alias="variants/78-0-2.btx">followers/variants/78-0-2.btx</file>
++<file alias="variants/79-0-2.btx">followers/variants/79-0-2.btx</file>
++<file alias="variants/80-0-2.btx">followers/variants/80-0-2.btx</file>
++<file alias="variants/81-0-2.btx">followers/variants/81-0-2.btx</file>
++<file alias="variants/82-0-2.btx">followers/variants/82-0-2.btx</file>
++<file alias="variants/83-0-2.btx">followers/variants/83-0-2.btx</file>
++<file alias="variants/84-0-2.btx">followers/variants/84-0-2.btx</file>
++<file alias="variants/85-0-2.btx">followers/variants/85-0-2.btx</file>
++<file alias="variants/86-0-2.btx">followers/variants/86-0-2.btx</file>
++<file alias="variants/87-0-2.btx">followers/variants/87-0-2.btx</file>
++<file alias="variants/88-0-2.btx">followers/variants/88-0-2.btx</file>
++<file alias="variants/89-0-2.btx">followers/variants/89-0-2.btx</file>
++<file alias="variants/90-0-2.btx">followers/variants/90-0-2.btx</file>
++<file alias="variants/91-0-2.btx">followers/variants/91-0-2.btx</file>
++<file alias="variants/92-0-2.btx">followers/variants/92-0-2.btx</file>
++<file alias="variants/93-0-2.btx">followers/variants/93-0-2.btx</file>
++<file alias="variants/94-0-2.btx">followers/variants/94-0-2.btx</file>
++<file alias="variants/95-0-2.btx">followers/variants/95-0-2.btx</file>
++<file alias="variants/96-0-2.btx">followers/variants/96-0-2.btx</file>
++<file alias="variants/97-0-2.btx">followers/variants/97-0-2.btx</file>
++<file alias="variants/98-0-2.btx">followers/variants/98-0-2.btx</file>
++<file alias="variants/99-0-2.btx">followers/variants/99-0-2.btx</file>
++<file alias="variants/100-0-2.btx">followers/variants/100-0-2.btx</file>
++<file alias="variants/101-0-2.btx">followers/variants/101-0-2.btx</file>
++<file alias="variants/102-0-2.btx">followers/variants/102-0-2.btx</file>
++<file alias="variants/103-0-2.btx">followers/variants/103-0-2.btx</file>
++<file alias="variants/104-0-2.btx">followers/variants/104-0-2.btx</file>
++<file alias="variants/105-0-2.btx">followers/variants/105-0-2.btx</file>
++<file alias="variants/106-0-2.btx">followers/variants/106-0-2.btx</file>
++<file alias="variants/107-0-2.btx">followers/variants/107-0-2.btx</file>
++<file alias="variants/108-0-2.btx">followers/variants/108-0-2.btx</file>
++<file alias="variants/109-0-2.btx">followers/variants/109-0-2.btx</file>
++<file alias="variants/110-0-2.btx">followers/variants/110-0-2.btx</file>
++<file alias="variants/111-0-2.btx">followers/variants/111-0-2.btx</file>
++<file alias="variants/112-0-2.btx">followers/variants/112-0-2.btx</file>
++<file alias="variants/113-0-2.btx">followers/variants/113-0-2.btx</file>
++<file alias="variants/114-0-2.btx">followers/variants/114-0-2.btx</file>
++<file alias="variants/115-0-2.btx">followers/variants/115-0-2.btx</file>
++<file alias="variants/116-0-2.btx">followers/variants/116-0-2.btx</file>
++<file alias="variants/117-0-2.btx">followers/variants/117-0-2.btx</file>
++<file alias="variants/118-0-2.btx">followers/variants/118-0-2.btx</file>
++<file alias="variants/119-0-2.btx">followers/variants/119-0-2.btx</file>
++<file alias="variants/120-0-2.btx">followers/variants/120-0-2.btx</file>
++<file alias="variants/121-0-2.btx">followers/variants/121-0-2.btx</file>
++<file alias="variants/122-0-2.btx">followers/variants/122-0-2.btx</file>
++<file alias="variants/123-0-2.btx">followers/variants/123-0-2.btx</file>
++<file alias="variants/124-0-2.btx">followers/variants/124-0-2.btx</file>
++<file alias="variants/125-0-2.btx">followers/variants/125-0-2.btx</file>
++<file alias="variants/126-0-2.btx">followers/variants/126-0-2.btx</file>
++<file alias="variants/127-0-2.btx">followers/variants/127-0-2.btx</file>
++<file alias="variants/128-0-2.btx">followers/variants/128-0-2.btx</file>
++<file alias="variants/129-0-2.btx">followers/variants/129-0-2.btx</file>
++<file alias="variants/130-0-2.btx">followers/variants/130-0-2.btx</file>
++<file alias="variants/131-0-2.btx">followers/variants/131-0-2.btx</file>
++<file alias="variants/132-0-2.btx">followers/variants/132-0-2.btx</file>
++<file alias="variants/133-0-2.btx">followers/variants/133-0-2.btx</file>
++<file alias="variants/134-0-2.btx">followers/variants/134-0-2.btx</file>
++<file alias="variants/135-0-2.btx">followers/variants/135-0-2.btx</file>
++<file alias="variants/136-0-2.btx">followers/variants/136-0-2.btx</file>
++<file alias="variants/137-0-2.btx">followers/variants/137-0-2.btx</file>
++<file alias="variants/138-0-2.btx">followers/variants/138-0-2.btx</file>
++<file alias="variants/139-0-2.btx">followers/variants/139-0-2.btx</file>
++<file alias="variants/140-0-2.btx">followers/variants/140-0-2.btx</file>
++<file alias="variants/141-0-2.btx">followers/variants/141-0-2.btx</file>
++<file alias="variants/142-0-2.btx">followers/variants/142-0-2.btx</file>
++<file alias="variants/143-0-2.btx">followers/variants/143-0-2.btx</file>
++<file alias="variants/144-0-2.btx">followers/variants/144-0-2.btx</file>
++<file alias="variants/145-0-2.btx">followers/variants/145-0-2.btx</file>
++<file alias="variants/146-0-2.btx">followers/variants/146-0-2.btx</file>
++<file alias="variants/147-0-2.btx">followers/variants/147-0-2.btx</file>
++<file alias="variants/148-0-2.btx">followers/variants/148-0-2.btx</file>
++<file alias="variants/149-0-2.btx">followers/variants/149-0-2.btx</file>
++<file alias="variants/150-0-2.btx">followers/variants/150-0-2.btx</file>
++<file alias="variants/151-0-2.btx">followers/variants/151-0-2.btx</file>
++<file alias="variants/152-0-2.btx">followers/variants/152-0-2.btx</file>
++<file alias="variants/153-0-2.btx">followers/variants/153-0-2.btx</file>
++<file alias="variants/154-0-2.btx">followers/variants/154-0-2.btx</file>
++<file alias="variants/154-0-1.btx">followers/variants/154-0-1.btx</file>
++<file alias="variants/155-0-2.btx">followers/variants/155-0-2.btx</file>
++<file alias="variants/156-0-2.btx">followers/variants/156-0-2.btx</file>
++<file alias="variants/157-0-2.btx">followers/variants/157-0-2.btx</file>
++<file alias="variants/158-0-2.btx">followers/variants/158-0-2.btx</file>
++<file alias="variants/159-0-2.btx">followers/variants/159-0-2.btx</file>
++<file alias="variants/160-0-2.btx">followers/variants/160-0-2.btx</file>
++<file alias="variants/161-0-2.btx">followers/variants/161-0-2.btx</file>
++<file alias="variants/162-0-2.btx">followers/variants/162-0-2.btx</file>
++<file alias="variants/163-0-2.btx">followers/variants/163-0-2.btx</file>
++<file alias="variants/164-0-2.btx">followers/variants/164-0-2.btx</file>
++<file alias="variants/165-0-2.btx">followers/variants/165-0-2.btx</file>
++<file alias="variants/166-0-2.btx">followers/variants/166-0-2.btx</file>
++<file alias="variants/167-0-2.btx">followers/variants/167-0-2.btx</file>
++<file alias="variants/168-0-2.btx">followers/variants/168-0-2.btx</file>
++<file alias="variants/169-0-2.btx">followers/variants/169-0-2.btx</file>
++<file alias="variants/170-0-2.btx">followers/variants/170-0-2.btx</file>
++<file alias="variants/171-0-2.btx">followers/variants/171-0-2.btx</file>
++<file alias="variants/172-0-2.btx">followers/variants/172-0-2.btx</file>
++<file alias="variants/173-0-2.btx">followers/variants/173-0-2.btx</file>
++<file alias="variants/174-0-2.btx">followers/variants/174-0-2.btx</file>
++<file alias="variants/175-0-2.btx">followers/variants/175-0-2.btx</file>
++<file alias="variants/176-0-2.btx">followers/variants/176-0-2.btx</file>
++<file alias="variants/177-0-2.btx">followers/variants/177-0-2.btx</file>
++<file alias="variants/178-0-2.btx">followers/variants/178-0-2.btx</file>
++<file alias="variants/179-0-2.btx">followers/variants/179-0-2.btx</file>
++<file alias="variants/180-0-2.btx">followers/variants/180-0-2.btx</file>
++<file alias="variants/181-0-2.btx">followers/variants/181-0-2.btx</file>
++<file alias="variants/182-0-2.btx">followers/variants/182-0-2.btx</file>
++<file alias="variants/183-0-2.btx">followers/variants/183-0-2.btx</file>
++<file alias="variants/184-0-2.btx">followers/variants/184-0-2.btx</file>
++<file alias="variants/185-0-2.btx">followers/variants/185-0-2.btx</file>
++<file alias="variants/186-0-2.btx">followers/variants/186-0-2.btx</file>
++<file alias="variants/187-0-2.btx">followers/variants/187-0-2.btx</file>
++<file alias="variants/188-0-2.btx">followers/variants/188-0-2.btx</file>
++<file alias="variants/189-0-2.btx">followers/variants/189-0-2.btx</file>
++<file alias="variants/190-0-2.btx">followers/variants/190-0-2.btx</file>
++<file alias="variants/191-0-2.btx">followers/variants/191-0-2.btx</file>
++<file alias="variants/192-0-2.btx">followers/variants/192-0-2.btx</file>
++<file alias="variants/193-0-2.btx">followers/variants/193-0-2.btx</file>
++<file alias="variants/194-0-2.btx">followers/variants/194-0-2.btx</file>
++<file alias="variants/195-0-2.btx">followers/variants/195-0-2.btx</file>
++<file alias="variants/196-0-2.btx">followers/variants/196-0-2.btx</file>
++<file alias="variants/197-0-2.btx">followers/variants/197-0-2.btx</file>
++<file alias="variants/198-0-2.btx">followers/variants/198-0-2.btx</file>
++<file alias="variants/199-0-2.btx">followers/variants/199-0-2.btx</file>
++<file alias="variants/200-0-2.btx">followers/variants/200-0-2.btx</file>
++<file alias="variants/201-0-2.btx">followers/variants/201-0-2.btx</file>
++<file alias="variants/201-1-2.btx">followers/variants/201-1-2.btx</file>
++<file alias="variants/201-2-2.btx">followers/variants/201-2-2.btx</file>
++<file alias="variants/201-3-2.btx">followers/variants/201-3-2.btx</file>
++<file alias="variants/201-4-2.btx">followers/variants/201-4-2.btx</file>
++<file alias="variants/201-5-2.btx">followers/variants/201-5-2.btx</file>
++<file alias="variants/201-6-2.btx">followers/variants/201-6-2.btx</file>
++<file alias="variants/201-7-2.btx">followers/variants/201-7-2.btx</file>
++<file alias="variants/201-8-2.btx">followers/variants/201-8-2.btx</file>
++<file alias="variants/201-9-2.btx">followers/variants/201-9-2.btx</file>
++<file alias="variants/201-10-2.btx">followers/variants/201-10-2.btx</file>
++<file alias="variants/201-11-2.btx">followers/variants/201-11-2.btx</file>
++<file alias="variants/201-12-2.btx">followers/variants/201-12-2.btx</file>
++<file alias="variants/201-13-2.btx">followers/variants/201-13-2.btx</file>
++<file alias="variants/201-14-2.btx">followers/variants/201-14-2.btx</file>
++<file alias="variants/201-15-2.btx">followers/variants/201-15-2.btx</file>
++<file alias="variants/201-16-2.btx">followers/variants/201-16-2.btx</file>
++<file alias="variants/201-17-2.btx">followers/variants/201-17-2.btx</file>
++<file alias="variants/201-18-2.btx">followers/variants/201-18-2.btx</file>
++<file alias="variants/201-19-2.btx">followers/variants/201-19-2.btx</file>
++<file alias="variants/201-20-2.btx">followers/variants/201-20-2.btx</file>
++<file alias="variants/201-21-2.btx">followers/variants/201-21-2.btx</file>
++<file alias="variants/201-22-2.btx">followers/variants/201-22-2.btx</file>
++<file alias="variants/201-23-2.btx">followers/variants/201-23-2.btx</file>
++<file alias="variants/201-24-2.btx">followers/variants/201-24-2.btx</file>
++<file alias="variants/201-25-2.btx">followers/variants/201-25-2.btx</file>
++<file alias="variants/201-26-2.btx">followers/variants/201-26-2.btx</file>
++<file alias="variants/201-27-2.btx">followers/variants/201-27-2.btx</file>
++<file alias="variants/202-0-2.btx">followers/variants/202-0-2.btx</file>
++<file alias="variants/202-0-1.btx">followers/variants/202-0-1.btx</file>
++<file alias="variants/203-0-2.btx">followers/variants/203-0-2.btx</file>
++<file alias="variants/204-0-2.btx">followers/variants/204-0-2.btx</file>
++<file alias="variants/205-0-2.btx">followers/variants/205-0-2.btx</file>
++<file alias="variants/206-0-2.btx">followers/variants/206-0-2.btx</file>
++<file alias="variants/207-0-2.btx">followers/variants/207-0-2.btx</file>
++<file alias="variants/208-0-2.btx">followers/variants/208-0-2.btx</file>
++<file alias="variants/208-0-1.btx">followers/variants/208-0-1.btx</file>
++<file alias="variants/209-0-2.btx">followers/variants/209-0-2.btx</file>
++<file alias="variants/210-0-2.btx">followers/variants/210-0-2.btx</file>
++<file alias="variants/211-0-2.btx">followers/variants/211-0-2.btx</file>
++<file alias="variants/212-0-2.btx">followers/variants/212-0-2.btx</file>
++<file alias="variants/213-0-2.btx">followers/variants/213-0-2.btx</file>
++<file alias="variants/214-0-2.btx">followers/variants/214-0-2.btx</file>
++<file alias="variants/214-0-1.btx">followers/variants/214-0-1.btx</file>
++<file alias="variants/215-0-2.btx">followers/variants/215-0-2.btx</file>
++<file alias="variants/216-0-2.btx">followers/variants/216-0-2.btx</file>
++<file alias="variants/217-0-2.btx">followers/variants/217-0-2.btx</file>
++<file alias="variants/218-0-2.btx">followers/variants/218-0-2.btx</file>
++<file alias="variants/219-0-2.btx">followers/variants/219-0-2.btx</file>
++<file alias="variants/220-0-2.btx">followers/variants/220-0-2.btx</file>
++<file alias="variants/221-0-2.btx">followers/variants/221-0-2.btx</file>
++<file alias="variants/222-0-2.btx">followers/variants/222-0-2.btx</file>
++<file alias="variants/223-0-2.btx">followers/variants/223-0-2.btx</file>
++<file alias="variants/224-0-2.btx">followers/variants/224-0-2.btx</file>
++<file alias="variants/225-0-2.btx">followers/variants/225-0-2.btx</file>
++<file alias="variants/226-0-2.btx">followers/variants/226-0-2.btx</file>
++<file alias="variants/227-0-2.btx">followers/variants/227-0-2.btx</file>
++<file alias="variants/228-0-2.btx">followers/variants/228-0-2.btx</file>
++<file alias="variants/229-0-2.btx">followers/variants/229-0-2.btx</file>
++<file alias="variants/230-0-2.btx">followers/variants/230-0-2.btx</file>
++<file alias="variants/231-0-2.btx">followers/variants/231-0-2.btx</file>
++<file alias="variants/232-0-2.btx">followers/variants/232-0-2.btx</file>
++<file alias="variants/233-0-2.btx">followers/variants/233-0-2.btx</file>
++<file alias="variants/234-0-2.btx">followers/variants/234-0-2.btx</file>
++<file alias="variants/235-0-2.btx">followers/variants/235-0-2.btx</file>
++<file alias="variants/236-0-2.btx">followers/variants/236-0-2.btx</file>
++<file alias="variants/237-0-2.btx">followers/variants/237-0-2.btx</file>
++<file alias="variants/238-0-2.btx">followers/variants/238-0-2.btx</file>
++<file alias="variants/239-0-2.btx">followers/variants/239-0-2.btx</file>
++<file alias="variants/240-0-2.btx">followers/variants/240-0-2.btx</file>
++<file alias="variants/241-0-2.btx">followers/variants/241-0-2.btx</file>
++<file alias="variants/242-0-2.btx">followers/variants/242-0-2.btx</file>
++<file alias="variants/243-0-2.btx">followers/variants/243-0-2.btx</file>
++<file alias="variants/244-0-2.btx">followers/variants/244-0-2.btx</file>
++<file alias="variants/245-0-2.btx">followers/variants/245-0-2.btx</file>
++<file alias="variants/246-0-2.btx">followers/variants/246-0-2.btx</file>
++<file alias="variants/247-0-2.btx">followers/variants/247-0-2.btx</file>
++<file alias="variants/248-0-2.btx">followers/variants/248-0-2.btx</file>
++<file alias="variants/249-0-2.btx">followers/variants/249-0-2.btx</file>
++<file alias="variants/250-0-2.btx">followers/variants/250-0-2.btx</file>
++<file alias="variants/251-0-2.btx">followers/variants/251-0-2.btx</file>
++<file alias="variants/252-0-2.btx">followers/variants/252-0-2.btx</file>
++<file alias="variants/253-0-2.btx">followers/variants/253-0-2.btx</file>
++<file alias="variants/254-0-2.btx">followers/variants/254-0-2.btx</file>
++<file alias="variants/255-0-2.btx">followers/variants/255-0-2.btx</file>
++<file alias="variants/256-0-2.btx">followers/variants/256-0-2.btx</file>
++<file alias="variants/257-0-2.btx">followers/variants/257-0-2.btx</file>
++<file alias="variants/258-0-2.btx">followers/variants/258-0-2.btx</file>
++<file alias="variants/259-0-2.btx">followers/variants/259-0-2.btx</file>
++<file alias="variants/260-0-2.btx">followers/variants/260-0-2.btx</file>
++<file alias="variants/261-0-2.btx">followers/variants/261-0-2.btx</file>
++<file alias="variants/262-0-2.btx">followers/variants/262-0-2.btx</file>
++<file alias="variants/263-0-2.btx">followers/variants/263-0-2.btx</file>
++<file alias="variants/264-0-2.btx">followers/variants/264-0-2.btx</file>
++<file alias="variants/265-0-2.btx">followers/variants/265-0-2.btx</file>
++<file alias="variants/266-0-2.btx">followers/variants/266-0-2.btx</file>
++<file alias="variants/267-0-2.btx">followers/variants/267-0-2.btx</file>
++<file alias="variants/268-0-2.btx">followers/variants/268-0-2.btx</file>
++<file alias="variants/269-0-2.btx">followers/variants/269-0-2.btx</file>
++<file alias="variants/270-0-2.btx">followers/variants/270-0-2.btx</file>
++<file alias="variants/271-0-2.btx">followers/variants/271-0-2.btx</file>
++<file alias="variants/272-0-2.btx">followers/variants/272-0-2.btx</file>
++<file alias="variants/273-0-2.btx">followers/variants/273-0-2.btx</file>
++<file alias="variants/274-0-2.btx">followers/variants/274-0-2.btx</file>
++<file alias="variants/275-0-2.btx">followers/variants/275-0-2.btx</file>
++<file alias="variants/276-0-2.btx">followers/variants/276-0-2.btx</file>
++<file alias="variants/277-0-2.btx">followers/variants/277-0-2.btx</file>
++<file alias="variants/278-0-2.btx">followers/variants/278-0-2.btx</file>
++<file alias="variants/279-0-2.btx">followers/variants/279-0-2.btx</file>
++<file alias="variants/280-0-2.btx">followers/variants/280-0-2.btx</file>
++<file alias="variants/281-0-2.btx">followers/variants/281-0-2.btx</file>
++<file alias="variants/282-0-2.btx">followers/variants/282-0-2.btx</file>
++<file alias="variants/283-0-2.btx">followers/variants/283-0-2.btx</file>
++<file alias="variants/284-0-2.btx">followers/variants/284-0-2.btx</file>
++<file alias="variants/285-0-2.btx">followers/variants/285-0-2.btx</file>
++<file alias="variants/286-0-2.btx">followers/variants/286-0-2.btx</file>
++<file alias="variants/287-0-2.btx">followers/variants/287-0-2.btx</file>
++<file alias="variants/288-0-2.btx">followers/variants/288-0-2.btx</file>
++<file alias="variants/289-0-2.btx">followers/variants/289-0-2.btx</file>
++<file alias="variants/290-0-2.btx">followers/variants/290-0-2.btx</file>
++<file alias="variants/291-0-2.btx">followers/variants/291-0-2.btx</file>
++<file alias="variants/292-0-2.btx">followers/variants/292-0-2.btx</file>
++<file alias="variants/293-0-2.btx">followers/variants/293-0-2.btx</file>
++<file alias="variants/294-0-2.btx">followers/variants/294-0-2.btx</file>
++<file alias="variants/295-0-2.btx">followers/variants/295-0-2.btx</file>
++<file alias="variants/296-0-2.btx">followers/variants/296-0-2.btx</file>
++<file alias="variants/297-0-2.btx">followers/variants/297-0-2.btx</file>
++<file alias="variants/298-0-2.btx">followers/variants/298-0-2.btx</file>
++<file alias="variants/299-0-2.btx">followers/variants/299-0-2.btx</file>
++<file alias="variants/300-0-2.btx">followers/variants/300-0-2.btx</file>
++<file alias="variants/301-0-2.btx">followers/variants/301-0-2.btx</file>
++<file alias="variants/302-0-2.btx">followers/variants/302-0-2.btx</file>
++<file alias="variants/303-0-2.btx">followers/variants/303-0-2.btx</file>
++<file alias="variants/304-0-2.btx">followers/variants/304-0-2.btx</file>
++<file alias="variants/305-0-2.btx">followers/variants/305-0-2.btx</file>
++<file alias="variants/306-0-2.btx">followers/variants/306-0-2.btx</file>
++<file alias="variants/307-0-2.btx">followers/variants/307-0-2.btx</file>
++<file alias="variants/308-0-2.btx">followers/variants/308-0-2.btx</file>
++<file alias="variants/309-0-2.btx">followers/variants/309-0-2.btx</file>
++<file alias="variants/310-0-2.btx">followers/variants/310-0-2.btx</file>
++<file alias="variants/311-0-2.btx">followers/variants/311-0-2.btx</file>
++<file alias="variants/312-0-2.btx">followers/variants/312-0-2.btx</file>
++<file alias="variants/313-0-2.btx">followers/variants/313-0-2.btx</file>
++<file alias="variants/314-0-2.btx">followers/variants/314-0-2.btx</file>
++<file alias="variants/315-0-2.btx">followers/variants/315-0-2.btx</file>
++<file alias="variants/316-0-2.btx">followers/variants/316-0-2.btx</file>
++<file alias="variants/317-0-2.btx">followers/variants/317-0-2.btx</file>
++<file alias="variants/318-0-2.btx">followers/variants/318-0-2.btx</file>
++<file alias="variants/319-0-2.btx">followers/variants/319-0-2.btx</file>
++<file alias="variants/320-0-2.btx">followers/variants/320-0-2.btx</file>
++<file alias="variants/321-0-2.btx">followers/variants/321-0-2.btx</file>
++<file alias="variants/322-0-2.btx">followers/variants/322-0-2.btx</file>
++<file alias="variants/323-0-2.btx">followers/variants/323-0-2.btx</file>
++<file alias="variants/324-0-2.btx">followers/variants/324-0-2.btx</file>
++<file alias="variants/325-0-2.btx">followers/variants/325-0-2.btx</file>
++<file alias="variants/326-0-2.btx">followers/variants/326-0-2.btx</file>
++<file alias="variants/327-0-2.btx">followers/variants/327-0-2.btx</file>
++<file alias="variants/328-0-2.btx">followers/variants/328-0-2.btx</file>
++<file alias="variants/329-0-2.btx">followers/variants/329-0-2.btx</file>
++<file alias="variants/330-0-2.btx">followers/variants/330-0-2.btx</file>
++<file alias="variants/331-0-2.btx">followers/variants/331-0-2.btx</file>
++<file alias="variants/332-0-2.btx">followers/variants/332-0-2.btx</file>
++<file alias="variants/333-0-2.btx">followers/variants/333-0-2.btx</file>
++<file alias="variants/334-0-2.btx">followers/variants/334-0-2.btx</file>
++<file alias="variants/335-0-2.btx">followers/variants/335-0-2.btx</file>
++<file alias="variants/336-0-2.btx">followers/variants/336-0-2.btx</file>
++<file alias="variants/337-0-2.btx">followers/variants/337-0-2.btx</file>
++<file alias="variants/338-0-2.btx">followers/variants/338-0-2.btx</file>
++<file alias="variants/339-0-2.btx">followers/variants/339-0-2.btx</file>
++<file alias="variants/340-0-2.btx">followers/variants/340-0-2.btx</file>
++<file alias="variants/341-0-2.btx">followers/variants/341-0-2.btx</file>
++<file alias="variants/342-0-2.btx">followers/variants/342-0-2.btx</file>
++<file alias="variants/343-0-2.btx">followers/variants/343-0-2.btx</file>
++<file alias="variants/344-0-2.btx">followers/variants/344-0-2.btx</file>
++<file alias="variants/345-0-2.btx">followers/variants/345-0-2.btx</file>
++<file alias="variants/346-0-2.btx">followers/variants/346-0-2.btx</file>
++<file alias="variants/347-0-2.btx">followers/variants/347-0-2.btx</file>
++<file alias="variants/348-0-2.btx">followers/variants/348-0-2.btx</file>
++<file alias="variants/349-0-2.btx">followers/variants/349-0-2.btx</file>
++<file alias="variants/350-0-2.btx">followers/variants/350-0-2.btx</file>
++<file alias="variants/351-0-2.btx">followers/variants/351-0-2.btx</file>
++<file alias="variants/351-1-2.btx">followers/variants/351-1-2.btx</file>
++<file alias="variants/351-2-2.btx">followers/variants/351-2-2.btx</file>
++<file alias="variants/351-3-2.btx">followers/variants/351-3-2.btx</file>
++<file alias="variants/352-0-2.btx">followers/variants/352-0-2.btx</file>
++<file alias="variants/353-0-2.btx">followers/variants/353-0-2.btx</file>
++<file alias="variants/354-0-2.btx">followers/variants/354-0-2.btx</file>
++<file alias="variants/355-0-2.btx">followers/variants/355-0-2.btx</file>
++<file alias="variants/356-0-2.btx">followers/variants/356-0-2.btx</file>
++<file alias="variants/357-0-2.btx">followers/variants/357-0-2.btx</file>
++<file alias="variants/358-0-2.btx">followers/variants/358-0-2.btx</file>
++<file alias="variants/359-0-2.btx">followers/variants/359-0-2.btx</file>
++<file alias="variants/360-0-2.btx">followers/variants/360-0-2.btx</file>
++<file alias="variants/361-0-2.btx">followers/variants/361-0-2.btx</file>
++<file alias="variants/362-0-2.btx">followers/variants/362-0-2.btx</file>
++<file alias="variants/363-0-2.btx">followers/variants/363-0-2.btx</file>
++<file alias="variants/364-0-2.btx">followers/variants/364-0-2.btx</file>
++<file alias="variants/365-0-2.btx">followers/variants/365-0-2.btx</file>
++<file alias="variants/366-0-2.btx">followers/variants/366-0-2.btx</file>
++<file alias="variants/367-0-2.btx">followers/variants/367-0-2.btx</file>
++<file alias="variants/368-0-2.btx">followers/variants/368-0-2.btx</file>
++<file alias="variants/369-0-2.btx">followers/variants/369-0-2.btx</file>
++<file alias="variants/370-0-2.btx">followers/variants/370-0-2.btx</file>
++<file alias="variants/371-0-2.btx">followers/variants/371-0-2.btx</file>
++<file alias="variants/372-0-2.btx">followers/variants/372-0-2.btx</file>
++<file alias="variants/373-0-2.btx">followers/variants/373-0-2.btx</file>
++<file alias="variants/374-0-2.btx">followers/variants/374-0-2.btx</file>
++<file alias="variants/375-0-2.btx">followers/variants/375-0-2.btx</file>
++<file alias="variants/376-0-2.btx">followers/variants/376-0-2.btx</file>
++<file alias="variants/377-0-2.btx">followers/variants/377-0-2.btx</file>
++<file alias="variants/378-0-2.btx">followers/variants/378-0-2.btx</file>
++<file alias="variants/379-0-2.btx">followers/variants/379-0-2.btx</file>
++<file alias="variants/380-0-2.btx">followers/variants/380-0-2.btx</file>
++<file alias="variants/381-0-2.btx">followers/variants/381-0-2.btx</file>
++<file alias="variants/382-0-2.btx">followers/variants/382-0-2.btx</file>
++<file alias="variants/383-0-2.btx">followers/variants/383-0-2.btx</file>
++<file alias="variants/384-0-2.btx">followers/variants/384-0-2.btx</file>
++<file alias="variants/385-0-2.btx">followers/variants/385-0-2.btx</file>
++<file alias="variants/386-0-2.btx">followers/variants/386-0-2.btx</file>
++<file alias="variants/386-1-2.btx">followers/variants/386-1-2.btx</file>
++<file alias="variants/386-2-2.btx">followers/variants/386-2-2.btx</file>
++<file alias="variants/386-3-2.btx">followers/variants/386-3-2.btx</file>
++<file alias="variants/387-0-2.btx">followers/variants/387-0-2.btx</file>
++<file alias="variants/388-0-2.btx">followers/variants/388-0-2.btx</file>
++<file alias="variants/389-0-2.btx">followers/variants/389-0-2.btx</file>
++<file alias="variants/390-0-2.btx">followers/variants/390-0-2.btx</file>
++<file alias="variants/391-0-2.btx">followers/variants/391-0-2.btx</file>
++<file alias="variants/392-0-2.btx">followers/variants/392-0-2.btx</file>
++<file alias="variants/393-0-2.btx">followers/variants/393-0-2.btx</file>
++<file alias="variants/394-0-2.btx">followers/variants/394-0-2.btx</file>
++<file alias="variants/395-0-2.btx">followers/variants/395-0-2.btx</file>
++<file alias="variants/396-0-2.btx">followers/variants/396-0-2.btx</file>
++<file alias="variants/397-0-2.btx">followers/variants/397-0-2.btx</file>
++<file alias="variants/398-0-2.btx">followers/variants/398-0-2.btx</file>
++<file alias="variants/399-0-2.btx">followers/variants/399-0-2.btx</file>
++<file alias="variants/400-0-2.btx">followers/variants/400-0-2.btx</file>
++<file alias="variants/401-0-2.btx">followers/variants/401-0-2.btx</file>
++<file alias="variants/402-0-2.btx">followers/variants/402-0-2.btx</file>
++<file alias="variants/403-0-2.btx">followers/variants/403-0-2.btx</file>
++<file alias="variants/404-0-2.btx">followers/variants/404-0-2.btx</file>
++<file alias="variants/405-0-2.btx">followers/variants/405-0-2.btx</file>
++<file alias="variants/406-0-2.btx">followers/variants/406-0-2.btx</file>
++<file alias="variants/407-0-2.btx">followers/variants/407-0-2.btx</file>
++<file alias="variants/408-0-2.btx">followers/variants/408-0-2.btx</file>
++<file alias="variants/409-0-2.btx">followers/variants/409-0-2.btx</file>
++<file alias="variants/410-0-2.btx">followers/variants/410-0-2.btx</file>
++<file alias="variants/411-0-2.btx">followers/variants/411-0-2.btx</file>
++<file alias="variants/412-0-2.btx">followers/variants/412-0-2.btx</file>
++<file alias="variants/412-1-2.btx">followers/variants/412-1-2.btx</file>
++<file alias="variants/412-2-2.btx">followers/variants/412-2-2.btx</file>
++<file alias="variants/413-0-2.btx">followers/variants/413-0-2.btx</file>
++<file alias="variants/413-1-2.btx">followers/variants/413-1-2.btx</file>
++<file alias="variants/413-2-2.btx">followers/variants/413-2-2.btx</file>
++<file alias="variants/414-0-2.btx">followers/variants/414-0-2.btx</file>
++<file alias="variants/415-0-2.btx">followers/variants/415-0-2.btx</file>
++<file alias="variants/415-0-1.btx">followers/variants/415-0-1.btx</file>
++<file alias="variants/416-0-2.btx">followers/variants/416-0-2.btx</file>
++<file alias="variants/417-0-2.btx">followers/variants/417-0-2.btx</file>
++<file alias="variants/418-0-2.btx">followers/variants/418-0-2.btx</file>
++<file alias="variants/419-0-2.btx">followers/variants/419-0-2.btx</file>
++<file alias="variants/420-0-2.btx">followers/variants/420-0-2.btx</file>
++<file alias="variants/421-0-2.btx">followers/variants/421-0-2.btx</file>
++<file alias="variants/421-1-2.btx">followers/variants/421-1-2.btx</file>
++<file alias="variants/422-0-2.btx">followers/variants/422-0-2.btx</file>
++<file alias="variants/422-1-2.btx">followers/variants/422-1-2.btx</file>
++<file alias="variants/423-0-2.btx">followers/variants/423-0-2.btx</file>
++<file alias="variants/423-1-2.btx">followers/variants/423-1-2.btx</file>
++<file alias="variants/424-0-2.btx">followers/variants/424-0-2.btx</file>
++<file alias="variants/425-0-2.btx">followers/variants/425-0-2.btx</file>
++<file alias="variants/426-0-2.btx">followers/variants/426-0-2.btx</file>
++<file alias="variants/427-0-2.btx">followers/variants/427-0-2.btx</file>
++<file alias="variants/428-0-2.btx">followers/variants/428-0-2.btx</file>
++<file alias="variants/429-0-2.btx">followers/variants/429-0-2.btx</file>
++<file alias="variants/430-0-2.btx">followers/variants/430-0-2.btx</file>
++<file alias="variants/431-0-2.btx">followers/variants/431-0-2.btx</file>
++<file alias="variants/432-0-2.btx">followers/variants/432-0-2.btx</file>
++<file alias="variants/433-0-2.btx">followers/variants/433-0-2.btx</file>
++<file alias="variants/434-0-2.btx">followers/variants/434-0-2.btx</file>
++<file alias="variants/435-0-2.btx">followers/variants/435-0-2.btx</file>
++<file alias="variants/436-0-2.btx">followers/variants/436-0-2.btx</file>
++<file alias="variants/437-0-2.btx">followers/variants/437-0-2.btx</file>
++<file alias="variants/438-0-2.btx">followers/variants/438-0-2.btx</file>
++<file alias="variants/439-0-2.btx">followers/variants/439-0-2.btx</file>
++<file alias="variants/440-0-2.btx">followers/variants/440-0-2.btx</file>
++<file alias="variants/441-0-2.btx">followers/variants/441-0-2.btx</file>
++<file alias="variants/442-0-2.btx">followers/variants/442-0-2.btx</file>
++<file alias="variants/443-0-2.btx">followers/variants/443-0-2.btx</file>
++<file alias="variants/444-0-2.btx">followers/variants/444-0-2.btx</file>
++<file alias="variants/445-0-2.btx">followers/variants/445-0-2.btx</file>
++<file alias="variants/446-0-2.btx">followers/variants/446-0-2.btx</file>
++<file alias="variants/447-0-2.btx">followers/variants/447-0-2.btx</file>
++<file alias="variants/448-0-2.btx">followers/variants/448-0-2.btx</file>
++<file alias="variants/449-0-2.btx">followers/variants/449-0-2.btx</file>
++<file alias="variants/449-0-1.btx">followers/variants/449-0-1.btx</file>
++<file alias="variants/450-0-2.btx">followers/variants/450-0-2.btx</file>
++<file alias="variants/450-0-1.btx">followers/variants/450-0-1.btx</file>
++<file alias="variants/451-0-2.btx">followers/variants/451-0-2.btx</file>
++<file alias="variants/452-0-2.btx">followers/variants/452-0-2.btx</file>
++<file alias="variants/453-0-2.btx">followers/variants/453-0-2.btx</file>
++<file alias="variants/454-0-2.btx">followers/variants/454-0-2.btx</file>
++<file alias="variants/455-0-2.btx">followers/variants/455-0-2.btx</file>
++<file alias="variants/456-0-2.btx">followers/variants/456-0-2.btx</file>
++<file alias="variants/457-0-2.btx">followers/variants/457-0-2.btx</file>
++<file alias="variants/458-0-2.btx">followers/variants/458-0-2.btx</file>
++<file alias="variants/459-0-2.btx">followers/variants/459-0-2.btx</file>
++<file alias="variants/460-0-2.btx">followers/variants/460-0-2.btx</file>
++<file alias="variants/461-0-2.btx">followers/variants/461-0-2.btx</file>
++<file alias="variants/462-0-2.btx">followers/variants/462-0-2.btx</file>
++<file alias="variants/463-0-2.btx">followers/variants/463-0-2.btx</file>
++<file alias="variants/464-0-2.btx">followers/variants/464-0-2.btx</file>
++<file alias="variants/465-0-2.btx">followers/variants/465-0-2.btx</file>
++<file alias="variants/466-0-2.btx">followers/variants/466-0-2.btx</file>
++<file alias="variants/467-0-2.btx">followers/variants/467-0-2.btx</file>
++<file alias="variants/468-0-2.btx">followers/variants/468-0-2.btx</file>
++<file alias="variants/469-0-2.btx">followers/variants/469-0-2.btx</file>
++<file alias="variants/470-0-2.btx">followers/variants/470-0-2.btx</file>
++<file alias="variants/471-0-2.btx">followers/variants/471-0-2.btx</file>
++<file alias="variants/472-0-2.btx">followers/variants/472-0-2.btx</file>
++<file alias="variants/473-0-2.btx">followers/variants/473-0-2.btx</file>
++<file alias="variants/474-0-2.btx">followers/variants/474-0-2.btx</file>
++<file alias="variants/475-0-2.btx">followers/variants/475-0-2.btx</file>
++<file alias="variants/476-0-2.btx">followers/variants/476-0-2.btx</file>
++<file alias="variants/477-0-2.btx">followers/variants/477-0-2.btx</file>
++<file alias="variants/478-0-2.btx">followers/variants/478-0-2.btx</file>
++<file alias="variants/479-0-2.btx">followers/variants/479-0-2.btx</file>
++<file alias="variants/479-1-2.btx">followers/variants/479-1-2.btx</file>
++<file alias="variants/479-2-2.btx">followers/variants/479-2-2.btx</file>
++<file alias="variants/479-3-2.btx">followers/variants/479-3-2.btx</file>
++<file alias="variants/479-4-2.btx">followers/variants/479-4-2.btx</file>
++<file alias="variants/479-5-2.btx">followers/variants/479-5-2.btx</file>
++<file alias="variants/480-0-2.btx">followers/variants/480-0-2.btx</file>
++<file alias="variants/481-0-2.btx">followers/variants/481-0-2.btx</file>
++<file alias="variants/482-0-2.btx">followers/variants/482-0-2.btx</file>
++<file alias="variants/483-0-2.btx">followers/variants/483-0-2.btx</file>
++<file alias="variants/484-0-2.btx">followers/variants/484-0-2.btx</file>
++<file alias="variants/485-0-2.btx">followers/variants/485-0-2.btx</file>
++<file alias="variants/486-0-2.btx">followers/variants/486-0-2.btx</file>
++<file alias="variants/487-0-2.btx">followers/variants/487-0-2.btx</file>
++<file alias="variants/487-1-2.btx">followers/variants/487-1-2.btx</file>
++<file alias="variants/488-0-2.btx">followers/variants/488-0-2.btx</file>
++<file alias="variants/489-0-2.btx">followers/variants/489-0-2.btx</file>
++<file alias="variants/490-0-2.btx">followers/variants/490-0-2.btx</file>
++<file alias="variants/491-0-2.btx">followers/variants/491-0-2.btx</file>
++<file alias="variants/492-0-2.btx">followers/variants/492-0-2.btx</file>
++<file alias="variants/492-1-2.btx">followers/variants/492-1-2.btx</file>
++<file alias="variants/493-0-2.btx">followers/variants/493-0-2.btx</file>
++<file alias="variants/493-1-2.btx">followers/variants/493-1-2.btx</file>
++<file alias="variants/493-2-2.btx">followers/variants/493-2-2.btx</file>
++<file alias="variants/493-3-2.btx">followers/variants/493-3-2.btx</file>
++<file alias="variants/493-4-2.btx">followers/variants/493-4-2.btx</file>
++<file alias="variants/493-5-2.btx">followers/variants/493-5-2.btx</file>
++<file alias="variants/493-6-2.btx">followers/variants/493-6-2.btx</file>
++<file alias="variants/493-7-2.btx">followers/variants/493-7-2.btx</file>
++<file alias="variants/493-8-2.btx">followers/variants/493-8-2.btx</file>
++<file alias="variants/493-9-2.btx">followers/variants/493-9-2.btx</file>
++<file alias="variants/493-10-2.btx">followers/variants/493-10-2.btx</file>
++<file alias="variants/493-11-2.btx">followers/variants/493-11-2.btx</file>
++<file alias="variants/493-12-2.btx">followers/variants/493-12-2.btx</file>
++<file alias="variants/493-13-2.btx">followers/variants/493-13-2.btx</file>
++<file alias="variants/493-14-2.btx">followers/variants/493-14-2.btx</file>
++<file alias="variants/493-15-2.btx">followers/variants/493-15-2.btx</file>
++<file alias="variants/493-16-2.btx">followers/variants/493-16-2.btx</file>
++<file alias="variants/494-0-2.btx">followers/variants/494-0-2.btx</file>
++<file alias="variants/495-0-2.btx">followers/variants/495-0-2.btx</file>
++<file alias="variants/496-0-2.btx">followers/variants/496-0-2.btx</file>
++<file alias="variants/497-0-2.btx">followers/variants/497-0-2.btx</file>
++<file alias="variants/498-0-2.btx">followers/variants/498-0-2.btx</file>
++<file alias="variants/499-0-2.btx">followers/variants/499-0-2.btx</file>
++<file alias="variants/500-0-2.btx">followers/variants/500-0-2.btx</file>
++<file alias="variants/501-0-2.btx">followers/variants/501-0-2.btx</file>
++<file alias="variants/502-0-2.btx">followers/variants/502-0-2.btx</file>
++<file alias="variants/503-0-2.btx">followers/variants/503-0-2.btx</file>
++<file alias="variants/504-0-2.btx">followers/variants/504-0-2.btx</file>
++<file alias="variants/505-0-2.btx">followers/variants/505-0-2.btx</file>
++<file alias="variants/506-0-2.btx">followers/variants/506-0-2.btx</file>
++<file alias="variants/507-0-2.btx">followers/variants/507-0-2.btx</file>
++<file alias="variants/508-0-2.btx">followers/variants/508-0-2.btx</file>
++<file alias="variants/509-0-2.btx">followers/variants/509-0-2.btx</file>
++<file alias="variants/510-0-2.btx">followers/variants/510-0-2.btx</file>
++<file alias="variants/511-0-2.btx">followers/variants/511-0-2.btx</file>
++<file alias="variants/512-0-2.btx">followers/variants/512-0-2.btx</file>
++<file alias="variants/513-0-2.btx">followers/variants/513-0-2.btx</file>
++<file alias="variants/514-0-2.btx">followers/variants/514-0-2.btx</file>
++<file alias="variants/515-0-2.btx">followers/variants/515-0-2.btx</file>
++<file alias="variants/516-0-2.btx">followers/variants/516-0-2.btx</file>
++<file alias="variants/517-0-2.btx">followers/variants/517-0-2.btx</file>
++<file alias="variants/518-0-2.btx">followers/variants/518-0-2.btx</file>
++<file alias="variants/519-0-2.btx">followers/variants/519-0-2.btx</file>
++<file alias="variants/520-0-2.btx">followers/variants/520-0-2.btx</file>
++<file alias="variants/521-0-2.btx">followers/variants/521-0-2.btx</file>
++<file alias="variants/521-0-1.btx">followers/variants/521-0-1.btx</file>
++<file alias="variants/522-0-2.btx">followers/variants/522-0-2.btx</file>
++<file alias="variants/523-0-2.btx">followers/variants/523-0-2.btx</file>
++<file alias="variants/524-0-2.btx">followers/variants/524-0-2.btx</file>
++<file alias="variants/525-0-2.btx">followers/variants/525-0-2.btx</file>
++<file alias="variants/526-0-2.btx">followers/variants/526-0-2.btx</file>
++<file alias="variants/527-0-2.btx">followers/variants/527-0-2.btx</file>
++<file alias="variants/528-0-2.btx">followers/variants/528-0-2.btx</file>
++<file alias="variants/529-0-2.btx">followers/variants/529-0-2.btx</file>
++<file alias="variants/530-0-2.btx">followers/variants/530-0-2.btx</file>
++<file alias="variants/531-0-2.btx">followers/variants/531-0-2.btx</file>
++<file alias="variants/532-0-2.btx">followers/variants/532-0-2.btx</file>
++<file alias="variants/533-0-2.btx">followers/variants/533-0-2.btx</file>
++<file alias="variants/534-0-2.btx">followers/variants/534-0-2.btx</file>
++<file alias="variants/535-0-2.btx">followers/variants/535-0-2.btx</file>
++<file alias="variants/536-0-2.btx">followers/variants/536-0-2.btx</file>
++<file alias="variants/537-0-2.btx">followers/variants/537-0-2.btx</file>
++<file alias="variants/538-0-2.btx">followers/variants/538-0-2.btx</file>
++<file alias="variants/539-0-2.btx">followers/variants/539-0-2.btx</file>
++<file alias="variants/540-0-2.btx">followers/variants/540-0-2.btx</file>
++<file alias="variants/541-0-2.btx">followers/variants/541-0-2.btx</file>
++<file alias="variants/542-0-2.btx">followers/variants/542-0-2.btx</file>
++<file alias="variants/543-0-2.btx">followers/variants/543-0-2.btx</file>
++<file alias="variants/544-0-2.btx">followers/variants/544-0-2.btx</file>
++<file alias="variants/545-0-2.btx">followers/variants/545-0-2.btx</file>
++<file alias="variants/546-0-2.btx">followers/variants/546-0-2.btx</file>
++<file alias="variants/547-0-2.btx">followers/variants/547-0-2.btx</file>
++<file alias="variants/548-0-2.btx">followers/variants/548-0-2.btx</file>
++<file alias="variants/549-0-2.btx">followers/variants/549-0-2.btx</file>
++<file alias="variants/550-0-2.btx">followers/variants/550-0-2.btx</file>
++<file alias="variants/550-1-2.btx">followers/variants/550-1-2.btx</file>
++<file alias="variants/551-0-2.btx">followers/variants/551-0-2.btx</file>
++<file alias="variants/552-0-2.btx">followers/variants/552-0-2.btx</file>
++<file alias="variants/553-0-2.btx">followers/variants/553-0-2.btx</file>
++<file alias="variants/554-0-2.btx">followers/variants/554-0-2.btx</file>
++<file alias="variants/555-0-2.btx">followers/variants/555-0-2.btx</file>
++<file alias="variants/555-1-2.btx">followers/variants/555-1-2.btx</file>
++<file alias="variants/556-0-2.btx">followers/variants/556-0-2.btx</file>
++<file alias="variants/557-0-2.btx">followers/variants/557-0-2.btx</file>
++<file alias="variants/558-0-2.btx">followers/variants/558-0-2.btx</file>
++<file alias="variants/559-0-2.btx">followers/variants/559-0-2.btx</file>
++<file alias="variants/560-0-2.btx">followers/variants/560-0-2.btx</file>
++<file alias="variants/561-0-2.btx">followers/variants/561-0-2.btx</file>
++<file alias="variants/562-0-2.btx">followers/variants/562-0-2.btx</file>
++<file alias="variants/563-0-2.btx">followers/variants/563-0-2.btx</file>
++<file alias="variants/564-0-2.btx">followers/variants/564-0-2.btx</file>
++<file alias="variants/565-0-2.btx">followers/variants/565-0-2.btx</file>
++<file alias="variants/566-0-2.btx">followers/variants/566-0-2.btx</file>
++<file alias="variants/567-0-2.btx">followers/variants/567-0-2.btx</file>
++<file alias="variants/568-0-2.btx">followers/variants/568-0-2.btx</file>
++<file alias="variants/569-0-2.btx">followers/variants/569-0-2.btx</file>
++<file alias="variants/570-0-2.btx">followers/variants/570-0-2.btx</file>
++<file alias="variants/571-0-2.btx">followers/variants/571-0-2.btx</file>
++<file alias="variants/572-0-2.btx">followers/variants/572-0-2.btx</file>
++<file alias="variants/573-0-2.btx">followers/variants/573-0-2.btx</file>
++<file alias="variants/574-0-2.btx">followers/variants/574-0-2.btx</file>
++<file alias="variants/575-0-2.btx">followers/variants/575-0-2.btx</file>
++<file alias="variants/576-0-2.btx">followers/variants/576-0-2.btx</file>
++<file alias="variants/577-0-2.btx">followers/variants/577-0-2.btx</file>
++<file alias="variants/578-0-2.btx">followers/variants/578-0-2.btx</file>
++<file alias="variants/579-0-2.btx">followers/variants/579-0-2.btx</file>
++<file alias="variants/580-0-2.btx">followers/variants/580-0-2.btx</file>
++<file alias="variants/581-0-2.btx">followers/variants/581-0-2.btx</file>
++<file alias="variants/582-0-2.btx">followers/variants/582-0-2.btx</file>
++<file alias="variants/583-0-2.btx">followers/variants/583-0-2.btx</file>
++<file alias="variants/584-0-2.btx">followers/variants/584-0-2.btx</file>
++<file alias="variants/585-0-2.btx">followers/variants/585-0-2.btx</file>
++<file alias="variants/585-1-2.btx">followers/variants/585-1-2.btx</file>
++<file alias="variants/585-2-2.btx">followers/variants/585-2-2.btx</file>
++<file alias="variants/585-3-2.btx">followers/variants/585-3-2.btx</file>
++<file alias="variants/586-0-2.btx">followers/variants/586-0-2.btx</file>
++<file alias="variants/586-1-2.btx">followers/variants/586-1-2.btx</file>
++<file alias="variants/586-2-2.btx">followers/variants/586-2-2.btx</file>
++<file alias="variants/586-3-2.btx">followers/variants/586-3-2.btx</file>
++<file alias="variants/587-0-2.btx">followers/variants/587-0-2.btx</file>
++<file alias="variants/588-0-2.btx">followers/variants/588-0-2.btx</file>
++<file alias="variants/589-0-2.btx">followers/variants/589-0-2.btx</file>
++<file alias="variants/590-0-2.btx">followers/variants/590-0-2.btx</file>
++<file alias="variants/591-0-2.btx">followers/variants/591-0-2.btx</file>
++<file alias="variants/592-0-2.btx">followers/variants/592-0-2.btx</file>
++<file alias="variants/592-0-1.btx">followers/variants/592-0-1.btx</file>
++<file alias="variants/593-0-2.btx">followers/variants/593-0-2.btx</file>
++<file alias="variants/593-0-1.btx">followers/variants/593-0-1.btx</file>
++<file alias="variants/594-0-2.btx">followers/variants/594-0-2.btx</file>
++<file alias="variants/595-0-2.btx">followers/variants/595-0-2.btx</file>
++<file alias="variants/596-0-2.btx">followers/variants/596-0-2.btx</file>
++<file alias="variants/597-0-2.btx">followers/variants/597-0-2.btx</file>
++<file alias="variants/598-0-2.btx">followers/variants/598-0-2.btx</file>
++<file alias="variants/599-0-2.btx">followers/variants/599-0-2.btx</file>
++<file alias="variants/600-0-2.btx">followers/variants/600-0-2.btx</file>
++<file alias="variants/601-0-2.btx">followers/variants/601-0-2.btx</file>
++<file alias="variants/602-0-2.btx">followers/variants/602-0-2.btx</file>
++<file alias="variants/603-0-2.btx">followers/variants/603-0-2.btx</file>
++<file alias="variants/604-0-2.btx">followers/variants/604-0-2.btx</file>
++<file alias="variants/605-0-2.btx">followers/variants/605-0-2.btx</file>
++<file alias="variants/606-0-2.btx">followers/variants/606-0-2.btx</file>
++<file alias="variants/607-0-2.btx">followers/variants/607-0-2.btx</file>
++<file alias="variants/608-0-2.btx">followers/variants/608-0-2.btx</file>
++<file alias="variants/609-0-2.btx">followers/variants/609-0-2.btx</file>
++<file alias="variants/610-0-2.btx">followers/variants/610-0-2.btx</file>
++<file alias="variants/611-0-2.btx">followers/variants/611-0-2.btx</file>
++<file alias="variants/612-0-2.btx">followers/variants/612-0-2.btx</file>
++<file alias="variants/613-0-2.btx">followers/variants/613-0-2.btx</file>
++<file alias="variants/614-0-2.btx">followers/variants/614-0-2.btx</file>
++<file alias="variants/615-0-2.btx">followers/variants/615-0-2.btx</file>
++<file alias="variants/616-0-2.btx">followers/variants/616-0-2.btx</file>
++<file alias="variants/617-0-2.btx">followers/variants/617-0-2.btx</file>
++<file alias="variants/618-0-2.btx">followers/variants/618-0-2.btx</file>
++<file alias="variants/619-0-2.btx">followers/variants/619-0-2.btx</file>
++<file alias="variants/620-0-2.btx">followers/variants/620-0-2.btx</file>
++<file alias="variants/621-0-2.btx">followers/variants/621-0-2.btx</file>
++<file alias="variants/622-0-2.btx">followers/variants/622-0-2.btx</file>
++<file alias="variants/623-0-2.btx">followers/variants/623-0-2.btx</file>
++<file alias="variants/624-0-2.btx">followers/variants/624-0-2.btx</file>
++<file alias="variants/625-0-2.btx">followers/variants/625-0-2.btx</file>
++<file alias="variants/626-0-2.btx">followers/variants/626-0-2.btx</file>
++<file alias="variants/627-0-2.btx">followers/variants/627-0-2.btx</file>
++<file alias="variants/628-0-2.btx">followers/variants/628-0-2.btx</file>
++<file alias="variants/629-0-2.btx">followers/variants/629-0-2.btx</file>
++<file alias="variants/630-0-2.btx">followers/variants/630-0-2.btx</file>
++<file alias="variants/631-0-2.btx">followers/variants/631-0-2.btx</file>
++<file alias="variants/632-0-2.btx">followers/variants/632-0-2.btx</file>
++<file alias="variants/633-0-2.btx">followers/variants/633-0-2.btx</file>
++<file alias="variants/634-0-2.btx">followers/variants/634-0-2.btx</file>
++<file alias="variants/635-0-2.btx">followers/variants/635-0-2.btx</file>
++<file alias="variants/636-0-2.btx">followers/variants/636-0-2.btx</file>
++<file alias="variants/637-0-2.btx">followers/variants/637-0-2.btx</file>
++<file alias="variants/638-0-2.btx">followers/variants/638-0-2.btx</file>
++<file alias="variants/639-0-2.btx">followers/variants/639-0-2.btx</file>
++<file alias="variants/640-0-2.btx">followers/variants/640-0-2.btx</file>
++<file alias="variants/641-0-2.btx">followers/variants/641-0-2.btx</file>
++<file alias="variants/641-1-2.btx">followers/variants/641-1-2.btx</file>
++<file alias="variants/642-0-2.btx">followers/variants/642-0-2.btx</file>
++<file alias="variants/642-1-2.btx">followers/variants/642-1-2.btx</file>
++<file alias="variants/643-0-2.btx">followers/variants/643-0-2.btx</file>
++<file alias="variants/644-0-2.btx">followers/variants/644-0-2.btx</file>
++<file alias="variants/645-0-2.btx">followers/variants/645-0-2.btx</file>
++<file alias="variants/645-1-2.btx">followers/variants/645-1-2.btx</file>
++<file alias="variants/646-0-2.btx">followers/variants/646-0-2.btx</file>
++<file alias="variants/646-1-2.btx">followers/variants/646-1-2.btx</file>
++<file alias="variants/646-2-2.btx">followers/variants/646-2-2.btx</file>
++<file alias="variants/647-0-2.btx">followers/variants/647-0-2.btx</file>
++<file alias="variants/647-1-2.btx">followers/variants/647-1-2.btx</file>
++<file alias="variants/648-0-2.btx">followers/variants/648-0-2.btx</file>
++<file alias="variants/648-1-2.btx">followers/variants/648-1-2.btx</file>
++<file alias="variants/649-0-2.btx">followers/variants/649-0-2.btx</file>
++<file alias="variants/649-1-2.btx">followers/variants/649-1-2.btx</file>
++<file alias="variants/649-2-2.btx">followers/variants/649-2-2.btx</file>
++<file alias="variants/649-3-2.btx">followers/variants/649-3-2.btx</file>
++<file alias="variants/649-4-2.btx">followers/variants/649-4-2.btx</file>
+ </qresource></RCC>
+--- a/source/melonDS/src/frontend/qt_sdl/EmuThread.cpp
++++ b/source/melonDS/src/frontend/qt_sdl/EmuThread.cpp
+@@ -1578,6 +1578,9 @@
+             if (emuActive && emuInstance->nds && emuInstance->nds->NDSCartSlot.GetCart())
+             {
+                 overworldDebugResult=overworldTracker.Sample(emuInstance->nds->MainRAM,emuInstance->nds->MainRAMMask+1);
++                int year,month,day,hour,minute,second;
++                emuInstance->nds->RTC.GetDateTime(year,month,day,hour,minute,second);
++                overworldDebugResult["clockHour"]=hour;overworldDebugResult["clockMonth"]=month;
+                 areaBattleScenes.update(emuInstance->nds->NDSCartSlot.GetCart(),overworldDebugResult);
+                 overworldDebugResult["areaBattleScenery"]=areaBattleScenes.status;
+                 overworldDebugResult["teleportStatus"]=fieldTeleport.message();
+--- a/source/melonDS/src/frontend/qt_sdl/FollowerInteraction.h
++++ b/source/melonDS/src/frontend/qt_sdl/FollowerInteraction.h
+@@ -7,9 +7,47 @@
+ 
+ // Read-only companion scenes. These never award friendship or write save data.
+ namespace FollowerInteraction {
++inline bool enabledByEnvironment() {
++    // A saved launcher choice wins; the old variable supports released launchers.
++    return qEnvironmentVariable("UNOVA_COMPANION_INTERACTIONS",
++        qEnvironmentVariable("UNOVA_EXPERIMENTAL_COMPANION","1"))=="1";
++}
++
+ inline bool available(const QVariantMap& mon) {
+     return mon.value("ok").toBool() && !mon.value("egg").toBool() &&
+         mon.value("species").toUInt()>0 && mon.value("species").toUInt()<=649;
++}
++
++inline QString contextNote(const QVariantMap& mon,const QVariantMap& context,unsigned variation) {
++    if(!available(mon) || !mon.value("hp").toUInt() || variation%2==0) return {};
++    QStringList notes;const auto area=context.value("area").toString().toLower();
++    const int hour=context.value("hour",12).toInt(),month=context.value("month",1).toInt();
++    const auto hasType=[&](int type) {return mon.value("type1",-1).toInt()==type || mon.value("type2",-1).toInt()==type;};
++    if(context.value("recentBattle").toBool()) notes<<"It checks on you after the battle."<<"It takes a slow breath, then stays close."<<"It seems glad to share a quiet moment after all that excitement.";
++    if(hour>=20 || hour<5) notes<<"It listens to the quiet of the night."<<"It glances toward the darkening path."<<"It stays within easy reach in the darkness.";
++    else if(hour<10) notes<<"It stretches, ready for the morning."<<"It greets the new day with a little sound."<<"It looks eager to see where today takes you.";
++    else if(hour>=17) notes<<"It watches the evening light."<<"It settles into the slower pace of the evening.";
++    if(area.contains("cave") || area.contains("tunnel") || area.contains("relic")) {
++        notes<<"It turns toward an echo deeper inside."<<"It picks its way carefully across the rocky ground.";
++        if(hasType(5) || hasType(4)) notes<<"It seems comfortable among the stones."<<"It examines a loose pebble with interest.";
++        if(hasType(7)) notes<<"It watches a shadow that you almost missed.";
++    }
++    if(area.contains("bridge") || area.contains("bay") || area.contains("marine") || area.contains("undella")) {
++        notes<<"It pauses to listen to the water."<<"It looks out over the ripples.";
++        if(hasType(10)) notes<<"It seems tempted to slip into the water."<<"It answers the sound of the water with a cheerful call.";
++    }
++    if(area.contains("forest") || area.contains("ranch") || area.contains("grove")) {
++        notes<<"It notices something moving in the leaves."<<"It takes in the scent of the greenery.";
++        if(hasType(11) || hasType(6)) notes<<"It looks quite at home among the plants."<<"It lingers beside a patch of fresh leaves.";
++    }
++    if(area.contains("city") || area.contains("town")) notes<<"It watches the people passing by."<<"A distant sound catches its attention."<<"It stays close through the busy streets.";
++    // Gen 5 seasons advance by DS calendar month: spring Jan/May/Sep, etc.
++    const auto season=(qBound(1,month,12)-1)%4;
++    if(season==0) notes<<"It sniffs at the fresh scent in the air."<<"It notices a tiny new shoot beside the path.";
++    else if(season==1) notes<<"It pauses in a patch of shade."<<"It seems happy to take things slowly in the warm season.";
++    else if(season==2) notes<<"It follows a drifting leaf with its eyes."<<"It nudges a fallen leaf along the path.";
++    else {notes<<"It huddles a little closer in the winter air."<<"It leaves a neat little trail behind you.";if(hasType(14)) notes<<"The winter air seems to put a spring in its step.";}
++    return notes.isEmpty()?QString():"\n"+notes[(variation/2)%notes.size()];
+ }
+ 
+ inline QString reaction(const QVariantMap& mon,const QString& action,unsigned variation=0) {
+@@ -18,7 +56,7 @@
+     const auto hp=mon.value("hp").toUInt(),max=mon.value("maxHp").toUInt();
+     if(!hp) return name+" needs to rest. Visit a Pokemon Center.";
+ 
+-    // PID % 25 is the cartridge's actual Gen 5 nature value.
++    // Gen 5 stores nature separately from the PID; Inspect reads block B + 25.
+     const auto nature=mon.value("nature").toUInt()%25;
+     const auto friendship=mon.value("friendship").toUInt();
+     const unsigned bond=friendship<50?0:friendship<100?1:friendship<150?2:friendship<220?3:4;
+--- a/source/melonDS/src/frontend/qt_sdl/Gen5Menu.cpp
++++ b/source/melonDS/src/frontend/qt_sdl/Gen5Menu.cpp
+@@ -459,6 +459,18 @@
+     return result;
+ }
+ 
++QVariantMap Gen5Menu::companionTraits(const unsigned char* bytes,std::size_t length,unsigned species,unsigned form)
++{
++    try {
++        Data rom{bytes,length};if(!rom.magic(12,"IREO") || species<1 || species>649 || form>31) return {};
++        const auto archive=file(rom,{"a","0","1","6"});auto personal=entry(archive,species);
++        if(form && form<personal.byte(32) && personal.half(28)) personal=entry(archive,personal.half(28)+form-1);
++        const auto first=personal.byte(6),second=personal.byte(7);
++        if(first>17 || second>17) return {};
++        return {{"type1",first},{"type2",second}};
++    } catch(const std::exception&) {return {};}
++}
++
+ QVariantList Gen5Menu::bossChallenges(const unsigned char* bytes,std::size_t length,QString& reason)
+ {
+     QVariantList result;reason.clear();
+--- a/source/melonDS/src/frontend/qt_sdl/Gen5Menu.h
++++ b/source/melonDS/src/frontend/qt_sdl/Gen5Menu.h
+@@ -30,6 +30,7 @@
+     static QVariantList relearnMoves(const unsigned char* rom,std::size_t length,unsigned species,unsigned form,unsigned level,QString& reason);
+     static QString moveName(const unsigned char* rom,std::size_t length,unsigned move);
+     static QVariantList bossChallenges(const unsigned char* rom,std::size_t length,QString& reason);
++    static QVariantMap companionTraits(const unsigned char* rom,std::size_t length,unsigned species,unsigned form);
+     static QVariantList npcTrainers(const unsigned char* rom,std::size_t length,QString& reason);
+     static QVariantMap trainerSummary(const unsigned char* rom,std::size_t length,unsigned id,QString& reason);
+     bool load(const unsigned char* rom,std::size_t length,QString& reason);
+--- a/source/melonDS/src/frontend/qt_sdl/MultiplayerPanel.cpp
++++ b/source/melonDS/src/frontend/qt_sdl/MultiplayerPanel.cpp
+@@ -380,7 +380,8 @@
+     acceptButton->setEnabled(false); declineButton->setEnabled(false); cancelButton->setEnabled(false); nativeButton->setEnabled(false);
+     overlayEnabled = new QCheckBox("Show players",this);
+     overlayEnabled->setChecked(true);
+-    companionInteractionsEnabled=qEnvironmentVariable("UNOVA_EXPERIMENTAL_COMPANION")=="1";
++    companionInteractionsEnabled=FollowerInteraction::enabledByEnvironment();
++    followerMotionScale=qEnvironmentVariable("UNOVA_FOLLOWER_REDUCED_MOTION")=="1"?0.0:1.0;
+     followerEnabled = new QCheckBox("Following Pokémon",this);
+     followerEnabled->setChecked(QSettings("PokePlay","Multiplayer").value("followingPokemon",true).toBool());
+     shareBattle=false; // Spectating is no longer offered or advertised.
+@@ -676,12 +677,14 @@
+     refreshNativeCoop(sample);
+     const auto romIdentity=sample.value("romIdentity").toString();
+     if(menuRomIdentity!=romIdentity) {menuArtwork=Gen5Menu{};menuRomIdentity=romIdentity;
+-        bossList.clear();bossSelection=0;
++        bossList.clear();bossCatalog.clear();bossSelection=0;presenceRomDigest.clear();companionSceneVisits.clear();
+         if(const auto* cart=instance->getNDS()?instance->getNDS()->NDSCartSlot.GetCart():nullptr) {
+             QString menuReason;
+             if(!menuArtwork.load(cart->GetROM(),cart->GetROMLength(),menuReason))
+                 history->appendPlainText("Game menu: "+menuReason);
+-            bossList=Gen5Menu::bossChallenges(cart->GetROM(),cart->GetROMLength(),bossCatalogReason);
++            bossCatalog=Gen5Menu::bossChallenges(cart->GetROM(),cart->GetROMLength(),bossCatalogReason);
++            filterBossCatalog();
++            if(!bossCatalog.isEmpty()) presenceRomDigest=bossCatalog.first().toMap().value("digest").toByteArray().toHex();
+         }
+         instance->gameMenuSurface.publish({});
+         if(romIdentity.isEmpty() && !menuMode.isEmpty()) closeGameMenus();
+@@ -689,7 +692,9 @@
+     if (romIdentity.isEmpty()) { spriteRomIdentity.clear(); maleSprites.clear(); femaleSprites.clear(); }
+     else if (spriteRomIdentity!=romIdentity)
+     { spriteRomIdentity=romIdentity; loadTrainerSprites();followerSprites.clear();followerTrails.clear();followerSampleTime=-1000;followerSpecies=0;followerForm=0; }
++    const bool wasInBattle=battlePresence.inBattle;
+     battlePresence.update(sample);
++    if(wasInBattle && !battlePresence.inBattle) companionBattleEnded=clock.elapsed();
+     refreshFollower();
+     if (!sample.value("cgearWirelessActive").toBool()) wirelessWarningShown=false;
+     else if (!wirelessWarningShown && menuMode.isEmpty() && menuArtwork.loaded() &&
+@@ -953,6 +958,9 @@
+     message["inMenu"]=!inBattle && (instance->gameMenuOpen() || currentSample.value("inMenu").toBool());
+     message["activity"]=presenceActivity();
+     message["nativeLANReady"]=currentSample.value("nativeCoopLANReady").toBool();
++    message["coopProtocol"]=2;
++    message["modVersion"]="1.0.7-dev";
++    if(!presenceRomDigest.isEmpty()) message["romFingerprint"]=presenceRomDigest;
+     message["coopStatus"]=coopStatus();
+     message["shareBattle"]=shareBattle;
+     if (active)
+@@ -962,6 +970,8 @@
+     if (active) message["avatar"]=trainerChoice->currentIndex();
+     message["followerSpecies"]=int(followerSpecies);
+     message["followerForm"]=int(followerForm);
++    message["followerGender"]=int(followerGender);
++    message["followerShiny"]=followerShiny;
+     socket->write(QJsonDocument(message).toJson(QJsonDocument::Compact)+'\n');
+     if(relaySocial && shareBattle && inBattle && battleViewers>0 && clock.elapsed()-lastPreviewFrame>=500 && socket->bytesToWrite()<8192) {
+         lastPreviewFrame=clock.elapsed();
+@@ -1161,11 +1171,11 @@
+         if (!calibrating && calibration.valid && calibration.map==currentSample.value("map").toInt())
+         {
+             const auto local=QPointF(currentSample.value("smoothX").toDouble(),currentSample.value("smoothZ").toDouble());
+-            auto appendFollower=[&](const QString& id,int map,unsigned species,unsigned form,QPointF position,double height,bool active) {
++            auto appendFollower=[&](const QString& id,int map,unsigned species,unsigned form,unsigned gender,bool shiny,QPointF position,double height,bool active) {
+                 auto& trail=followerTrails[id];
+                 trail.update(map,species,position,height,active && (id=="local"?followerEnabled->isChecked():showPeerFollowers));
+                 if(!trail.visible) return;
+-                const auto sprites=pokemonFollowerSprites(species,form);
++                const auto sprites=pokemonFollowerSprites(species,form,gender,shiny);
+                 if(sprites.size()!=12) return;
+                 PresenceAvatar follower{id+"/follower",{},trail.facing,trail.position,trail.moving,trail.height,sprites};
+                 const auto greeting=std::max(followerGreetings.value(id=="local"?selfId:id),id=="local"?companionReactionUntil:qint64(0));
+@@ -1178,19 +1188,20 @@
+                     follower.companionOwnerPosition=position;
+                     follower.companionReactionStarted=companionReactionStarted;
+                     follower.companionReactionUntil=companionReactionUntil;
+-                } else if(greeting>now) {follower.moving=true;follower.height+=3*std::abs(std::sin(double(greeting-now)*.006));}
++                } else if(greeting>now) {follower.moving=followerMotionScale>0;follower.height+=3*std::abs(std::sin(double(greeting-now)*.006))*followerMotionScale;}
+                 follower.positionDrivenStride=greeting<=now;follower.companion=true;
+                 follower.companionSpecies=species;follower.companionForm=form;avatars.append(follower);
++                avatars.last().companionMotionScale=followerMotionScale;
+             };
+             // Capture owner poses before appending companions to this list.
+             const auto owners=avatars;
+             QSet<QString> followerOwners{"local"};
+-            appendFollower("local",localMap,followerSpecies,followerForm,local,currentSample.value("worldY").toDouble(),true);
++            appendFollower("local",localMap,followerSpecies,followerForm,followerGender,followerShiny,local,currentSample.value("worldY").toDouble(),true);
+             for(const auto& owner:owners) {
+                 if(!showPeerFollowers) continue;
+                 followerOwners.insert(owner.id);
+                 const auto state=SamplePresenceMotion(remote.value(owner.id).frames,now);
+-                appendFollower(owner.id,localMap,state.value("followerSpecies").toUInt(),state.value("followerForm").toUInt(),
++                appendFollower(owner.id,localMap,state.value("followerSpecies").toUInt(),state.value("followerForm").toUInt(),state.value("followerGender",2).toUInt(),state.value("followerShiny").toBool(),
+                                owner.position,owner.height,!owner.inBattle);
+             }
+             for(auto it=followerTrails.begin();it!=followerTrails.end();)
+@@ -1225,8 +1236,13 @@
+     if(!companionActive()) {companionMessage="Stand idle in the field with your companion.";drawGameMenu();return;}
+     if(clock.elapsed()-companionLastAction<800) return;
+     companionLastAction=clock.elapsed();
+-    const auto variation=companionReactionCount++;
+-    companionMessage=FollowerInteraction::reaction(companion,action,variation);
++    const auto identity=companion.value("record").toByteArray().left(4);
++    if(!companionSceneVisits.contains(identity) && companionSceneVisits.size()>=24) companionSceneVisits.erase(companionSceneVisits.begin());
++    const auto variation=companionSceneVisits[identity][action]++;
++    QVariantMap context{{"area",menuArtwork.mapName(currentSample.value("map").toInt())},
++        {"hour",currentSample.value("clockHour",12)},{"month",currentSample.value("clockMonth",1)},
++        {"recentBattle",clock.elapsed()-companionBattleEnded<120000}};
++    companionMessage=FollowerInteraction::reaction(companion,action,variation)+FollowerInteraction::contextNote(companion,context,variation);
+     const auto cue=FollowerInteraction::visualCue(companion,action,variation);
+     companionReactionStarted=clock.elapsed();companionEmote=cue.emote;companionMotion=cue.motion;
+     companionReactionUntil=companion.value("hp").toUInt()?companionReactionStarted+cue.durationMs:0;
+@@ -1269,9 +1285,17 @@
+         if(companion.value("record").toByteArray().left(4)!=first.value("record").toByteArray().left(4)) {
+             companionReactionUntil=0;companionEmote.clear();companionMotion.clear();companionMessage.clear();
+         }
++        const bool sameTraits=companion.value("species")==first.value("species") && companion.value("form")==first.value("form") && companion.contains("type1");
++        const auto previousTraits=companion;
+         followerValidTime=now;companion=first;followerSpecies=0;followerForm=0;
++        if(sameTraits) {companion["type1"]=previousTraits.value("type1");companion["type2"]=previousTraits.value("type2");}
++        else if(const auto* cart=instance->getNDS()?instance->getNDS()->NDSCartSlot.GetCart():nullptr) {
++            const auto traits=Gen5Menu::companionTraits(cart->GetROM(),cart->GetROMLength(),first.value("species").toUInt(),first.value("form").toUInt());
++            for(auto it=traits.cbegin();it!=traits.cend();++it) companion[it.key()]=it.value();
++        }
+         if(!first.value("egg").toBool() && first.value("hp").toUInt()) {
+             followerSpecies=first.value("species").toUInt();followerForm=first.value("form").toUInt();
++            followerGender=first.value("gender",2).toUInt();followerShiny=first.value("shiny").toBool();
+         }
+     } catch(const std::exception&) {
+         // A transient encryption lock must not make an existing follower blink.
+@@ -1280,19 +1304,21 @@
+     }
+ }
+ 
+-QList<QImage> MultiplayerPanel::pokemonFollowerSprites(unsigned species,unsigned form)
+-{
+-    if(species<1 || species>649 || form>31) return {};
+-    const auto key=species*32+form;
+-    if(followerSprites.contains(key)) return followerSprites.value(key);
++QList<QImage> MultiplayerPanel::pokemonFollowerSprites(unsigned species,unsigned form,unsigned gender,bool shiny)
++{
++    if(species<1 || species>649 || form>31 || gender>2) return {};
++    const auto key=(((species*32+form)*3+gender)*2)+unsigned(shiny);
++    if(const auto* cached=followerSprites.object(key)) return *cached;
+     QList<QImage> frames;
+     if(const auto* cart=instance->getNDS()?instance->getNDS()->NDSCartSlot.GetCart():nullptr) {
+-        const auto result=LoadLocalPokemonSprites(cart->GetROM(),cart->GetROMLength(),species,form);
++        const auto result=LoadLocalPokemonSprites(cart->GetROM(),cart->GetROMLength(),species,form,gender,shiny);
+         for(const auto& frame:result.value("frames").toList()) frames.append(frame.value<QImage>());
+     }
+-    // A remote peer cannot force unbounded decoded image retention.
+-    if(followerSprites.size()>=64) followerSprites.clear();
+-    followerSprites.insert(key,frames);return frames;
++    // Cost-bounded LRU eviction retains active sprites instead of dropping the
++    // entire cache whenever a player changes species, gender, form or shininess.
++    int cost=0;for(const auto& image:frames) cost+=int(image.sizeInBytes()/1024);
++    if(!frames.isEmpty()) followerSprites.insert(key,new QList<QImage>(frames),qMax(1,cost));
++    return frames;
+ }
+ 
+ void MultiplayerPanel::updateOffMapPresenceDebug(bool trackingEnabled,bool localResolved,int localMap,qint64 now,bool localInBattle)
+@@ -1439,7 +1465,12 @@
+     const bool free=interactionId.isEmpty() && pokemonTrade.isEmpty() && itemOffer.isEmpty() &&
+         instance->getEmuThread()->pendingPokemonTrade().isEmpty() && !currentSample.value("nativeCoopCanCancel").toBool();
+     tradeButton->setEnabled(connected && relayPokemon && eligible && free && availability->currentData()!="busy");
+-    battleButton->setEnabled(connected && relayPlayerBattles && eligible && free && availability->currentData()!="busy" && currentSample.value("nativeCoopLANReady").toBool());
++    bool battleCompatible=false;
++    if(row>=0 && peers->item(row,0)) {
++        const auto it=remote.constFind(peers->item(row,0)->data(Qt::UserRole).toString());
++        if(it!=remote.cend() && !it->frames.isEmpty()) battleCompatible=battleCompatibility(it->frames.last().state).isEmpty();
++    }
++    battleButton->setEnabled(connected && relayPlayerBattles && eligible && free && battleCompatible && availability->currentData()!="busy" && currentSample.value("nativeCoopLANReady").toBool());
+     const bool challengeActive=checkpoint.value("status")=="active";
+     checkpointCreate->setEnabled(connected && relayCheckpoints && !challengeActive && !remote.isEmpty() &&
+         currentSample.value("status")=="Experimental match");
+@@ -1452,6 +1483,27 @@
+     nativeButton->setText(interactionFrom==selfId ? "Host native wireless session" : "Join native wireless session");
+     if(interactionId.isEmpty() && clock.elapsed()>=interactionFeedbackUntil)
+         interactionStatus->setText(interactionEligibilityReason());
++}
++
++QString MultiplayerPanel::battleCompatibility(const QVariantMap& state) const
++{
++    if(state.value("coopProtocol").toInt()!=2) return "Battles need both clients and the relay updated to the current co-op protocol.";
++    if(presenceRomDigest.isEmpty() || state.value("romFingerprint").toString().isEmpty()) return "Waiting for ROM compatibility information.";
++    if(state.value("romFingerprint").toString()!=presenceRomDigest) return "Different ROM builds: load the same game for battles.";
++    return {};
++}
++
++void MultiplayerPanel::filterBossCatalog()
++{
++    static const QSet<QString> gyms={"Cheren","Roxie","Burgh","Elesa","Clay","Skyla","Drayden","Marlon"};
++    static const QSet<QString> league={"Shauntal","Marshal","Grimsley","Caitlin","Iris","Alder","Benga"};
++    bossList.clear();
++    for(const auto& record:bossCatalog) {
++        const auto name=record.toMap().value("name").toString().section(' ',0,0);
++        const int category=gyms.contains(name)?1:name=="Hugh"?2:league.contains(name)?3:4;
++        if(!bossCategory || bossCategory==category) bossList.append(record);
++    }
++    bossSelection=0;menuScroll=0;
+ }
+ 
+ QString MultiplayerPanel::interactionEligibilityReason() const
+@@ -1484,6 +1536,8 @@
+     if(availability->currentData()=="busy")
+         return "You are Busy; switch your availability to Ready to request an interaction.";
+     if(!relayPokemon || !relayPlayerBattles) return "Restart the updated relay and update both clients for overworld trades and battles.";
++    const auto compatibility=battleCompatibility(state);
++    if(!compatibility.isEmpty()) return "Pokemon trades are available. "+compatibility;
+     return currentSample.value("nativeCoopLANReady").toBool()?"Ready: trade Pokemon or request a battle here.":"Pokemon trades are ready. Battles also need two players connected to native LAN.";
+ }
+ 
+@@ -1698,10 +1752,12 @@
+     } else if(menuMode=="bosses" || menuMode=="rematches") {
+         const bool practiceOnly=menuMode=="rematches";
+         title=practiceOnly?"PRACTICE BATTLES":"DEBUG CHALLENGES";
++        static const QStringList categories={"All trainers","Gym leaders","Rivals","League","Other trainers"};
++        row("bossFilter",categories.value(bossCategory),{8,26,240,17});
+         menuScroll=qBound(0,menuScroll,qMax(0,bossList.size()-4));
+         for(int i=0;i<4 && i+menuScroll<bossList.size();++i) {
+             const int index=i+menuScroll;const auto boss=bossList[index].toMap();
+-            row("boss:"+QString::number(index),(index==bossSelection?"> ":"  ")+boss.value("name").toString(),{8,28+i*25,240,23});
++            row("boss:"+QString::number(index),(index==bossSelection?"> ":"  ")+boss.value("name").toString(),{8,45+i*20,240,19});
+         }
+         const bool cancel=currentSample.value("nativeCoopCanCancel").toBool();
+         const bool nativeLANReady=currentSample.value("nativeCoopLANReady").toBool();
+@@ -1907,6 +1963,7 @@
+     else if(action.startsWith("peer:")) {gameItemTarget=action.mid(5);if(menuMode=="recipient") menuMode="trade";}
+     else if(action=="bosses") {menuMode="bosses";menuFocus=0;menuScroll=0;}
+     else if(action=="bossPrev") menuScroll-=4;
++    else if(action=="bossFilter") {bossCategory=(bossCategory+1)%5;filterBossCatalog();menuFocus=0;}
+     else if(action=="bossNext") menuScroll+=4;
+     else if(action=="cancelBoss") {closeGameMenus();instance->getEmuThread()->requestNativeCoopCancel();return;}
+     else if(action.startsWith("boss:")) bossSelection=action.mid(5).toInt();
+--- a/source/melonDS/src/frontend/qt_sdl/MultiplayerPanel.h
++++ b/source/melonDS/src/frontend/qt_sdl/MultiplayerPanel.h
+@@ -10,6 +10,7 @@
+ #include "BattlePresenceState.h"
+ #include "Gen5Menu.h"
+ #include "PokemonFollower.h"
++#include <QCache>
+ class ScreenPanel;
+ class QCheckBox;
+ class QComboBox;
+@@ -43,6 +44,11 @@
+ private:
+     Gen5Menu menuArtwork;
+     QVariantList bossList;
++    QVariantList bossCatalog;
++    int bossCategory=0;
++    void filterBossCatalog();
++    QString battleCompatibility(const QVariantMap& state) const;
++    QString presenceRomDigest;
+     int bossSelection=0;
+     QString bossCatalogReason;
+     QString menuRomIdentity;
+@@ -153,10 +159,12 @@
+     int calibrationMap = -1;
+     QCheckBox* overlayEnabled;
+     QCheckBox* followerEnabled;
+-    unsigned followerSpecies=0, followerForm=0;
++    unsigned followerSpecies=0, followerForm=0, followerGender=2;
++    bool followerShiny=false;
++    double followerMotionScale=1.0;
+     qint64 followerSampleTime=-1000;
+     qint64 followerValidTime=-2000;
+-    QMap<unsigned,QList<QImage>> followerSprites;
++    QCache<unsigned,QList<QImage>> followerSprites{6144};
+     QMap<QString,PokemonFollowerTrail> followerTrails;
+     void refreshFollower();
+     bool companionInteractionsEnabled=false;
+@@ -164,6 +172,8 @@
+     QString companionMessage;
+     qint64 companionReactionUntil=0,companionLastAction=-10000;
+     unsigned companionReactionCount=0;
++    QMap<QByteArray,QMap<QString,unsigned>> companionSceneVisits;
++    qint64 companionBattleEnded=-100000;
+     QString companionEmote, companionMotion;
+     qint64 companionReactionStarted=0;
+     int companionActionFocus=0;
+@@ -173,7 +183,7 @@
+     QRectF companionHitBox;
+     bool facingCompanion() const;
+     void openCompanionDialogue();
+-    QList<QImage> pokemonFollowerSprites(unsigned species,unsigned form);
++    QList<QImage> pokemonFollowerSprites(unsigned species,unsigned form,unsigned gender=2,bool shiny=false);
+     QCheckBox* markerMode;
+     QCheckBox* cameraFollows;
+     QCheckBox* showGuides;
+--- a/source/melonDS/src/frontend/qt_sdl/native/CoopContext.c
++++ b/source/melonDS/src/frontend/qt_sdl/native/CoopContext.c
+@@ -335,6 +335,16 @@
+     u32 owned=context && *(volatile u32*)context==0x12345678 &&
+         *(volatile u32*)(context+0x7dc)==(u32)event &&
+         *(volatile u32*)(context+0x7d0)==setup;
++    /* Practice must not let its first finisher tear the shared radio down.
++     * After the genuine scene callback finishes, expose the actual outcome
++     * and hold this parent until both peers acknowledge it. PvP opts out:
++     * its local win/loss outcomes intentionally differ. */
++    if(owned && context[0x7d9] && context[0x7d7] &&
++       *(volatile u32*)(context+0x7bc)!=2) {
++        *(volatile u32*)(context+0x7b4)=*(volatile u32*)((volatile u8*)setup+0xa8);
++        context[0x7da]=1;
++        return 0;
++    }
+     u32 done=((u32 (*)(void*,volatile u32*,void*))0x02168bad)(event,state,data);
+     volatile u32* system=(volatile u32*)*((volatile u32*)event+4);
+     volatile u32* child=(volatile u32*)system[6];
+--- a/source/melonDS/src/frontend/qt_sdl/NativeCoopPayload.h
++++ b/source/melonDS/src/frontend/qt_sdl/NativeCoopPayload.h
+@@ -2,9 +2,9 @@
+ #include <array>
+ #include <cstdint>
+ // Generated by tools/build_coop_payload.py from native/CoopContext.c.
+-// Source SHA256: a4d1e245dcbd98c2d7bdb5699cef54e0b2e2b596c8c7e829ecf2cc5ed0b9e9d3
++// Source SHA256: 1ed5da01ccdd890ae255499968761d80f64a564b5ebeb96ef1ceb9926141d31b
+ namespace CoopNativePayload {
+-inline constexpr std::array<unsigned char,3276> Code={
++inline constexpr std::array<unsigned char,3340> Code={
+     0xf8,0xb5,0x0d,0x00,0x14,0x00,0x1f,0x00,0x00,0x28,0x3e,0xd0,0x80,0x23,0x5b,0x02,
+     0x99,0x42,0x3a,0xd2,0x05,0x2a,0x38,0xd8,0x00,0x2f,0x36,0xd1,0x1c,0x4b,0x98,0x47,
+     0x06,0x1e,0x32,0xd0,0x1b,0x4b,0x98,0x47,0x00,0x28,0x2e,0xd0,0x1a,0x4b,0x98,0x47,
+@@ -140,16 +140,20 @@
+     0x0b,0x4b,0xea,0x54,0x30,0x00,0xfe,0xbd,0x00,0x24,0xe5,0xe7,0x01,0x24,0xe3,0xe7,
+     0xb0,0x18,0x14,0x02,0x78,0x56,0x34,0x12,0xe0,0x6c,0x1d,0x02,0xd6,0x07,0x00,0x00,
+     0x48,0x74,0x1d,0x02,0x21,0x0c,0x04,0x02,0x01,0x6e,0x01,0x02,0x65,0x0c,0x04,0x02,
+-    0xd7,0x07,0x00,0x00,0xf7,0xb5,0x07,0x00,0x1d,0x48,0x00,0x24,0x84,0x46,0x93,0x6a,
+-    0x1c,0x48,0x9c,0x44,0x16,0x00,0x25,0x00,0x92,0x68,0x84,0x45,0x0f,0xd8,0x1a,0x48,
+-    0x1c,0x18,0x20,0x68,0x19,0x4b,0x98,0x42,0x09,0xd1,0x19,0x4b,0xe3,0x58,0x9f,0x42,
+-    0x05,0xd1,0xfa,0x23,0xdb,0x00,0xe5,0x58,0xad,0x1a,0x6b,0x42,0x5d,0x41,0x15,0x4b,
+-    0x32,0x00,0x38,0x00,0x98,0x47,0x3b,0x69,0x01,0x90,0x9b,0x69,0x00,0x2b,0x08,0xd0,
+-    0x1a,0x68,0x97,0x42,0x05,0xd1,0x59,0x68,0x0f,0x4a,0x91,0x42,0x01,0xd1,0xf2,0x6a,
+-    0x5a,0x60,0x01,0x9b,0x00,0x2b,0x08,0xd0,0x00,0x2d,0x06,0xd0,0x20,0x00,0xff,0xf7,
+-    0xa5,0xfc,0xfb,0x23,0x01,0x22,0xdb,0x00,0xe2,0x54,0x01,0x98,0xfe,0xbd,0xc0,0x46,
+-    0xb4,0xf8,0xff,0xfd,0xf0,0xf7,0x3f,0x00,0xb4,0xf8,0xff,0xff,0x78,0x56,0x34,0x12,
+-    0xdc,0x07,0x00,0x00,0xad,0x8b,0x16,0x02,0x01,0x6e,0x01,0x02,0xf7,0xb5,0x2e,0x4b,
++    0xd7,0x07,0x00,0x00,0xf7,0xb5,0x29,0x4b,0x94,0x6a,0x07,0x00,0xe0,0x18,0x28,0x4b,
++    0x16,0x00,0x92,0x68,0x98,0x42,0x26,0xd8,0x26,0x4b,0x00,0x25,0xe4,0x18,0x20,0x68,
++    0x25,0x4b,0x98,0x42,0x21,0xd1,0x25,0x4b,0xe3,0x58,0x9f,0x42,0x1d,0xd1,0xfa,0x23,
++    0xdb,0x00,0xe3,0x58,0x93,0x42,0x18,0xd1,0x21,0x4a,0xa2,0x5c,0xaa,0x42,0x33,0xd0,
++    0x20,0x4a,0xa2,0x5c,0xaa,0x42,0x2f,0xd0,0x1f,0x4a,0xa2,0x58,0x02,0x2a,0x2b,0xd0,
++    0xa8,0x33,0x1a,0x68,0x1d,0x4b,0xe2,0x50,0x01,0x22,0x1d,0x4b,0xe2,0x54,0x00,0x23,
++    0x01,0x93,0x01,0x98,0xfe,0xbd,0x00,0x25,0x2c,0x00,0x1a,0x4b,0x32,0x00,0x38,0x00,
++    0x98,0x47,0x3b,0x69,0x01,0x90,0x9b,0x69,0x00,0x2b,0x08,0xd0,0x1a,0x68,0x97,0x42,
++    0x05,0xd1,0x59,0x68,0x14,0x4a,0x91,0x42,0x01,0xd1,0xf2,0x6a,0x5a,0x60,0x01,0x9b,
++    0x00,0x2b,0xe4,0xd0,0x00,0x2d,0xe4,0xd0,0x20,0x00,0xff,0xf7,0x8f,0xfc,0xfb,0x23,
++    0x01,0x22,0xdb,0x00,0xe2,0x54,0xdc,0xe7,0x01,0x25,0xde,0xe7,0xb4,0xf8,0xff,0xfd,
++    0xf0,0xf7,0x3f,0x00,0xb4,0xf8,0xff,0xff,0x78,0x56,0x34,0x12,0xdc,0x07,0x00,0x00,
++    0xd9,0x07,0x00,0x00,0xd7,0x07,0x00,0x00,0xbc,0x07,0x00,0x00,0xb4,0x07,0x00,0x00,
++    0xda,0x07,0x00,0x00,0xad,0x8b,0x16,0x02,0x01,0x6e,0x01,0x02,0xf7,0xb5,0x2e,0x4b,
+     0x94,0x6a,0x15,0x00,0xe2,0x18,0x2d,0x4b,0x06,0x00,0x01,0x91,0x9a,0x42,0x01,0xd9,
+     0x00,0x20,0xfe,0xbd,0x2a,0x4b,0xe4,0x18,0x22,0x68,0x2a,0x4b,0x9a,0x42,0xf7,0xd1,
+     0x29,0x4b,0xe3,0x58,0x83,0x42,0xf3,0xd1,0xfa,0x23,0xdb,0x00,0xe2,0x58,0xab,0x68,
+@@ -160,7 +164,7 @@
+     0xe3,0x51,0xf7,0x23,0xdb,0x00,0xe7,0x58,0x2a,0x00,0x17,0x4b,0x30,0x00,0x01,0x99,
+     0x98,0x47,0x33,0x69,0x9b,0x69,0x00,0x2b,0x07,0xd0,0x1a,0x68,0x96,0x42,0x04,0xd1,
+     0x59,0x68,0x12,0x4a,0x91,0x42,0x00,0xd1,0x5f,0x60,0x00,0x28,0xb8,0xd0,0x20,0x00,
+-    0xff,0xf7,0x3c,0xfc,0xfb,0x23,0x01,0x22,0xdb,0x00,0xe2,0x54,0xab,0x68,0xa8,0x33,
++    0xff,0xf7,0x1c,0xfc,0xfb,0x23,0x01,0x22,0xdb,0x00,0xe2,0x54,0xab,0x68,0xa8,0x33,
+     0x1a,0x68,0x0b,0x4b,0xe2,0x50,0xab,0xe7,0xb4,0xf8,0xff,0xfd,0xf0,0xf7,0x3f,0x00,
+     0xb4,0xf8,0xff,0xff,0x78,0x56,0x34,0x12,0xdc,0x07,0x00,0x00,0x52,0x4f,0x54,0x53,
+     0xbc,0x07,0x00,0x00,0x85,0x7c,0x01,0x02,0xad,0x8b,0x16,0x02,0x01,0x6e,0x01,0x02,
+@@ -220,12 +224,12 @@
+ inline constexpr std::uint32_t PokePlayGetCoopGroupStatusOffset=0x724;
+ inline constexpr std::uint32_t PokePlayCoopSceneEventOffset=0x7b8;
+ inline constexpr std::uint32_t PokePlayCoopFieldEventOffset=0x874;
+-inline constexpr std::uint32_t PokePlayCoopStoryFieldEventOffset=0x90c;
+-inline constexpr std::uint32_t PokePlayStoryFixtureParentOffset=0x9f4;
+-inline constexpr std::uint32_t PokePlayCreateStoryFixtureOffset=0xa24;
+-inline constexpr std::uint32_t PokePlayLaunchCoopBattleOffset=0xad8;
+-inline constexpr std::uint32_t PokePlayReleaseCoopContextOffset=0xbf0;
+-inline constexpr std::uint32_t PokePlayRetryCoopShutdownOffset=0xc54;
++inline constexpr std::uint32_t PokePlayCoopStoryFieldEventOffset=0x94c;
++inline constexpr std::uint32_t PokePlayStoryFixtureParentOffset=0xa34;
++inline constexpr std::uint32_t PokePlayCreateStoryFixtureOffset=0xa64;
++inline constexpr std::uint32_t PokePlayLaunchCoopBattleOffset=0xb18;
++inline constexpr std::uint32_t PokePlayReleaseCoopContextOffset=0xc30;
++inline constexpr std::uint32_t PokePlayRetryCoopShutdownOffset=0xc94;
+ struct Fingerprint {std::uint32_t address;std::array<unsigned char,8> bytes;};
+ inline constexpr std::array<Fingerprint,54> Profile={{
+     {0x20169a8, {0x10,0xb5,0x04,0x1c,0x00,0xf0,0x6c,0xf8}},
+--- a/source/melonDS/src/frontend/qt_sdl/NativeCoopRuntime.cpp
++++ b/source/melonDS/src/frontend/qt_sdl/NativeCoopRuntime.cpp
+@@ -578,7 +578,7 @@
+                 {"eventRangeHits",npcTraceEventRangeHits},{"fetchHits",npcTraceFetchHits},
+                 {"constructorReturnHits",npcTraceConstructorHits},{"last",npcTrace},
+                 {"fetchHistory",npcTraceFetchHistory}}},
+-            {"nativeCoopPlayerBattle",playerBattle},{"nativeCoopStoryMode",storyBattle},{"nativeCoopStoryAttached",storyAttached},{"nativeCoopStoryReleased",storyReleased},{"nativeCoopStoryResult",storyResult},{"nativeCoopStoryResultAgreed",storyResultAgreed},
++            {"nativeCoopPlayerBattle",playerBattle},{"nativeCoopStoryMode",storyBattle},{"nativeCoopStoryAttached",storyAttached},{"nativeCoopStoryReleased",storyReleased},{"nativeCoopStoryResult",storyResult},{"nativeCoopStoryResultAgreed",storyResultAgreed},{"nativeCoopCompletionAgreed",completionResultAgreed},
+             {"nativeCoopBossTrainer",bossTrainer},{"nativeCoopBossSecondaryTrainer",bossSecondaryTrainer},{"nativeCoopBossName",bossName},{"nativeCoopBossTeamSize",bossCount},{"nativeCoopAttempt",attemptNumber},{"nativeCoopCanStart",CanRequestManualTest()},{"nativeCoopCanCancel",CanCancel()},
+             {"nativeCoopLANReady",nativeLANReady},{"nativeCoopLANPlayers",nativeLANPlayers},
+             {"nativeCoopRecovered",recovered},{"nativeCoopRecoveryFieldIdle",recoveryFieldIdle},{"nativeCoopBattleCompleted",battleCompleted},
+@@ -1056,7 +1056,7 @@
+     }
+     if(phase==Phase::AwaitUnregister) {
+         if(!word(nds,0x021418b0)) {
+-            if(storyResultAgreed && pairingRole==2 &&
++            if(completionResultAgreed && pairingRole==2 &&
+                melonDS::MPInterface::GetType()==melonDS::MPInterface_LAN)
+                 static_cast<melonDS::LAN&>(melonDS::MPInterface::Get()).SetCoopStoryCleanupDone();
+             adapterAddress=0;unregisterVerified=true;phase=Phase::ReleaseContext;
+@@ -1182,7 +1182,9 @@
+             return;
+         }
+         sceneCleanupWaitFrames=0;
+-        if(storyBattle && fieldDone && word(nds,contextAddress+0x7bc)!=2) {
++        const bool practiceResultReady=!storyBattle && !playerBattle && valid(contextAddress,0x7f0) &&
++            nds.MainRAM[contextAddress-0x02000000+0x7da];
++        if(((storyBattle && fieldDone) || practiceResultReady) && !completionResultAgreed) {
+             const auto outcome=word(nds,contextAddress+0x7b4);
+             int agreed=0;
+             if(enabled && qEnvironmentVariableIsSet("POKEPLAY_COOP_PAIR_CHECK")) {
+@@ -1192,14 +1194,17 @@
+             } else if(melonDS::MPInterface::GetType()==melonDS::MPInterface_LAN) {
+                 auto& lan=static_cast<melonDS::LAN&>(melonDS::MPInterface::Get());
+                 lan.SetCoopStoryResult(outcome);agreed=lan.CoopStoryResultStatus();
+-                if(!agreed && lan.CoopChallengeStatus()!=1) {Recover("Story result partner disconnected before acknowledgement");return;}
+-            }
+-            if(agreed<0) {Recover("Story battle results differed; progression cancelled");return;}
++                if(!agreed && lan.CoopChallengeStatus()!=1) {Recover("Battle result partner disconnected before acknowledgement");return;}
++            }
++            if(agreed<0) {Recover("Battle results differed; returning both games to the field");return;}
+             if(agreed==1) {
+-                storyResult=outcome;storyResultAgreed=true;
++                storyResult=outcome;completionResultAgreed=true;storyResultAgreed=storyBattle;
+                 nds.ARM9.DataWrite32(contextAddress+0x7bc,2);
+             }
+-            else if(++storyFrames>18600) {Recover("Story battle result acknowledgement timed out");return;}
++            else {
++                status=storyBattle?"Story complete; waiting for partner result":"Practice complete; waiting for partner result";
++                if(++storyFrames>(storyBattle?18600u:1800u)) {Recover("Battle result acknowledgement timed out");return;}
++            }
+         }
+         if(partnerDisconnected && !fieldDone) ++missingPeerFrames; else missingPeerFrames=0;
+         // Co-op Practice can enter a local level-up / move-learning sequence
+@@ -1237,12 +1242,12 @@
+            LiveOwner(nds,liveSystem,liveData) && liveSystem==system && liveData==data) {
+             // Keep the parent radio alive until the guest driver has actually
+             // unregistered. Dialogue duration is not a safe teardown timer.
+-            if(storyResultAgreed && pairingRole==1 &&
++            if(completionResultAgreed && pairingRole==1 &&
+                melonDS::MPInterface::GetType()==melonDS::MPInterface_LAN) {
+                 auto& lan=static_cast<melonDS::LAN&>(melonDS::MPInterface::Get());
+                 if(lan.CoopPartnerConnected() && !lan.CoopRemoteStoryCleanupDone()) {
+                     battleCompleted=true;
+-                    status="Story returned; waiting for partner wireless shutdown";return;
++                    status="Battle returned; waiting for partner wireless shutdown";return;
+                 }
+             }
+             battleCompleted=true;if(storyBattle) storyResult=word(nds,contextAddress+0x7b4);
+@@ -1540,6 +1545,7 @@
+                 break;
+             }
+             phase=Phase::LaunchBattle;
++            nds.ARM9.DataWrite8(contextAddress+0x7d9,playerBattle?0:1);
+             status=playerBattle?"Queuing native player battle event":"Queuing co-op battle event; co-op EXP gain disabled";
+             Queue(codeAddress+CoopNativePayload::PokePlayLaunchCoopBattleOffset+1,
+                 {contextAddress,system,codeAddress+CoopNativePayload::PokePlayCoopFieldEventOffset+1,
+--- a/source/melonDS/src/frontend/qt_sdl/NativeCoopRuntime.h
++++ b/source/melonDS/src/frontend/qt_sdl/NativeCoopRuntime.h
+@@ -97,6 +97,7 @@
+     bool battleEventQueued=false;
+     bool bridgeVerified=false, contextVerified=false;
+     bool cancelRequested=false, recovered=false, recoveryFieldIdle=false, battleCompleted=false;
++    bool completionResultAgreed=false;
+     QByteArray recoveryState;
+     const void* recoveryCart=nullptr;
+     bool fixtureScriptLoaded=false;
+--- a/source/melonDS/src/frontend/qt_sdl/PokemonTrading.cpp
++++ b/source/melonDS/src/frontend/qt_sdl/PokemonTrading.cpp
+@@ -239,7 +239,8 @@
+         }
+         return {{"ok",true},{"name",p.name},{"species",p.species},{"level",p.level},
+             {"ivs",ivs},{"evs",evs},{"evTotal",total},{"moves",moves},{"friendship",blocks.byte(12)},
+-            {"nature",p.pid%25},
++            {"nature",blocks.byte(57)},{"gender",(blocks.byte(56)>>1)&3},
++            {"shiny",((p.pid>>16)^(p.pid&65535)^blocks.half(4)^blocks.half(6))<8},
+             {"hp",p.hp},{"maxHp",p.maxHp},{"heldItem",p.item},{"egg",p.egg},{"form",p.form},
+             {"tradeable",reason.isEmpty()},{"reason",reason},{"record",record}};
+     } catch(const std::exception& e) {return {{"ok",false},{"tradeable",false},{"reason",QString::fromUtf8(e.what())}};}
+--- a/source/melonDS/src/frontend/qt_sdl/PresenceOverlay.cpp
++++ b/source/melonDS/src/frontend/qt_sdl/PresenceOverlay.cpp
+@@ -199,7 +199,7 @@
+         // Camera globals can be unavailable for one sample while the field still
+         // has a valid actor. Keep the last projection briefly, only on that map.
+         valid=field && valid && map==sampleMap && lastCameraTime>=0 &&
+-            now>=lastCameraTime && now-lastCameraTime<=200;
++            now>=lastCameraTime && now-lastCameraTime<=400;
+         if (!valid) lastCameraTime=-1;
+         return valid;
+     }
+@@ -281,7 +281,17 @@
+     const auto localFeet=c.automatic?c.projectWorld(local,localAvatar.height):c.project(local,local);
+     QRegion localSilhouette;
+     if(!markers && localAvatar.sprites.size()>=12 && std::isfinite(localFeet.x()) && std::isfinite(localFeet.y())) {
+-        const auto& sprite=localAvatar.sprites[PresenceSpriteFrame(localAvatar,elapsedMs)];
++        // Use a stable silhouette across the three directional poses. Cutting
++        // with just the current animation frame made another sprite's limbs
++        // flash whenever the local trainer changed walking pose.
++        const int base=(PresenceSpriteFrame(localAvatar,elapsedMs)/3)*3;
++        QImage sprite=localAvatar.sprites[base];
++        for(int pose=1;pose<3;++pose) {
++            const auto& other=localAvatar.sprites[base+pose];
++            if(other.size()!=sprite.size()) continue;
++            for(int y=0;y<sprite.height();++y) for(int x=0;x<sprite.width();++x)
++                if(qAlpha(other.pixel(x,y))>qAlpha(sprite.pixel(x,y))) sprite.setPixel(x,y,other.pixel(x,y));
++        }
+         auto localPose=localAvatar;localPose.position=local;
+         const double scale=avatarScale(c,local,localPose);
+         const auto mask=sprite.scaled(qMax(1,int(std::round(32*scale))),qMax(1,int(std::round(32*scale))),Qt::IgnoreAspectRatio,Qt::FastTransformation);
+@@ -303,7 +313,7 @@
+     for (const auto& avatar : sorted)
+     {
+         const auto basePos = c.automatic ? c.projectWorld(avatar.position,avatar.height) : c.project(avatar.position,local);
+-        if (!std::isfinite(basePos.x()) || !std::isfinite(basePos.y()) || basePos.x() < 0 || basePos.x()>=256 || basePos.y() < 0 || basePos.y()>=192) continue;
++        if (!finitePoint(basePos) || PresenceAvatarBounds(c,local,avatar,markers).isEmpty()) continue;
+         const bool reactionActive=avatar.companion && !avatar.companionMotion.isEmpty() &&
+             elapsedMs>=avatar.companionReactionStarted && elapsedMs<avatar.companionReactionUntil;
+         quint32 hash = 2166136261u;
+@@ -312,6 +322,7 @@
+         double scale=avatarScale(c,local,avatar);
+         QPointF pos=basePos;
+         double actionBob=0,actionLean=0,actionTurn=0;
++        const double motionScale=std::clamp(avatar.companionMotionScale,0.0,1.0);
+         qint64 reactionAge=0;
+         if(reactionActive) {
+             reactionAge=elapsedMs-avatar.companionReactionStarted;
+@@ -337,6 +348,7 @@
+                 actionLean=std::sin(reactionAge*0.008)*1.5;
+             }
+         }
++        pos=basePos+(pos-basePos)*motionScale;
+         p.save();
+         // The emulator overlay has no game depth buffer. Preserve the local
+         // trainer silhouette when a remote trainer stands behind or on it.
+@@ -345,7 +357,7 @@
+             :avatarDepth(c,local,avatar)<=localDepth+(c.automatic?0.03125:0.5);
+         if(!localSilhouette.isEmpty() && behindLocal) p.setClipRegion(QRegion(QRect(0,0,256,192)).subtracted(localSilhouette),Qt::IntersectClip);
+         p.translate(std::round(pos.x()),std::round(pos.y()));
+-        p.translate(actionLean,0);
++        p.translate(actionLean*motionScale,0);
+         p.setPen(Qt::NoPen); p.setBrush(QColor(0,0,0,100)); p.drawEllipse(QRectF(-6,-2,12,4));
+         if (markers && !avatar.companion)
+         {
+@@ -355,24 +367,35 @@
+         else if (avatar.sprites.size()>=12)
+         {
+             auto pose=avatar;
+-            if(reactionActive && (avatar.companionMotion=="run" || avatar.companionMotion=="hop")) pose.moving=true;
++            if(reactionActive && motionScale>0 && (avatar.companionMotion=="run" || avatar.companionMotion=="hop")) pose.moving=true;
+             const int frameIndex=PresenceSpriteFrame(pose,elapsedMs);
+             const auto& sprite=avatar.sprites[frameIndex];
+             p.save();
+-            if(actionTurn) p.rotate(actionTurn);
++            if(actionTurn) p.rotate(actionTurn*motionScale);
+             // The texture's 32 pixels span a smaller billboard in the game.
+             // Initial visual correction from the same-tile-height comparison;
+             // scale around the feet so the validated ground projection stays fixed.
+             // Keep the original transparent margins; feet are at row 30.
+             double idleBob=0;
+-            if(reactionActive) idleBob=actionBob;
++            if(reactionActive) idleBob=actionBob*motionScale;
+             else if(avatar.companion && !avatar.moving && !avatar.inBattle && !avatar.inMenu) {
+                 const quint32 bobSeed=hash ^ (avatar.companionSpecies*0x9e3779b9u) ^ (avatar.companionForm*0x85ebca6bu);
+                 constexpr double tau=6.28318530717958647692;
+                 const double phase=(double(elapsedMs)+double(bobSeed%1200))*tau/1400.0;
+-                idleBob=1.5*(1.0-std::cos(phase));
+-            }
+-            p.drawImage(QRectF(-16*scale,-30*scale-idleBob,32*scale,32*scale),sprite);
++                idleBob=0.7*(1.0-std::cos(phase))*motionScale;
++            }
++            double width=32,height=32,ground=30;
++            if(avatar.companion) {
++                width=sprite.width();height=sprite.height();ground=0;
++                for(const auto& frame:avatar.sprites) for(int y=frame.height()-1;y>=int(ground);--y) {
++                    bool opaque=false;for(int x=0;x<frame.width();++x) opaque|=qAlpha(frame.pixel(x,y))>0;
++                    if(opaque) {ground=y+1;break;}
++                }
++            }
++            // Idle breathing is a small vertical stretch about the feet. It
++            // does not make grounded Pokemon levitate or cut a 64-pixel sprite.
++            const double breathe=avatar.companion && !reactionActive ? idleBob : 0;
++            p.drawImage(QRectF(-width*scale/2,-ground*scale-(reactionActive?idleBob:breathe),width*scale,height*scale+(ground>0?breathe*height/ground:0)),sprite);
+             p.restore();
+         }
+         else
+@@ -397,7 +420,11 @@
+         else if (avatar.facing=="West") arrow=QPointF(-4,0);
+         if (markers && !avatar.companion) { p.setPen(QPen(color,2)); p.drawLine(QPointF(0,-5),QPointF(0,-5)+arrow*2); }
+         if (avatar.companion) {
+-            if(reactionActive) drawCompanionEmote(p,avatar.companionEmote);
++            if(reactionActive) {
++                const auto sprite=avatar.sprites.value(PresenceSpriteFrame(avatar,elapsedMs));
++                p.save();p.translate(0,-qMax(0,sprite.height()-34));
++                drawCompanionEmote(p,avatar.companionEmote);p.restore();
++            }
+             p.restore(); continue;
+         }
+         QFont font=p.font(); font.setPixelSize(8); p.setFont(font);
+@@ -484,9 +511,10 @@
+ {
+     if (!c.valid) return {};
+     const auto pos=c.automatic ? c.projectWorld(a.position,a.height) : c.project(a.position,local);
+-    if (!finitePoint(pos) || pos.x()<0 || pos.x()>=256 || pos.y()<0 || pos.y()>=192) return {};
++    if (!finitePoint(pos)) return {};
+     const double scale=avatarScale(c,local,a);
+-    const double halfWidth=markers ? 9 : a.sprites.size()>=12 ? 16*scale : 9;
+-    const double height=markers ? 15 : a.sprites.size()>=12 ? 30*scale : 25;
++    const bool marker=markers && !a.companion;
++    const double halfWidth=marker ? 9 : a.sprites.size()>=12 ? (a.companion?a.sprites[0].width()/2.0:16)*scale : 9;
++    const double height=marker ? 15 : a.sprites.size()>=12 ? (a.companion?a.sprites[0].height():30)*scale : 25;
+     return QRectF(std::round(pos.x())-halfWidth,std::round(pos.y())-height,2*halfWidth,height+4).intersected(QRectF(0,0,256,192));
+ }
+--- a/source/melonDS/src/frontend/qt_sdl/PresenceOverlay.h
++++ b/source/melonDS/src/frontend/qt_sdl/PresenceOverlay.h
+@@ -23,7 +23,7 @@
+     QImage snapshot()
+     {
+         QMutexLocker lock(&mutex);
+-        if (std::chrono::steady_clock::now() - timestamp > std::chrono::milliseconds(250)) return {};
++        if (std::chrono::steady_clock::now() - timestamp > std::chrono::milliseconds(500)) return {};
+         return image;
+     }
+ private:
+@@ -65,6 +65,7 @@
+     QString companionEmote, companionMotion;
+     QPointF companionOwnerPosition;
+     qint64 companionReactionStarted = 0, companionReactionUntil = 0;
++    double companionMotionScale = 1.0;
+ };
+ 
+ // The local silhouette and remote sprites must use the same Gen 5 pose rules.
+@@ -112,6 +113,6 @@
+ // Reads NitroFS a/0/4/8 and selected BTX textures from the already loaded cart.
+ // Decoded images stay local in memory and are never included in relay messages.
+ QVariantMap LoadLocalTrainerSprites(const unsigned char* rom, std::size_t size);
+-QVariantMap LoadLocalPokemonSprites(const unsigned char* rom, std::size_t size, unsigned species, unsigned form=0);
++QVariantMap LoadLocalPokemonSprites(const unsigned char* rom, std::size_t size, unsigned species, unsigned form=0, unsigned gender=2, bool shiny=false);
+ 
+ QRectF PresenceAvatarBounds(const PresenceCalibration& calibration, QPointF local, const PresenceAvatar& avatar, bool markers);
+--- a/source/melonDS/src/frontend/qt_sdl/TrainerSprites.cpp
++++ b/source/melonDS/src/frontend/qt_sdl/TrainerSprites.cpp
+@@ -132,14 +132,14 @@
+ }
+ 
+ namespace {
+-QList<QImage> followerTextures(Bytes file) {
++QList<QImage> followerTextures(Bytes file,bool shiny=false) {
+     if(!file.magic(0,"BTX0")) throw std::runtime_error("No follower texture");
+     const auto section=file.word(16);if(!file.magic(section,"TEX0")) throw std::runtime_error("No follower TEX0");
+     const auto tex=file.slice(section,file.word(section+4));
+     const unsigned dict=tex.half(14),info=dict+tex.half(dict+6);
+     const auto count=tex.byte(dict+1);
+     if(tex.half(info)!=8 || (count!=6 && count!=8)) throw std::runtime_error("Unsupported follower poses");
+-    const auto palette=tex.word(56);tex.require(palette,32);
++    const auto palette=tex.word(56)+(shiny?32:0);tex.require(palette,32);
+     QList<QImage> source;
+     for(unsigned frame=0;frame<count;++frame) {
+         const auto param=tex.word(info+4+frame*8);
+@@ -152,21 +152,26 @@
+             const auto color=tex.half(palette+index*2);
+             if(index || !(param&(1u<<29))) image.setPixel(x,y,qRgba((color&31)*255/31,((color>>5)&31)*255/31,((color>>10)&31)*255/31,255));
+         }
+-        QImage canvas(32,32,QImage::Format_ARGB32);canvas.fill(Qt::transparent);
+-        image=image.scaled(32,32,Qt::KeepAspectRatio,Qt::FastTransformation);
++        source.append(image);
++    }
++    int canvasWidth=32,canvasHeight=32;
++    for(const auto& image:source) {canvasWidth=std::max(canvasWidth,image.width());canvasHeight=std::max(canvasHeight,image.height());}
++    canvasHeight+=2; // transparent headroom for floating/legless stride poses
++    for(auto& image:source) {
++        QImage canvas(canvasWidth,canvasHeight,QImage::Format_ARGB32);canvas.fill(Qt::transparent);
+         for(int y=0;y<image.height();++y) for(int x=0;x<image.width();++x)
+-            canvas.setPixel((32-image.width())/2+x,32-image.height()+y,image.pixel(x,y));
+-        source.append(canvas);
++            canvas.setPixel((canvasWidth-image.width())/2+x,canvasHeight-image.height()+y,image.pixel(x,y));
++        image=canvas;
+     }
+     // Several native floating/legless sprites repeat the idle pose. Give their
+     // second movement pose a one-pixel lift without redrawing or clipping art.
+     for(int direction=0;direction<source.size()/2;++direction) {
+         const auto& idle=source[direction*2];auto& moving=source[direction*2+1];
+         if(idle!=moving) continue;
+-        bool room=true;for(int x=0;x<32;++x) room &= qAlpha(idle.pixel(x,0))==0;
++        bool room=true;for(int x=0;x<canvasWidth;++x) room &= qAlpha(idle.pixel(x,0))==0;
+         if(!room) continue;
+-        QImage lifted(32,32,QImage::Format_ARGB32);lifted.fill(Qt::transparent);
+-        for(int y=1;y<32;++y) for(int x=0;x<32;++x) lifted.setPixel(x,y-1,idle.pixel(x,y));
++        QImage lifted(canvasWidth,canvasHeight,QImage::Format_ARGB32);lifted.fill(Qt::transparent);
++        for(int y=1;y<canvasHeight;++y) for(int x=0;x<canvasWidth;++x) lifted.setPixel(x,y-1,idle.pixel(x,y));
+         moving=lifted;
+     }
+     QList<QImage> frames;
+@@ -179,9 +184,23 @@
+ }
+ 
+ }
+-QVariantMap LoadLocalPokemonSprites(const unsigned char* rom,std::size_t size,unsigned species,unsigned form) {
++QVariantMap LoadLocalPokemonSprites(const unsigned char* rom,std::size_t size,unsigned species,unsigned form,unsigned gender,bool shiny) {
+     try {
+-        if(!rom || size<0x200 || species<1 || species>649) throw std::runtime_error("Invalid follower species");
++        if(!rom || size<0x200 || species<1 || species>649 || form>31 || gender>2) throw std::runtime_error("Invalid follower species or appearance");
++        QString variant=QString(":/followers/variants/%1-%2-%3.btx").arg(species).arg(form).arg(gender);
++        const bool exactGender=QFile::exists(variant);
++        if(!exactGender) variant=QString(":/followers/variants/%1-%2-2.btx").arg(species).arg(form);
++        bool exactForm=QFile::exists(variant);
++        if(!exactForm) variant=QString(":/followers/variants/%1-0-2.btx").arg(species);
++        // Retail Gen 1-4 normal sprites continue to come from the player's ROM.
++        // Authored variants supply real shiny palettes, female differences and
++        // forms, keeping original sprite dimensions rather than shrinking them.
++        if(QFile::exists(variant) && (species>=494 || shiny || (gender==1 && exactGender) || (form && exactForm))) {
++            QFile asset(variant);if(!asset.open(QIODevice::ReadOnly)) throw std::runtime_error("Follower variant unavailable");
++            const auto bytes=asset.readAll();const auto images=followerTextures({reinterpret_cast<const unsigned char*>(bytes.constData()),std::size_t(bytes.size())},shiny);
++            QVariantList frames;for(const auto& image:images) frames.append(QVariant::fromValue(image));
++            return {{"frames",frames},{"walking",true},{"shiny",shiny},{"formSupported",exactForm},{"genderVariant",gender==1 && exactGender},{"status","Credited directional follower variant"}};
++        }
+         unsigned entry=PokemonFollowerEntries[species];
+         if(species==201 && form<28) entry+=form;
+         if((species==386 && form<4) || ((species==412 || species==413) && form<3) ||
+--- /dev/null
++++ b/source/melonDS/src/Gen5ShopPolicy.h
+@@ -0,0 +1,113 @@
++// Unova Together: Copyright (C) 2026 mvq1303. GPL-3.0-or-later.
++// Shop policy maintenance with OpenAI Codex (2026). Original ROM/save untouched.
++#pragma once
++#include "ROMAssetOverlay.h"
++#include <array>
++#include <stdexcept>
++#include <string_view>
++
++namespace Gen5ShopPolicy {
++inline constexpr unsigned SuperRepel=76;
++inline constexpr unsigned MinimumPositivePrice=10; // native item prices are encoded in tens
++struct Bytes {
++    const uint8_t* data;std::size_t length;
++    void need(std::size_t offset,std::size_t size) const {if(offset>length || size>length-offset) throw std::runtime_error("Invalid shop asset bounds");}
++    unsigned byte(std::size_t o) const {need(o,1);return data[o];}
++    unsigned half(std::size_t o) const {need(o,2);return data[o]|(unsigned(data[o+1])<<8);}
++    uint32_t word(std::size_t o) const {return half(o)|(uint32_t(half(o+2))<<16);}
++    bool magic(std::size_t o,const char* text) const {need(o,4);return !std::memcmp(data+o,text,4);}
++    Bytes slice(std::size_t o,std::size_t n) const {need(o,n);return {data+o,n};}
++    std::vector<uint8_t> copy() const {return {data,data+length};}
++};
++inline void half(std::vector<uint8_t>& out,std::size_t at,unsigned value) {out.at(at)=uint8_t(value);out.at(at+1)=uint8_t(value>>8);}
++inline void word(std::vector<uint8_t>& out,std::size_t at,uint32_t value) {half(out,at,value);half(out,at+2,value>>16);}
++struct File {uint32_t fat,start,end;Bytes bytes;};
++inline File file(Bytes rom,const std::array<std::string_view,4>& path) {
++    const auto fnt=rom.slice(rom.word(0x40),rom.word(0x44));
++    const auto fat=rom.slice(rom.word(0x48),rom.word(0x4c));
++    const auto directories=fnt.half(6);if(!directories || directories>4096) throw std::runtime_error("Invalid shop file directory");
++    unsigned directory=0,id=0;
++    for(unsigned level=0;level<path.size();++level) {
++        if(directory>=directories) throw std::runtime_error("Invalid shop directory ID");
++        auto pos=fnt.word(directory*8);auto current=fnt.half(directory*8+4);bool found=false;
++        while(pos<fnt.length) {
++            const auto tag=fnt.byte(pos++);if(!tag) break;const auto size=tag&127;
++            if(!size) throw std::runtime_error("Invalid shop filename");
++            fnt.need(pos,size);std::string_view name(reinterpret_cast<const char*>(fnt.data+pos),size);pos+=size;
++            if(tag&128) {const auto child=fnt.half(pos)&4095;pos+=2;if(name==path[level] && level+1<path.size()) {directory=child;found=true;break;}}
++            else {if(name==path[level] && level+1==path.size()) {id=current;found=true;break;}++current;}
++        }
++        if(!found) throw std::runtime_error("Shop archive unavailable");
++    }
++    const auto start=fat.word(id*8),end=fat.word(id*8+4);if(end<start) throw std::runtime_error("Invalid shop file range");
++    return {rom.word(0x48)+id*8,start,end,rom.slice(start,end-start)};
++}
++struct Narc {std::vector<std::vector<uint8_t>> files;std::vector<uint32_t> offsets;std::vector<uint8_t> header,names;};
++inline Narc parse(Bytes raw) {
++    if(!raw.magic(0,"NARC") || raw.half(12)!=16 || raw.half(14)!=3 || raw.word(8)!=raw.length) throw std::runtime_error("Unsupported shop archive");
++    Bytes allocations{nullptr,0},payload{nullptr,0};Narc result;result.header=raw.slice(0,16).copy();
++    std::size_t pos=16;
++    for(unsigned i=0;i<3;++i) {
++        const auto size=raw.word(pos+4);if(size<8) throw std::runtime_error("Invalid shop section");
++        const auto block=raw.slice(pos,size);
++        if(block.magic(0,"BTAF")) allocations=block;
++        else if(block.magic(0,"BTNF")) result.names=block.copy();
++        else if(block.magic(0,"GMIF")) payload=block.slice(8,size-8);
++        pos+=size;
++    }
++    if(!allocations.data || !payload.data || result.names.empty() || pos!=raw.length) throw std::runtime_error("Incomplete shop archive");
++    const auto count=allocations.half(8);if(!count || count>1024) throw std::runtime_error("Invalid shop member count");
++    for(unsigned i=0;i<count;++i) {
++        const auto a=allocations.word(12+i*8),b=allocations.word(16+i*8);if(b<a) throw std::runtime_error("Invalid shop member");
++        result.files.push_back(payload.slice(a,b-a).copy());
++        result.offsets.push_back(uint32_t(payload.data-raw.data)+a);
++    }
++    return result;
++}
++inline std::vector<uint8_t> pack(const Narc& narc) {
++    auto result=narc.header;std::vector<uint8_t> allocation(12+narc.files.size()*8,0),payload(8,0);
++    std::memcpy(allocation.data(),"BTAF",4);word(allocation,4,uint32_t(allocation.size()));half(allocation,8,unsigned(narc.files.size()));
++    std::memcpy(payload.data(),"GMIF",4);
++    for(unsigned i=0;i<narc.files.size();++i) {
++        word(allocation,12+i*8,uint32_t(payload.size()-8));payload.insert(payload.end(),narc.files[i].begin(),narc.files[i].end());
++        word(allocation,16+i*8,uint32_t(payload.size()-8));while(payload.size()%4) payload.push_back(0xff);
++    }
++    word(payload,4,uint32_t(payload.size()));result.insert(result.end(),allocation.begin(),allocation.end());
++    result.insert(result.end(),narc.names.begin(),narc.names.end());result.insert(result.end(),payload.begin(),payload.end());
++    word(result,8,uint32_t(result.size()));return result;
++}
++inline std::vector<melonDS::ROMAssetPatch> patches(const uint8_t* data,std::size_t length) {
++    try {
++        if(!data || length<0x200 || length>0x40000000 || std::memcmp(data+12,"IREO",4)) return {};
++        Bytes rom{data,length};const auto stock=file(rom,{"a","2","8","2"}),counts=file(rom,{"a","2","8","3"}),items=file(rom,{"a","0","2","4"});
++        auto shops=parse(stock.bytes),numbers=parse(counts.bytes);
++        const auto itemData=parse(items.bytes);
++        if(itemData.files.size()<=SuperRepel || itemData.files[SuperRepel].size()!=36) return {};
++        std::vector<melonDS::ROMAssetPatch> result{{items.start+itemData.offsets[SuperRepel],{1,0}}};
++        if(numbers.files.size()!=1 || numbers.files[0].size()!=shops.files.size() || shops.files.size()>255) return {};
++        unsigned changes=0;
++        for(unsigned i=0;i<shops.files.size();++i) {
++            const unsigned count=numbers.files[0][i];auto& items=shops.files[i];if(!count) continue;
++            if(count>63 || count*2>items.size()) return {};
++            Bytes values{items.data(),items.size()};bool present=false;
++            for(unsigned j=0;j<count;++j) {const auto item=values.half(j*2);if(item>638) return {};present|=item==SuperRepel;}
++            if(!present) {items.insert(items.begin()+count*2,{uint8_t(SuperRepel),0});numbers.files[0][i]=uint8_t(count+1);++changes;}
++        }
++        if(!changes) return result;
++        auto replacement=pack(shops),newCounts=pack(numbers);
++        if(newCounts.size()!=counts.bytes.length || replacement.size()>65536 || length<replacement.size()+512) return result;
++        // Relocate only into verified unallocated cartridge padding. Stock can
++        // grow without replacing another item, expanding the ROM or changing it
++        // on disk. The native filesystem sees the patched FAT through card reads.
++        const auto start=uint32_t((length-replacement.size()-512)&~std::size_t(3));
++        uint32_t used=rom.word(0x80);const auto fat=rom.slice(rom.word(0x48),rom.word(0x4c));
++        if(fat.length%8) return result;
++        for(std::size_t i=0;i<fat.length;i+=8) used=std::max(used,fat.word(i+4));
++        used=std::max(used,rom.word(0x20)+rom.word(0x2c));used=std::max(used,rom.word(0x30)+rom.word(0x3c));
++        if(start<used || !std::all_of(data+start,data+start+replacement.size(),[](uint8_t b){return b==0xff;})) return result;
++        std::vector<uint8_t> pointer(8);word(pointer,0,start);word(pointer,4,start+uint32_t(replacement.size()));
++        result.push_back({stock.fat,std::move(pointer)});result.push_back({start,std::move(replacement)});result.push_back({counts.start,std::move(newCounts)});
++        return result;
++    } catch(const std::exception&) {return {};}
++}
++}
+--- a/source/melonDS/src/NDSCart.cpp
++++ b/source/melonDS/src/NDSCart.cpp
+@@ -20,6 +20,7 @@
+ #include "NDS.h"
+ #include "DSi.h"
+ #include "NDSCart.h"
++#include "Gen5ShopPolicy.h"
+ #include "CRC32.h"
+ #include "Platform.h"
+ #include "ROMList.h"
+@@ -205,6 +206,7 @@
+     memcpy(&Header, ROM.get(), sizeof(Header));
+     IsDSi = Header.IsDSi() && !badDSiDump;
+     DSiBase = Header.DSiRegionStart << 19;
++    GameplayOverlay.set(Gen5ShopPolicy::patches(ROM.get(),ROMLength),ROMLength);
+ }
+ 
+ CartCommon::~CartCommon() = default;
+@@ -378,6 +380,7 @@
+ 
+     memcpy(data+offset, ROM.get()+addr, len);
+     AssetOverlay.apply(addr,len,data+offset);
++    GameplayOverlay.apply(addr,len,data+offset);
+ }
+ 
+ const NDSBanner* CartCommon::Banner() const
+@@ -577,6 +580,7 @@
+ 
+     memcpy(data+offset, ROM.get()+addr, len);
+     AssetOverlay.apply(addr,len,data+offset);
++    GameplayOverlay.apply(addr,len,data+offset);
+ }
+ 
+ u8 CartRetail::SRAMWrite_EEPROMTiny(u8 val, u32 pos, bool last)
+--- a/source/melonDS/src/NDSCart.h
++++ b/source/melonDS/src/NDSCart.h
+@@ -120,6 +120,7 @@
+     std::unique_ptr<u8[]> ROM = nullptr;
+     u32 ROMLength = 0;
+     ROMAssetOverlay AssetOverlay;
++    ROMAssetOverlay GameplayOverlay;
+     u32 ChipID = 0;
+     bool IsDSi = false;
+     bool DSiMode = false;
+--- a/source/melonDS/src/net/LAN.cpp
++++ b/source/melonDS/src/net/LAN.cpp
+@@ -480,7 +480,7 @@
+     // Native runtime must finish rollback/cleanup before a new session can
+     // receive game traffic. Old challenge/result/radio queues never survive.
+     ClearCoopChallenge();CoopRemote.fill(0);CoopPeer=nullptr;
+-    CoopDeclined=false;CoopDeclinedNonce=0;CoopLocalFinished=CoopRemoteFinished=CoopFinishedAck=false;
++    CoopDeclined=false;CoopDeclinedNonce=0;CoopDeclinedPeer=nullptr;CoopLocalFinished=CoopRemoteFinished=CoopFinishedAck=false;
+     CoopLocalResult=CoopRemoteResult=0;CoopResultStatus=0;
+     CoopLocalCleanupDone=CoopRemoteCleanupDone=false;
+     CancelReplyWait();ConnectedBitmask=0;LastHostID=-1;LastHostPeer=nullptr;
+@@ -500,7 +500,7 @@
+     RecoveryState=0;RecoveryPeer=nullptr;RecoveryNext=RecoveryDeadline=0;
+     CancelReplyWait();
+     StopNetworkWorker();
+-    ClearCoopChallenge();CoopRemote.fill(0);CoopPeer=nullptr;CoopDeclinedNonce=0;CoopDeclined=false;
++    ClearCoopChallenge();CoopRemote.fill(0);CoopPeer=nullptr;CoopDeclinedNonce=0;CoopDeclinedPeer=nullptr;CoopDeclined=false;
+     if (!Active) return;
+     if (IsHost) EndDiscovery();
+ 
+@@ -960,7 +960,7 @@
+ void LAN::ProcessEvent(ENetEvent& event)
+ {
+     if(event.type==ENET_EVENT_TYPE_DISCONNECT) {
+-        CoopDeclinedNonce=0;
++        if(CoopDeclinedPeer==event.peer) {CoopDeclinedNonce=0;CoopDeclinedPeer=nullptr;}
+         if(CoopPeer==event.peer) {CoopPeer=nullptr;CoopRemote.fill(0);CoopEcho=0;}
+     }
+     if (IsHost)
+@@ -1402,6 +1402,13 @@
+ namespace {
+ u32 coopWord(const u8* p) {return u32(p[0])|(u32(p[1])<<8)|(u32(p[2])<<16)|(u32(p[3])<<24);}
+ void coopWord(u8* p,u32 v) {for(unsigned i=0;i<4;++i)p[i]=u8(v>>(i*8));}
++std::array<u8,32> coopProtocolDigest(std::array<u8,32> digest) {
++    // Domain separation for the completion barrier. Existing native sessions
++    // remain compatible; custom battles must use the same mod protocol.
++    constexpr char marker[]="Unova completion protocol 2";
++    for(unsigned i=0;i<sizeof(marker)-1;++i) digest[i]^=u8(marker[i]);
++    return digest;
++}
+ }
+ int LAN::CoopPartnerID() const
+ {
+@@ -1430,8 +1437,9 @@
+ }
+ void LAN::BeginCoopChallenge(u32 trainer,const std::array<u8,32>& digest)
+ {
++    const auto protocolDigest=coopProtocolDigest(digest);
+     auto* invited=CoopInvitation() && coopWord(CoopRemote.data())==trainer &&
+-        std::equal(digest.begin(),digest.end(),CoopRemote.begin()+8) ? CoopPeer : nullptr;
++        std::equal(protocolDigest.begin(),protocolDigest.end(),CoopRemote.begin()+8) ? CoopPeer : nullptr;
+     CoopDeclined=false;
+     CoopLocal.fill(0);CoopRemote.fill(0);CoopPeer=invited;CoopEcho=0;
+     CoopLocalReady=CoopRemoteReady=CoopReadyAck=false;
+@@ -1439,14 +1447,17 @@
+     CoopLocalCleanupDone=CoopRemoteCleanupDone=false;
+     CoopNonce=++CoopSerial;if(!CoopNonce) CoopNonce=++CoopSerial;
+     coopWord(CoopLocal.data(),trainer);coopWord(CoopLocal.data()+4,CoopNonce);
+-    std::copy(digest.begin(),digest.end(),CoopLocal.begin()+8);
++    std::copy(protocolDigest.begin(),protocolDigest.end(),CoopLocal.begin()+8);
+     SendCoopChallenge(1);
+ }
+ void LAN::ClearCoopChallenge()
+ {
+     if(CoopNonce) SendCoopChallenge(3,coopWord(CoopRemote.data()+4));
++    if(coopWord(CoopRemote.data()+4)) {CoopDeclinedNonce=coopWord(CoopRemote.data()+4);CoopDeclinedPeer=CoopPeer;}
+     CoopNonce=CoopEcho=0;CoopLocal.fill(0);CoopRemote.fill(0);CoopPeer=nullptr;
+     CoopLocalReady=CoopRemoteReady=CoopReadyAck=false;
++    CoopLocalFinished=CoopRemoteFinished=CoopFinishedAck=false;CoopResultStatus=0;
++    CoopLocalCleanupDone=CoopRemoteCleanupDone=false;
+ }
+ void LAN::SendCoopChallenge(u8 kind,u32 echo)
+ {
+@@ -1515,7 +1526,7 @@
+         CoopRemoteReady=CoopReadyAck=false;
+         CoopLocalCleanupDone=CoopRemoteCleanupDone=false;
+     }
+-    if(coopWord(data+6)==CoopDeclinedNonce && CoopDeclinedNonce) return;
++    if(event.peer==CoopDeclinedPeer && coopWord(data+6)==CoopDeclinedNonce && CoopDeclinedNonce) return;
+     const bool newlyPaired=!CoopPeer;
+     std::copy(data+2,data+42,CoopRemote.begin());CoopPeer=event.peer;
+     if(newlyPaired && CoopNonce && NumPlayers>2) WithdrawOtherCoopInvitations();
+@@ -1544,12 +1555,14 @@
+ }
+ bool LAN::CoopInvitationMatches(const std::array<u8,32>& digest) const
+ {
+-    return CoopInvitation() && std::equal(digest.begin(),digest.end(),CoopRemote.begin()+8);
++    const auto protocolDigest=coopProtocolDigest(digest);
++    return CoopInvitation() && std::equal(protocolDigest.begin(),protocolDigest.end(),CoopRemote.begin()+8);
+ }
+ void LAN::DeclineCoopInvitation()
+ {
+     if(!CoopInvitation()) return;
+     CoopDeclinedNonce=coopWord(CoopRemote.data()+4);
++    CoopDeclinedPeer=CoopPeer;
+     SendCoopChallenge(3,coopWord(CoopRemote.data()+4));
+     CoopRemote.fill(0);CoopPeer=nullptr;CoopEcho=0;
+ }
+--- a/source/melonDS/src/net/LAN.h
++++ b/source/melonDS/src/net/LAN.h
+@@ -195,6 +195,7 @@
+     u32 CoopNonce=0,CoopEcho=0,CoopSerial=0;
+     bool CoopDeclined=false;
+     u32 CoopDeclinedNonce=0;
++    ENetPeer* CoopDeclinedPeer=nullptr;
+     bool CoopLocalReady=false,CoopRemoteReady=false,CoopReadyAck=false;
+     bool CoopLocalFinished=false,CoopRemoteFinished=false,CoopFinishedAck=false;
+     u32 CoopLocalResult=0,CoopRemoteResult=0;
