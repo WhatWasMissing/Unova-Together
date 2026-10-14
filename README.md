@@ -1,16 +1,16 @@
 # Unova Together
 
-**Current release: 1.0.13.** Fixes launcher update recovery and Play availability: [downloads](https://github.com/WhatWasMissing/Unova-Together/releases/tag/v1.0.13). Made by mvq1303 / WhatWasMissing, built on melonDS.
+**Current release: 1.0.14.** Reduces LAN-host input hitching during busy network bursts: [downloads](https://github.com/WhatWasMissing/Unova-Together/releases/tag/v1.0.14). Made by mvq1303 / WhatWasMissing, built on melonDS.
 
 Explore Unova with friends in supported English Pokémon Black 2 and Blaze Black 2 Redux. Each player uses their own matching ROM and independent save.
 
 ## Download and play
 
-1. [Download version 1.0.13](https://github.com/WhatWasMissing/Unova-Together/releases/tag/v1.0.13). Choose **Unova-Together.exe**, or extract the complete Windows x64 ZIP.
+1. [Download version 1.0.14](https://github.com/WhatWasMissing/Unova-Together/releases/tag/v1.0.14). Choose **Unova-Together.exe**, or extract the complete Windows x64 ZIP.
 2. Open the EXE, or run **Start Unova Together.cmd** in the extracted folder. Choose your ROM and select **Play**.
 3. Open launcher **Co-op** to configure your connection and host or join LAN. Follow the [player guide](docs/PLAYER_GUIDE.md).
 
-Version **1.0.13** includes matching launcher and emulator version labels. Existing ROMs and saves do not need conversion. Updates install beside the active build; the current game can remain open while the new build downloads. Play becomes available again after any game from that installation closes. Clients still running launcher 1.0.5 should install the game update, then run [Repair-Launcher.exe](https://github.com/WhatWasMissing/Unova-Together/releases/download/v1.0.13/Repair-Launcher.exe) once and select their old launcher. Subsequent updates follow the same entry automatically. See the [migration instructions](RELEASE_NOTES_1.0.10.md). Update every player and restart the presence relay.
+Version **1.0.14** includes matching launcher and emulator version labels. It bounds each LAN socket-worker pass so bursts of network events cannot hold the shared network lock for an extended interval. Existing ROMs and saves do not need conversion. Updates install beside the active build; the current game can remain open while the new build downloads. Play becomes available again after any game from that installation closes. Clients still running launcher 1.0.5 should install the game update, then run [Repair-Launcher.exe](https://github.com/WhatWasMissing/Unova-Together/releases/download/v1.0.14/Repair-Launcher.exe) once and select their old launcher. Subsequent updates follow the same entry automatically. See the [migration instructions](RELEASE_NOTES_1.0.10.md). Update every player and restart the presence relay.
 
 ## Features
 
