@@ -24,6 +24,17 @@ def validate_state(message, previous_sequence):
     if type(message.get('active')) is not bool:
         raise ValueError('Invalid active flag')
     result = {'sequence': sequence, 'active': message['active']}
+    if 'coopProtocol' in message:
+        if not integer(message['coopProtocol'],1,65535):raise ValueError('Invalid co-op protocol')
+        result['coopProtocol']=message['coopProtocol']
+    if 'modVersion' in message:
+        value=message['modVersion']
+        if type(value) is not str or not 1<=len(value)<=32 or not all(c.isascii() and (c.isalnum() or c in '.-') for c in value):raise ValueError('Invalid mod version')
+        result['modVersion']=value
+    if 'romFingerprint' in message:
+        value=message['romFingerprint']
+        if type(value) is not str or len(value)!=64 or any(c not in '0123456789abcdef' for c in value):raise ValueError('Invalid ROM fingerprint')
+        result['romFingerprint']=value
     for key in ('shareBattle',):
         if key in message:
             if type(message[key]) is not bool:
@@ -51,11 +62,14 @@ def validate_state(message, previous_sequence):
         result['nativeLANReady'] = message['nativeLANReady']
     if not result['active']:
         return result
-    for key, limit in [('followerSpecies',649), ('followerForm',31)]:
+    for key, limit in [('followerSpecies',649), ('followerForm',31), ('followerGender',2)]:
         if key in message:
             if not integer(message[key],0,limit):
                 raise ValueError('Invalid follower metadata')
             result[key]=message[key]
+    if 'followerShiny' in message:
+        if type(message['followerShiny']) is not bool:raise ValueError('Invalid follower shininess')
+        result['followerShiny']=message['followerShiny']
     for key, low, high in [('map', 1, 65535), ('tileX', 0, 65535), ('tileZ', 0, 65535)]:
         if not integer(message.get(key), low, high):
             raise ValueError('Invalid coordinate or map')

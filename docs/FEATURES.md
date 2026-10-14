@@ -30,6 +30,8 @@ Interactions are cosmetic and read-only. They do not raise friendship, heal Pok�
 
 ## Pokémon and field tools
 
+**Mega Evolution test (1.0.15):** Mega Serperior is available in the supported English Black 2 Redux v1.4.1 profile. Serperior must hold Serperiorite and be at move selection; press **L + R**. The transformation is battle-only and limited to once per trainer per battle. See the [test guide](MEGA_EVOLUTION.md). Linked co-op delivery has deterministic transport and handler coverage but still needs a live two-emulator battle test.
+
 | Feature | Where to use it | Scope and limits |
 | --- | --- | --- |
 | IVs and EVs | **Unova → Pokémon → IVs and EVs** | Read your party's stats. |

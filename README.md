@@ -1,16 +1,16 @@
 # Unova Together
 
-**Current release: 1.0.14.** Reduces LAN-host input hitching during busy network bursts: [downloads](https://github.com/WhatWasMissing/Unova-Together/releases/tag/v1.0.14). Made by mvq1303 / WhatWasMissing, built on melonDS.
+**Current release: 1.0.15.** Adds an experimental, battle-only Mega Evolution test for Mega Serperior: [downloads](https://github.com/WhatWasMissing/Unova-Together/releases/tag/v1.0.15). Made by mvq1303 / WhatWasMissing, built on melonDS.
 
 Explore Unova with friends in supported English Pokémon Black 2 and Blaze Black 2 Redux. Each player uses their own matching ROM and independent save.
 
 ## Download and play
 
-1. [Download version 1.0.14](https://github.com/WhatWasMissing/Unova-Together/releases/tag/v1.0.14). Choose **Unova-Together.exe**, or extract the complete Windows x64 ZIP.
+1. [Download version 1.0.15](https://github.com/WhatWasMissing/Unova-Together/releases/tag/v1.0.15). Choose **Unova-Together.exe**, or extract the complete Windows x64 ZIP.
 2. Open the EXE, or run **Start Unova Together.cmd** in the extracted folder. Choose your ROM and select **Play**.
 3. Open launcher **Co-op** to configure your connection and host or join LAN. Follow the [player guide](docs/PLAYER_GUIDE.md).
 
-Version **1.0.14** includes matching launcher and emulator version labels. It bounds each LAN socket-worker pass so bursts of network events cannot hold the shared network lock for an extended interval. Existing ROMs and saves do not need conversion. Updates install beside the active build; the current game can remain open while the new build downloads. Play becomes available again after any game from that installation closes. Clients still running launcher 1.0.5 should install the game update, then run [Repair-Launcher.exe](https://github.com/WhatWasMissing/Unova-Together/releases/download/v1.0.14/Repair-Launcher.exe) once and select their old launcher. Subsequent updates follow the same entry automatically. See the [migration instructions](RELEASE_NOTES_1.0.10.md). Update every player and restart the presence relay.
+Version **1.0.15** includes matching launcher and emulator version labels and an experimental Mega Serperior battle feature. Existing ROMs and saves do not need conversion. Updates install beside the active build; the current game can remain open while the new build downloads. Play becomes available again after any game from that installation closes. Clients still running launcher 1.0.5 should install the game update, then run [Repair-Launcher.exe](https://github.com/WhatWasMissing/Unova-Together/releases/download/v1.0.15/Repair-Launcher.exe) once and select their old launcher. Subsequent updates follow the same entry automatically. See the [migration instructions](RELEASE_NOTES_1.0.10.md). Update every player and restart the presence relay.
 
 ## Features
 
@@ -18,6 +18,7 @@ Version **1.0.14** includes matching launcher and emulator version labels. It bo
 - **Trade and battle:** item offers, party Pokémon exchanges and friendly PvP from **Unova → Players**.
 - **Trainer co-op:** supported story encounters, Solo/Co-op mode and practice rematches with independent saves.
 - **Pokémon tools:** all 649 directional followers, ten companion interaction scenes with nature-aware dialogue and animated reactions, IVs/EVs, seasonal encounters and free level-up move relearning.
+- **Battle experiment:** Mega Serperior and Serperiorite for the supported Black 2 Redux profile. The form is battle-only; see the [Mega Evolution test guide](docs/MEGA_EVOLUTION.md) for setup and co-op limits.
 - **Field HMs:** owned HMs work without taking learned battle move slots; native story requirements remain.
 - **Presentation:** custom camera and optional nearby battle scenery built locally from your ROM.
 - **Launcher:** simple save slots, Gen 5 ROM/save/XP tools, LAN Host/Join/Retry, controller navigation, music, settings, optional cheats, save backups/restore, diagnostics, verified updates and repair.
@@ -30,7 +31,7 @@ The release includes 743 normal/shiny follower variants, supported female/forms,
 
 ## Guides and limits
 
-[Release notes](RELEASE_NOTES_1.0.11.md) · [Release checks](docs/RELEASE_CHECKS_1.0.11.md) · [Known limits](docs/KNOWN_ISSUES.md)
+[Release notes](RELEASE_NOTES_1.0.15.md) · [Release checks](docs/RELEASE_CHECKS_1.0.15.md) · [Known limits](docs/KNOWN_ISSUES.md)
 
 [Launcher](docs/LAUNCHER.md) · [Co-op tools](docs/COOP_TOOLS.md) · [Field tools](docs/FIELD_TOOLS.md) · [Followers](docs/FOLLOWING_POKEMON.md) · [Companions](docs/COMPANIONS_AND_SOARING.md) · [Party stats](docs/PARTY_STATS.md)
 
