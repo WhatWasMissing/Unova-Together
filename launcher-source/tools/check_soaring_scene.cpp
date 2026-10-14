@@ -10,8 +10,10 @@ int main(int argc,char** argv) {
     assert(scene.phase==SoaringScene::Flying && scene.altitude==96);
     for(int i=0;i<200;++i) scene.step((1<<6)|1,.05);
     assert(std::abs(scene.z)<=600 && scene.speed>170);
-    for(int i=0;i<100;++i) scene.step(1<<9,.05);assert(scene.altitude==256);
-    for(int i=0;i<100;++i) scene.step(1<<8,.05);assert(scene.altitude==64);
+    for(int i=0;i<100;++i) scene.step(1<<9,.05);
+    assert(scene.altitude==256);
+    for(int i=0;i<100;++i) scene.step(1<<8,.05);
+    assert(scene.altitude==64);
     scene.phase=SoaringScene::Landing;for(int i=0;i<100;++i) scene.step(0,.05);assert(!scene.active());
     assert(scene.render({},0).size()==QSize(256,192));
     {
@@ -35,6 +37,19 @@ int main(int argc,char** argv) {
         const auto clipped=load({QJsonArray{0,QJsonArray{vertex(-50,120,300,0,0),vertex(120,0,-300,2,0),vertex(-120,0,-300,0,2)}}});
         int visible=0;for(int y=0;y<192;++y) for(int x=0;x<256;++x) visible+=clipped.pixelColor(x,y)==Qt::red;
         assert(visible>100);
+        QJsonArray bridgeVertices{QJsonArray{-80,-26,-220},QJsonArray{80,-26,-220},QJsonArray{0,-25,-80}};
+        QJsonArray forestVertices{QJsonArray{-140,-30,-220},QJsonArray{-80,-30,-220},QJsonArray{-110,-10,-170}};
+        QJsonArray debugRoute{QJsonArray{.5,.5},QJsonArray{1.5,.5},QJsonArray{2.5,1.5}};
+        QFile debugFile(directory.filePath("debug-scene.json"));assert(debugFile.open(QIODevice::WriteOnly));
+        debugFile.write(QJsonDocument(QJsonObject{{"format",2},{"zone",191},{"sourceZone",191},{"world",QJsonArray{0,0,0}},
+            {"textures",QJsonArray{"red.png","blue.png"}},{"faces",QJsonArray{lower,upper}},
+            {"atlasSize",QJsonArray{3,2}},{"atlasGrid",QJsonArray{1,0,1,1,1,1}},
+            {"atlasBiome",QJsonArray{2,0,1,2,2,2}},
+            {"flywayRoutes",QJsonArray{debugRoute}},{"flywayFaces",QJsonArray{QJsonArray{0,bridgeVertices}}},
+            {"regionFaces",QJsonArray{QJsonArray{2,forestVertices}}},
+            {"collisionDebug",true},{"collisionTiles",QJsonArray{QJsonArray{6,6,0,0},QJsonArray{7,6,0,1},QJsonArray{8,6,0,2}}}}).toJson());debugFile.close();
+        scene.reset();scene.map=191;assert(scene.load(debugFile.fileName()));
+        const auto debugFrame=scene.render({},0);assert(debugFrame.size()==QSize(256,192) && debugFrame!=first);
     }
     if(argc>1) {
         scene.reset();scene.map=191;assert(scene.load(QString::fromLocal8Bit(argv[1])));

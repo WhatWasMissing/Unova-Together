@@ -20,7 +20,7 @@ from extract_battle_surroundings import matrix_cells, terrain_model
 from field_scene_geometry import decode, crop_face
 from vendor.nsbmd_writer import WriteFile as writer
 from ndspy import _common
-from soaring_geometry import close_building_shell,landing_tiles
+from soaring_geometry import close_building_shell,collision_debug_tiles,landing_tiles
 
 
 def texture_pack(data):
@@ -59,9 +59,27 @@ class FieldSource:
         if rom.idCode!=b'IREO':raise ValueError('English Black 2 required')
         self.headers=self.arc('a/0/1/2')[0]
         self.areas=rom.getFileByName('a/0/1/3')
+        self.events=self.arc('a/1/2/6')
         self.matrices=self.arc('a/0/0/9');self.chunks=self.arc('a/0/0/8')
         self.packs=self.arc('a/0/1/4');self.props_cache={}
         self.terrain_cache={};self.texture_cache={};self.matrix_cache={}
+
+    def event_objects(self,zone):
+        """Return authored NPC/event-object tile positions for a zone."""
+        if not 0<=zone<len(self.headers)//48:return []
+        event_id=struct.unpack_from('<H',self.headers,zone*48+22)[0]
+        if event_id==0xffff or event_id>=len(self.events):return []
+        data=self.events[event_id]
+        if len(data)<8:return []
+        count=data[5]
+        if count>64 or 8+count*36>len(data):return []
+        result=[]
+        for index in range(count):
+            offset=8+index*36
+            # BW2 object-event records store local tile X/Z at bytes 28/30.
+            x,z=struct.unpack_from('<HH',data,offset+28)
+            if x<32 and z<32:result.append((x,z))
+        return result
 
     def matrix(self,index):
         if index not in self.matrix_cache:
@@ -82,7 +100,7 @@ class FieldSource:
         self.props_cache[area]=(models,pack)
         return models,pack
 
-    def scene(self,zone,x,z,height,radius=176,keep_centre=False,flight=False,layout_matrix=None):
+    def scene(self,zone,x,z,height,radius=176,keep_centre=False,flight=False,layout_matrix=None,collision_debug=False):
         if not 0<=zone<len(self.headers)//48 or not all(math.isfinite(v) for v in (x,z,height)):
             raise ValueError('Invalid encounter')
         area,matrix=struct.unpack_from('<HH',self.headers,zone*48+2)
@@ -96,7 +114,7 @@ class FieldSource:
             raise ValueError('Live zone differs from static matrix')
         tid=struct.unpack_from('<H',self.areas,area*10+2)[0]
         pack=texture_pack(self.packs[tid])
-        packs={'terrain':pack};faces=[];omitted=[];sources=[];landings=[];closed_backs=0
+        packs={'terrain':pack};faces=[];omitted=[];sources=[];landings=[];collisions=[];closed_backs=0
         min_mx=max(0,math.floor((x-radius)/512));max_mx=min(width-1,math.floor((x+radius)/512))
         min_mz=max(0,math.floor((z-radius)/512));max_mz=min(depth-1,math.floor((z+radius)/512))
         for mz in range(min_mz,max_mz+1):
@@ -149,9 +167,12 @@ class FieldSource:
                     except (ValueError,KeyError,IndexError,struct.error) as error:
                         omitted.append(f'prop {uid}: {error}')
                         if flight:obstacles.append((px-64,px+64,pz-64,pz+64))
-                if flight:landings.extend(landing_tiles(self.chunks[cid],terrain,neighbor,mx,mz,origin,height,obstacles))
+                if flight:
+                    npcs=[(mx*32+nx,mz*32+nz) for nx,nz in self.event_objects(neighbor)]
+                    landings.extend(landing_tiles(self.chunks[cid],terrain,neighbor,mx,mz,origin,height,obstacles,npcs))
+                    if collision_debug:collisions.extend(collision_debug_tiles(self.chunks[cid],terrain,mx,mz,origin,height,obstacles,radius=650))
         if not faces and not flight:raise ValueError('No supported nearby geometry')
-        return faces,packs,dict(zone=zone,area=area,matrix=matrix,world=[x,height,z],chunks=sources,omittedProps=sorted(set(omitted)),landings=landings,closedBacks=closed_backs)
+        return faces,packs,dict(zone=zone,area=area,matrix=matrix,world=[x,height,z],chunks=sources,omittedProps=sorted(set(omitted)),landings=landings,collisionTiles=collisions,closedBacks=closed_backs)
 
 
 def compress_texture(texture,palette):

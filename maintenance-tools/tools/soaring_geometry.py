@@ -66,7 +66,7 @@ def close_building_shell(geometry):
     return result,added
 
 
-def landing_tiles(chunk,terrain,zone,mx,mz,origin,height,obstacles):
+def landing_tiles(chunk,terrain,zone,mx,mz,origin,height,obstacles,npc_tiles=()):
     """Whitelist ordinary flat walkable tiles, with actual mesh height.
 
     Native WB permissions have an 8-byte tile record. Flags 0/128 with behavior
@@ -94,6 +94,11 @@ def landing_tiles(chunk,terrain,zone,mx,mz,origin,height,obstacles):
         if slope!=0 or behavior!=0 or flags not in (0,128):continue
         px=origin[0]-256+tx*16+8;pz=origin[2]-256+tz*16+8
         if any(a-8<=px<=b+8 and c-8<=pz<=d+8 for a,b,c,d in obstacles):continue
+        # Static event objects can stand on ordinary tiles that the map's
+        # collision grid marks as clear. Keep landings away from them so the
+        # player doesn't arrive inside an NPC's interaction/collision space.
+        global_x=mx*32+tx;global_z=mz*32+tz
+        if any(max(abs(global_x-nx),abs(global_z-nz))<=2 for nx,nz in npc_tiles):continue
         heights=[]
         for a,b,c,area in triangles:
             w0=((b[2]-c[2])*(px-c[0])+(c[0]-b[0])*(pz-c[2]))/area
@@ -101,4 +106,42 @@ def landing_tiles(chunk,terrain,zone,mx,mz,origin,height,obstacles):
             if min(w0,w1,1-w0-w1)>=-1e-6:heights.append(a[1]+height)
         if not heights or max(heights)-min(heights)>.25:continue
         result.append([zone,mx*32+tx,mz*32+tz,round(sum(heights)/len(heights),5)])
+    return result
+
+
+def collision_debug_tiles(chunk,terrain,mx,mz,origin,height,obstacles,radius=1350):
+    """Return compact, local collision samples for the optional Soaring overlay.
+
+    Kinds are 0=ordinary walkable ground, 1=blocked/prop-covered, and
+    2=slope or special behavior. These are inspection colors only; they do
+    not change the conservative native landing whitelist.
+    """
+    begin,end=struct.unpack_from('<II',chunk,8);permission=chunk[begin:end]
+    if len(permission)<8196 or struct.unpack_from('<HH',permission)!=(32,32):return []
+    buckets={}
+    for _,face in terrain:
+        for i in range(1,len(face)-1):
+            a,b,c=face[0],face[i],face[i+1]
+            area=(b[2]-c[2])*(a[0]-c[0])+(c[0]-b[0])*(a[2]-c[2])
+            if abs(area)<1e-6:continue
+            left=max(0,int(math.floor((min(v[0] for v in (a,b,c))-origin[0]+256)/16)))
+            right=min(31,int(math.floor((max(v[0] for v in (a,b,c))-origin[0]+256)/16)))
+            top=max(0,int(math.floor((min(v[2] for v in (a,b,c))-origin[2]+256)/16)))
+            bottom=min(31,int(math.floor((max(v[2] for v in (a,b,c))-origin[2]+256)/16)))
+            for tz in range(top,bottom+1):
+                for tx in range(left,right+1):buckets.setdefault((tx,tz),[]).append((a,b,c,area))
+    result=[]
+    for (tx,tz),triangles in buckets.items():
+        px=origin[0]-256+tx*16+8;pz=origin[2]-256+tz*16+8
+        if px*px+pz*pz>radius*radius:continue
+        heights=[]
+        for a,b,c,area in triangles:
+            w0=((b[2]-c[2])*(px-c[0])+(c[0]-b[0])*(pz-c[2]))/area
+            w1=((c[2]-a[2])*(px-c[0])+(a[0]-c[0])*(pz-c[2]))/area
+            if min(w0,w1,1-w0-w1)>=-1e-6:heights.append(a[1]+height)
+        if not heights or max(heights)-min(heights)>.25:continue
+        slope,_,behavior,flags=struct.unpack_from('<4H',permission,4+(tz*32+tx)*8)
+        blocked=flags not in (0,128) or any(a-8<=px<=b+8 and c-8<=pz<=d+8 for a,b,c,d in obstacles)
+        kind=1 if blocked else 2 if behavior!=0 or slope!=0 else 0
+        result.append([mx*32+tx,mz*32+tz,round(sum(heights)/len(heights),3),kind])
     return result

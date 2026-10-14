@@ -1,6 +1,6 @@
 # Unova Together features
 
-Unova Together by **mvq1303 / WhatWasMissing**, built on melonDS. Current release: **1.0.11**. The wider regional Soaring view is included as an experimental test feature and remains off by default. Supported games are reviewed English Pokémon Black 2 and Blaze Black 2 Redux profiles on Windows x64. Every player supplies a matching ROM and uses an independent save.
+Unova Together by **mvq1303 / WhatWasMissing**, built on melonDS. Current release: **1.0.12**. Soaring remains an optional experimental feature and is off by default. Supported games are reviewed English Pokémon Black 2 and Blaze Black 2 Redux profiles on Windows x64. Every player supplies a matching ROM and uses an independent save.
 
 ## Explore and play together
 
@@ -36,7 +36,7 @@ Interactions are cosmetic and read-only. They do not raise friendship, heal Pok�
 | Seasonal encounters | **Unova → Pokémon → Find wild Pokémon** | Ordinary grass, water and fishing tables from the loaded ROM. Gifts, scripted legendaries and Hidden Grottos are excluded. |
 | Free move relearning | **Unova → Pokémon → Relearn moves** | Current species/form's level-up moves at or below its level. Save normally afterward. |
 | Field HMs without learned move slots | Normal field interactions and native party menu | Own the HM and meet native story requirements. Fly needs a move slot without another field action. |
-| Regional Soaring test feature | Enable **Settings → Experimental features → Soaring flight**; then open **Unova → Pokémon → Take flight** | Off by default. Choose a flying partner to enter a separate, local flight scene. Black 2's regional matrix streams real outdoor terrain up to 4,096 units around you, with smaller scene windows in dense areas and fog over gaps. Land only on verified clear ground, or return to take-off with B. The scene stays local and experimental. |
+| Regional Soaring | Enable **Settings → Experimental features → Soaring flight**; then open **Unova → Pokémon → Take flight** | Off by default. Choose a flying partner to enter a separate, local flight scene. Black 2's regional matrix streams real outdoor terrain up to 4,096 units around you, with fog, ocean and decorative forest fills across gaps. Optional collision data marks verified landing tiles. Landing avoids authored NPC event tiles and holds game input through the native map transition; return to take-off asks for confirmation. Separate map matrices still lack verified shared coordinates. |
 | Solo XP compensation | Automatic on supported profiles | **1.25×** newly awarded solo XP, with native rounding/caps. Existing XP is unchanged; co-op awards remain zero. |
 
 See [field tools](FIELD_TOOLS.md), [party stats](PARTY_STATS.md) and [XP compensation](XP_COMPENSATION.md).

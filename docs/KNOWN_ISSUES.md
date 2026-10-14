@@ -1,6 +1,6 @@
-# Unova Together 1.0.11 — known limits
+# Unova Together 1.0.12 — known limits
 
-Release 1.0.11 includes the regional Soaring view as a test feature. The previously reported movement hitching, idle follower disappearance, distorted bobbing and Redux shiny follower colours were confirmed fixed in 1.0.10 gameplay. Broader physical-PC, WAN and every-species testing remains limited. See [release checks](RELEASE_CHECKS_1.0.11.md).
+Release 1.0.12 improves Soaring's regional scenery and protects the landing transition from NPC input. Soaring remains experimental and needs live playtesting across maps. The previously reported movement hitching, idle follower disappearance, distorted bobbing and Redux shiny follower colours were confirmed fixed in 1.0.10 gameplay. Broader physical-PC, WAN and every-species testing remains limited. See [release checks](RELEASE_CHECKS_1.0.12.md).
 
 - **Other VPNs can block connections.** NordVPN caused a tester’s presence-relay connection to fail with WinError 10013. Disconnect other VPNs while using Tailscale; check their kill-switch and network-filter settings if access remains blocked. This is not evidence that the game server is offline.
 - **Online UDP is experimental.** It has been checked locally, but reliable battle completion between players on different networks has not yet been confirmed. Use Tailscale if it fails.

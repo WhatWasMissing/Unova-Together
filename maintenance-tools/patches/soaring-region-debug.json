@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "baselineRelease": "Unova Together 1.0.11 source",
+  "baselinePath": "source/melonDS/src/frontend/qt_sdl/SoaringScene.h",
+  "baselineSha256": "f8c38467f55b23fbb966884d83633057bdc5508e23cc0c7516a946dfb2798f64",
+  "patch": "soaring-region-debug.patch",
+  "patchSha256": "7e261a816811a6d2f3be111d158b116e07d7fa79ebeebb69bef564740ede3a1e",
+  "resultSha256": "408223e0836f342cafcb93841c53130700bef43fdcef92859cd819292a857827",
+  "scope": "Local Soaring collision coverage and decorative flyways; no landing/collision changes"
+}

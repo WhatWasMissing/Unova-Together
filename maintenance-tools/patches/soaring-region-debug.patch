@@ -1,0 +1,269 @@
+diff --git a/source/melonDS/src/frontend/qt_sdl/SoaringScene.h b/source/melonDS/src/frontend/qt_sdl/SoaringScene.h
+--- a/source/melonDS/src/frontend/qt_sdl/SoaringScene.h
++++ b/source/melonDS/src/frontend/qt_sdl/SoaringScene.h
+@@ -12,17 +12,23 @@
+ #include <QPainterPath>
+ #include <algorithm>
+ #include <cmath>
++#include <limits>
+ #include <vector>
+ 
+ // A local rendering scene, never a Town Map overlay or live actor-coordinate
+ // editor. Geometry and textures come from the user's loaded ROM.
+ class SoaringScene {
+     struct Vertex {QVector3D position;QPointF uv;};
+-    struct Face {int texture;QList<Vertex> vertices;};
++    struct Face {int texture;QList<Vertex> vertices;QVector3D centre;float radius=0;QRgb solidColour=0;int collisionKind=-1;};
++    struct AtlasRoute {QList<QPointF> points;};
+     QList<Face> faces;
+     QList<QImage> textures;
+     struct TextureMode {bool repeatS=true,repeatT=true,mirrorS=false,mirrorT=false;};
+     QList<TextureMode> textureModes;
++    QList<int> atlasGrid;
++    QList<AtlasRoute> flywayRoutes;
++    int atlasWidth=0,atlasHeight=0;
++    bool collisionDebug=false;
+ public:
+     enum Phase {Off,Preparing,Takeoff,Flying,Landing};
+     Phase phase=Off;
+@@ -41,10 +47,12 @@
+     bool load(const QString& path) {
+         QFile file(path);if(!file.open(QIODevice::ReadOnly) || file.size()>16*1024*1024) {error="Flight scenery unavailable";return false;}
+         const auto data=QJsonDocument::fromJson(file.readAll()).object();
+-        if(data.value("format").toInt()!=1 || data.value("sourceZone").toInt(data.value("zone").toInt())!=map) {error="Flight map changed";return false;}
++        const int format=data.value("format").toInt();
++        if((format!=1 && format!=2) || data.value("sourceZone").toInt(data.value("zone").toInt())!=map) {error="Flight map changed";return false;}
+         const QDir dir(QFileInfo(path).absolutePath());
+         const auto images=data.value("textures").toArray(),geometry=data.value("faces").toArray();
+-        if(images.isEmpty() || images.size()>512 || geometry.isEmpty() || geometry.size()>32000) {error="Unsupported flight scenery";return false;}
++        const bool atlasFallback=format==2 && data.value("atlasSize").isArray();
++        if((images.isEmpty() && !atlasFallback) || images.size()>512 || (geometry.isEmpty() && !atlasFallback) || geometry.size()>32000) {error="Unsupported flight scenery";return false;}
+         QList<QImage> checkedTextures;QList<Face> checkedFaces;QList<TextureMode> checkedModes;
+         const auto modes=data.value("textureModes").toArray();
+         qint64 pixels=0;
+@@ -62,12 +70,35 @@
+             Face face;face.texture=pair[0].toInt(-1);
+             const auto vertices=pair[1].toArray();
+             if(face.texture<0 || face.texture>=checkedTextures.size() || vertices.size()<3 || vertices.size()>12) return false;
++            QVector3D minimum(32768,32768,32768),maximum(-32768,-32768,-32768);
+             for(const auto& item:vertices) {
+                 const auto v=item.toArray();if(v.size()!=5) return false;
+                 for(const auto& coordinate:v) if(!coordinate.isDouble() || !std::isfinite(coordinate.toDouble()) || std::abs(coordinate.toDouble())>32768) return false;
+-                face.vertices.append({QVector3D(v[0].toDouble(),v[1].toDouble(),v[2].toDouble()),QPointF(v[3].toDouble(),v[4].toDouble())});
+-            }
++                const QVector3D position(v[0].toDouble(),v[1].toDouble(),v[2].toDouble());
++                face.vertices.append({position,QPointF(v[3].toDouble(),v[4].toDouble())});
++                minimum.setX(std::min(minimum.x(),position.x()));minimum.setY(std::min(minimum.y(),position.y()));minimum.setZ(std::min(minimum.z(),position.z()));
++                maximum.setX(std::max(maximum.x(),position.x()));maximum.setY(std::max(maximum.y(),position.y()));maximum.setZ(std::max(maximum.z(),position.z()));
++            }
++            face.centre=(minimum+maximum)*.5f;face.radius=(maximum-minimum).length()*.5f;
+             checkedFaces.append(face);
++        }
++        const auto flywayFaces=data.value("flywayFaces").toArray();
++        if(flywayFaces.size()>6000 || checkedFaces.size()+flywayFaces.size()>32000) return false;
++        for(const auto& value:flywayFaces) {
++            const auto record=value.toArray();if(record.size()!=2) return false;
++            const int material=record[0].toInt(-1);if(material<0 || material>2) return false;
++            const auto vertices=record[1].toArray();if(vertices.size()!=3) return false;
++            const QRgb colours[]={qRgba(189,158,100,255),qRgba(49,137,149,255),qRgba(240,221,164,255)};
++            Face face;face.texture=-1;face.solidColour=colours[material];
++            QVector3D minimum(32768,32768,32768),maximum(-32768,-32768,-32768);
++            for(const auto& item:vertices) {
++                const auto v=item.toArray();if(v.size()!=3) return false;
++                for(const auto& coordinate:v) if(!coordinate.isDouble() || !std::isfinite(coordinate.toDouble()) || std::abs(coordinate.toDouble())>32768) return false;
++                const QVector3D position(v[0].toDouble(),v[1].toDouble(),v[2].toDouble());face.vertices.append({position,{}});
++                minimum.setX(std::min(minimum.x(),position.x()));minimum.setY(std::min(minimum.y(),position.y()));minimum.setZ(std::min(minimum.z(),position.z()));
++                maximum.setX(std::max(maximum.x(),position.x()));maximum.setY(std::max(maximum.y(),position.y()));maximum.setZ(std::max(maximum.z(),position.z()));
++            }
++            face.centre=(minimum+maximum)*.5f;face.radius=(maximum-minimum).length()*.5f;checkedFaces.append(face);
+         }
+         const auto world=data.value("world").toArray();
+         if(world.size()!=3) return false;
+@@ -84,7 +115,40 @@
+             if(zone<=0 || zone>4095 || tx<0 || tx>4095 || tz<0 || tz>4095 || std::abs(y)>32768) return false;
+             checkedLandings.append({{"map",zone},{"tileX",tx},{"tileZ",tz},{"worldX",tx*16.+8},{"worldZ",tz*16.+8},{"worldY",y}});
+         }
++        const auto atlasSize=data.value("atlasSize").toArray(),grid=data.value("atlasGrid").toArray();
++        QList<int> checkedGrid;int checkedWidth=0,checkedHeight=0;
++        if(atlasSize.size()==2 && atlasSize[0].isDouble() && atlasSize[1].isDouble()) {
++            checkedWidth=atlasSize[0].toInt();checkedHeight=atlasSize[1].toInt();
++            if(checkedWidth<1 || checkedHeight<1 || checkedWidth*checkedHeight>4096 || grid.size()!=checkedWidth*checkedHeight) return false;
++            for(const auto& value:grid) {const int cell=value.toInt(-1);if(cell!=0 && cell!=1) return false;checkedGrid.append(cell);}
++        }
++        QList<AtlasRoute> checkedRoutes;const auto routes=data.value("flywayRoutes").toArray();if(routes.size()>128) return false;
++        for(const auto& value:routes) {
++            const auto points=value.toArray();if(points.size()<2 || points.size()>256) return false;
++            AtlasRoute route;
++            for(const auto& item:points) {
++                const auto p=item.toArray();if(p.size()!=2 || !p[0].isDouble() || !p[1].isDouble()) return false;
++                const double gx=p[0].toDouble(),gz=p[1].toDouble();
++                if(!std::isfinite(gx) || !std::isfinite(gz) || gx<0 || gz<0 || gx>checkedWidth || gz>checkedHeight) return false;
++                route.points.append(QPointF(gx,gz));
++            }
++            checkedRoutes.append(route);
++        }
++        const auto collision=data.value("collisionTiles").toArray();if(collision.size()>40000 || checkedFaces.size()+collision.size()>32000) return false;
++        for(const auto& item:collision) {
++            const auto tile=item.toArray();if(tile.size()!=4) return false;
++            const int tx=tile[0].toInt(-1),tz=tile[1].toInt(-1),kind=tile[3].toInt(-1);const double ground=tile[2].toDouble(std::numeric_limits<double>::quiet_NaN());
++            if(tx<0 || tz<0 || tx>4095 || tz>4095 || kind<0 || kind>2 || !std::isfinite(ground) || std::abs(ground)>32768) return false;
++            const double px=tx*16.+8-world[0].toDouble(),pz=tz*16.+8-world[2].toDouble(),py=ground-world[1].toDouble()+.6;
++            const QRgb colours[]={qRgba(49,235,115,170),qRgba(255,72,78,185),qRgba(255,189,53,175)};
++            Face face;face.texture=-1;face.solidColour=colours[kind];face.collisionKind=kind;
++            face.vertices={{{float(px-7),float(py),float(pz-7)},{}},{{float(px+7),float(py),float(pz-7)},{}},
++                           {{float(px+7),float(py),float(pz+7)},{}},{{float(px-7),float(py),float(pz+7)},{}}};
++            face.centre=QVector3D(px,py,pz);face.radius=11;checkedFaces.append(face);
++        }
+         landingSites=checkedLandings;
++        atlasGrid=checkedGrid;atlasWidth=checkedWidth;atlasHeight=checkedHeight;flywayRoutes=checkedRoutes;
++        collisionDebug=data.value("collisionDebug").toBool() && !atlasGrid.isEmpty();
+         textures=checkedTextures;textureModes=checkedModes;faces=checkedFaces;
+         if(phase==Preparing || phase==Off) {phase=Takeoff;phaseTime=0;}
+         return true;
+@@ -101,8 +165,8 @@
+         if(phase!=Flying) return;
+         const double turn=((buttons&(1<<4))?1.:0.)-((buttons&(1<<5))?1.:0.);
+         heading+=turn*dt*1.4;
+-        const double target=buttons&(1<<6)?(buttons&1?120.:72.):buttons&(1<<7)?-32.:0.;
+-        speed+=(target-speed)*std::min(1.,dt*4);
++        const double target=buttons&(1<<6)?(buttons&1?180.:100.):buttons&(1<<7)?-44.:0.;
++        speed+=(target-speed)*std::min(1.,dt*5);
+         x=std::clamp(x+std::sin(heading)*speed*dt,sceneX-600.,sceneX+600.);
+         z=std::clamp(z-std::cos(heading)*speed*dt,sceneZ-600.,sceneZ+600.);
+         altitude=std::clamp(altitude+(((buttons&(1<<9))?1.:0.)-((buttons&(1<<8))?1.:0.))*dt*72,64.,256.);
+@@ -120,19 +184,25 @@
+     }
+     QImage render(const QList<QImage>& mount,qint64 now,const QImage& trainer={}) const {
+         QImage image(256,192,QImage::Format_ARGB32_Premultiplied);image.fill(QColor(140,197,226));QPainter painter(&image);
+-        QLinearGradient sky(0,0,0,192);sky.setColorAt(0,QColor(110,167,213));sky.setColorAt(1,QColor(204,226,229));painter.fillRect(image.rect(),sky);
++        QLinearGradient sky(0,0,0,192);sky.setColorAt(0,QColor(110,167,213));sky.setColorAt(.52,QColor(183,207,220));sky.setColorAt(.70,QColor(113,199,211));sky.setColorAt(1,QColor(30,127,153));painter.fillRect(image.rect(),sky);
+         if(faces.isEmpty()) return image.convertToFormat(QImage::Format_RGBA8888_Premultiplied);
+         const QVector3D forward(std::sin(heading),0,-std::cos(heading));
++        const QVector3D right(std::cos(heading),0,std::sin(heading));
+         const QVector3D rider(x-sceneX,altitude,z-sceneZ);
+         QMatrix4x4 view;view.lookAt(rider-forward*130+QVector3D(0,65,0),rider+forward*150-QVector3D(0,72,0),{0,1,0});
+         QMatrix4x4 projection;projection.perspective(58,4.f/3.f,8,2400);
+         const auto matrix=projection*view;
+         struct Projected {double x,y,q,u,v;};
+-        struct Triangle {int texture;Projected vertex[3];float depth;};QList<Triangle> triangles;
++        struct Triangle {int texture;QRgb solidColour;Projected vertex[3];float depth;};QList<Triangle> triangles;
+         // Clip at the near plane, then interpolate UV/w and 1/w per pixel.
+         // Affine brushes stretched roads and average-depth sorting let roofs
+         // overwrite walls; the depth buffer resolves individual fragments.
+-        for(const auto& face:faces) for(int i=1;i+1<face.vertices.size();++i) {
++        for(const auto& face:faces) {
++            const QVector3D delta=face.centre-rider;
++            const double distance=QVector3D::dotProduct(delta,forward),side=std::abs(QVector3D::dotProduct(delta,right));
++            const double margin=face.radius+160.;
++            if(distance+margin<0 || distance-margin>1750. || side>std::max(140.,distance+220.)*.62+face.radius) continue;
++            for(int i=1;i+1<face.vertices.size();++i) {
+             struct Clip {QVector4D p;QPointF uv;};QList<Clip> polygon;
+             for(int index:{0,i,i+1}) {
+                 const auto& v=face.vertices[index];polygon.append({matrix*QVector4D(v.position,1),v.uv});
+@@ -145,7 +215,7 @@
+                 if((da>=0)!=(db>=0)) {const double f=da/(da-db);clipped.append({a.p+(b.p-a.p)*f,a.uv+(b.uv-a.uv)*f});}
+             }
+             for(int j=1;j+1<clipped.size();++j) {
+-                Triangle t;t.texture=face.texture;t.depth=0;int k=0;QRectF bounds;
++                Triangle t;t.texture=face.texture;t.solidColour=face.solidColour;t.depth=0;int k=0;QRectF bounds;
+                 bool valid=true;
+                 for(int index:{0,j,j+1}) {
+                     const auto& v=clipped[index];if(v.p.w()<=0) {valid=false;break;}
+@@ -157,6 +227,7 @@
+                 bounds=QRectF(QPointF(std::min({a.x,b.x,c.x}),std::min({a.y,b.y,c.y})),QPointF(std::max({a.x,b.x,c.x}),std::max({a.y,b.y,c.y})));
+                 if(bounds.intersects(image.rect())) triangles.append(t);
+             }
++            }
+         }
+         std::sort(triangles.begin(),triangles.end(),[](const auto& a,const auto& b){return a.depth>b.depth;});
+         painter.end();std::vector<float> depth(256*192,0.f);
+@@ -167,8 +238,9 @@
+             const int right=int(std::clamp(std::ceil(std::max({a.x,b.x,c.x})),0.,255.));
+             const int top=int(std::clamp(std::floor(std::min({a.y,b.y,c.y})),0.,191.));
+             const int bottom=int(std::clamp(std::ceil(std::max({a.y,b.y,c.y})),0.,191.));
+-            const auto& texture=textures[t.texture];const int tw=texture.width(),th=texture.height();
+-            const auto mode=textureModes[t.texture];
++            const bool solid=t.texture<0;const QImage* texture=solid?nullptr:&textures[t.texture];
++            const int tw=solid?1:texture->width(),th=solid?1:texture->height();
++            const auto mode=solid?TextureMode{false,false,false,false}:textureModes[t.texture];
+             auto coordinate=[](int value,int size,bool repeat,bool mirror) {
+                 if(!repeat) return std::clamp(value,0,size-1);
+                 const int period=mirror?size*2:size;value=(value%period+period)%period;
+@@ -185,12 +257,28 @@
+                     if(q<=depth[index]) continue;
+                     const int u=int(std::floor((w0*a.u+w1*b.u+w2*c.u)/q));
+                     const int v=int(std::floor((w0*a.v+w1*b.v+w2*c.v)/q));
+-                    const QRgb colour=reinterpret_cast<const QRgb*>(texture.constScanLine(coordinate(v,th,mode.repeatT,mode.mirrorT)))[coordinate(u,tw,mode.repeatS,mode.mirrorS)];
++                    const QRgb colour=solid?t.solidColour:reinterpret_cast<const QRgb*>(texture->constScanLine(coordinate(v,th,mode.repeatT,mode.mirrorT)))[coordinate(u,tw,mode.repeatS,mode.mirrorS)];
+                     const int alpha=qAlpha(colour);if(!alpha) continue;
+                     if(alpha==255) output[px]=colour;
+                     else {const auto old=output[px];output[px]=qRgb((qRed(colour)*alpha+qRed(old)*(255-alpha))/255,(qGreen(colour)*alpha+qGreen(old)*(255-alpha))/255,(qBlue(colour)*alpha+qBlue(old)*(255-alpha))/255);}
+                     depth[index]=q;
+                 }
++            }
++        }
++        // Fade map geometry before the far clip. The renderer can stream a
++        // wider region while keeping distant unseen triangles off the frame.
++        const QRgb fog=qRgb(177,207,220);
++        for(int py=0;py<image.height();++py) {
++            auto* output=reinterpret_cast<QRgb*>(image.scanLine(py));
++            for(int px=0;px<image.width();++px) {
++                const float reciprocal=depth[py*image.width()+px];if(reciprocal<=0.f) continue;
++                const double distance=1./reciprocal;
++                const int amount=int(std::clamp((distance-550.)/1200.,0.,1.)*255.);
++                if(!amount) continue;
++                const QRgb colour=output[px];
++                output[px]=qRgb((qRed(colour)*(255-amount)+qRed(fog)*amount)/255,
++                                (qGreen(colour)*(255-amount)+qGreen(fog)*amount)/255,
++                                (qBlue(colour)*(255-amount)+qBlue(fog)*amount)/255);
+             }
+         }
+         painter.begin(&image);
+@@ -211,6 +299,47 @@
+         }
+         painter.setPen(QColor(255,255,255,210));
+         if(speed>55) for(int i=0;i<5;++i) {const int offset=int(now/7+i*37)%192;painter.drawLine(9+i*59,offset,9+i*59,offset+9);}
++        if(collisionDebug && atlasWidth>0 && atlasHeight>0) drawCoverageDebug(painter);
+         return image.convertToFormat(QImage::Format_RGBA8888_Premultiplied);
+     }
++private:
++    void drawCoverageDebug(QPainter& painter) const {
++        const double cell=std::min(2.55,std::min(82.0/atlasWidth,70.0/atlasHeight));
++        const double mapWidth=atlasWidth*cell,mapHeight=atlasHeight*cell,x0=246-mapWidth,y0=18;
++        const double panelX=246-std::max(102.0,mapWidth+10.0),panelWidth=246-panelX;
++        painter.save();painter.setRenderHint(QPainter::Antialiasing,false);
++        painter.fillRect(QRectF(panelX,y0-14,panelWidth,mapHeight+43),QColor(8,19,36,218));
++        painter.setPen(QColor(227,241,248,230));painter.setFont(QFont("monospace",6,QFont::Bold));painter.drawText(QRectF(panelX+3,y0-13,panelWidth-6,10),Qt::AlignLeft|Qt::AlignVCenter,"MAP / COLLISION");
++        QList<int> kinds(atlasGrid.size(),-1);
++        for(const auto& face:faces) {
++            if(face.collisionKind<0 || face.radius>13) continue;
++            const auto p=face.centre;const int tx=int(std::floor((anchor.value("worldX").toDouble()+p.x())/16.));
++            const int tz=int(std::floor((anchor.value("worldZ").toDouble()+p.z())/16.));
++            const int cx=tx/32,cz=tz/32;if(cx<0 || cz<0 || cx>=atlasWidth || cz>=atlasHeight) continue;
++            const int index=cz*atlasWidth+cx;if(index<0 || index>=kinds.size()) continue;
++            const int kind=face.collisionKind;
++            if(kinds[index]<0 || kind==0 || (kind==1 && kinds[index]==2)) kinds[index]=kind;
++        }
++        for(int z=0;z<atlasHeight;++z) for(int x=0;x<atlasWidth;++x) {
++            const int index=z*atlasWidth+x;if(index>=atlasGrid.size()) continue;
++            QColor colour;
++            if(!atlasGrid[index]) colour=QColor(71,57,103,225);
++            else if(kinds.value(index,-1)==0) colour=QColor(58,205,112,238);
++            else if(kinds.value(index,-1)==1) colour=QColor(247,78,74,238);
++            else if(kinds.value(index,-1)==2) colour=QColor(255,186,57,238);
++            else colour=QColor(103,157,174,225);
++            painter.fillRect(QRectF(x0+x*cell,y0+z*cell,std::max(1.,cell-.35),std::max(1.,cell-.35)),colour);
++        }
++        painter.setPen(QPen(QColor(242,207,119,230),std::max(.8,cell*.7),Qt::SolidLine,Qt::RoundCap,Qt::RoundJoin));
++        for(const auto& route:flywayRoutes) for(int i=1;i<route.points.size();++i) {
++            const auto a=route.points[i-1],b=route.points[i];painter.drawLine(QPointF(x0+a.x()*cell,y0+a.y()*cell),QPointF(x0+b.x()*cell,y0+b.y()*cell));
++        }
++        const double playerX=(anchor.value("worldX").toDouble()+x)/512.,playerZ=(anchor.value("worldZ").toDouble()+z)/512.;
++        painter.setPen(QPen(QColor(255,255,255,245),1));painter.setBrush(QColor(255,60,65,255));
++        painter.drawEllipse(QPointF(x0+playerX*cell,y0+playerZ*cell),2.2,2.2);
++        painter.setPen(QColor(231,238,244,245));painter.setFont(QFont("monospace",5));
++        painter.drawText(QRectF(panelX+3,y0+mapHeight+2,panelWidth-6,8),Qt::AlignLeft|Qt::AlignVCenter,"G ground  R blocked");
++        painter.drawText(QRectF(panelX+3,y0+mapHeight+10,panelWidth-6,8),Qt::AlignLeft|Qt::AlignVCenter,"Y special  P map gap");
++        painter.restore();
++    }
+ };

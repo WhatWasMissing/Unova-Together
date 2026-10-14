@@ -216,10 +216,14 @@ class LauncherTests(unittest.TestCase):
         with patch('launcher_ui.preferences.identify',return_value=profile):
             self.app._identify_rom();self.assertTrue(all('disabled' not in c.state() for c in self.app.cheat_buttons.values()))
             self.app.cheat_buttons['repel'].invoke();self.app._preference('volume',35)
+        self.assertFalse(self.app.soaring_collision_debug.get())
+        self.app.soaring_collision_debug_button.invoke()
         data=json.loads(self.app.config_path.read_text())
         self.assertTrue(data['cheats']['test-rom']['repel']);self.assertEqual(data['preferences']['volume'],35)
+        self.assertTrue(data['preferences']['soaring_collision_debug'])
         self.app.destroy();self.app=Launcher(self.home,testing=True);self.app.update()
         self.assertEqual(self.app.volume.get(),35)
+        self.assertTrue(self.app.soaring_collision_debug.get())
         with patch('launcher_ui.preferences.identify',return_value=profile):self.app._identify_rom()
         self.assertTrue(self.app.cheat_vars['repel'].get())
         if OUTPUT:
@@ -240,6 +244,12 @@ class LauncherTests(unittest.TestCase):
             self.assertEqual(spawn.call_args.kwargs['env']['UNOVA_RELAY_ROOM'],'friends')
             self.assertEqual(spawn.call_args.kwargs['env']['UNOVA_COMPANION_INTERACTIONS'],'1')
             self.assertEqual(spawn.call_args.kwargs['env']['UNOVA_EXPERIMENTAL_COMPANION'],'1')
+        self.app.game=None;self.app._preference('soaring',True);self.app._preference('soaring_collision_debug',True)
+        with patch('launcher_ui.preferences.running',return_value=False),patch('launcher_ui.app.subprocess.Popen',return_value=proc) as spawn,patch('soaring_scene_worker.SoaringWorker') as worker:
+            self.app.launch()
+            self.assertEqual(spawn.call_args.kwargs['env']['UNOVA_EXPERIMENTAL_SOARING'],'1')
+            worker.assert_called_once()
+            self.assertTrue(worker.call_args.kwargs['collision_debug'])
         self.app.game=None;self.app.profile_picker.current(1);self.app._select_profile();self.assertEqual(self.app.volume.get(),75)
         self.assertIn('play-profiles',self.app.save_dir.get())
 

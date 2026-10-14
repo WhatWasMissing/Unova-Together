@@ -14,6 +14,6 @@ Run python tools/unova_launcher.py --home <your-Unova-installation>.
 Build with python tools/build_unova_launcher.py; UI/routing tests run from tools.
 Cleanup scripts are development utilities; they preview by default.
 
-Launcher 1.0.6, build revision 2026101302, updates the Features tab and moves companion interactions to **Settings → Following Pokémon**, enabled by default when unset. Explicit off choices remain saved. The launcher passes both new and legacy runtime switches for compatibility. Nearby battle scenery remains experimental and off by default. This source/local update is newer than the launcher in public v1.0.6 release assets.
+Launcher 1.0.12, build revision 2026101401, is paired with the 1.0.12 emulator release. Companion interactions remain under **Settings → Following Pokémon** and default on when unset. Soaring and its optional collision display remain under **Settings → Experimental features** and off by default. The matching source is included in the 1.0.12 source download.
 
 See the [feature guide](../docs/FEATURES.md), [roadmap](../docs/ROADMAP.md), and [native default-policy patch](../maintenance-tools/README.md#follower-defaults-and-feature-review--13-october-2026).

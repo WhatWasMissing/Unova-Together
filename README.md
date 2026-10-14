@@ -1,16 +1,16 @@
 # Unova Together
 
-**Current release: 1.0.11.** Adds a wider fogged Soaring view across the verified Black 2 outdoor matrix for testing: [downloads](https://github.com/WhatWasMissing/Unova-Together/releases/tag/v1.0.11). Made by mvq1303 / WhatWasMissing, built on melonDS.
+**Current release: 1.0.12.** Improves Soaring scenery and landing transitions: [downloads](https://github.com/WhatWasMissing/Unova-Together/releases/tag/v1.0.12). Made by mvq1303 / WhatWasMissing, built on melonDS.
 
 Explore Unova with friends in supported English Pokémon Black 2 and Blaze Black 2 Redux. Each player uses their own matching ROM and independent save.
 
 ## Download and play
 
-1. [Download version 1.0.11](https://github.com/WhatWasMissing/Unova-Together/releases/tag/v1.0.11). Choose **Unova-Together.exe**, or extract the complete Windows x64 ZIP.
+1. [Download version 1.0.12](https://github.com/WhatWasMissing/Unova-Together/releases/tag/v1.0.12). Choose **Unova-Together.exe**, or extract the complete Windows x64 ZIP.
 2. Open the EXE, or run **Start Unova Together.cmd** in the extracted folder. Choose your ROM and select **Play**.
 3. Open launcher **Co-op** to configure your connection and host or join LAN. Follow the [player guide](docs/PLAYER_GUIDE.md).
 
-Version **1.0.11** includes matching launcher and emulator versions. Existing ROMs and saves do not need conversion. Clients still running launcher 1.0.5 should install the game update, then run [Repair-Launcher.exe](https://github.com/WhatWasMissing/Unova-Together/releases/download/v1.0.11/Repair-Launcher.exe) once and select their old launcher. Subsequent updates follow the same entry automatically. See the [migration instructions](RELEASE_NOTES_1.0.10.md). Update every player and restart the presence relay.
+Version **1.0.12** includes matching launcher and emulator versions. Existing ROMs and saves do not need conversion. Clients still running launcher 1.0.5 should install the game update, then run [Repair-Launcher.exe](https://github.com/WhatWasMissing/Unova-Together/releases/download/v1.0.12/Repair-Launcher.exe) once and select their old launcher. Subsequent updates follow the same entry automatically. See the [migration instructions](RELEASE_NOTES_1.0.10.md). Update every player and restart the presence relay.
 
 ## Features
 
@@ -22,7 +22,7 @@ Version **1.0.11** includes matching launcher and emulator versions. Existing RO
 - **Presentation:** custom camera and optional nearby battle scenery built locally from your ROM.
 - **Launcher:** simple save slots, Gen 5 ROM/save/XP tools, LAN Host/Join/Retry, controller navigation, music, settings, optional cheats, save backups/restore, diagnostics, verified updates and repair.
 
-See the [complete feature guide](docs/FEATURES.md) for controls, menu paths and limitations, and the [roadmap](docs/ROADMAP.md) for proposed additions. Priorities are battle recovery, easier connection checks, contextual follower reactions and wider trainer coverage.
+See the [complete feature guide](docs/FEATURES.md) for controls, menu paths and limitations, and the [roadmap](docs/ROADMAP.md) for proposed additions. Soaring remains optional and experimental; gaps use decorative regional terrain, and landings wait for the native map transition to settle before restoring game input.
 
 Companion interactions are in **Settings → Following Pokémon** and enabled by default when no preference has been saved. Explicit off choices are preserved.
 

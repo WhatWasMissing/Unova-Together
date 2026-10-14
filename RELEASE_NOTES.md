@@ -1,3 +1,7 @@
+# Current release
+
+See [Unova Together 1.0.12 release notes](RELEASE_NOTES_1.0.12.md). Earlier version-specific release notes are retained below for history.
+
 # Unova Together 1.0.9 — Client launcher migration
 
 Fixes the remaining case where a client's usual launcher shortcut keeps opening 1.0.5 after updating the game package.
