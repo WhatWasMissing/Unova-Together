@@ -46,7 +46,7 @@ Keyboard: **Tab/Shift+Tab** moves focus, **Enter** activates a button, **Ctrl+Ta
 
 ## Updates, checks and repair
 
-**Updates** downloads official Windows releases, verifies SHA-256 and installs beside the previous runtime. Updates/repairs back up existing save files first. Save normally and close the game before switching.
+**Updates** downloads official Windows releases, verifies SHA-256 and installs beside the previous runtime. Updates and repairs can stage while the current game remains open. The refreshed launcher recognizes emulator processes in every version folder for that installation, so Play stays unavailable until the old game exits; unrelated melonDS installs do not block it. Updates/repairs back up existing save files first. Save normally before starting an update.
 
 From launcher 1.0.8, update completion restarts into the new shared Pokémon Together launcher with the same profile/save home. Older compatible hub entry points forward to newer installed hubs without downgrading to legacy per-mod launchers. Release and Launcher labels describe the active game package and the running launcher build separately. Shared launchers older than 1.0.8 need the one-time restart described in [release notes](../RELEASE_NOTES_1.0.8.md).
 

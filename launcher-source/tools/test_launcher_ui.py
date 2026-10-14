@@ -150,10 +150,23 @@ class LauncherTests(unittest.TestCase):
         with patch('launcher_ui.app.subprocess.Popen',return_value=proc) as spawn, patch('launcher_ui.preferences.running',return_value=False):
             self.app.launch();self.app.launch();self.assertEqual(spawn.call_count,1)
             self.assertEqual(spawn.call_args.args[0][1],str(self.rom.resolve()))
-            self.app.release=self.feed()['release'];self.app._sync();self.assertEqual(self.app.update_button['state'],'disabled')
+            self.app.release=self.feed()['release'];self.app._sync();self.assertEqual(self.app.update_button['state'],'normal')
         doc=self.home/'docs/PLAYER_GUIDE.md';doc.parent.mkdir();doc.write_text('fixture guide')
         with patch('launcher_ui.app.os.startfile') as open_doc:self.app.guide();open_doc.assert_called_once_with(str(doc))
         with patch('launcher_ui.app.webbrowser.open') as open_web:self.app.guide('KNOWN_ISSUES.md');self.assertIn(u.REPO,open_web.call_args.args[0])
+
+    def test_update_can_stage_while_same_install_game_runs_and_play_recovers(self):
+        self.app.rom.set(str(self.rom));self.app.release=self.feed()['release']
+        emulator=self.app.root/'builds/current/melonDS.exe';paths=[emulator]
+        with patch('launcher_ui.preferences._emulator_paths',side_effect=lambda:paths):
+            self.app._process_check_at=0;self.app._sync()
+            self.assertEqual(self.app.play['state'],'disabled')
+            self.assertEqual(self.app.update_button['state'],'normal')
+            with patch.object(u,'install',return_value=self.home):
+                self.app.install_update();self.wait()
+            self.assertTrue(self.app.status.get().startswith('Update installed.'))
+            paths.clear();self.app._process_check_at=0;self.app._sync()
+            self.assertEqual(self.app.play['state'],'normal')
     def test_restart_uses_updated_launcher_and_same_home(self):
         launcher=self.app.root/'launcher/Pokemon Together.exe'
         launcher.parent.mkdir(exist_ok=True);launcher.write_bytes(b'fixture launcher')

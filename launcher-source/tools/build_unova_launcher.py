@@ -9,7 +9,7 @@ assets=ROOT/'tools/launcher_ui'
 parser=argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--output-dir',type=Path,default=ROOT/'builds/mod-hub/current')
 parser.add_argument('--work-dir',type=Path,default=ROOT/'test-fixtures/mod-hub-build-20261013')
-parser.add_argument('--revision',default='2026101306')
+parser.add_argument('--revision',default='2026101402')
 parser.add_argument('--version',default=versioning.current_version())
 parser.add_argument('--bootstrap',type=Path,help='Built permanent launcher entry / client repair executable')
 args=parser.parse_args()

@@ -1,6 +1,6 @@
 # Current release
 
-See [Unova Together 1.0.12 release notes](RELEASE_NOTES_1.0.12.md). Earlier version-specific release notes are retained below for history.
+See [Unova Together 1.0.13 release notes](RELEASE_NOTES_1.0.13.md). Earlier version-specific release notes are retained below for history.
 
 # Unova Together 1.0.9 — Client launcher migration
 

@@ -22,6 +22,7 @@ class Launcher(tk.Tk):
         try:self.iconbitmap(str(HERE/'assets/launcher.ico'))
         except tk.TclError:pass
         self.messages=queue.Queue();self.busy=False;self.release=None;self.game=None;self.operation='';self.guides_busy=False
+        self._process_check_at=0;self._process_running=False
         self.cancel=threading.Event();self.rom=tk.StringVar();self.auto=tk.BooleanVar(value=True);self.music=tk.BooleanVar(value=False)
         self.status=tk.StringVar(value='');self.news_status=tk.StringVar(value='Saved release notes · available offline')
         self.update_status=tk.StringVar(value='Check GitHub for the latest Windows release.')
@@ -599,7 +600,8 @@ class Launcher(tk.Tk):
         self._worker('repair-feed',find)
 
     def _install_with_backup(self,release):
-        if prefs.running(self.root/'builds/current/melonDS.exe'):raise ValueError('Close this build’s emulator before updating or repairing.')
+        # Updates and repairs install into a fresh versioned folder. Keep the
+        # current game usable while staging; its runtime and saves are untouched.
         for item in self.play_profiles:services.backup(self.home,item,'before-update')
         return updates.install(self.home,release,self.cancel,lambda done,total:self.messages.put(('progress',done*100/total)))
 
@@ -764,7 +766,7 @@ class Launcher(tk.Tk):
 
     def _sync(self):
         self.library_details['black2'].set(self._version_text())
-        path=Path(self.rom.get());valid=path.is_file() and path.suffix.lower()=='.nds';running=self.game is not None and self.game.poll() is None
+        path=Path(self.rom.get());valid=path.is_file() and path.suffix.lower()=='.nds';running=self._game_is_running()
         present=(self.root/'builds/current/melonDS.exe').is_file()
         set_enabled(self.research_play,not self.busy,'primary')
         for control in self.library_buttons.values():set_enabled(control,not self.busy,'primary')
@@ -774,15 +776,23 @@ class Launcher(tk.Tk):
         set_enabled(self.lan_retry_button,valid and not self.busy and present and self.net_mode.get()!='Solo')
         set_enabled(self.lan_join_button,valid and not self.busy and not running and present and self.net_mode.get()!='Solo')
         set_enabled(self.check_button,not self.busy);set_enabled(self.refresh_news,not self.busy)
-        set_enabled(self.update_button,bool(self.release) and not self.busy and not running,'primary')
+        set_enabled(self.update_button,bool(self.release) and not self.busy,'primary')
         set_enabled(self.connection_button,not self.busy);set_enabled(self.verify_button,not self.busy);set_enabled(self.export_button,not self.busy)
-        set_enabled(self.repair_button,bool(self.repair_release) and not self.busy and not running)
+        set_enabled(self.repair_button,bool(self.repair_release) and not self.busy)
         set_enabled(self.cancel_button,self.busy and self.operation=='installed' and not self.cancel.is_set())
         set_enabled(self.backup_button,not self.busy,'primary');set_enabled(self.restore_button,bool(self.backup_paths) and not self.busy and not running)
         set_enabled(self.cleanup_button,not self.busy)
-        message=('Game running. Save normally before changing builds.' if running else 'Emulator missing. Extract the complete release folder.' if not present else
+        message=('Game running. Save normally and close it before starting another session.' if running else 'Emulator missing. Extract the complete release folder.' if not present else
             'Choose your own matching Black 2 or Redux ROM.' if not self.rom.get() else 'ROM not found. Browse to an existing .nds file.' if not valid else 'Ready to play.')
         self.game_hint.configure(text=message)
+
+    def _game_is_running(self):
+        child=self.game is not None and self.game.poll() is None
+        now=time.monotonic()
+        if now>=self._process_check_at:
+            self._process_running=prefs.running_in_home(self.home)
+            self._process_check_at=now+1.0
+        return child or self._process_running
 
     def _game_selected(self,save=True):
         mod=next((key for key,spec in game_routes.MODS.items() if spec['game']==self.selected_game.get()),None)
@@ -835,7 +845,7 @@ class Launcher(tk.Tk):
 
     def _start_lan(self,action):
         if self.selected_game.get()==game_routes.GAMES['pokemon-x']:self._launch_research('host' if action=='host' else 'guest');return
-        if self.busy or self.game is not None and self.game.poll() is None:return
+        if self.busy or self._game_is_running():return
         if self.net_mode.get()=='Solo':self.lan_status.set('Choose LAN or an online mode first.');return
         self.connection_role.set('Host' if action=='host' else 'Join')
         if action=='host':self._connection_role_changed()
@@ -847,7 +857,8 @@ class Launcher(tk.Tk):
 
     def launch(self,lan_action=None):
         if self.selected_game.get()==game_routes.GAMES['pokemon-x']:self._launch_research('host' if lan_action=='host' else 'guest' if lan_action=='join' else None);return
-        if self.busy or self.game is not None and self.game.poll() is None:return
+        if self.busy:return
+        if self._game_is_running():self.status.set('This game is already running from this installation.');return
         if lan_action is not None:
             if lan_action not in ('host','join'):raise ValueError('Unknown LAN action')
             if self.net_mode.get()=='Solo':self.lan_status.set('Choose LAN or an online mode first.');return
@@ -900,7 +911,7 @@ class Launcher(tk.Tk):
                 self.lan_status.set('Starting LAN host…' if lan_action=='host' else 'Joining LAN host…')
             self._stop_music()
             self.game=subprocess.Popen([str(exe),str(path.resolve())],cwd=exe.parent,env=env)
-            self.status.set('Game running. Save normally before changing builds.');self._sync()
+            self.status.set('Game running. Save normally and close it before starting another session.');self._sync()
         except (OSError,ValueError,subprocess.SubprocessError) as exc:self.status.set('Unable to start the game: '+str(exc))
 
     def guide(self,name='PLAYER_GUIDE.md'):
@@ -933,7 +944,7 @@ class Launcher(tk.Tk):
         self._worker('feed',updates.launcher_feed)
 
     def install_update(self):
-        if not self.release or self.busy or self.game is not None and self.game.poll() is None:return
+        if not self.release or self.busy:return
         self.show_page('Updates');self.status.set('Downloading and verifying update…');self.update_status.set('Downloading release '+self.release['version']+'…')
         self.phase.set('Downloading · verification follows');self.bar['value']=0;release=dict(self.release)
         self._worker('installed',lambda:self._install_with_backup(release))
@@ -1022,7 +1033,7 @@ class Launcher(tk.Tk):
             if time.monotonic()-self.lan_started>30:self.lan_status.set('No LAN response. Save and close the game, then Retry.')
 
     def _retry_lan(self):
-        if self.game is not None and self.game.poll() is None:
+        if self._game_is_running():
             self.lan_status.set('Save and close the game before retrying.');return
         self._start_lan(self.last_lan_action)
 

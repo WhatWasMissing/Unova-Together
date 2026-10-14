@@ -10,6 +10,62 @@ import tomlkit
 CATALOG = json.loads((Path(__file__).parent/'assets/cheats.json').read_text(encoding='utf-8'))
 MARKER = 'Unova Together launcher cheats'
 
+def _emulator_paths():
+    """Return executable paths for visible or background melonDS processes."""
+    if os.name != 'nt':return []
+    import ctypes
+    from ctypes import wintypes
+    class ProcessEntry(ctypes.Structure):
+        _fields_=[('dwSize',wintypes.DWORD),('cntUsage',wintypes.DWORD),('th32ProcessID',wintypes.DWORD),
+            ('th32DefaultHeapID',ctypes.c_size_t),('th32ModuleID',wintypes.DWORD),('cntThreads',wintypes.DWORD),
+            ('th32ParentProcessID',wintypes.DWORD),('pcPriClassBase',wintypes.LONG),('dwFlags',wintypes.DWORD),
+            ('szExeFile',wintypes.WCHAR*260)]
+    kernel=ctypes.WinDLL('kernel32',use_last_error=True)
+    snapshot_fn=kernel.CreateToolhelp32Snapshot;snapshot_fn.argtypes=[wintypes.DWORD,wintypes.DWORD];snapshot_fn.restype=wintypes.HANDLE
+    first_fn=kernel.Process32FirstW;first_fn.argtypes=[wintypes.HANDLE,ctypes.POINTER(ProcessEntry)];first_fn.restype=wintypes.BOOL
+    next_fn=kernel.Process32NextW;next_fn.argtypes=[wintypes.HANDLE,ctypes.POINTER(ProcessEntry)];next_fn.restype=wintypes.BOOL
+    open_fn=kernel.OpenProcess;open_fn.argtypes=[wintypes.DWORD,wintypes.BOOL,wintypes.DWORD];open_fn.restype=wintypes.HANDLE
+    image_fn=kernel.QueryFullProcessImageNameW;image_fn.argtypes=[wintypes.HANDLE,wintypes.DWORD,wintypes.LPWSTR,ctypes.POINTER(wintypes.DWORD)];image_fn.restype=wintypes.BOOL
+    close_fn=kernel.CloseHandle;close_fn.argtypes=[wintypes.HANDLE];close_fn.restype=wintypes.BOOL
+    handle=snapshot_fn(0x00000002,0)
+    if handle==wintypes.HANDLE(-1).value:return []
+    paths=[]
+    try:
+        entry=ProcessEntry();entry.dwSize=ctypes.sizeof(entry)
+        if first_fn(handle,ctypes.byref(entry)):
+            while True:
+                if entry.szExeFile.casefold()=='melonds.exe':
+                    process=open_fn(0x1000,False,entry.th32ProcessID)
+                    if process:
+                        try:
+                            size=wintypes.DWORD(32768);buffer=ctypes.create_unicode_buffer(size.value)
+                            if image_fn(process,0,buffer,ctypes.byref(size)):paths.append(Path(buffer.value))
+                        finally:close_fn(process)
+                if not next_fn(handle,ctypes.byref(entry)):break
+    finally:close_fn(handle)
+    return paths
+
+def _same_executable(left,right):
+    left=Path(left);right=Path(right)
+    try:
+        if os.path.samefile(left,right):return True
+    except OSError:pass
+    def key(path):
+        value=os.path.normpath(str(path.resolve()))
+        if value.startswith('\\\\?\\'):value=value[4:]
+        return os.path.normcase(value)
+    try:return key(left)==key(right)
+    except OSError:return False
+
+def running_in_home(home):
+    """Check this install across its legacy and versioned runtime folders."""
+    home=Path(home).resolve()
+    candidates=[home/'builds/current/melonDS.exe']
+    versions=home/'.updates/versions'
+    if versions.is_dir():
+        candidates.extend(versions.glob('*/Unova-Together/builds/current/melonDS.exe'))
+    return any(_same_executable(process,exe) for process in _emulator_paths() for exe in candidates if exe.is_file())
+
 def identify(path):
     path = Path(path)
     try:
@@ -26,11 +82,7 @@ def identify(path):
 
 def running(executable):
     """Check only this exact runtime, including games opened outside the launcher."""
-    if os.name != 'nt':return False
-    result = subprocess.run(['powershell.exe','-NoProfile','-Command',
-        'Get-Process melonDS -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Path'],
-        capture_output=True,text=True,timeout=8,creationflags=subprocess.CREATE_NO_WINDOW)
-    return any(Path(line.strip()).resolve()==Path(executable).resolve() for line in result.stdout.splitlines() if line.strip())
+    return any(_same_executable(process,executable) for process in _emulator_paths())
 
 def any_running():
     if os.name!='nt':return False

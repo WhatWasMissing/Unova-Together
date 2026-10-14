@@ -54,5 +54,12 @@ class PreferencesTests(unittest.TestCase):
         with self.assertRaises(ValueError):p.managed_codes('CAT 0 '+p.MARKER+'\nCODE 1 Edited\n',{})
     def test_unknown_rom_not_accepted_by_filename(self):
         self.assertIsNone(p.identify(self.rom));self.assertIsNone(p.identify(self.home/'missing.nds'))
+    def test_running_install_finds_legacy_and_versioned_emulators_only(self):
+        legacy=self.home/'builds/current/melonDS.exe';legacy.parent.mkdir(parents=True);legacy.write_bytes(b'legacy fixture')
+        old=self.home/'.updates/versions/1.0.9/Unova-Together/builds/current/melonDS.exe';old.parent.mkdir(parents=True);old.write_bytes(b'old version fixture')
+        unrelated=self.home/'other-install/builds/current/melonDS.exe';unrelated.parent.mkdir(parents=True);unrelated.write_bytes(b'other fixture')
+        with patch.object(p,'_emulator_paths',return_value=[old]):self.assertTrue(p.running_in_home(self.home))
+        with patch.object(p,'_emulator_paths',return_value=[legacy]):self.assertTrue(p.running_in_home(self.home))
+        with patch.object(p,'_emulator_paths',return_value=[unrelated]):self.assertFalse(p.running_in_home(self.home))
 
 if __name__=='__main__':unittest.main()

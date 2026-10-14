@@ -1,16 +1,16 @@
 # Unova Together
 
-**Current release: 1.0.12.** Improves Soaring scenery and landing transitions: [downloads](https://github.com/WhatWasMissing/Unova-Together/releases/tag/v1.0.12). Made by mvq1303 / WhatWasMissing, built on melonDS.
+**Current release: 1.0.13.** Fixes launcher update recovery and Play availability: [downloads](https://github.com/WhatWasMissing/Unova-Together/releases/tag/v1.0.13). Made by mvq1303 / WhatWasMissing, built on melonDS.
 
 Explore Unova with friends in supported English Pokémon Black 2 and Blaze Black 2 Redux. Each player uses their own matching ROM and independent save.
 
 ## Download and play
 
-1. [Download version 1.0.12](https://github.com/WhatWasMissing/Unova-Together/releases/tag/v1.0.12). Choose **Unova-Together.exe**, or extract the complete Windows x64 ZIP.
+1. [Download version 1.0.13](https://github.com/WhatWasMissing/Unova-Together/releases/tag/v1.0.13). Choose **Unova-Together.exe**, or extract the complete Windows x64 ZIP.
 2. Open the EXE, or run **Start Unova Together.cmd** in the extracted folder. Choose your ROM and select **Play**.
 3. Open launcher **Co-op** to configure your connection and host or join LAN. Follow the [player guide](docs/PLAYER_GUIDE.md).
 
-Version **1.0.12** includes matching launcher and emulator versions. Existing ROMs and saves do not need conversion. Clients still running launcher 1.0.5 should install the game update, then run [Repair-Launcher.exe](https://github.com/WhatWasMissing/Unova-Together/releases/download/v1.0.12/Repair-Launcher.exe) once and select their old launcher. Subsequent updates follow the same entry automatically. See the [migration instructions](RELEASE_NOTES_1.0.10.md). Update every player and restart the presence relay.
+Version **1.0.13** includes matching launcher and emulator version labels. Existing ROMs and saves do not need conversion. Updates install beside the active build; the current game can remain open while the new build downloads. Play becomes available again after any game from that installation closes. Clients still running launcher 1.0.5 should install the game update, then run [Repair-Launcher.exe](https://github.com/WhatWasMissing/Unova-Together/releases/download/v1.0.13/Repair-Launcher.exe) once and select their old launcher. Subsequent updates follow the same entry automatically. See the [migration instructions](RELEASE_NOTES_1.0.10.md). Update every player and restart the presence relay.
 
 ## Features
 
