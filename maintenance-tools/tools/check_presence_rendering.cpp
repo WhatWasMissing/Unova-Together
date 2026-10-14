@@ -20,6 +20,13 @@ static PresenceCalibration camera(bool rotate=false)
 }
 
 int main(int argc,char** argv) {
+    PresenceSurface surface;
+    surface.publishCamera({{"buffer",0}},0);surface.publishCamera({{"buffer",1}},1);
+    surface.publishRenderer([](const QVariantMap& camera,qint64) {QImage frame(1,1,QImage::Format_ARGB32);frame.fill(camera.value("buffer").toInt()?Qt::blue:Qt::red);return frame;});
+    assert(surface.needsFrameProjection());
+    assert(surface.snapshot(0).pixelColor(0,0)==QColor(Qt::red));
+    assert(surface.snapshot(1).pixelColor(0,0)==QColor(Qt::blue));
+    surface.publish({});assert(!surface.needsFrameProjection() && surface.snapshot().isNull());
     PresenceAvatar animation;animation.facing="East";animation.moving=true;
     assert(PresenceSpriteFrame(animation,140)==10);
     animation.inBattle=true;assert(PresenceSpriteFrame(animation,140)==9);

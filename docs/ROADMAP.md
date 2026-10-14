@@ -40,7 +40,7 @@ The ten actions, five friendship bands, subtle nature cues and animated reaction
 
 Independent parties and saves should remain the default. Shared story flags would require a separate design.
 
-The development practice browser now searches ROM-backed trainers and shows party size and level span. The Take flight shortcut opens native Fly; an ORAS-inspired separate flight scene remains planned in [Soaring design](SOARING_DESIGN.md), since Gen 5 uses discrete field maps rather than a continuous 3D region.
+The development practice browser now searches ROM-backed trainers and shows party size and level span. Experimental local Soaring now streams a wider, fogged view of the Black 2 outdoor matrix, with scene-size fallbacks to protect the native face and memory limits. Verifying placements for the smaller standalone map matrices and broad live flight testing remain future work; see [Soaring design](SOARING_DESIGN.md).
 
 ## 5. Polish field tools, presentation and accessibility
 

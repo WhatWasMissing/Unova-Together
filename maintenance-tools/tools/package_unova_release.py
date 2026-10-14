@@ -17,6 +17,9 @@ HELPERS = (
     'online_udp_bridge.py', 'requirements-online-udp.txt', 'setup_tailscale_firewall.ps1',
     'unova_launcher.py', 'unova_updater.py', 'unova_storage.py', 'build_unova_launcher.py',
     'launcher_migration.py', 'unova_launcher_bootstrap.py', 'build_unova_bootstrap.py',
+    'soaring_scene_worker.py','battle_surroundings_worker.py','build_battle_surroundings.py',
+    'field_scene_geometry.py','extract_battle_surroundings.py','area_scene_cache.py',
+    'build_area_battle_scene.py','build_area_battle_catalog.py',
 )
 COMMANDS = ('Online Co-op.cmd', 'Install UDP Dependencies.cmd', 'Start LAN Presence Relay.cmd')
 DOCS = ('PLAYER_GUIDE.md', 'KNOWN_ISSUES.md', 'TAILSCALE_COOP.md', 'UDP_SERVER_GUIDE.md',
@@ -86,6 +89,9 @@ def main():
         z.writestr('Unova-Together/builds/current/melonDS.toml', portable)
         for name in HELPERS:
             z.write(ROOT/'tools'/name, 'Unova-Together/tools/'+name)
+        for path in sorted((ROOT/'tools/vendor').rglob('*')):
+            if path.is_file() and path.suffix.lower() in {'.py','.txt','.md'}:
+                z.write(path,'Unova-Together/tools/vendor/'+path.relative_to(ROOT/'tools/vendor').as_posix())
         for path in sorted((ROOT/'tools/launcher_ui').rglob('*')):
             if path.is_file() and '__pycache__' not in path.parts:
                 z.write(path,'Unova-Together/tools/launcher_ui/'+path.relative_to(ROOT/'tools/launcher_ui').as_posix())
@@ -119,6 +125,9 @@ def main():
             z.write(path, 'Unova-Together-Source/source/melonDS/'+relative.as_posix())
         for name in HELPERS:
             z.write(ROOT/'tools'/name, 'Unova-Together-Source/tools/'+name)
+        for path in sorted((ROOT/'tools/vendor').rglob('*')):
+            if path.is_file() and path.suffix.lower() in {'.py','.txt','.md'}:
+                z.write(path,'Unova-Together-Source/tools/vendor/'+path.relative_to(ROOT/'tools/vendor').as_posix())
         for path in sorted((ROOT/'tools/launcher_ui').rglob('*')):
             if path.is_file() and '__pycache__' not in path.parts:
                 z.write(path,'Unova-Together-Source/tools/launcher_ui/'+path.relative_to(ROOT/'tools/launcher_ui').as_posix())

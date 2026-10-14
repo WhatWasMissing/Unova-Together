@@ -62,6 +62,14 @@ int main(int argc,char** argv) {
         const auto shiny=LoadLocalPokemonSprites(reinterpret_cast<const unsigned char*>(rom.constData()),rom.size(),identity[0].toUInt(),identity[1].toUInt(),identity[2].toUInt(),true);
         assert(normal.value("frames").toList().size()==12 && shiny.value("frames").toList().size()==12);
         assert(shiny.value("shiny").toBool());
+        bool recoloured=false;
+        const auto normalFrames=normal.value("frames").toList(),shinyFrames=shiny.value("frames").toList();
+        for(int i=0;i<12;++i) {
+            const auto a=normalFrames[i].value<QImage>(),b=shinyFrames[i].value<QImage>();
+            assert(a.size()==b.size());recoloured=recoloured || a!=b;
+            for(int y=0;y<a.height();++y) for(int x=0;x<a.width();++x) assert(qAlpha(a.pixel(x,y))==qAlpha(b.pixel(x,y)));
+        }
+        if(!recoloured) {std::cerr<<"Shiny palette unchanged: "<<asset.toStdString()<<"\n";return 1;}
         for(const auto& image:shiny.value("frames").toList()) {
             const auto frame=image.value<QImage>();assert(frame.width()==32 || frame.width()==64);
             assert(frame.height()==frame.width()+2);

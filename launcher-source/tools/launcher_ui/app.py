@@ -664,7 +664,7 @@ class Launcher(tk.Tk):
         self.soaring=tk.BooleanVar(value=values.get('soaring',False))
         ttk.Checkbutton(experiment_box,text='Soaring flight (experimental, off by default)',variable=self.soaring,
             command=lambda:self._preference('soaring',self.soaring.get())).pack(anchor='w',pady=4)
-        label(experiment_box,'Adds the Take flight shortcut to Unova → Pokémon. Changes apply next launch.',size=9,color=C['muted'],bg=C['surface'],wraplength=620,justify='left').pack(anchor='w',pady=(2,0))
+        label(experiment_box,'Fly above the local game map. Changes apply next launch.',size=9,color=C['muted'],bg=C['surface'],wraplength=620,justify='left').pack(anchor='w',pady=(2,0))
         followers=card(parent);followers.pack(fill='x',pady=(0,18))
         follower_box=tk.Frame(followers,bg=C['surface']);follower_box.pack(fill='x',padx=18,pady=16)
         label(follower_box,'FOLLOWING POKÉMON',size=9,bold=True,bg=C['surface']).pack(anchor='w',pady=(0,8))
@@ -867,6 +867,14 @@ class Launcher(tk.Tk):
             env['UNOVA_EXPERIMENTAL_COMPANION']=companion # compatibility with existing released runtimes
             env['UNOVA_FOLLOWER_REDUCED_MOTION']='1' if settings.get('reduced_follower_motion',False) else '0'
             env['UNOVA_EXPERIMENTAL_SOARING']='1' if settings.get('soaring',False) else '0'
+            env.pop('UNOVA_SOARING_CACHE',None)
+            previous=getattr(self,'soaring_worker',None)
+            if previous:previous.stop.set()
+            if settings.get('soaring',False):
+                from soaring_scene_worker import SoaringWorker
+                directory=self.home/'soaring-scenes'/uuid.uuid4().hex
+                self.soaring_worker=SoaringWorker(path,directory)
+                env['UNOVA_SOARING_CACHE']=str(directory)
             env.pop('UNOVA_AREA_CATALOG',None)
             env.pop('UNOVA_SURROUNDINGS_DIR',None)
             if settings.get('area_scenery',False):

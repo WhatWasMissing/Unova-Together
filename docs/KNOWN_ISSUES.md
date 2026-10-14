@@ -1,6 +1,6 @@
-# Unova Together 1.0.10 — known limits
+# Unova Together 1.0.11 — known limits
 
-Release 1.0.10 fixes the locally reported movement hitching, idle follower disappearance, distorted bobbing and Redux shiny follower colours. The author confirmed those fixes in gameplay. Broader physical-PC, WAN and every-species testing remains limited. See [release checks](RELEASE_CHECKS_1.0.10.md).
+Release 1.0.11 includes the regional Soaring view as a test feature. The previously reported movement hitching, idle follower disappearance, distorted bobbing and Redux shiny follower colours were confirmed fixed in 1.0.10 gameplay. Broader physical-PC, WAN and every-species testing remains limited. See [release checks](RELEASE_CHECKS_1.0.11.md).
 
 - **Other VPNs can block connections.** NordVPN caused a tester’s presence-relay connection to fail with WinError 10013. Disconnect other VPNs while using Tailscale; check their kill-switch and network-filter settings if access remains blocked. This is not evidence that the game server is offline.
 - **Online UDP is experimental.** It has been checked locally, but reliable battle completion between players on different networks has not yet been confirmed. Use Tailscale if it fails.
@@ -27,7 +27,7 @@ Release 1.0.10 fixes the locally reported movement hitching, idle follower disap
 
 Nearby battle scenery remains experimental. Special cinematic scenes keep original backgrounds; not every environment has been playtested. Disable the option if a background looks wrong.
 
-Companion interactions are in Settings → Following Pokémon and enabled by default when no preference has been saved. Saved off choices are preserved. Use R+A or tap the follower; A alone advances game text. Full free-flight Soaring remains unfinished; the optional flight shortcut must be enabled in experimental launcher settings.
+Companion interactions are in Settings → Following Pokémon and enabled by default when no preference has been saved. Saved off choices are preserved. Use R+A or tap the follower; A alone advances game text. Regional Soaring remains experimental and off by default. It streams farther within the take-off map's outdoor matrix; smaller standalone outdoor maps are not positioned in the regional atlas yet. Unsupported map cells appear as open sky/sea, and landing is limited to verified clear terrain. Flight is local; B returns to the take-off point.
 
 Field HMs retain native story requirements. Fly needs a party member with a move slot without another field action. Full obstacle traversal and every save/reload path have not been separately playtested. Encounter gifts, scripted legendaries and Hidden Grottos are excluded. Relearning offers the current species/form's level-up moves at or below its level.
 

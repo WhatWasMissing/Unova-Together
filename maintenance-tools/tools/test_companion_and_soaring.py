@@ -56,6 +56,11 @@ int main() {
   }
  }
  assert(combinations==5000 && sawRun);
+ for(unsigned nature=0;nature<25;++nature) {
+  p["nature"]=nature;p["friendship"]=240;std::set<QString> lines;
+  for(unsigned i=0;i<60;++i) lines.insert(FollowerInteraction::reaction(p,"talk",i));
+  assert(lines.size()>=16);
+ }
  p["type1"]=10;p["type2"]=10;
  const QVariantMap context{{"area","Undella Bay"},{"hour",23},{"month",4},{"recentBattle",true}};
  const auto beforeContext=p;std::set<QString> contexts;

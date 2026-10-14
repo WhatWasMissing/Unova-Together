@@ -1,0 +1,1086 @@
+--- a/source/melonDS/src/net/LAN.cpp
++++ b/source/melonDS/src/net/LAN.cpp
+@@ -31,6 +31,7 @@
+     #define sockaddr_in_t  SOCKADDR_IN
+ #else
+     #include <unistd.h>
++    #include <fcntl.h>
+     #include <netinet/in.h>
+     #include <sys/select.h>
+     #include <sys/socket.h>
+@@ -138,6 +139,8 @@
+             TIMER_MODIFY_STATE | SYNCHRONIZE);
+ #endif
+         while (!NetworkStop.load()) {
++            DiscoveryData beacon{};
++            bool sendBeacon=false;
+             {
+                 std::lock_guard<std::recursive_mutex> guard(NetworkMutex);
+                 ENetEvent event;
+@@ -147,6 +150,19 @@
+                     NetworkEvents.push(event);
+                     NetworkReady.notify_all();
+                 }
++                if(DiscoveryBeaconPending) {
++                    beacon=PendingDiscoveryBeacon;DiscoveryBeaconPending=false;sendBeacon=true;
++                }
++            }
++            // Discovery broadcasts can stall in an OS/VPN filter. Keep their
++            // socket operation outside the emulated frame and ENet mutex.
++            if(sendBeacon) {
++                std::lock_guard<std::mutex> guard(DiscoverySendMutex);
++                if(DiscoverySocket!=INVALID_SOCKET) {
++                    sockaddr_in_t address{};address.sin_family=AF_INET;
++                    address.sin_addr.s_addr=htonl(INADDR_BROADCAST);address.sin_port=htons(kDiscoveryPort);
++                    sendto(DiscoverySocket,reinterpret_cast<const char*>(&beacon),sizeof(beacon),0,reinterpret_cast<const sockaddr_t*>(&address),sizeof(address));
++                }
+             }
+ #ifdef __WIN32__
+             LARGE_INTEGER due;
+@@ -168,6 +184,7 @@
+     NetworkStop = true;
+     NetworkReady.notify_all();
+     if (NetworkWorker.joinable()) NetworkWorker.join();
++    DiscoveryBeaconPending=false;
+     while (!NetworkEvents.empty()) {
+         const auto event=NetworkEvents.front();NetworkEvents.pop();
+         if (event.type==ENET_EVENT_TYPE_RECEIVE) enet_packet_destroy(event.packet);
+@@ -281,6 +298,15 @@
+         return false;
+     }
+ 
++#ifdef __WIN32__
++    u_long nonblocking=1;
++    if(ioctlsocket(DiscoverySocket,FIONBIO,&nonblocking)!=0) {
++#else
++    const int socketFlags=fcntl(DiscoverySocket,F_GETFL,0);
++    if(socketFlags<0 || fcntl(DiscoverySocket,F_SETFL,socketFlags|O_NONBLOCK)<0) {
++#endif
++        closesocket(DiscoverySocket);DiscoverySocket=INVALID_SOCKET;return false;
++    }
+     DiscoveryLastTick = (u32)Platform::GetMSCount();
+     DiscoveryList.clear();
+ 
+@@ -291,6 +317,7 @@
+ void LAN::EndDiscovery()
+ {
+     if (!Inited) return;
++    std::lock_guard<std::mutex> guard(DiscoverySendMutex);
+ 
+     if (DiscoverySocket != INVALID_SOCKET)
+     {
+@@ -557,13 +584,9 @@
+         beacon.MaxPlayers = MaxPlayers;
+         beacon.Status = 0; // TODO
+ 
+-        sockaddr_in_t saddr;
+-        memset(&saddr, 0, sizeof(saddr));
+-        saddr.sin_family = AF_INET;
+-        saddr.sin_addr.s_addr = htonl(INADDR_BROADCAST);
+-        saddr.sin_port = htons(kDiscoveryPort);
+-
+-        sendto(DiscoverySocket, (const char*)&beacon, sizeof(beacon), 0, (const sockaddr_t*)&saddr, sizeof(saddr));
++        // One latest announcement is sufficient; never accumulate a backlog.
++        std::lock_guard<std::recursive_mutex> guard(NetworkMutex);
++        PendingDiscoveryBeacon=beacon;DiscoveryBeaconPending=true;
+     }
+     else
+     {
+--- a/source/melonDS/src/net/LAN.h
++++ b/source/melonDS/src/net/LAN.h
+@@ -186,6 +186,9 @@
+     std::recursive_mutex NetworkMutex;
+     std::condition_variable_any NetworkReady;
+     std::queue<ENetEvent> NetworkEvents;
++    bool DiscoveryBeaconPending=false;
++    DiscoveryData PendingDiscoveryBeacon{};
++    std::mutex DiscoverySendMutex;
+     u64 FrameWaitUsed = 0; // microseconds, including sub-millisecond waits
+     void StartNetworkWorker();
+     void StopNetworkWorker();
+--- a/source/melonDS/src/frontend/qt_sdl/CheckpointStorage.h
++++ b/source/melonDS/src/frontend/qt_sdl/CheckpointStorage.h
+@@ -0,0 +1,22 @@
++// Unova Together: Copyright (C) 2026 mvq1303. GPL-3.0-or-later.
++#pragma once
++#include "Savestate.h"
++#include <QByteArray>
++#include <array>
++
++// Reuse capture allocations without changing capture cadence or recovery data.
++// QByteArray copy-on-write keeps any retained recovery checkpoint immutable.
++class CheckpointStorage {
++    std::array<QByteArray,2> buffers;
++    unsigned next=0;
++public:
++    template<class Writer> QByteArray capture(Writer writer) {
++        auto& buffer=buffers[next];
++        buffer.resizeForOverwrite(melonDS::Savestate::DEFAULT_SIZE);
++        melonDS::Savestate state(buffer.data(),buffer.size(),true);
++        if(!writer(state) || state.Error) return {};
++        state.Finish();if(state.Error) return {};
++        buffer.resize(state.Length());next^=1;
++        return buffer;
++    }
++};
+--- a/source/melonDS/src/frontend/qt_sdl/ConnectionFeedback.h
++++ b/source/melonDS/src/frontend/qt_sdl/ConnectionFeedback.h
+@@ -0,0 +1,23 @@
++// Unova Together: Copyright (C) 2026 mvq1303. GPL-3.0-or-later.
++#pragma once
++#include <QVariantMap>
++#include <QString>
++
++inline QString PresenceVisibilityReason(const QVariantMap& local,const QVariantMap& partner,qint64 age,
++                                        const QString& localVersion,const QString& localRom)
++{
++    if(age>=2000) return "Waiting for a fresh partner update.";
++    if(local.value("inBattle").toBool() || partner.value("inBattle").toBool()) return "Overworld sprites are hidden during battles.";
++    if(partner.value("inMenu").toBool()) return "Partner is in a game menu.";
++    if(!partner.value("active").toBool()) return "Partner has not reached the overworld.";
++    if(!local.value("fieldPositionOwned").toBool()) return "Your field position is unavailable; return to the overworld.";
++    if(local.value("map").toInt()!=partner.value("map").toInt()) return "Different maps: use Join map to meet up.";
++    const auto version=partner.value("modVersion").toString();
++    if(!version.isEmpty() && version!="1.0.7-dev" && version!=localVersion) return "Different releases: update both players to the same version.";
++    const auto rom=partner.value("romFingerprint").toString();
++    if(!localRom.isEmpty() && !rom.isEmpty() && rom!=localRom) return "Different ROM builds: battles require matching games.";
++    if(!local.value("cameraValid").toBool()) return "The game camera is unavailable in this area.";
++    if(localRom.isEmpty() || rom.isEmpty()) return "Same map; waiting for ROM compatibility information.";
++    if(version.isEmpty() || version=="1.0.7-dev") return "Same map and matching ROM; partner version is not reported reliably.";
++    return "Same map and matching ROM; partner should be visible.";
++}
+--- a/source/melonDS/src/frontend/qt_sdl/SoaringScene.h
++++ b/source/melonDS/src/frontend/qt_sdl/SoaringScene.h
+@@ -0,0 +1,216 @@
++// Unova Together: Copyright (C) 2026 mvq1303. GPL-3.0-or-later.
++#pragma once
++#include <QJsonDocument>
++#include <QJsonArray>
++#include <QJsonObject>
++#include <QFile>
++#include <QFileInfo>
++#include <QVariantMap>
++#include <QDir>
++#include <QPainter>
++#include <QMatrix4x4>
++#include <QPainterPath>
++#include <algorithm>
++#include <cmath>
++#include <vector>
++
++// A local rendering scene, never a Town Map overlay or live actor-coordinate
++// editor. Geometry and textures come from the user's loaded ROM.
++class SoaringScene {
++    struct Vertex {QVector3D position;QPointF uv;};
++    struct Face {int texture;QList<Vertex> vertices;};
++    QList<Face> faces;
++    QList<QImage> textures;
++    struct TextureMode {bool repeatS=true,repeatT=true,mirrorS=false,mirrorT=false;};
++    QList<TextureMode> textureModes;
++public:
++    enum Phase {Off,Preparing,Takeoff,Flying,Landing};
++    Phase phase=Off;
++    double x=0,z=0,altitude=0,heading=0,speed=0,phaseTime=0;
++    double sceneX=0,sceneZ=0;
++    int visibleMap=0;
++    QList<QVariantMap> landingSites;
++    double landingX=0,landingZ=0,landingHeight=0;
++    unsigned species=0,form=0,gender=2;
++    bool shiny=false;
++    int map=0;
++    QVariantMap anchor;
++    QString error;
++    bool active() const {return phase!=Off;}
++    void reset() {*this=SoaringScene{};}
++    bool load(const QString& path) {
++        QFile file(path);if(!file.open(QIODevice::ReadOnly) || file.size()>16*1024*1024) {error="Flight scenery unavailable";return false;}
++        const auto data=QJsonDocument::fromJson(file.readAll()).object();
++        if(data.value("format").toInt()!=1 || data.value("sourceZone").toInt(data.value("zone").toInt())!=map) {error="Flight map changed";return false;}
++        const QDir dir(QFileInfo(path).absolutePath());
++        const auto images=data.value("textures").toArray(),geometry=data.value("faces").toArray();
++        if(images.isEmpty() || images.size()>512 || geometry.isEmpty() || geometry.size()>32000) {error="Unsupported flight scenery";return false;}
++        QList<QImage> checkedTextures;QList<Face> checkedFaces;QList<TextureMode> checkedModes;
++        const auto modes=data.value("textureModes").toArray();
++        qint64 pixels=0;
++        for(const auto& value:images) {
++            const auto name=value.toString();
++            if(name.contains('/') || name.contains('\\') || !name.endsWith(".png")) return false;
++            QImage image(dir.filePath(name));
++            if(image.isNull() || image.width()>1024 || image.height()>1024 || (pixels+=qint64(image.width())*image.height())>16*1024*1024) return false;
++            checkedTextures.append(image.convertToFormat(QImage::Format_ARGB32));
++            const auto mode=checkedModes.size()<modes.size()?modes[checkedModes.size()].toArray():QJsonArray{};
++            checkedModes.append(mode.size()==4?TextureMode{mode[0].toBool(),mode[1].toBool(),mode[2].toBool(),mode[3].toBool()}:TextureMode{});
++        }
++        for(const auto& value:geometry) {
++            const auto pair=value.toArray();if(pair.size()!=2 || !pair[0].isDouble()) return false;
++            Face face;face.texture=pair[0].toInt(-1);
++            const auto vertices=pair[1].toArray();
++            if(face.texture<0 || face.texture>=checkedTextures.size() || vertices.size()<3 || vertices.size()>12) return false;
++            for(const auto& item:vertices) {
++                const auto v=item.toArray();if(v.size()!=5) return false;
++                for(const auto& coordinate:v) if(!coordinate.isDouble() || !std::isfinite(coordinate.toDouble()) || std::abs(coordinate.toDouble())>32768) return false;
++                face.vertices.append({QVector3D(v[0].toDouble(),v[1].toDouble(),v[2].toDouble()),QPointF(v[3].toDouble(),v[4].toDouble())});
++            }
++            checkedFaces.append(face);
++        }
++        const auto world=data.value("world").toArray();
++        if(world.size()!=3) return false;
++        for(const auto& value:world) if(!value.isDouble() || !std::isfinite(value.toDouble())) return false;
++        sceneX=world[0].toDouble()-anchor.value("worldX",world[0].toDouble()).toDouble();
++        sceneZ=world[2].toDouble()-anchor.value("worldZ",world[2].toDouble()).toDouble();
++        visibleMap=data.value("zone").toInt();
++        QList<QVariantMap> checkedLandings;
++        const auto sites=data.value("landings").toArray();if(sites.size()>10000) return false;
++        for(const auto& item:sites) {
++            const auto site=item.toArray();if(site.size()!=4) return false;
++            for(const auto& value:site) if(!value.isDouble() || !std::isfinite(value.toDouble())) return false;
++            const int zone=site[0].toInt(),tx=site[1].toInt(),tz=site[2].toInt();const double y=site[3].toDouble();
++            if(zone<=0 || zone>4095 || tx<0 || tx>4095 || tz<0 || tz>4095 || std::abs(y)>32768) return false;
++            checkedLandings.append({{"map",zone},{"tileX",tx},{"tileZ",tz},{"worldX",tx*16.+8},{"worldZ",tz*16.+8},{"worldY",y}});
++        }
++        landingSites=checkedLandings;
++        textures=checkedTextures;textureModes=checkedModes;faces=checkedFaces;
++        if(phase==Preparing || phase==Off) {phase=Takeoff;phaseTime=0;}
++        return true;
++    }
++    void step(unsigned buttons,double dt) {
++        dt=std::clamp(dt,0.,.1);phaseTime+=dt;
++        if(phase==Takeoff) {altitude=96*std::min(1.,phaseTime/1.4);if(phaseTime>=1.4) {phase=Flying;phaseTime=0;}return;}
++        if(phase==Landing) {
++            x+=(landingX-x)*std::min(1.,dt*5);z+=(landingZ-z)*std::min(1.,dt*5);
++            altitude=std::max(landingHeight,altitude-dt*80);
++            if(altitude==landingHeight && std::hypot(x-landingX,z-landingZ)<.5) {x=landingX;z=landingZ;phase=Off;}
++            return;
++        }
++        if(phase!=Flying) return;
++        const double turn=((buttons&(1<<4))?1.:0.)-((buttons&(1<<5))?1.:0.);
++        heading+=turn*dt*1.4;
++        const double target=buttons&(1<<6)?(buttons&1?120.:72.):buttons&(1<<7)?-32.:0.;
++        speed+=(target-speed)*std::min(1.,dt*4);
++        x=std::clamp(x+std::sin(heading)*speed*dt,sceneX-600.,sceneX+600.);
++        z=std::clamp(z-std::cos(heading)*speed*dt,sceneZ-600.,sceneZ+600.);
++        altitude=std::clamp(altitude+(((buttons&(1<<9))?1.:0.)-((buttons&(1<<8))?1.:0.))*dt*72,64.,256.);
++    }
++    QVariantMap nearestLanding(double radius=48) const {
++        QVariantMap result;
++        for(const auto& site:landingSites) {
++            const double dx=site.value("worldX").toDouble()-anchor.value("worldX").toDouble()-x;
++            const double dz=site.value("worldZ").toDouble()-anchor.value("worldZ").toDouble()-z;
++            const double ground=site.value("worldY").toDouble()-anchor.value("worldY").toDouble();
++            const double distance=std::hypot(dx,dz);
++            if(distance<=radius && ground<altitude-8) {radius=distance;result=site;}
++        }
++        return result;
++    }
++    QImage render(const QList<QImage>& mount,qint64 now,const QImage& trainer={}) const {
++        QImage image(256,192,QImage::Format_ARGB32_Premultiplied);image.fill(QColor(140,197,226));QPainter painter(&image);
++        QLinearGradient sky(0,0,0,192);sky.setColorAt(0,QColor(110,167,213));sky.setColorAt(1,QColor(204,226,229));painter.fillRect(image.rect(),sky);
++        if(faces.isEmpty()) return image.convertToFormat(QImage::Format_RGBA8888_Premultiplied);
++        const QVector3D forward(std::sin(heading),0,-std::cos(heading));
++        const QVector3D rider(x-sceneX,altitude,z-sceneZ);
++        QMatrix4x4 view;view.lookAt(rider-forward*130+QVector3D(0,65,0),rider+forward*150-QVector3D(0,72,0),{0,1,0});
++        QMatrix4x4 projection;projection.perspective(58,4.f/3.f,8,2400);
++        const auto matrix=projection*view;
++        struct Projected {double x,y,q,u,v;};
++        struct Triangle {int texture;Projected vertex[3];float depth;};QList<Triangle> triangles;
++        // Clip at the near plane, then interpolate UV/w and 1/w per pixel.
++        // Affine brushes stretched roads and average-depth sorting let roofs
++        // overwrite walls; the depth buffer resolves individual fragments.
++        for(const auto& face:faces) for(int i=1;i+1<face.vertices.size();++i) {
++            struct Clip {QVector4D p;QPointF uv;};QList<Clip> polygon;
++            for(int index:{0,i,i+1}) {
++                const auto& v=face.vertices[index];polygon.append({matrix*QVector4D(v.position,1),v.uv});
++            }
++            QList<Clip> clipped;
++            for(int j=0;j<polygon.size();++j) {
++                const auto& a=polygon[j];const auto& b=polygon[(j+1)%polygon.size()];
++                const double da=a.p.z()+a.p.w(),db=b.p.z()+b.p.w();
++                if(da>=0) clipped.append(a);
++                if((da>=0)!=(db>=0)) {const double f=da/(da-db);clipped.append({a.p+(b.p-a.p)*f,a.uv+(b.uv-a.uv)*f});}
++            }
++            for(int j=1;j+1<clipped.size();++j) {
++                Triangle t;t.texture=face.texture;t.depth=0;int k=0;QRectF bounds;
++                bool valid=true;
++                for(int index:{0,j,j+1}) {
++                    const auto& v=clipped[index];if(v.p.w()<=0) {valid=false;break;}
++                    const double q=1./v.p.w();
++                    t.vertex[k++]={128+128*v.p.x()*q,96-96*v.p.y()*q,q,v.uv.x()*q,v.uv.y()*q};t.depth+=v.p.w();
++                }
++                if(!valid) continue;
++                const auto& a=t.vertex[0];const auto& b=t.vertex[1];const auto& c=t.vertex[2];
++                bounds=QRectF(QPointF(std::min({a.x,b.x,c.x}),std::min({a.y,b.y,c.y})),QPointF(std::max({a.x,b.x,c.x}),std::max({a.y,b.y,c.y})));
++                if(bounds.intersects(image.rect())) triangles.append(t);
++            }
++        }
++        std::sort(triangles.begin(),triangles.end(),[](const auto& a,const auto& b){return a.depth>b.depth;});
++        painter.end();std::vector<float> depth(256*192,0.f);
++        for(const auto& t:triangles) {
++            const auto& a=t.vertex[0];const auto& b=t.vertex[1];const auto& c=t.vertex[2];
++            const double area=(b.y-c.y)*(a.x-c.x)+(c.x-b.x)*(a.y-c.y);if(std::abs(area)<1e-8) continue;
++            const int left=int(std::clamp(std::floor(std::min({a.x,b.x,c.x})),0.,255.));
++            const int right=int(std::clamp(std::ceil(std::max({a.x,b.x,c.x})),0.,255.));
++            const int top=int(std::clamp(std::floor(std::min({a.y,b.y,c.y})),0.,191.));
++            const int bottom=int(std::clamp(std::ceil(std::max({a.y,b.y,c.y})),0.,191.));
++            const auto& texture=textures[t.texture];const int tw=texture.width(),th=texture.height();
++            const auto mode=textureModes[t.texture];
++            auto coordinate=[](int value,int size,bool repeat,bool mirror) {
++                if(!repeat) return std::clamp(value,0,size-1);
++                const int period=mirror?size*2:size;value=(value%period+period)%period;
++                return value>=size?period-1-value:value;
++            };
++            const double dx0=(b.y-c.y)/area,dy0=(c.x-b.x)/area,dx1=(c.y-a.y)/area,dy1=(a.x-c.x)/area;
++            double row0=((b.y-c.y)*(left+.5-c.x)+(c.x-b.x)*(top+.5-c.y))/area;
++            double row1=((c.y-a.y)*(left+.5-c.x)+(a.x-c.x)*(top+.5-c.y))/area;
++            for(int py=top;py<=bottom;++py,row0+=dy0,row1+=dy1) {
++                auto* output=reinterpret_cast<QRgb*>(image.scanLine(py));double w0=row0,w1=row1;
++                for(int px=left;px<=right;++px,w0+=dx0,w1+=dx1) {
++                    const double w2=1-w0-w1;if(w0<-1e-7 || w1<-1e-7 || w2<-1e-7) continue;
++                    const double q=w0*a.q+w1*b.q+w2*c.q;const int index=py*256+px;
++                    if(q<=depth[index]) continue;
++                    const int u=int(std::floor((w0*a.u+w1*b.u+w2*c.u)/q));
++                    const int v=int(std::floor((w0*a.v+w1*b.v+w2*c.v)/q));
++                    const QRgb colour=reinterpret_cast<const QRgb*>(texture.constScanLine(coordinate(v,th,mode.repeatT,mode.mirrorT)))[coordinate(u,tw,mode.repeatS,mode.mirrorS)];
++                    const int alpha=qAlpha(colour);if(!alpha) continue;
++                    if(alpha==255) output[px]=colour;
++                    else {const auto old=output[px];output[px]=qRgb((qRed(colour)*alpha+qRed(old)*(255-alpha))/255,(qGreen(colour)*alpha+qGreen(old)*(255-alpha))/255,(qBlue(colour)*alpha+qBlue(old)*(255-alpha))/255);}
++                    depth[index]=q;
++                }
++            }
++        }
++        painter.begin(&image);
++        const auto landing=nearestLanding(120);
++        if(!landing.isEmpty() && phase==Flying) {
++            const QVector3D point(landing.value("worldX").toDouble()-anchor.value("worldX").toDouble()-sceneX,
++                                  landing.value("worldY").toDouble()-anchor.value("worldY").toDouble()+1,
++                                  landing.value("worldZ").toDouble()-anchor.value("worldZ").toDouble()-sceneZ);
++            const auto p=matrix*QVector4D(point,1);
++            if(p.w()>8) {painter.setBrush(Qt::NoBrush);painter.setPen(QPen(QColor(80,255,130),2));painter.drawEllipse(QPointF(128+128*p.x()/p.w(),96-96*p.y()/p.w()),5,3);}
++        }
++        if(mount.size()==12) {
++            constexpr int poses[4]={0,1,0,2};
++            const auto sprite=mount[poses[(now/180)%4]];
++            painter.save();painter.translate(128,132);painter.rotate(-std::sin(heading)*7);painter.drawImage(QRect(-24,-32,48,48),sprite);
++            if(!trainer.isNull()) painter.drawImage(QRect(-10,-35,20,20),trainer,QRect(0,0,trainer.width(),trainer.height()*2/3));
++            painter.restore();
++        }
++        painter.setPen(QColor(255,255,255,210));
++        if(speed>55) for(int i=0;i<5;++i) {const int offset=int(now/7+i*37)%192;painter.drawLine(9+i*59,offset,9+i*59,offset+9);}
++        return image.convertToFormat(QImage::Format_RGBA8888_Premultiplied);
++    }
++};
+--- a/source/melonDS/src/frontend/qt_sdl/NativeCoopRuntime.h
++++ b/source/melonDS/src/frontend/qt_sdl/NativeCoopRuntime.h
+@@ -10,6 +10,7 @@
+ #include "NativeCallGate.h"
+ #include "NpcStoryHold.h"
+ #include "NpcDialogueHold.h"
++#include "CheckpointStorage.h"
+ #include <QString>
+ #include <QVariantMap>
+ #include <QByteArray>
+@@ -47,6 +48,9 @@
+     QVariantList npcTraceFetchHistory;
+     NpcStoryHold::Encounter npcEncounter;
+     QByteArray npcCheckpoint;
++    CheckpointStorage npcCheckpointStorage;
++    double npcCheckpointMs=0;
++    unsigned npcCheckpointCaptures=0;
+     const void* npcCart=nullptr;
+     unsigned npcOwner=0,npcIdleFrames=0,npcHoldFrames=0;
+     QVariantList npcCatalog;
+--- a/source/melonDS/src/frontend/qt_sdl/NativeCoopRuntime.cpp
++++ b/source/melonDS/src/frontend/qt_sdl/NativeCoopRuntime.cpp
+@@ -11,6 +11,7 @@
+ #include "NDS.h"
+ #include "NDSCart.h"
+ #include "Savestate.h"
++#include <QElapsedTimer>
+ #include "EmuInstance.h"
+ #include "LAN.h"
+ #include "Gen5Menu.h"
+@@ -510,10 +511,13 @@
+ }
+ QVariantMap NativeCoopRuntime::Snapshot() const {
+     unsigned nativeLANPlayers=0;
++    QVariantList peerPings;
+     bool nativeLANReady=false;
+     if(melonDS::MPInterface::GetType()==melonDS::MPInterface_LAN) {
+         auto& lan=static_cast<melonDS::LAN&>(melonDS::MPInterface::Get());
+-        nativeLANPlayers=static_cast<unsigned>(lan.GetPlayerList().size());
++        const auto players=lan.GetPlayerList();nativeLANPlayers=static_cast<unsigned>(players.size());
++        for(const auto& player:players) if(!player.IsLocalPlayer)
++            peerPings.append(QVariantMap{{"name",QString::fromUtf8(player.Name,32).section(QChar(0),0,0)},{"pingMs",player.Ping},{"measured",player.Ping>0}});
+         nativeLANReady=lan.GetSessionRole()!=0 && nativeLANPlayers>=2;
+     }
+     QVariantMap pairingDetails;
+@@ -569,6 +573,8 @@
+     return {{"fixtureFrames",reportFrames},{"fixtureElapsedMs",qulonglong(fixtureStartMs?melonDS::Platform::GetMSCount()-fixtureStartMs:0)},
+             {"nativeCoopPairingDetails",pairingDetails},{"nativeCoopInvitation",invitation},{"nativeCoopInvitationSerial",invitationSerial},{"nativeCoopInvitationName",invitationName},{"nativeCoopInvitationReason",invitationReason},
+             {"nativeCoopNpcAutomatic",automaticStory},{"nativeCoopNpcWatching",npcObserving},
++            {"nativeCoopCheckpointMs",npcCheckpointMs},{"nativeCoopCheckpointCaptures",npcCheckpointCaptures},
++            {"nativeCoopPeerPings",peerPings},
+             {"nativeCoopNpcDialogueHeld",npcDialogueDetected&&!npcDialogueReleased},
+             {"nativeCoopNpcDialogueMatched",npcDialogueReleased},
+             {"nativeCoopNpcDialogueTrainer",npcDialogue.trainer},
+@@ -821,11 +827,10 @@
+     const bool button=!(nds.KeyInput&1);
+     const bool walking=(nds.KeyInput&0xf0)!=0xf0;
+     if(npcCheckpoint.isEmpty() || (button && !npcButtonDown) || (walking && ++npcIdleFrames>=60)) {
+-        melonDS::Savestate checkpoint;
+-        if(nds.DoSavestate(&checkpoint) && !checkpoint.Error) {
+-            checkpoint.Finish();
+-            if(!checkpoint.Error) npcCheckpoint=QByteArray(static_cast<const char*>(checkpoint.Buffer()),checkpoint.Length());
+-        }
++        QElapsedTimer captureTime;captureTime.start();
++        const auto checkpoint=npcCheckpointStorage.capture([&](melonDS::Savestate& state) {return nds.DoSavestate(&state);});
++        npcCheckpointMs=captureTime.nsecsElapsed()/1000000.;
++        if(!checkpoint.isEmpty()) {npcCheckpoint=checkpoint;++npcCheckpointCaptures;}
+         npcIdleFrames=0;
+     }
+     npcButtonDown=button;core=&nds;npcObserving=true;
+--- a/source/melonDS/src/frontend/qt_sdl/PresenceOverlay.h
++++ b/source/melonDS/src/frontend/qt_sdl/PresenceOverlay.h
+@@ -9,6 +9,8 @@
+ #include <chrono>
+ #include <cmath>
+ #include <QVariantMap>
++#include <functional>
++#include <array>
+ 
+ // Frontend-only pixels. No ROM/RAM writes; GUI producer and render-thread consumer.
+ class PresenceSurface
+@@ -18,17 +20,36 @@
+     {
+         QMutexLocker lock(&mutex);
+         image = frame;
++        renderer={};
+         timestamp = std::chrono::steady_clock::now();
+     }
+-    QImage snapshot()
++    void publishRenderer(std::function<QImage(const QVariantMap&,qint64)> draw,bool cameraRequired=true)
++    {
++        QMutexLocker lock(&mutex);renderer=std::move(draw);usesCamera=cameraRequired;timestamp=std::chrono::steady_clock::now();
++    }
++    bool needsFrameProjection() {QMutexLocker lock(&mutex);return bool(renderer) && usesCamera;}
++    void publishCamera(const QVariantMap& camera,int buffer)
++    {
++        QMutexLocker lock(&mutex);cameras[buffer&1]=camera;latestBuffer=buffer&1;
++    }
++    QImage snapshot(int buffer=-1)
+     {
+         QMutexLocker lock(&mutex);
+         if (std::chrono::steady_clock::now() - timestamp > std::chrono::milliseconds(500)) return {};
++        if(renderer) {
++            const auto draw=renderer;const auto camera=cameras[buffer<0?latestBuffer:buffer&1];
++            const auto age=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now()-timestamp).count();
++            lock.unlock();return draw(camera,age);
++        }
+         return image;
+     }
+ private:
+     QMutex mutex;
+     QImage image;
++    std::function<QImage(const QVariantMap&,qint64)> renderer;
++    std::array<QVariantMap,2> cameras;
++    int latestBuffer=0;
++    bool usesCamera=true;
+     std::chrono::steady_clock::time_point timestamp{};
+ };
+ 
+--- a/source/melonDS/src/frontend/qt_sdl/EmuThread.h
++++ b/source/melonDS/src/frontend/qt_sdl/EmuThread.h
+@@ -239,6 +239,7 @@
+     QVariantMap followerSampleResult;
+     std::atomic<bool> followerSamplePending{false};
+     OverworldTracker overworldTracker;
++    OverworldTracker presenceRenderTracker;
+     AreaBattleScenes areaBattleScenes;
+     NativeCoopRuntime nativeCoopRuntime;
+     FieldTeleport fieldTeleport;
+--- a/source/melonDS/src/frontend/qt_sdl/EmuThread.cpp
++++ b/source/melonDS/src/frontend/qt_sdl/EmuThread.cpp
+@@ -558,6 +558,7 @@
+ 
+             const auto* profileCart=emuInstance->nds->NDSCartSlot.GetCart();
+             overworldTracker.SetGameCode(profileCart && profileCart->GetROMLength()>=16 ? profileCart->GetROM()+12 : nullptr);
++            presenceRenderTracker.SetGameCode(profileCart && profileCart->GetROMLength()>=16 ? profileCart->GetROM()+12 : nullptr);
+ 
+             emuInstance->nds->SetKeyMask(emuInstance->inputMask);
+ 
+@@ -779,6 +780,8 @@
+                     }
+                 }
+                 nlines = emuInstance->nds->RunFrame();
++                if(emuInstance->presenceSurface.needsFrameProjection())
++                    emuInstance->presenceSurface.publishCamera(presenceRenderTracker.Sample(emuInstance->nds->MainRAM,emuInstance->nds->MainRAMMask+1),emuInstance->nds->GPU.FrontBuffer);
+                 const bool playerBattleCompleted=nativeCoopRuntime.PlayerBattleCompleted();
+                 if(playerBattleCompleted && !playerBattleCompletionObserved) {
+                     playerBattleFieldRecoveryPending=true;
+--- a/source/melonDS/src/frontend/qt_sdl/Screen.cpp
++++ b/source/melonDS/src/frontend/qt_sdl/Screen.cpp
+@@ -852,7 +852,7 @@
+         emuThread->frontBufferLock.unlock();
+ 
+         QRect screenrc(0, 0, 256, 192);
+-        const auto presence = emuInstance->presenceSurface.snapshot();
++        const auto presence = emuInstance->presenceSurface.snapshot(frontbuf);
+         const auto gameMenu = emuInstance->gameMenuSurface.snapshot();
+ 
+         for (int i = 0; i < numScreens; i++)
+--- a/source/melonDS/src/frontend/qt_sdl/MultiplayerPanel.cpp
++++ b/source/melonDS/src/frontend/qt_sdl/MultiplayerPanel.cpp
+@@ -66,6 +66,8 @@
+ #include "NDSCart.h"
+ #include "ItemTrading.h"
+ #include "PokemonTrading.h"
++#include "ConnectionFeedback.h"
++#include "FollowerAppearance.h"
+ #include "OffMapPresence.h"
+ #include "FollowerInteraction.h"
+ 
+@@ -238,6 +240,7 @@
+     coopReadinessStatus=new QLabel("Co-op readiness: waiting for connection status.",this);
+     coopReadinessStatus->setObjectName("coopReadinessStatus");
+     coopReadinessStatus->setWordWrap(true);
++    coopReadinessStatus->setTextFormat(Qt::PlainText);
+     coopReadinessStatus->setTextInteractionFlags(Qt::TextSelectableByMouse);
+     diag->addWidget(coopReadinessStatus);
+     offMapPresenceDebug=new QLabel("Off-map teammates: none",this);
+@@ -668,6 +671,20 @@
+             .arg(sample.value("nativeCoopInvitationName").toString());
+     else
+         readiness+="\nChallenge agreement is checked when Practice is requested; the partner must accept Join.";
++    if(!remote.isEmpty()) {
++        auto selected=remote.cbegin();
++        const int row=peers->currentRow();
++        if(row>=0 && peers->item(row,0)) {
++            const auto candidate=remote.constFind(peers->item(row,0)->data(Qt::UserRole).toString());
++            if(candidate!=remote.cend()) selected=candidate;
++        }
++        if(!selected->frames.isEmpty()) readiness+="\n"+selected->name+": "+PresenceVisibilityReason(sample,selected->frames.last().state,clock.elapsed()-selected->frames.last().time,ProjectCredits::Version,presenceRomDigest);
++    }
++    if(sample.value("nativeCoopCheckpointCaptures").toUInt()) readiness+=QString("\nLocal checkpoint capture: %1 ms.").arg(sample.value("nativeCoopCheckpointMs").toDouble(),0,'f',1);
++    unsigned maximumPing=0;
++    for(const auto& value:sample.value("nativeCoopPeerPings").toList()) if(value.toMap().value("measured").toBool()) maximumPing=qMax(maximumPing,value.toMap().value("pingMs").toUInt());
++    if(maximumPing) readiness+=QString("\nNative LAN ping: %1 ms (highest peer).").arg(maximumPing);
++    else if(lanPlayers>1) readiness+="\nNative LAN ping: waiting for a measurement.";
+     coopReadinessStatus->setText(readiness);
+ }
+ 
+@@ -676,6 +693,10 @@
+     syncGameItemCard();syncPlayersMenu();
+     const auto sample = instance->getEmuThread()->sampleOverworldPresence(previous.isEmpty());
+     currentSample = sample;
++    if(soaringEnabled && !soaring.active() && sample.value("fieldPositionOwned").toBool() && !sample.value("moving").toBool() && !sample.value("inMenu").toBool() && !sample.value("inBattle").toBool()) {
++        const auto duplicate=std::any_of(soaringLandings.cbegin(),soaringLandings.cend(),[&](const auto& site) {return site.toMap().value("map")==sample.value("map") && site.toMap().value("tileX")==sample.value("tileX") && site.toMap().value("tileZ")==sample.value("tileZ");});
++        if(!duplicate) {soaringLandings.append(sample);if(soaringLandings.size()>256) soaringLandings.removeFirst();}
++    }
+     refreshNativeCoop(sample);
+     const auto romIdentity=sample.value("romIdentity").toString();
+     if(menuRomIdentity!=romIdentity) {menuArtwork=Gen5Menu{};menuRomIdentity=romIdentity;
+@@ -964,7 +985,7 @@
+     message["activity"]=presenceActivity();
+     message["nativeLANReady"]=currentSample.value("nativeCoopLANReady").toBool();
+     message["coopProtocol"]=2;
+-    message["modVersion"]="1.0.7-dev";
++    message["modVersion"]=ProjectCredits::Version;
+     if(!presenceRomDigest.isEmpty()) message["romFingerprint"]=presenceRomDigest;
+     message["coopStatus"]=coopStatus();
+     message["shareBattle"]=shareBattle;
+@@ -1113,6 +1134,13 @@
+ 
+ void MultiplayerPanel::renderPeers()
+ {
++    if(soaring.active()) {
++        const auto mount=pokemonFollowerSprites(soaring.species,soaring.form,soaring.gender,soaring.shiny);
++        const auto trainer=(trainerChoice->currentIndex()==1?femaleSprites:maleSprites).value(0);
++        const auto now=clock.elapsed();const auto buttons=instance->gameMenuButtons();
++        instance->presenceSurface.publishRenderer([flight=soaring,mount,trainer,now,buttons](const QVariantMap&,qint64 age) {auto frame=flight;frame.step(buttons,age/1000.);return frame.render(mount,now+age,trainer);},false);
++        return;
++    }
+     QString selectedId;
+     if (peers->currentRow() >= 0 && peers->item(peers->currentRow(),0))
+         selectedId=peers->item(peers->currentRow(),0)->data(Qt::UserRole).toString();
+@@ -1220,10 +1248,36 @@
+         if(menuMode=="companionDialogue" && companionActive()) {
+             QPainter painter(&image);
+             painter.drawImage(0,0,companionShowingReply
+-                ?menuArtwork.renderCompanionDialogue(companionMessage)
++                ?menuArtwork.renderCompanionDialogue(companionMessage,companionDialoguePage)
+                 :menuArtwork.renderCompanionActions(companion.value("name").toString(),companionActionFocus));
+         } else if(menuMode=="companionDialogue") closeGameMenus();
+-        instance->presenceSurface.publish(image);
++        if(calibration.automatic && calibration.valid && menuMode!="companionDialogue") {
++            QMap<QString,QList<PresenceMotionFrame>> frames;
++            for(auto it=remote.cbegin();it!=remote.cend();++it) frames[it.key()]=it->frames;
++            const auto local=QPointF(currentSample.value("smoothX").toDouble(),currentSample.value("smoothZ").toDouble());
++            PresenceAvatar localAvatar{selfId,playerName->text(),currentSample.value("facing").toString(),local,currentSample.value("moving").toBool(),currentSample.value("worldY").toDouble(),trainerChoice->currentIndex()==1?femaleSprites:maleSprites,false};
++            instance->presenceSurface.publishRenderer([base=calibration,poses=avatars,frames,local,localAvatar,now,checkpoint=checkpoint,markers=markerMode->isChecked(),guides=showGuides->isChecked(),fallback=image](const QVariantMap& camera,qint64 age) {
++                if(camera.isEmpty()) return fallback;
++                if(!camera.value("fieldPositionOwned").toBool() || camera.value("map").toInt()!=base.map || camera.value("inBattle").toBool() || camera.value("inMenu").toBool()) return QImage{};
++                auto projection=base;
++                if(!projection.updateCamera(camera,now+age)) return QImage{};
++                const QPointF currentLocal(camera.value("smoothX").toDouble(),camera.value("smoothZ").toDouble());
++                auto currentPoses=poses;
++                QMap<QString,QPointF> shifts;shifts["local"]=currentLocal-local;
++                for(auto& avatar:currentPoses) if(!avatar.companion && frames.contains(avatar.id)) {
++                    const auto state=SamplePresenceMotion(frames.value(avatar.id),now+age);
++                    if(state.value("map").toInt()!=base.map) continue;
++                    const QPointF position(state.value("smoothX").toDouble(),state.value("smoothZ").toDouble());
++                    shifts[avatar.id]=position-avatar.position;avatar.position=position;
++                    avatar.height=state.value("worldY").toDouble();avatar.facing=state.value("facing").toString();
++                    avatar.moving=state.value("moving").toBool();avatar.running=state.value("running").toBool();
++                }
++                for(auto& avatar:currentPoses) if(avatar.companion) avatar.position+=shifts.value(avatar.id.section('/',0,0));
++                auto currentAvatar=localAvatar;currentAvatar.position=currentLocal;
++                currentAvatar.height=camera.value("worldY").toDouble();currentAvatar.facing=camera.value("facing").toString();currentAvatar.moving=camera.value("moving").toBool();
++                return DrawPresenceOverlay(projection,currentLocal,currentPoses,markers,guides,now+age,checkpoint,currentAvatar,QString());
++            });
++        } else instance->presenceSurface.publish(image);
+     }
+     else {followerTrails.clear();clearOverlay();}
+ }
+@@ -1241,6 +1295,7 @@
+     if(!companionActive()) {companionMessage="Stand idle in the field with your companion.";drawGameMenu();return;}
+     if(clock.elapsed()-companionLastAction<800) return;
+     companionLastAction=clock.elapsed();
++    companionDialoguePage=0;
+     const auto identity=companion.value("record").toByteArray().left(4);
+     if(!companionSceneVisits.contains(identity) && companionSceneVisits.size()>=24) companionSceneVisits.erase(companionSceneVisits.begin());
+     const auto variation=companionSceneVisits[identity][action]++;
+@@ -1507,11 +1562,17 @@
+     for(const auto& record:source) {
+         const auto trainer=record.toMap();
+         const auto fullName=trainer.value("name").toString();
++        const int level=trainer.value("maxLevel").toInt();
++        if(trainerPartyLevel>0 && ((bossDifficulty==1 && std::abs(level-trainerPartyLevel)>10) ||
++           (bossDifficulty==2 && level>=trainerPartyLevel) || (bossDifficulty==3 && level<=trainerPartyLevel))) continue;
+         if(!trainerSearch.isEmpty() && !fullName.contains(trainerSearch,Qt::CaseInsensitive)) continue;
+         const auto name=fullName.section(' ',0,0);
+         const int category=gyms.contains(name)?1:name=="Hugh"?2:league.contains(name)?3:4;
+         if(!bossCategory || bossCategory==category) bossList.append(record);
+     }
++    if(bossDifficulty && trainerPartyLevel>0) std::stable_sort(bossList.begin(),bossList.end(),[this](const auto& a,const auto& b) {
++        return std::abs(a.toMap().value("maxLevel").toInt()-trainerPartyLevel)<std::abs(b.toMap().value("maxLevel").toInt()-trainerPartyLevel);
++    });
+     bossSelection=0;menuScroll=0;
+ }
+ 
+@@ -1595,6 +1656,7 @@
+ }
+ void MultiplayerPanel::closeGameMenus()
+ {
++    if(menuMode=="soaring" || soaring.active()) {soaring.reset();soaringRequest.clear();instance->presenceSurface.publish({});}
+     menuMode.clear();menuRows.clear();instance->gameMenuSurface.publish({});
+     instance->setGameMenuOpen(false);lastMenuButtons=0;menuButtonsReady=false;
+     if(auto* window=qobject_cast<MainWindow*>(parentWidget())) {if(window->panel) {window->panel->update();window->panel->setFocus(Qt::OtherFocusReason);}window->update();}
+@@ -1674,6 +1736,20 @@
+         row("peerFollowers",showPeerFollowers?"Teammate followers: On":"Teammate followers: Off",{8,100,240,20});
+         row("greetFollowers","Greet teammate's Pokemon",{8,124,240,20},relaySocial && followerSpecies>0);
+         hint="B closes. L/R switches pages.";
++    } else if(menuMode=="soar-party") {
++        title="FLYING PARTNER";
++        for(int i=0;i<statsParty.size();++i) {
++            const auto mon=statsParty[i].toMap();bool capable=mon.value("type1").toInt()==2 || mon.value("type2").toInt()==2;
++            for(const auto& move:mon.value("moves").toList()) capable=capable || move.toUInt()==19;
++            row("soarPokemon:"+QString::number(i),mon.value("name").toString(),{8,28+i*18,240,17},capable && mon.value("hp").toUInt() && !mon.value("egg").toBool());
++        }
++        row("pokemonTools","B Back",{8,150,240,16});hint=soaringStatus.isEmpty()?"Choose a Flying-type partner or a Pokemon with Fly.":soaringStatus;
++    } else if(menuMode=="soaring") {
++        title="SOARING";
++        row("flightStatus",soaring.phase==SoaringScene::Preparing?"Preparing the local game map...":QString("Altitude %1 · Speed %2").arg(int(soaring.altitude)).arg(int(std::abs(soaring.speed))),{8,30,240,20},false);
++        row("soarLand","Land on clear ground",{8,80,240,24},soaring.phase==SoaringScene::Flying);
++        row("close","Return to take-off spot",{8,112,240,24});
++        hint=soaringStatus.isEmpty()?"D-pad steer/move. Hold A: boost. L/R altitude. B return. X land.":soaringStatus;
+     } else if(menuMode=="pokemonTools") {
+         title="POKEMON";
+         const bool idle=!currentSample.value("inBattle").toBool() && !currentSample.value("nativeCoopCanCancel").toBool();
+@@ -1683,7 +1759,7 @@
+         row("relearnParty","Relearn moves",{8,toolY,240,20},idle);toolY+=24;
+         if(soaringEnabled) row("soar","Take flight (experimental)",{8,toolY,240,20},idle);
+         hint=idle?"B closes. L/R switches pages.":"Return to the field to use Pokemon tools.";
+-        if(soaringEnabled && idle && menuFocus==3) hint="Choose a Pokemon, then use Fly. Landing stays in the game's own map flow.";
++        if(soaringEnabled && idle && menuFocus==3) hint="Steer above the local game world with a flying partner.";
+     } else if(menuMode=="coopTools") {
+         title="CO-OP";
+         const bool idle=!currentSample.value("inBattle").toBool() && !currentSample.value("nativeCoopCanCancel").toBool();
+@@ -1769,13 +1845,10 @@
+         menuScroll=qBound(0,menuScroll,qMax(0,bossList.size()-3));
+         for(int i=0;i<3 && i+menuScroll<bossList.size();++i) {
+             const int index=i+menuScroll;const auto boss=bossList[index].toMap();
+-            row("boss:"+QString::number(index),(index==bossSelection?"> ":"  ")+boss.value("name").toString(),{8,46+i*18,240,17});
+-        }
+-        if(!bossList.isEmpty()) {
+-            const auto trainer=bossList[qBound(0,bossSelection,bossList.size()-1)].toMap();
+-            const QString levels=trainer.contains("minLevel")?QString("Lv %1–%2").arg(trainer.value("minLevel").toUInt()).arg(trainer.value("maxLevel").toUInt()):QString("%1 Pokemon").arg(trainer.value("count").toUInt());
+-            row("trainerDetails",QString("Party: %1 Pokemon · %2").arg(trainer.value("count").toUInt()).arg(levels),{8,101,240,16},false);
+-        } else row("trainerDetails",trainerSearch.isEmpty()?bossCatalogReason:"No trainers match this search.",{8,101,240,16},false);
++            row("boss:"+QString::number(index),(index==bossSelection?"> ":"  ")+boss.value("name").toString()+QString(" Lv %1").arg(boss.value("maxLevel").toInt()),{8,46+i*18,240,17});
++        }
++        static const QStringList difficulty={"All levels","Near my party","Easier teams","Harder teams"};
++        row("bossDifficulty",difficulty[bossDifficulty]+QString(" · %1 teams").arg(bossList.size()),{8,101,240,16});
+         const bool cancel=currentSample.value("nativeCoopCanCancel").toBool();
+         const bool nativeLANReady=currentSample.value("nativeCoopLANReady").toBool();
+         const bool canStart=!bossList.isEmpty() && currentSample.value("nativeCoopCanStart").toBool() && nativeLANReady && !coopRequestPending && itemOffer.isEmpty() && pokemonTrade.isEmpty() && instance->getEmuThread()->pendingPokemonTrade().isEmpty();
+@@ -1878,7 +1951,7 @@
+ {
+     if(menuMode.isEmpty()) return;
+     if(menuMode=="companionDialogue") {
+-        if(companionShowingReply) {companionShowingReply=false;renderPeers();return;}
++        if(companionShowingReply) {if(companionDialoguePage+1<menuArtwork.companionDialoguePages(companionMessage).size()) ++companionDialoguePage;else companionShowingReply=false;renderPeers();return;}
+         if(point.y()>=110 && point.y()<180) {
+             const int row=qBound(0,int((point.y()-110)/14),4);
+             const int index=row*2+(point.x()>=128?1:0);
+@@ -1891,6 +1964,105 @@
+         return;
+     }
+     for(int i=0;i<menuRows.size();++i) if(menuRows[i].rect.contains(point.toPoint())) {menuFocus=i;if(menuRows[i].enabled) gameMenuAction(menuRows[i].id);return;}
++}
++void MultiplayerPanel::beginSoaring(int slot)
++{
++    if(!soaringEnabled || slot<0 || slot>=statsParty.size()) return;
++    const auto mon=statsParty[slot].toMap();bool capable=mon.value("type1").toInt()==2 || mon.value("type2").toInt()==2;
++    for(const auto& move:mon.value("moves").toList()) capable=capable || move.toUInt()==19;
++    const QDir directory(qEnvironmentVariable("UNOVA_SOARING_CACHE"));
++    if(!capable || !mon.value("hp").toUInt() || mon.value("egg").toBool() || !currentSample.value("fieldPositionOwned").toBool() || currentSample.value("moving").toBool() || currentSample.value("inBattle").toBool() || currentSample.value("nativeCoopCanCancel").toBool() || qEnvironmentVariable("UNOVA_SOARING_CACHE").isEmpty() || !directory.exists()) {
++        soaringStatus="Stand idle outdoors with a flying partner. Enable Soaring in launcher settings.";drawGameMenu();return;
++    }
++    soaring.reset();soaring.phase=SoaringScene::Preparing;soaring.anchor=currentSample;soaring.map=currentSample.value("map").toInt();
++    soaring.species=mon.value("species").toUInt();soaring.form=mon.value("form").toUInt();soaring.gender=mon.value("gender",2).toUInt();soaring.shiny=mon.value("shiny").toBool();
++    soaringStarted=soaringLastTick=clock.elapsed();soaringStreamRetry=0;soaringStatus.clear();soaringLandingTarget.clear();
++    soaringRequest=directory.filePath(QString("request-%1-%2.json").arg(QCoreApplication::applicationPid()).arg(soaringStarted));
++    QSaveFile request(soaringRequest);
++    const QJsonObject data{{"zone",soaring.map},{"worldX",currentSample.value("worldX").toDouble()},{"worldZ",currentSample.value("worldZ").toDouble()},{"worldY",currentSample.value("worldY").toDouble()}};
++    const auto bytes=QJsonDocument(data).toJson(QJsonDocument::Compact);
++    if(!request.open(QIODevice::WriteOnly) || request.write(bytes)!=bytes.size() || !request.commit()) {soaring.reset();soaringStatus="Could not prepare flight scenery.";drawGameMenu();return;}
++    menuMode="soaring";menuFocus=0;instance->setGameMenuOpen(true);renderPeers();drawGameMenu();
++}
++void MultiplayerPanel::pollSoaring(unsigned buttons,unsigned pressed)
++{
++    if(!soaring.active()) return;
++    if((pressed&(1<<1)) || currentSample.value("map").toInt()!=soaring.map || currentSample.value("inBattle").toBool() || currentSample.value("nativeCoopCanCancel").toBool() || !currentSample.value("fieldPositionOwned").toBool()) {closeGameMenus();renderPeers();return;}
++    const auto now=clock.elapsed();const double dt=(now-soaringLastTick)/1000.;soaringLastTick=now;
++    if(soaring.phase==SoaringScene::Preparing) {
++        const auto requestInfo=QFileInfo(soaringRequest);
++        QFile ready(requestInfo.dir().filePath(requestInfo.fileName().replace("request-","ready-")));
++        if(ready.open(QIODevice::ReadOnly) && ready.size()<=4096) {
++            const auto data=QJsonDocument::fromJson(ready.readAll()).object();
++            const auto relative=data.value("scene").toString();
++            const auto path=requestInfo.dir().filePath(relative);
++            const bool local=QFileInfo(path).canonicalFilePath().startsWith(requestInfo.dir().canonicalPath()+"/");
++            if(!data.value("error").toString().isEmpty() || !local || !soaring.load(path)) {
++                soaringStatus=data.value("error").toString(soaring.error.isEmpty()?"This map is not supported for flight.":soaring.error);
++                soaring.reset();menuMode="soar-party";instance->presenceSurface.publish({});drawGameMenu();return;
++            }
++            soaringRequest.clear();
++        } else if(now-soaringStarted>60000) {soaringStatus="Flight scenery timed out. Return and try again.";soaring.reset();menuMode="soar-party";instance->presenceSurface.publish({});drawGameMenu();return;}
++    } else {
++        // Preload ahead of the bounded scenery window while flight continues.
++        // The native actor remains at take-off; only the rendered scene moves.
++        if(soaring.phase==SoaringScene::Flying) {
++            if(!soaringRequest.isEmpty()) {
++                const QFileInfo requestInfo(soaringRequest);
++                QFile ready(requestInfo.dir().filePath(requestInfo.fileName().replace("request-","ready-")));
++                if(ready.open(QIODevice::ReadOnly) && ready.size()<=4096) {
++                    const auto data=QJsonDocument::fromJson(ready.readAll()).object();
++                    const auto path=requestInfo.dir().filePath(data.value("scene").toString());
++                    const bool local=QFileInfo(path).canonicalFilePath().startsWith(requestInfo.dir().canonicalPath()+"/");
++                    if(!data.value("error").toString().isEmpty() || !local || !soaring.load(path))
++                        soaringStatus=data.value("error").toString("Nearby flight scenery unavailable.");
++                    else soaringStatus.clear();
++                    soaringRequest.clear();soaringStreamRetry=now+3000;
++                } else if(now-soaringStarted>60000) {
++                    soaringRequest.clear();soaringStreamRetry=now+3000;soaringStatus="Nearby scenery timed out. B returns to take-off.";
++                }
++            }
++            if(soaringRequest.isEmpty() && now>=soaringStreamRetry && std::max(std::abs(soaring.x-soaring.sceneX),std::abs(soaring.z-soaring.sceneZ))>256) {
++                const QDir directory(qEnvironmentVariable("UNOVA_SOARING_CACHE"));
++                soaringStarted=now;
++                soaringRequest=directory.filePath(QString("request-%1-%2.json").arg(QCoreApplication::applicationPid()).arg(now));
++                QSaveFile request(soaringRequest);
++                const QJsonObject data{{"zone",soaring.map},{"worldX",soaring.anchor.value("worldX").toDouble()+soaring.x},{"worldZ",soaring.anchor.value("worldZ").toDouble()+soaring.z},{"worldY",soaring.anchor.value("worldY").toDouble()}};
++                const auto bytes=QJsonDocument(data).toJson(QJsonDocument::Compact);
++                if(!request.open(QIODevice::WriteOnly) || request.write(bytes)!=bytes.size() || !request.commit()) {
++                    soaringRequest.clear();soaringStreamRetry=now+3000;soaringStatus="Could not load nearby scenery.";
++                }
++            }
++        }
++        if(soaring.phase==SoaringScene::Flying && (pressed&(1<<10))) {
++            QVariantMap closest=soaring.nearestLanding();double distance=48;
++            if(!closest.isEmpty()) distance=std::hypot(closest.value("worldX").toDouble()-soaring.anchor.value("worldX").toDouble()-soaring.x,closest.value("worldZ").toDouble()-soaring.anchor.value("worldZ").toDouble()-soaring.z);
++            auto sites=soaringLandings;sites.append(soaring.anchor);
++            for(const auto& value:sites) {
++                const auto site=value.toMap();if(site.value("map").toInt()!=soaring.visibleMap && site.value("map").toInt()!=soaring.map) continue;
++                const double d=std::hypot(site.value("worldX").toDouble()-soaring.anchor.value("worldX").toDouble()-soaring.x,site.value("worldZ").toDouble()-soaring.anchor.value("worldZ").toDouble()-soaring.z);
++                if(d<=distance) {distance=d;closest=site;}
++            }
++            if(closest.isEmpty()) soaringStatus="No clear landing ground nearby. Move toward a green marker; B returns.";
++            else {
++                soaringLandingTarget=closest;soaring.phase=SoaringScene::Landing;soaring.phaseTime=0;
++                soaring.landingX=closest.value("worldX").toDouble()-soaring.anchor.value("worldX").toDouble();
++                soaring.landingZ=closest.value("worldZ").toDouble()-soaring.anchor.value("worldZ").toDouble();
++                soaring.landingHeight=closest.value("worldY").toDouble()-soaring.anchor.value("worldY").toDouble();
++                soaringStatus="Landing...";
++            }
++        }
++        soaring.step(buttons,dt);
++        if(!soaring.active()) {
++            const auto destination=soaringLandingTarget;const auto origin=soaring.anchor;closeGameMenus();
++            if(!destination.isEmpty() && (destination.value("map")!=origin.value("map") || destination.value("tileX")!=origin.value("tileX") || destination.value("tileZ")!=origin.value("tileZ"))) {
++                const auto result=instance->getEmuThread()->teleportToPlayer(destination.value("map").toInt(),destination.value("tileX").toInt(),destination.value("tileZ").toInt(),destination.value("worldY").toDouble());
++                if(!result.value("ok").toBool()) instance->osdAddMessage(0xFFFFFF,result.value("reason").toString().toUtf8().constData());
++            }
++            renderPeers();return;
++        }
++    }
++    renderPeers();drawGameMenu();
+ }
+ void MultiplayerPanel::refreshPartyStats()
+ {
+@@ -1906,6 +2078,7 @@
+         QVariantList verified;
+         for(unsigned i=0;i<count;++i) {
+             auto pokemon=PokemonTrading::Inspect(ram.mid(offset+8+i*PokemonTrading::RecordSize,PokemonTrading::RecordSize));
++            pokemon["shiny"]=pokemon.value("shinyXor").toUInt()<FollowerShinyThreshold(ram);
+             if(!pokemon.value("ok").toBool()) throw std::runtime_error("Party temporarily unavailable. Try again.");
+             verified.append(pokemon);
+         }
+@@ -1933,7 +2106,8 @@
+ void MultiplayerPanel::gameMenuAction(const QString& action)
+ {
+     if(action=="coopTools") {menuMode="coopTools";menuFocus=0;drawGameMenu();return;}
+-    if(action=="rematches") {trainerSearch.clear();menuMode="rematches";filterBossCatalog(true);menuFocus=0;menuScroll=0;drawGameMenu();return;}
++    if(action=="rematches") {refreshPartyStats();trainerPartyLevel=0;for(const auto& mon:statsParty) trainerPartyLevel=qMax(trainerPartyLevel,mon.toMap().value("level").toInt());trainerSearch.clear();menuMode="rematches";filterBossCatalog(true);menuFocus=0;menuScroll=0;drawGameMenu();return;}
++    if(action=="bossDifficulty") {bossDifficulty=trainerPartyLevel>0?(bossDifficulty+1)%4:0;filterBossCatalog(menuMode=="rematches");menuFocus=0;drawGameMenu();return;}
+     if(action=="pokemonTools") {menuMode="pokemonTools";menuFocus=0;drawGameMenu();return;}
+     if(action=="followerOptions") {menuMode="game";menuFocus=0;drawGameMenu();return;}
+     if(action=="greetFollowers") {sendSocial("greet");closeGameMenus();return;}
+@@ -1944,7 +2118,16 @@
+     if(action=="toolsPrev" || action=="toolsNext") {menuScroll+=action=="toolsNext"?4:-4;menuFocus=0;drawGameMenu();return;}
+     if(action.startsWith("encounterInfo:")) {const auto index=action.mid(14).toInt();if(index>=0 && index<encounterRows.size()) {const auto info=encounterRows[index].toMap();fieldToolsReason=info.value("method").toString()+(info.value("invalidRange").toBool()?". ROM has an invalid level range.":". Chance within this encounter method.");}drawGameMenu();return;}
+     if(action=="relearnParty") {refreshPartyStats();menuMode="relearn-party";menuFocus=0;drawGameMenu();return;}
+-    if(action=="soar" && soaringEnabled) {closeGameMenus();instance->getEmuThread()->openOriginalGameMenu(1);return;}
++    if(action=="soar" && soaringEnabled) {
++        refreshPartyStats();soaringStatus=statsReason;
++        if(const auto* cart=instance->getNDS()?instance->getNDS()->NDSCartSlot.GetCart():nullptr) for(auto& entry:statsParty) {
++            auto mon=entry.toMap();const auto traits=Gen5Menu::companionTraits(cart->GetROM(),cart->GetROMLength(),mon.value("species").toUInt(),mon.value("form").toUInt());
++            mon["type1"]=traits.value("type1");mon["type2"]=traits.value("type2");entry=mon;
++        }
++        menuMode="soar-party";menuFocus=0;drawGameMenu();return;
++    }
++    if(action.startsWith("soarPokemon:") && soaringEnabled) {beginSoaring(action.mid(12).toInt());return;}
++    if(action=="soarLand") {pollSoaring(0,1<<10);return;}
+     if(action.startsWith("relearnPokemon:")) {statsSelection=action.mid(15).toInt();refreshFieldTools(false);menuMode="relearn";menuScroll=menuFocus=0;drawGameMenu();return;}
+     if(action=="relearnBack") {menuMode="relearn";fieldToolsReason.clear();menuFocus=0;drawGameMenu();return;}
+     if(action.startsWith("learn:")) {relearnSelection=action.mid(6).toUInt();if(relearnSelection>=unsigned(relearnRows.size())) return;menuMode="relearn-slot";fieldToolsReason="Replace a move with "+relearnRows[relearnSelection].toMap().value("name").toString()+"?";menuFocus=0;drawGameMenu();return;}
+@@ -2033,6 +2216,7 @@
+     if(menuMode.isEmpty()) return;
+     const auto buttons=instance->gameMenuButtons();
+     const auto pressed=instance->takeGameMenuPress();
++    if(soaring.active()) {pollSoaring(buttons,pressed);return;}
+     if(!menuButtonsReady) {if(!buttons) menuButtonsReady=true;lastMenuButtons=buttons;return;}
+     lastMenuButtons=buttons;
+     if(menuMode=="companionDialogue") {
+@@ -2043,7 +2227,7 @@
+             return;
+         }
+         if(companionShowingReply) {
+-            if(pressed&1) {companionShowingReply=false;renderPeers();}
++            if(pressed&1) {if(companionDialoguePage+1<menuArtwork.companionDialoguePages(companionMessage).size()) ++companionDialoguePage;else companionShowingReply=false;renderPeers();}
+             return;
+         }
+         const int previousFocus=companionActionFocus;
+--- a/source/melonDS/src/frontend/qt_sdl/MultiplayerPanel.h
++++ b/source/melonDS/src/frontend/qt_sdl/MultiplayerPanel.h
+@@ -10,6 +10,7 @@
+ #include "BattlePresenceState.h"
+ #include "Gen5Menu.h"
+ #include "PokemonFollower.h"
++#include "SoaringScene.h"
+ #include <QCache>
+ class ScreenPanel;
+ class QCheckBox;
+@@ -48,6 +49,7 @@
+     QVariantList practiceCatalog;
+     QString trainerSearch;
+     int bossCategory=0;
++    int bossDifficulty=0,trainerPartyLevel=0;
+     void filterBossCatalog(bool practiceOnly=false);
+     QString battleCompatibility(const QVariantMap& state) const;
+     QString presenceRomDigest;
+@@ -171,6 +173,13 @@
+     void refreshFollower();
+     bool companionInteractionsEnabled=false;
+     bool soaringEnabled=false;
++    SoaringScene soaring;
++    QString soaringRequest,soaringStatus;
++    qint64 soaringLastTick=0,soaringStarted=0,soaringStreamRetry=0;
++    QVariantList soaringLandings;
++    QVariantMap soaringLandingTarget;
++    void beginSoaring(int slot);
++    void pollSoaring(unsigned buttons,unsigned pressed);
+     QVariantMap companion;
+     QString companionMessage;
+     qint64 companionReactionUntil=0,companionLastAction=-10000;
+@@ -181,6 +190,7 @@
+     qint64 companionReactionStarted=0;
+     int companionActionFocus=0;
+     bool companionShowingReply=false;
++    int companionDialoguePage=0;
+     bool companionActive() const;
+     void interactWithCompanion(const QString& action);
+     QRectF companionHitBox;
+--- a/source/melonDS/src/frontend/qt_sdl/Gen5Menu.cpp
++++ b/source/melonDS/src/frontend/qt_sdl/Gen5Menu.cpp
+@@ -11,6 +11,7 @@
+ #include <QtEndian>
+ #include <QSet>
+ #include <QCryptographicHash>
++#include <QRegularExpression>
+ #include <cstring>
+ #include <stdexcept>
+ 
+@@ -623,19 +624,23 @@
+ }
+ 
+ // Follower interactions use locally loaded Gen 5 fonts and UI artwork only.
+-QImage Gen5Menu::renderCompanionDialogue(const QString& message) const {
++QStringList Gen5Menu::companionDialoguePages(const QString& message) const {
++    QStringList lines;QString line;
++    for(const auto& word:message.split(QRegularExpression("\\s+"),Qt::SkipEmptyParts)) {
++        const auto candidate=line.isEmpty()?word:line+" "+word;
++        int width=0;for(const auto ch:candidate) width+=compactAdvances.value(ch.unicode(),6);
++        if(width>224 && !line.isEmpty()) {lines.append(line);line=word;} else line=candidate;
++    }
++    if(!line.isEmpty()) lines.append(line);
++    QStringList pages;for(int i=0;i<lines.size();i+=3) pages.append(lines.mid(i,3).join('\n'));
++    if(pages.isEmpty()) pages.append(QString());return pages;
++}
++QImage Gen5Menu::renderCompanionDialogue(const QString& message,int page) const {
+     QImage image(256,192,QImage::Format_ARGB32_Premultiplied);image.fill(Qt::transparent);
+     {QPainter painter(&image);painter.drawImage(QRect(4,137,248,51),button);}
+-    QString line;int y=141;
+-    for(const auto& word:message.split(' ')) {
+-        const auto candidate=line.isEmpty()?word:line+" "+word;
+-        int width=0;for(const auto ch:candidate) width+=compactAdvances.value(ch.unicode(),6);
+-        if(width>224 && !line.isEmpty()) {text(image,{12,y},line,224,true);y+=12;line=word;}
+-        else line=candidate;
+-        if(y>165) break;
+-    }
+-    if(y<=165) text(image,{12,y},line,224,true);
+-    text(image,{12,175},"A/B: MENU   X: CLOSE",232,true);
++    const auto pages=companionDialoguePages(message);page=qBound(0,page,pages.size()-1);
++    int y=141;for(const auto& line:pages[page].split('\n')) {text(image,{12,y},line,224,true);y+=12;}
++    text(image,{12,175},page+1<pages.size()?"A: NEXT   B: MENU   X: CLOSE":"A/B: MENU   X: CLOSE",232,true);
+     return image.convertToFormat(QImage::Format_RGBA8888_Premultiplied);
+ }
+ 
+--- a/source/melonDS/src/frontend/qt_sdl/Gen5Menu.h
++++ b/source/melonDS/src/frontend/qt_sdl/Gen5Menu.h
+@@ -7,6 +7,7 @@
+  * See AUTHORSHIP.md for attribution guidance and the non-binding AI-use request.
+  */
+ #pragma once
++#include <QStringList>
+ #include <QImage>
+ #include <QMap>
+ #include <QString>
+@@ -37,7 +38,8 @@
+     bool load(const unsigned char* rom,std::size_t length,QString& reason);
+     QImage render(const QString& title,const QList<Gen5MenuRow>& rows,int focus,
+                   const QString& hint,const QString& connection) const;
+-    QImage renderCompanionDialogue(const QString& message) const;
++    QStringList companionDialoguePages(const QString& message) const;
++    QImage renderCompanionDialogue(const QString& message,int page=0) const;
+     QImage renderCompanionActions(const QString& name,int focus) const;
+     QString mapName(int mapId) const { return mapNames.value(mapId); }
+     QImage itemIcon(int id);
+--- a/source/melonDS/src/frontend/qt_sdl/FollowerInteraction.h
++++ b/source/melonDS/src/frontend/qt_sdl/FollowerInteraction.h
+@@ -23,6 +23,19 @@
+     QStringList notes;const auto area=context.value("area").toString().toLower();
+     const int hour=context.value("hour",12).toInt(),month=context.value("month",1).toInt();
+     const auto hasType=[&](int type) {return mon.value("type1",-1).toInt()==type || mon.value("type2",-1).toInt()==type;};
++    const auto friendship=mon.value("friendship").toUInt();
++    if(context.value("returned").toBool()) notes<<"It recognizes the path before you do."<<"It pauses at a spot you visited together."<<"It seems pleased to be back here with you.";
++    if(context.value("longWalk").toBool()) notes<<"It looks back to make sure you are keeping up."<<"It pauses for a breather, then catches your eye."<<"It has settled into your walking rhythm.";
++    const auto weather=context.value("weather").toString();
++    if(weather=="rain") {notes<<"It shakes a few drops from its head."<<"It watches raindrops splash beside your feet.";if(hasType(10)) notes<<"It seems delighted by the rain.";}
++    if(weather=="snow") {notes<<"It studies a snowflake before it melts."<<"It looks back at the tracks you made together.";if(hasType(14)) notes<<"It takes a lively hop through the snow.";}
++    if(friendship>=220) notes<<"It catches your eye as if sharing a private joke."<<"It waits for you without needing to be asked."<<"It gives you a small, familiar nudge.";
++    else if(friendship<50) notes<<"It watches how you react, then relaxes a little."<<"It keeps a cautious distance while listening.";
++    if(hasType(12)) notes<<"It follows something distant with its eyes."<<"Its attention shifts before you hear the sound.";
++    if(hasType(3)) notes<<"It catches a passing scent and tilts its head.";
++    if(hasType(8)) notes<<"It tests the firm ground with one careful step.";
++    if(hasType(9)) notes<<"It finds a warm patch and lingers there.";
++    if(hasType(16)) notes<<"It raises its head, surveying the path ahead.";
+     if(context.value("recentBattle").toBool()) notes<<"It checks on you after the battle."<<"It takes a slow breath, then stays close."<<"It seems glad to share a quiet moment after all that excitement.";
+     if(hour>=20 || hour<5) notes<<"It listens to the quiet of the night."<<"It glances toward the darkening path."<<"It stays within easy reach in the darkness.";
+     else if(hour<10) notes<<"It stretches, ready for the morning."<<"It greets the new day with a little sound."<<"It looks eager to see where today takes you.";
+@@ -145,7 +158,19 @@
+     QString result=name+" "+choices.value(int(choice));
+     if(max && hp*4<=max) result=name+" looks tired, but is glad you stopped. ";
+     else result+=" ";
+-    result+=QString::fromLatin1(natureNotes[nature]);
++    // Rotate the closing observation too, so four base lines do not become
++    // four endlessly repeated conversations. Nature remains implicit.
++    static const std::array<const char*,5> quiet{{"It takes a moment to study your expression.","It listens before making a small sound.","It settles beside you without a fuss.","It seems content to let you set the pace.","It glances away, then back at you."}};
++    static const std::array<const char*,5> eager{{"It takes a quick step, hoping you will follow.","It turns a small discovery into a game.","It seems ready to try something new.","It has already spotted the next thing to investigate.","It gives an impatient little hop, then waits."}};
++    static const std::array<const char*,5> steady{{"It waits until you are ready to continue.","It checks the path, then looks back at you.","It holds your gaze for a reassuring moment.","It answers with a deliberate little nod.","It stays beside you while you finish speaking."}};
++    const auto round=variation/4;
++    if(round%3==0) result+=QString::fromLatin1(natureNotes[nature]);
++    else {
++        const bool shy=nature==1 || nature==10 || nature==17 || nature==18;
++        const bool lively=nature==2 || nature==4 || nature==5 || nature==8 || nature==11 || nature==13 || nature==14 || nature==19 || nature==22 || nature==24;
++        const auto& observations=shy?quiet:lively?eager:steady;
++        result+=QString::fromLatin1(observations[(round+nature+scene)%observations.size()]);
++    }
+     return result;
+ }
+ 
+@@ -161,6 +186,13 @@
+     const bool shy=nature==1 || nature==10 || nature==17 || nature==18;
+     const bool lively=nature==2 || nature==4 || nature==5 || nature==8 || nature==11 ||
+         nature==13 || nature==14 || nature==19 || nature==22 || nature==24;
++    if(mon.value("maxHp").toUInt() && mon.value("hp").toUInt()*4<=mon.value("maxHp").toUInt()) return {"...","sway",1700};
++    if(action=="talk" && variation>=4) {
++        const QStringList symbols=bond>=3?QStringList{"heart","!","...","?"}:QStringList{"?","...","!","..."};
++        const QStringList movement=shy?QStringList{"peek","sway","peek","sway"}:lively?QStringList{"hop","spin","bounce","run"}:QStringList{"sway","peek","bounce","sway"};
++        const auto index=(variation/4)%4;
++        return {symbols[index],movement[index],movement[index]=="run"?2400:1700};
++    }
+     if(action=="play") {
+         const bool runs=lively || (bond>=3 && variation%2==1);
+         return {bond<2?"?":"!",runs?"run":"bounce",runs?2400:1700};
+--- a/source/melonDS/src/frontend/qt_sdl/TrainerSprites.cpp
++++ b/source/melonDS/src/frontend/qt_sdl/TrainerSprites.cpp
+@@ -192,10 +192,11 @@
+         if(!exactGender) variant=QString(":/followers/variants/%1-%2-2.btx").arg(species).arg(form);
+         bool exactForm=QFile::exists(variant);
+         if(!exactForm) variant=QString(":/followers/variants/%1-0-2.btx").arg(species);
+-        // Retail Gen 1-4 normal sprites continue to come from the player's ROM.
+-        // Authored variants supply real shiny palettes, female differences and
+-        // forms, keeping original sprite dimensions rather than shrinking them.
+-        if(QFile::exists(variant) && (species>=494 || shiny || (gender==1 && exactGender) || (form && exactForm))) {
++        // Keep normal/shiny/gender variants on the same directional artwork.
++        // Switching between ROM art and variant art changes silhouettes and
++        // foot anchors even when only the palette should change. Unknown normal
++        // forms retain the native ROM path rather than silently using base art.
++        if(QFile::exists(variant) && (exactForm || shiny)) {
+             QFile asset(variant);if(!asset.open(QIODevice::ReadOnly)) throw std::runtime_error("Follower variant unavailable");
+             const auto bytes=asset.readAll();const auto images=followerTextures({reinterpret_cast<const unsigned char*>(bytes.constData()),std::size_t(bytes.size())},shiny);
+             QVariantList frames;for(const auto& image:images) frames.append(QVariant::fromValue(image));
+diff --git a/source/melonDS/src/frontend/qt_sdl/ProjectCredits.h b/source/melonDS/src/frontend/qt_sdl/ProjectCredits.h
+index 0000000..1111111 100644
+--- a/source/melonDS/src/frontend/qt_sdl/ProjectCredits.h
++++ b/source/melonDS/src/frontend/qt_sdl/ProjectCredits.h
+@@ -11,5 +11,5 @@
+-inline constexpr char Version[] = "1.0.10";
+-inline constexpr char WindowTitle[] = "Unova Together 1.0.10";
++inline constexpr char Version[] = "1.0.11";
++inline constexpr char WindowTitle[] = "Unova Together 1.0.11";
+ inline constexpr char GithubUrl[] = "https://github.com/WhatWasMissing/Unova-Together";
+ inline constexpr char CreditsHtml[] =
+-    "<b>Unova Together 1.0.10</b> — Created by <b>mvq1303</b> · "
++    "<b>Unova Together 1.0.11</b> — Created by <b>mvq1303</b> · "
+     "<a href=\"https://github.com/WhatWasMissing\">GitHub: WhatWasMissing</a><br>"

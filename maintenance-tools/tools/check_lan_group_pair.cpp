@@ -28,6 +28,18 @@ int main() {
     using namespace melonDS;
     LAN host,first,second;
     assert(host.StartHost("group-host",16));
+    {
+        // A stalled discovery send must not hold up the emulated frame.
+        std::unique_lock<std::mutex> stalled(host.DiscoverySendMutex);
+        for(int n=0;n<50;++n) {
+            host.DiscoveryLastTick=0;const auto start=std::chrono::steady_clock::now();
+            host.ProcessDiscovery();
+            assert(std::chrono::steady_clock::now()-start<std::chrono::milliseconds(30));
+        }
+        std::lock_guard<std::recursive_mutex> guard(host.NetworkMutex);
+        assert(host.PendingDiscoveryBeacon.NumPlayers==1);
+        assert(host.PendingDiscoveryBeacon.MaxPlayers==16);
+    }
     std::recursive_mutex lock;std::atomic<bool> stop{false};
     std::thread worker([&]{while(!stop) {{std::lock_guard guard(lock);host.Process();first.Process();second.Process();}std::this_thread::sleep_for(std::chrono::milliseconds(2));}});
     assert(first.StartClient("first-spectator","127.0.0.1"));
