@@ -2,6 +2,7 @@
 
 Pick a version to read what changed. The newest release is first.
 
+- [Unova Together 1.0.22 — Mega Serperior menu fix](RELEASE_NOTES_1.0.22.md)
 - [Unova Together 1.0.21 — Mega Serperior test](RELEASE_NOTES_1.0.21.md)
 - [Unova Together 1.0.20 — Mega battle crash fix](RELEASE_NOTES_1.0.20.md)
 - [Unova Together 1.0.19 — Fix for a startup problem](RELEASE_NOTES_1.0.19.md)
