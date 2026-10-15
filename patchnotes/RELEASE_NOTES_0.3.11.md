@@ -1,4 +1,4 @@
-# Unova Together 0.3.11 — Helpful Pokémon tools
+# Unova Together 0.3.11 — More Pokémon tools
 
-- Browse local encounters by season and relearn level-up moves for free.
-- Use field moves while keeping those moves out of your battle move slots. The game still controls whether you can use them.
+- Browse nearby encounters by season and relearn level-up moves for free.
+- Use field moves without taking up one of a Pokémon's four battle move slots.

@@ -1,4 +1,3 @@
-# Unova Together 1.0.2 — More experience in solo battles
+# Unova Together 1.0.2 — A boost for solo battles
 
-- Solo battles now give extra experience to help make up for experience not earned while playing co-op.
-- Co-op rewards and Pokémon you have already trained are unchanged.
+- Solo battles now award extra experience to help you progress while playing alone.

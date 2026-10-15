@@ -1,5 +1,5 @@
-# Unova Together 1.0.10 — Smoother followers
+# Unova Together 1.0.10 — Smoother Pokémon followers
 
-- Fixed follower hitching and made follower movement smoother.
-- A follower stays visible through brief data hiccups and updates correctly when your party or area changes.
-- Shiny followers now follow the odds used by the loaded game.
+- Follower movement is smoother, and followers stay visible through brief connection hiccups.
+- Followers update correctly when your party or area changes.
+- Shiny followers use the odds from your loaded game.

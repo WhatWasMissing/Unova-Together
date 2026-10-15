@@ -1,5 +1,5 @@
-# Unova Together 1.0.11 — A wider Soaring view
+# Unova Together 1.0.11 — A wider view while soaring
 
-- Soaring now shows more of the surrounding outdoor scenery, with distant areas softened by fog.
-- Enable it under Settings → Experimental features, then choose Unova → Pokémon → Take flight.
-- This is still a preview, not a complete map of Unova. The Town Map is not used.
+- Soaring shows more of the surrounding scenery.
+- Turn it on under Settings → Experimental features, then choose Unova → Pokémon → Take flight.
+- Soaring is an optional preview.

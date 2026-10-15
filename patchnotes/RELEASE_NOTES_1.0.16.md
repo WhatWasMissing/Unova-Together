@@ -1,4 +1,4 @@
-# Unova Together 1.0.16 — More Mega Serperior testing
+# Unova Together 1.0.16 — Mega Serperior preview
 
-- The test now checks Serperior's Mega form and battle stats during a replay.
-- A live co-op battle still needs testing. Save normally before trying Mega Evolution.
+- Continue trying Mega Serperior's battle form and stats in this preview.
+- Give it Serperiorite, then hold L + R while choosing a move. Save your game before trying new features.

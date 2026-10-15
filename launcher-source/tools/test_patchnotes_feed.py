@@ -20,9 +20,24 @@ class PatchNotesFeedTests(unittest.TestCase):
         self.assertEqual(len(notes), len(self.index['notes']))
         self.assertEqual(notes[0]['version'], self.latest_version)
         self.assertEqual(notes[-1]['version'], '0.3.5')
+        disk_versions = {
+            match.group(1)
+            for path in (self.root / 'patchnotes').glob('RELEASE_NOTES_*.md')
+            if (match := re.fullmatch(r'RELEASE_NOTES_(\d+\.\d+\.\d+)\.md', path.name))
+        }
+        self.assertEqual({note['version'] for note in notes}, disk_versions)
         for item in notes:
             self.assertTrue((self.root / 'patchnotes' / item['file']).is_file())
             self.assertIn('/blob/main/patchnotes/' + item['file'], item['url'])
+
+        # Notes left out of the index disappear from the launcher even though
+        # the Markdown file exists in GitHub. Keep the generated index complete.
+        self.assertIn('1.0.23', {note['version'] for note in notes})
+        readme = (self.root / 'patchnotes/README.md').read_text(encoding='utf-8')
+        self.assertTrue(all(item['file'] in readme for item in notes))
+
+        bundled = json.loads((self.root / 'launcher-source/tools/launcher_ui/assets/news.json').read_text(encoding='utf-8'))
+        self.assertEqual({note['version'] for note in updater.patch_note_news(bundled['notes'])}, disk_versions)
 
     def test_launcher_feed_reads_github_index_separately_from_releases(self):
         version = self.latest_version
@@ -75,6 +90,30 @@ class PatchNotesFeedTests(unittest.TestCase):
         feed = updater.launcher_feed(opener)
         self.assertEqual(feed['newsSource'], 'releases-fallback')
         self.assertEqual(feed['news'][0]['body'], 'Available from the release page')
+
+    def test_patch_notes_remain_available_when_release_history_is_unavailable(self):
+        requests = []
+
+        class Response:
+            def __init__(self, url, data): self.url, self.data = url, data
+            def __enter__(self): return self
+            def __exit__(self, *args): pass
+            def geturl(self): return self.url
+            def read(self, limit): return self.data[:limit]
+
+        def opener(url):
+            requests.append(url)
+            if url == updater.API:
+                raise OSError('Release history unavailable')
+            if url == updater.PATCHNOTES_URL:
+                return Response(url, json.dumps(self.index).encode())
+            raise AssertionError(f'Unexpected launcher request: {url}')
+
+        feed = updater.launcher_feed(opener)
+        self.assertIsNone(feed['release'])
+        self.assertEqual(feed['newsSource'], 'patchnotes')
+        self.assertEqual(len(feed['news']), len(self.index['notes']))
+        self.assertEqual(requests, [updater.API, updater.PATCHNOTES_URL])
 
 
 if __name__ == '__main__':

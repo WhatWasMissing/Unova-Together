@@ -1,5 +1,5 @@
-# Unova Together 1.0.3 — Easier save management
+# Unova Together 1.0.3 — Manage saves with ease
 
-- Create separate game slots and keep their saves apart.
-- Back up or restore saves from one place; the current save is backed up before a restore.
-- Added a simple calculator to help plan solo experience.
+- Create separate game slots so each one keeps its own save.
+- Back up or restore saves from one place.
+- Use the experience calculator to plan solo battles.

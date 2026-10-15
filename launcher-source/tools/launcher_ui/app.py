@@ -992,12 +992,19 @@ class Launcher(tk.Tk):
                 if action=='diagnostics':
                     self.status.set('Report prepared. Review before sharing.');self._review_report(Path(value));self._sync();continue
                 if action=='feed':
-                    latest=value['release'];self.available.set('Release '+latest['version']);self.news=value['news'];self._render_news()
+                    self.news=value['news'];self._render_news()
                     self.news_status.set('Up to date · patch notes from GitHub' if value.get('newsSource')=='patchnotes' else 'Using release notes while patch notes are unavailable')
                     try:
                         cache=self.home/'.updates/news-cache.json';cache.parent.mkdir(exist_ok=True);pending=cache.with_suffix('.pending')
                         pending.write_text(json.dumps(self.news),encoding='utf-8');os.replace(pending,cache)
                     except OSError:self.news_status.set('News refreshed · offline cache could not be saved')
+                    latest=value.get('release')
+                    if latest is None:
+                        self.release=None;self.available.set('Update check unavailable')
+                        self.status.set('Patch notes refreshed. Update information is unavailable right now.')
+                        self.update_status.set('Your installed game is unchanged. Try checking for updates again later.')
+                        self.nav['Updates'].configure(text='Updates');self._sync();continue
+                    self.available.set('Release '+latest['version'])
                     if latest['numbers']>updates.installed_version(self.home):
                         self.release=latest;self.status.set('Release '+latest['version']+' is available in Updates.');self.update_status.set('A new Windows build is ready to install.');self.nav['Updates'].configure(text='Updates  •')
                     else:

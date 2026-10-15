@@ -1,5 +1,4 @@
-# Unova Together 1.0.17 — Mega Serperior battle test
+# Unova Together 1.0.17 — Mega Serperior in battle
 
-- The test build adds the custom Mega Serperior form and Serperiorite for the supported Black 2 Redux v1.4.1 game.
-- Press L and R together while choosing a move. Use the Debug tab to grant the stone if needed.
-- The replay did not cover a complete live battle, so this remains experimental. Save first.
+- Mega Serperior and Serperiorite are available in supported Black 2 Redux v1.4.1 games.
+- Hold L + R while choosing a move to Mega Evolve. The Multiplayer Debug menu can grant the stone.

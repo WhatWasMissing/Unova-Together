@@ -1,5 +1,4 @@
-# Unova Together 1.0.1 — A reliability update
+# Unova Together 1.0.1 — More reliable co-op
 
-- Co-op reconnect and recovery checks have been improved.
-- The launcher gives clearer connection information and safer retry options.
-- This is mainly a behind-the-scenes maintenance update.
+- Reconnecting and recovering a co-op session is more reliable.
+- The launcher gives clearer connection messages and retry options.

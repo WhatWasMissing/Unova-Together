@@ -1,4 +1,4 @@
-# Unova Together 0.3.6 — Clearer player locations
+# Unova Together 0.3.6 — Clearer teammate locations
 
-- Teammate locations and battle status now recover more reliably after returning to the field.
-- The player list gives a clearer message when someone's location cannot be found.
+- See your teammates' locations and battle status more reliably.
+- The player list gives a clearer message when a teammate's location is unavailable.

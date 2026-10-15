@@ -65,9 +65,10 @@ Some later-generation abilities do not exist in Generation V. Where needed, this
 
 ## Artwork and animation
 
-The supplied sprite folders and PokeMMO X/Y archives provide the Mega front, back, and shiny art. Mega Mewtwo X now uses its sourced X-archive sprites instead of generated artwork. Black 2 Redux cannot read GIF files directly. GIFs are currently imported as static frames; converting them into the game's native animation resources is possible, but still needs an animation writer and emulator verification.
+Mega battle art with a supplied GIF is now converted into a complete frame sequence for the emulator to play. Mega Salamence is the first live test for this change and has 67 frames. This release still needs an in-game check to confirm the animation cycles correctly during battle.
+
+The supplied sprite folders and PokeMMO X/Y archives provide the Mega front, back, and shiny art. Mega Mewtwo X uses its sourced X-archive sprites instead of generated artwork.
 
 The Mega system and imported assets pass automated regression checks. The expanded roster still needs individual live testing, and linked co-op Mega battles have not been verified. Automated passes do not guarantee every form will work in a live battle.
 
 This is a free, non-commercial fan mod. The art was supplied by the project owner, who confirmed non-commercial use with creator credit. The original artist's name is still being checked. The release does not include a ROM, save, firmware, or RAM dump.
-

@@ -135,7 +135,7 @@ def main():
         z.write(ROOT/'tools/test_launcher_versioning.py','Unova-Together-Source/tools/test_launcher_versioning.py')
         for path in sorted(source_root.rglob('*')):
             relative = path.relative_to(source_root)
-            if not path.is_file() or any(part in {'.git', 'build', '__pycache__'} for part in relative.parts):
+            if not path.is_file() or any(part in {'.git', 'build', '__pycache__', 'artifacts', 'test-fixtures'} for part in relative.parts):
                 continue
             if path.suffix.lower() in FORBIDDEN:
                 raise RuntimeError(f'Private/game file in source: {relative}')
@@ -175,7 +175,7 @@ def main():
         assert not any('/source/' in n for n in z.namelist())
         assert 'Unova-Together/docs/COMPANIONS_AND_SOARING.md' in z.namelist()
         note_files=[name for name in z.namelist() if name.startswith('Unova-Together/patchnotes/RELEASE_NOTES_') and name.endswith('.md')]
-        assert len(note_files)==30 and f'Unova-Together/patchnotes/RELEASE_NOTES_{version}.md' in note_files
+        assert len(note_files)==len(patch_index['notes']) and f'Unova-Together/patchnotes/RELEASE_NOTES_{version}.md' in note_files
         assert 'Unova-Together/patchnotes/index.json' in z.namelist()
         launcher_info=json.loads(z.read('Unova-Together/launcher/BUILD_INFO.json'))
         assert launcher_info['product']=='pokemon-together' and launcher_info['version']==version

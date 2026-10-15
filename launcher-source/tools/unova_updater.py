@@ -149,14 +149,26 @@ def fetch_patch_notes(opener=_open) -> list[dict]:
 
 
 def launcher_feed(opener=_open) -> dict:
-    releases = fetch_releases(opener)
+    # Patch notes live in the repository now, separately from GitHub Releases.
+    # Fetch them even when the Releases API has been trimmed, rate-limited, or
+    # temporarily unavailable so older notes remain readable on their own.
+    try:
+        releases = fetch_releases(opener)
+    except (OSError, ValueError):
+        releases = []
     try:
         news = fetch_patch_notes(opener)
         news_source = 'patchnotes'
     except (OSError, ValueError, json.JSONDecodeError):
         news = release_news(releases)
         news_source = 'releases-fallback'
-    return {'release': select_latest(releases), 'news': news, 'newsSource': news_source}
+    try:
+        release = select_latest(releases)
+    except ValueError:
+        release = None
+    if release is None and not news:
+        raise ValueError('Could not load update information or patch notes')
+    return {'release': release, 'news': news, 'newsSource': news_source}
 
 def active_root(home: Path, allow_missing=False) -> Path:
     home = home.resolve()

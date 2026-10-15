@@ -1,5 +1,5 @@
 # Unova Together 1.0.13 — Safer game updates
 
-- Updates install alongside your current game, so a running game can finish before you switch.
-- An unrelated melonDS copy no longer blocks Play or repair.
-- Your settings, ROM, and saves stay in place.
+- Updates install alongside your current game, so you can finish a session before switching versions.
+- The launcher only checks for a running game from your Unova Together installation.
+- Your ROM, saves, and settings stay in place.

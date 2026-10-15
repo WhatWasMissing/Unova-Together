@@ -1,5 +1,4 @@
-# Unova Together 1.0.7 — A Soaring preview
+# Unova Together 1.0.7 — Trainer search and a flight shortcut
 
-- Search the practice trainer list by name or class before starting a no-reward battle.
-- An optional Fly shortcut opens the game's own party menu and destinations.
-- Free-flying over Unova is not included in this preview.
+- Find practice trainers by name or class before starting a no-reward battle.
+- An optional Fly shortcut opens the game's usual party menu and destinations.

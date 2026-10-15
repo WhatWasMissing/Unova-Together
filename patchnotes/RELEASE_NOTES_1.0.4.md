@@ -1,4 +1,4 @@
-# Unova Together 1.0.4 — Safely clean up old installs
+# Unova Together 1.0.4 — Free up storage safely
 
-- The launcher can remove unused old game copies to free space.
-- It keeps the active game, one rollback copy, and running games. ROMs, saves, backups, and custom files are preserved.
+- Remove unused old game copies from the launcher to free up space.
+- Your active game, saves, backups, ROMs, and custom files are kept safe.

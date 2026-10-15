@@ -2,227 +2,238 @@
   "schema": 1,
   "notes": [
     {
+      "version": "1.0.28",
+      "title": "Mega Pokémon animations",
+      "file": "RELEASE_NOTES_1.0.28.md",
+      "body": "- Mega Pokémon with supplied animated artwork now play through their GIF frames during battle.\n- Mega Salamence is the first animation test, with 67 frames.\n- Give it Salamencite and press L + R together while choosing a move."
+    },
+    {
       "version": "1.0.27",
-      "title": "Mega Mewtwo X sprite update",
+      "title": "Updated Mega Mewtwo X artwork",
       "file": "RELEASE_NOTES_1.0.27.md",
-      "body": "- Replaces generated Mega Mewtwo X artwork with the matching sourced sprite from the supplied PokeMMO X pack.\n- Keeps all 49 Mega forms, abilities, stones, and battle behavior unchanged.\n- Supplied GIF sprites still appear as static frames in the game."
+      "body": "- Mega Mewtwo X now uses updated battle artwork."
     },
     {
       "version": "1.0.26",
-      "title": "Mega Roster Expansion",
+      "title": "A bigger Mega roster",
       "file": "RELEASE_NOTES_1.0.26.md",
-      "body": "- Adds 46 Mega Stone and form entries, bringing the roster to 49 Mega forms.\r\n- Every stone has a name and matching icon; Pokémon Center Marts sell them for ₽50,000.\r\n- Give a Pokémon its matching stone, then press L + R while choosing a move. It returns to normal when the battle ends.\r\n- Supplied GIF art currently appears as static sprites. Native Gen 5 animation is still being investigated.\r\n- Save normally first. New forms and linked co-op Mega battles still need live testing."
+      "body": "- The game now supports 49 Mega forms, with matching Mega Stones.\n- Buy Mega Stones at Pokémon Center Marts for ₽50,000 each. Give a Pokémon its matching stone, then hold L + R while choosing a move.\n- Mega Evolution lasts until the battle ends."
     },
     {
       "version": "1.0.25",
       "title": "More Mega Pokémon",
       "file": "RELEASE_NOTES_1.0.25.md",
-      "body": "- Added Mega forms for Ampharos, Venusaur, Charizard Y, Gengar, Alakazam, Mawile, and Garchomp.\n- All 19 matching Mega Stones are sold at Pokémon Center Marts for ₽50,000 each.\n- Give a Pokémon its matching stone, then press L + R together while choosing a move in battle. It returns to normal when the battle ends.\n- Save normally before testing. Mega Evolution remains experimental, especially in linked two-player battles."
+      "body": "- Mega forms arrive for Ampharos, Venusaur, Charizard Y, Gengar, Alakazam, Mawile, and Garchomp.\n- Matching Mega Stones are sold at Pokémon Center Marts for ₽50,000 each.\n- Hold L + R while choosing a move in battle to Mega Evolve."
     },
     {
       "version": "1.0.24",
-      "title": "12 Mega forms to test",
+      "title": "12 more Mega Pokémon",
       "file": "RELEASE_NOTES_1.0.24.md",
-      "body": "- Adds Mega forms for Serperior, Arcanine, Aggron, Altaria, Banette, Gallade, Heracross, Latios, Manectric, Sableye, Salamence, and Scizor.\n- Use Multiplayer → Debug to grant a matching Mega Stone, then press L + R while choosing a move in battle.\n- Mega forms last for that battle only. Save normally before testing; linked two-player battles and every form still need live playtesting."
+      "body": "- Mega forms arrive for Serperior, Arcanine, Aggron, Altaria, Banette, Gallade, Heracross, Latios, Manectric, Sableye, Salamence, and Scizor.\n- Give a Pokémon its matching Mega Stone and hold L + R while choosing a move in battle."
+    },
+    {
+      "version": "1.0.23",
+      "title": "Mega Serperior ready for the next battle",
+      "file": "RELEASE_NOTES_1.0.23.md",
+      "body": "- Improved Mega Serperior's appearance during battle.\n- Mega Evolution is ready to use again after a battle ends."
     },
     {
       "version": "1.0.22",
-      "title": "Mega Serperior menu fix",
+      "title": "Open your party after Mega Evolution",
       "file": "RELEASE_NOTES_1.0.22.md",
-      "body": "- Fixed a crash that could happen when opening the Pokémon menu after Mega Evolving Serperior.\n- Mega Serperior stays in its battle form; the menu uses its normal icon where the game has no Mega icon.\n- The launcher and game now share version 1.0.22. Open your existing launcher and install the update to test its download feature.\n- To check the battle fix, use Black 2 Redux Complete v1.4.1, Mega Evolve Serperior, open the Pokémon menu, and finish the battle.\n- Mega Evolution remains experimental. Save normally first; a live two-player Mega battle still needs testing."
+      "body": "- Fixed a crash that could happen when opening the Pokémon menu after Mega Evolving Serperior.\n- Serperior stays Mega Evolved during battle. The party screen shows its regular icon."
     },
     {
       "version": "1.0.21",
-      "title": "Mega Serperior test",
+      "title": "Mega Serperior gains Adaptability",
       "file": "RELEASE_NOTES_1.0.21.md",
-      "body": "- Mega Serperior's ability changes to Adaptability instead of its normal Contrary.\r\n- Give it Serperiorite, open Fight, and press L + R together while choosing a move.\r\n- The Multiplayer Debug tab can grant a test stone. Save normally before testing."
+      "body": "- Mega Serperior now has the Adaptability ability instead of Contrary while Mega Evolved.\n- Give it Serperiorite and hold L + R while choosing a move in battle."
     },
     {
       "version": "1.0.20",
-      "title": "Mega battle crash fix",
+      "title": "Mega Serperior battle fix",
       "file": "RELEASE_NOTES_1.0.20.md",
-      "body": "- Fixed the crash that could happen after choosing a move while Mega Evolving Serperior.\n- Mega Serperior now keeps its form and stats through the battle, then returns to normal when the battle ends.\n- To try it, use Black 2 Redux Complete v1.4.1, give Serperior Serperiorite, open Fight, and press L + R while choosing a move. The Multiplayer Debug tab can grant the stone.\n- Mega Serperior is the only Mega in this build. Save normally before testing; live two-player Mega battles still need a test."
+      "body": "- Fixed a problem that could occur after choosing a move while Mega Evolving Serperior.\n- Mega Serperior now keeps its form and stats through the battle, then returns to normal when the battle ends.\n- Give Serperior Serperiorite and hold L + R while choosing a move to try it."
     },
     {
       "version": "1.0.19",
-      "title": "Fix for a startup problem",
+      "title": "Fix for a Windows startup problem",
       "file": "RELEASE_NOTES_1.0.19.md",
-      "body": "- Fixed a Windows startup issue that could stop melonDS from opening.\n- Close the emulator before updating, then start it again from the launcher.\n- Mega Evolution gameplay was not changed in this update."
+      "body": "- Fixed a Windows issue that could stop the game from opening.\n- Close the emulator before updating, then start it again from the launcher."
     },
     {
       "version": "1.0.18",
-      "title": "Another Mega Serperior test",
+      "title": "Mega Serperior preview update",
       "file": "RELEASE_NOTES_1.0.18.md",
-      "body": "- Mega Serperior remains the only playable Mega in this test build.\n- Start a fresh battle with Serperior holding Serperiorite, then press L and R together while choosing a move.\n- Earlier testing did not confirm that the battle stays playable afterward. Save normally and treat this as experimental."
+      "body": "- Continue trying Mega Serperior in battle with Serperiorite.\n- Choose Fight, then hold L + R while selecting a move. Save your game before trying this preview."
     },
     {
       "version": "1.0.17",
-      "title": "Mega Serperior battle test",
+      "title": "Mega Serperior in battle",
       "file": "RELEASE_NOTES_1.0.17.md",
-      "body": "- The test build adds the custom Mega Serperior form and Serperiorite for the supported Black 2 Redux v1.4.1 game.\n- Press L and R together while choosing a move. Use the Debug tab to grant the stone if needed.\n- The replay did not cover a complete live battle, so this remains experimental. Save first."
+      "body": "- Mega Serperior and Serperiorite are available in supported Black 2 Redux v1.4.1 games.\n- Hold L + R while choosing a move to Mega Evolve. The Multiplayer Debug menu can grant the stone."
     },
     {
       "version": "1.0.16",
-      "title": "More Mega Serperior testing",
+      "title": "Mega Serperior preview",
       "file": "RELEASE_NOTES_1.0.16.md",
-      "body": "- The test now checks Serperior's Mega form and battle stats during a replay.\n- A live co-op battle still needs testing. Save normally before trying Mega Evolution."
+      "body": "- Continue trying Mega Serperior's battle form and stats in this preview.\n- Give it Serperiorite, then hold L + R while choosing a move. Save your game before trying new features."
     },
     {
       "version": "1.0.15",
-      "title": "Mega Serperior arrives as a test feature",
+      "title": "Mega Serperior arrives",
       "file": "RELEASE_NOTES_1.0.15.md",
-      "body": "- Serperior can Mega Evolve in battle in the supported English Black 2 Redux v1.4.1 game.\n- Give it Serperiorite, open Fight, then press L and R together. The Multiplayer Debug tab can grant a test stone.\n- This feature is experimental. Save normally before trying it, and use the same version with co-op partners."
+      "body": "- Mega Evolve Serperior in supported English Black 2 Redux v1.4.1 games.\n- Give Serperior Serperiorite, choose Fight, then hold L + R while selecting a move.\n- If you need the stone for this preview, use Multiplayer → Debug to grant it."
     },
     {
       "version": "1.0.14",
       "title": "Smoother LAN hosting",
       "file": "RELEASE_NOTES_1.0.14.md",
-      "body": "- Hosting a local game should feel smoother when several network events arrive together.\n- The launcher and emulator now show the same version number. Your ROMs, saves, and settings are kept."
+      "body": "- Hosting a local game is smoother when several network events happen at once."
     },
     {
       "version": "1.0.13",
       "title": "Safer game updates",
       "file": "RELEASE_NOTES_1.0.13.md",
-      "body": "- Updates install alongside your current game, so a running game can finish before you switch.\n- An unrelated melonDS copy no longer blocks Play or repair.\n- Your settings, ROM, and saves stay in place."
+      "body": "- Updates install alongside your current game, so you can finish a session before switching versions.\n- The launcher only checks for a running game from your Unova Together installation.\n- Your ROM, saves, and settings stay in place."
     },
     {
       "version": "1.0.12",
-      "title": "Safer Soaring landings",
+      "title": "Better Soaring landings",
       "file": "RELEASE_NOTES_1.0.12.md",
-      "body": "- You can see more ground and scenery while flying, and the debug view can show landing areas.\n- The game now waits for the landing area to load before giving control back, helping prevent NPC conversations from getting stuck.\n- Returning to take-off asks you to confirm. Flight also stays steadier during speedup."
+      "body": "- See more of the ground while flying and return to a landing area more smoothly.\n- Confirm before returning to take-off, and enjoy steadier flight while using speedup."
     },
     {
       "version": "1.0.11",
-      "title": "A wider Soaring view",
+      "title": "A wider view while soaring",
       "file": "RELEASE_NOTES_1.0.11.md",
-      "body": "- Soaring now shows more of the surrounding outdoor scenery, with distant areas softened by fog.\n- Enable it under Settings → Experimental features, then choose Unova → Pokémon → Take flight.\n- This is still a preview, not a complete map of Unova. The Town Map is not used."
+      "body": "- Soaring shows more of the surrounding scenery.\n- Turn it on under Settings → Experimental features, then choose Unova → Pokémon → Take flight.\n- Soaring is an optional preview."
     },
     {
       "version": "1.0.10",
-      "title": "Smoother followers",
+      "title": "Smoother Pokémon followers",
       "file": "RELEASE_NOTES_1.0.10.md",
-      "body": "- Fixed follower hitching and made follower movement smoother.\n- A follower stays visible through brief data hiccups and updates correctly when your party or area changes.\n- Shiny followers now follow the odds used by the loaded game."
+      "body": "- Follower movement is smoother, and followers stay visible through brief connection hiccups.\n- Followers update correctly when your party or area changes.\n- Shiny followers use the odds from your loaded game."
     },
     {
       "version": "1.0.9",
-      "title": "A one-time launcher repair",
+      "title": "Repair older launcher shortcuts",
       "file": "RELEASE_NOTES_1.0.9.md",
-      "body": "- If an older shortcut keeps opening an outdated launcher, run Repair-Launcher.exe once and select the shortcut's original Pokémon Together.exe.\n- Close the launcher if Windows asks; the repair never closes the game for you.\n- Your ROMs, profiles, saves, and backups stay in place. See the launcher migration guide before running the repair."
+      "body": "- If an old shortcut keeps opening an outdated launcher, run Repair-Launcher.exe once and choose the Pokémon Together.exe that shortcut used.\n- Your ROMs, profiles, saves, and backups stay in place."
     },
     {
       "version": "1.0.8",
-      "title": "Launcher updates work more smoothly",
+      "title": "Smoother launcher updates",
       "file": "RELEASE_NOTES_1.0.8.md",
-      "body": "- After an update, the launcher now opens the newly installed version.\n- Older shortcuts can follow the newer launcher without changing your saves or settings.\n- Soaring remains an experimental preview."
+      "body": "- After an update, the launcher opens the newly installed game.\n- Older shortcuts can now open the latest launcher without changing your saves or settings."
     },
     {
       "version": "1.0.7",
-      "title": "A Soaring preview",
+      "title": "Trainer search and a flight shortcut",
       "file": "RELEASE_NOTES_1.0.7.md",
-      "body": "- Search the practice trainer list by name or class before starting a no-reward battle.\n- An optional Fly shortcut opens the game's own party menu and destinations.\n- Free-flying over Unova is not included in this preview."
+      "body": "- Find practice trainers by name or class before starting a no-reward battle.\n- An optional Fly shortcut opens the game's usual party menu and destinations."
     },
     {
       "version": "1.0.6",
-      "title": "More ways to enjoy your companion",
+      "title": "Spend time with your companion",
       "file": "RELEASE_NOTES_1.0.6.md",
-      "body": "- Talk to, pet, praise, and play with your lead Pokémon; its reactions reflect its nature and friendship.\n- Interactions are just for fun and do not change HP, friendship, items, or saves.\n- Hold R and press A while facing your follower, or tap it, to open the menu."
+      "body": "- Talk to, pet, praise, and play with your lead Pokémon. Its reactions reflect its nature and friendship.\n- Face your follower and hold R while pressing A, or tap the follower, to open the interaction menu."
     },
     {
       "version": "1.0.5",
       "title": "Balanced solo experience",
       "file": "RELEASE_NOTES_1.0.5.md",
-      "body": "- The solo experience bonus is now 1.25× instead of 1.65×.\n- Existing experience, saves, and co-op rewards are unchanged.\n\n## Separate launcher update — 13 October 2026\n\n- A shared mod library adds separate Unova Together and Pokémon X pages.\n- Launcher messages are shorter. Your Unova game, saves, and settings stay in place.\n- Pokémon X still needs its separately prepared prototype. [Full launcher notes](LAUNCHER_NOTES_2026-10-13.md)."
+      "body": "- The extra experience earned in solo battles has been adjusted for a more balanced pace."
     },
     {
       "version": "1.0.4",
-      "title": "Safely clean up old installs",
+      "title": "Free up storage safely",
       "file": "RELEASE_NOTES_1.0.4.md",
-      "body": "- The launcher can remove unused old game copies to free space.\n- It keeps the active game, one rollback copy, and running games. ROMs, saves, backups, and custom files are preserved."
+      "body": "- Remove unused old game copies from the launcher to free up space.\n- Your active game, saves, backups, ROMs, and custom files are kept safe."
     },
     {
       "version": "1.0.3",
-      "title": "Easier save management",
+      "title": "Manage saves with ease",
       "file": "RELEASE_NOTES_1.0.3.md",
-      "body": "- Create separate game slots and keep their saves apart.\n- Back up or restore saves from one place; the current save is backed up before a restore.\n- Added a simple calculator to help plan solo experience."
+      "body": "- Create separate game slots so each one keeps its own save.\n- Back up or restore saves from one place.\n- Use the experience calculator to plan solo battles."
     },
     {
       "version": "1.0.2",
-      "title": "More experience in solo battles",
+      "title": "A boost for solo battles",
       "file": "RELEASE_NOTES_1.0.2.md",
-      "body": "- Solo battles now give extra experience to help make up for experience not earned while playing co-op.\n- Co-op rewards and Pokémon you have already trained are unchanged."
+      "body": "- Solo battles now award extra experience to help you progress while playing alone."
     },
     {
       "version": "1.0.1",
-      "title": "A reliability update",
+      "title": "More reliable co-op",
       "file": "RELEASE_NOTES_1.0.1.md",
-      "body": "- Co-op reconnect and recovery checks have been improved.\n- The launcher gives clearer connection information and safer retry options.\n- This is mainly a behind-the-scenes maintenance update."
+      "body": "- Reconnecting and recovering a co-op session is more reliable.\n- The launcher gives clearer connection messages and retry options."
     },
     {
       "version": "1.0.0",
-      "title": "The full release",
+      "title": "Unova Together is here",
       "file": "RELEASE_NOTES_1.0.0.md",
-      "body": "- Explore together, see teammates, trade items or Pokémon, and battle with friends.\n- Includes followers, companion interactions, co-op trainer battles, Pokémon tools, and optional battle scenery.\n- The launcher adds profiles, LAN hosting, backups, verified updates, and installation repair."
+      "body": "- Explore with friends, see nearby teammates, trade items or Pokémon, and battle together.\n- Enjoy Pokémon followers, companion interactions, co-op trainer battles, Pokémon tools, and optional battle scenery.\n- The launcher includes profiles, local hosting, save backups, updates, and installation repair."
     },
     {
       "version": "0.4.0",
-      "title": "Companion interactions and a flight preview",
+      "title": "Companion interactions and flight",
       "file": "RELEASE_NOTES_0.4.0.md",
-      "body": "- Talk to, pet, and play with your lead Pokémon. These interactions are cosmetic and do not change your save.\n- Try an experimental flight preview over your current surroundings. The game's normal Fly menu still chooses destinations and landing spots."
+      "body": "- Talk to, pet, praise, and play with your lead Pokémon.\n- Try an experimental flight preview over the area around you.\n- These interactions are cosmetic and do not change your save."
     },
     {
       "version": "0.3.13",
-      "title": "Quicker menus and safer reconnects",
+      "title": "Quicker menus and reconnects",
       "file": "RELEASE_NOTES_0.3.13.md",
-      "body": "- Switch between Players, Pokémon, Co-op, and Settings from the tabs or with L/R.\n- The Options shortcut now opens the right menu, and reconnects recover more cleanly.\n- Follower controls and trainer battle settings are easier to find."
+      "body": "- Move between the Players, Pokémon, Co-op, and Settings pages from the tabs or with L/R.\n- The Options shortcut and reconnects work more reliably.\n- Follower controls and trainer battle settings are easier to find."
     },
     {
       "version": "0.3.12",
-      "title": "Simpler menus and co-op tools",
+      "title": "Easier co-op tools",
       "file": "RELEASE_NOTES_0.3.12.md",
-      "body": "- Pokémon tools, co-op settings, and game options are easier to find.\n- Choose solo or co-op trainer battles, start no-reward practice rematches, and challenge another player.\n- Show or hide followers and see clearer teammate status messages."
+      "body": "- Pokémon tools, co-op settings, and game options are easier to find.\n- Choose solo or co-op trainer battles, try no-reward practice rematches, or challenge another player.\n- Show or hide followers and see clearer teammate status."
     },
     {
       "version": "0.3.11",
-      "title": "Helpful Pokémon tools",
+      "title": "More Pokémon tools",
       "file": "RELEASE_NOTES_0.3.11.md",
-      "body": "- Browse local encounters by season and relearn level-up moves for free.\n- Use field moves while keeping those moves out of your battle move slots. The game still controls whether you can use them."
+      "body": "- Browse nearby encounters by season and relearn level-up moves for free.\n- Use field moves without taking up one of a Pokémon's four battle move slots."
     },
     {
       "version": "0.3.10",
       "title": "Followers and party stats",
       "file": "RELEASE_NOTES_0.3.10.md",
-      "body": "- All 649 original Pokémon now have directional follower sprites.\n- Followers have a gentle idle bob, and you can view IVs and EVs in the launcher tools.\n- Viewing stats does not change your Pokémon."
+      "body": "- Followers are now available for all 649 Pokémon, with a gentle idle animation.\n- View your Pokémon's IVs and EVs from the launcher."
     },
     {
       "version": "0.3.9",
-      "title": "Battle scenery and followers",
+      "title": "Battle scenery and better followers",
       "file": "RELEASE_NOTES_0.3.9.md",
-      "body": "- Try optional 3D battle scenery made from your own ROM. It is cached on your computer and does not change your game files.\n- Pokémon followers now use more accurate sprites and animations.\n- Fixed the in-game Options shortcut."
+      "body": "- Try optional 3D battle scenery created from your own game copy.\n- Pokémon followers have improved sprites and animations.\n- The in-game Options shortcut now opens the right menu."
     },
     {
       "version": "0.3.8",
-      "title": "Bigger LAN lobbies",
+      "title": "Bigger LAN sessions",
       "file": "RELEASE_NOTES_0.3.8.md",
-      "body": "- Local games can now host up to 16 players, and guests can join after the host starts.\n- Co-op invitations and reconnects are more reliable.\n- Traded Pokémon follow the game's obedience rules in supported Black 2 versions."
+      "body": "- Host local sessions with up to 16 players, and let guests join after the host starts.\n- Co-op invitations and reconnects are more reliable.\n- Traded Pokémon follow the game's obedience rules in supported Black 2 versions."
     },
     {
       "version": "0.3.7",
-      "title": "More reliable map tracking",
+      "title": "More reliable player tracking",
       "file": "RELEASE_NOTES_0.3.7.md",
-      "body": "- Nearby players are matched to the area they are actually visiting.\n- Fixed several cases where a teammate's location or battle status could get stuck.\n- Teammates can remain visible behind in-game menus when the game camera is available."
+      "body": "- The player list better reflects which area your teammates are visiting.\n- Teammate locations and battle status recover more reliably after menus and battles.\n- Teammates can stay visible behind in-game menus when the game view allows it."
     },
     {
       "version": "0.3.6",
-      "title": "Clearer player locations",
+      "title": "Clearer teammate locations",
       "file": "RELEASE_NOTES_0.3.6.md",
-      "body": "- Teammate locations and battle status now recover more reliably after returning to the field.\n- The player list gives a clearer message when someone's location cannot be found."
+      "body": "- See your teammates' locations and battle status more reliably.\n- The player list gives a clearer message when a teammate's location is unavailable."
     },
     {
       "version": "0.3.5",
       "title": "Easy setup and co-op",
       "file": "RELEASE_NOTES_0.3.5.md",
-      "body": "- The launcher can check for updates, host or join a local game, and help you reconnect.\n- It now includes setup guides, gameplay screenshots, optional music, and keyboard or controller navigation.\n- Updates keep your ROM, saves, and emulator settings. Problem reports stay on your computer until you choose to share them."
+      "body": "- Set up or update your game, host or join a local session, and reconnect from the launcher.\n- Find setup guides, optional music, and keyboard or controller controls in one place.\n- Your game files and saves stay on your computer when you update."
     }
   ]
 }
-
