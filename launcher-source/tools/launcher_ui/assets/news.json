@@ -2,6 +2,12 @@
   "schema": 1,
   "notes": [
     {
+      "version": "1.0.20",
+      "title": "Mega battle crash fix",
+      "file": "RELEASE_NOTES_1.0.20.md",
+      "body": "- Fixed the crash that could happen after choosing a move while Mega Evolving Serperior.\n- Mega Serperior now keeps its form and stats through the battle, then returns to normal when the battle ends.\n- To try it, use Black 2 Redux Complete v1.4.1, give Serperior Serperiorite, open Fight, and press L + R while choosing a move. The Multiplayer Debug tab can grant the stone.\n- Mega Serperior is the only Mega in this build. Save normally before testing; live two-player Mega battles still need a test."
+    },
+    {
       "version": "1.0.19",
       "title": "Fix for a startup problem",
       "file": "RELEASE_NOTES_1.0.19.md",
