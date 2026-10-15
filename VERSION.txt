@@ -1,2 +1,1 @@
-Unova Together 1.0.24
-Full release
+Unova Together 1.0.26
