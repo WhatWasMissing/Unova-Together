@@ -1,6 +1,6 @@
 # Mega Evolution
 
-Unova Together 1.0.26 includes **49 Mega forms** for the supported English Pokémon Black 2 Redux Complete v1.4.1 game. Give a Pokémon its matching stone, then press **L + R together** while choosing a move in battle. Its Mega form lasts until that battle ends.
+Unova Together 1.0.27 includes **49 Mega forms** for the supported English Pokémon Black 2 Redux Complete v1.4.1 game. Give a Pokémon its matching stone, then press **L + R together** while choosing a move in battle. Its Mega form lasts until that battle ends.
 
 All 49 stones are sold at Pokémon Center Marts for **₽50,000**. Stock is shared across the marts so each shop stays within the game's 45-item limit. The 46 new stone entries reuse Mail, Apricorn, and Data Card item slots; three earlier stones keep their existing slots.
 
@@ -65,8 +65,9 @@ Some later-generation abilities do not exist in Generation V. Where needed, this
 
 ## Artwork and animation
 
-The supplied sprite folders are used for the Mega front, back, and shiny art. Black 2 Redux cannot read GIF files directly. GIFs are currently imported as static frames; converting them into the game's native animation resources is possible, but still needs an animation writer and emulator verification.
+The supplied sprite folders and PokeMMO X/Y archives provide the Mega front, back, and shiny art. Mega Mewtwo X now uses its sourced X-archive sprites instead of generated artwork. Black 2 Redux cannot read GIF files directly. GIFs are currently imported as static frames; converting them into the game's native animation resources is possible, but still needs an animation writer and emulator verification.
 
 The Mega system and imported assets pass automated regression checks. The expanded roster still needs individual live testing, and linked co-op Mega battles have not been verified. Automated passes do not guarantee every form will work in a live battle.
 
 This is a free, non-commercial fan mod. The art was supplied by the project owner, who confirmed non-commercial use with creator credit. The original artist's name is still being checked. The release does not include a ROM, save, firmware, or RAM dump.
+
