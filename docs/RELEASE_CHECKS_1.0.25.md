@@ -14,3 +14,10 @@
 - Release packaging checks ZIP integrity, launcher/runtime version metadata, the Windows Qt platform plugin, source inclusion, and exclusion of ROMs, saves, RAM dumps, and firmware.
 - SHA-256 checksums are included with the release assets.
 
+## Public launcher download verification
+
+- The production updater downloaded the public GitHub runtime ZIP, verified its checksum, and installed it into an isolated test home.
+- Version selection, archived patch notes, the Windows Qt plugin, settings preservation, and a save sentinel all passed. No downloaded executable was run.
+- Result: `{"downloadBytes": 172325557, "emulatorSha256": "60f9833b94ce74bf243a8aa6fde4da61ec5a87cdd308247f4909d91b863f1b27", "newsSource": "patchnotes", "patchNotes": 35, "saveSentinelPreserved": true, "settingsPreserved": true, "version": "1.0.25", "windowsQtPluginPresent": true}`
+- The generated download and extracted test installation were removed after recording these results.
+
