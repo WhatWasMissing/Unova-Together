@@ -41,3 +41,11 @@ These hashes identify the published release artifacts. GitHub's asset digests we
 - Version selection, archived patch notes, the Windows Qt plugin, settings preservation, and a save sentinel all passed. No downloaded executable was run.
 - Result: `{"downloadBytes": 179089509, "emulatorSha256": "79f6e57ddfce8a86ea1b6c5d09e854256d7002bcdf20add280ef6b6b04e5aa35", "newsSource": "patchnotes", "patchNotes": 31, "saveSentinelPreserved": true, "settingsPreserved": true, "version": "1.0.20", "windowsQtPluginPresent": true}`
 - The generated download and extracted test installation were removed after recording these results.
+
+## Old release cleanup
+
+- Removed 31 superseded GitHub Release entries and their downloadable assets after the new public download/install passed. Only v1.0.20 remains in Releases. All Git tags and commit history were preserved.
+- All 31 versioned notes remain in the launcher feed. The separate 13 October shared-launcher notes are archived in their own file and mentioned in the 1.0.5 launcher history. Original text for all 32 release entries is also archived in patchnotes/archive/.
+- Retired release tags: `v1.0.19`, `v1.0.18`, `v1.0.17`, `v1.0.16`, `v1.0.15`, `v1.0.14`, `v1.0.13`, `v1.0.12`, `v1.0.11`, `v1.0.10`, `v1.0.9`, `v1.0.8`, `v1.0.7`, `v1.0.6`, `vlauncher-20261013`, `v1.0.5`, `v1.0.4`, `v1.0.3`, `v1.0.2`, `v1.0.1`, `v1.0.0`, `v0.4.0`, `v0.3.13`, `v0.3.12`, `v0.3.11`, `v0.3.10`, `v0.3.9`, `v0.3.8`, `v0.3.7`, `v0.3.6`, `v0.3.5`.
+- After cleanup, the unauthenticated production launcher feed sees one downloadable release (1.0.20) and all 31 archived version notes, including the separate launcher update in the 1.0.5 history. All five public asset URLs and the stable repair URL return HTTP 200 with expected sizes.
+- Patch-note feed regressions: 3/3 passed. Cached-credential publishing regressions: 2/2 passed, including the no-interactive-sign-in failure case. Reusable tests are retained in tools; temporary installs and downloads were cleaned up.
