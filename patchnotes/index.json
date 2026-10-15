@@ -2,6 +2,12 @@
   "schema": 1,
   "notes": [
     {
+      "version": "1.0.25",
+      "title": "More Mega Pokémon",
+      "file": "RELEASE_NOTES_1.0.25.md",
+      "body": "- Added Mega forms for Ampharos, Venusaur, Charizard Y, Gengar, Alakazam, Mawile, and Garchomp.\n- All 19 matching Mega Stones are sold at Pokémon Center Marts for ₽50,000 each.\n- Give a Pokémon its matching stone, then press L + R together while choosing a move in battle. It returns to normal when the battle ends.\n- Save normally before testing. Mega Evolution remains experimental, especially in linked two-player battles."
+    },
+    {
       "version": "1.0.24",
       "title": "12 Mega forms to test",
       "file": "RELEASE_NOTES_1.0.24.md",
@@ -207,3 +213,4 @@
     }
   ]
 }
+
