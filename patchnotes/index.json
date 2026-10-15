@@ -2,6 +2,12 @@
   "schema": 1,
   "notes": [
     {
+      "version": "1.0.24",
+      "title": "12 Mega forms to test",
+      "file": "RELEASE_NOTES_1.0.24.md",
+      "body": "- Adds Mega forms for Serperior, Arcanine, Aggron, Altaria, Banette, Gallade, Heracross, Latios, Manectric, Sableye, Salamence, and Scizor.\n- Use Multiplayer → Debug to grant a matching Mega Stone, then press L + R while choosing a move in battle.\n- Mega forms last for that battle only. Save normally before testing; linked two-player battles and every form still need live playtesting."
+    },
+    {
       "version": "1.0.22",
       "title": "Mega Serperior menu fix",
       "file": "RELEASE_NOTES_1.0.22.md",
