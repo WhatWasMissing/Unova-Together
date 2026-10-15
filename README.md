@@ -1,16 +1,18 @@
 # Unova Together
 
-**Current release: 1.0.19.** Continues the experimental, battle-only Mega Serperior test: [downloads](https://github.com/WhatWasMissing/Unova-Together/releases/tag/v1.0.19). Made by mvq1303 / WhatWasMissing, built on melonDS.
+**Current release: 1.0.20.** Fixes the crash after selecting a move while Mega Evolving Serperior: [downloads](https://github.com/WhatWasMissing/Unova-Together/releases/latest). Made by mvq1303 / WhatWasMissing, built on melonDS.
 
 Explore Unova with friends in supported English Pokémon Black 2 and Blaze Black 2 Redux. Each player uses their own matching ROM and independent save.
 
 ## Download and play
 
-1. [Download version 1.0.19](https://github.com/WhatWasMissing/Unova-Together/releases/tag/v1.0.19). Choose **Unova-Together.exe**, or extract the complete Windows x64 ZIP.
+1. [Download version 1.0.20](https://github.com/WhatWasMissing/Unova-Together/releases/latest). Choose **Unova-Together.exe**, or extract the complete Windows x64 ZIP.
 2. Open the EXE, or run **Start Unova Together.cmd** in the extracted folder. Choose your ROM and select **Play**.
 3. Open launcher **Co-op** to configure your connection and host or join LAN. Follow the [player guide](docs/PLAYER_GUIDE.md).
 
-Version **1.0.19** keeps Mega Serperior as the only playable Mega profile and fixes the missing Qt Windows platform plugin that prevented some 1.0.18 downloads from opening. The matching-overlay replay from 1.0.17 verified form 0→1, Contrary, stat updates and saved-party preservation; 1.0.18 added the Serperior-only Release gate and ROM boot regressions. Other Mega drafts remain disabled in the public build. Existing ROMs and saves do not need conversion. Updates install beside the active build; the current game can remain open while the new build downloads. Play becomes available again after any game from that installation closes. Clients still running launcher 1.0.5 should install the game update, then run [Repair-Launcher.exe](https://github.com/WhatWasMissing/Unova-Together/releases/download/v1.0.19/Repair-Launcher.exe) once and select their old launcher. Subsequent updates follow the same entry automatically. See the [migration instructions](patchnotes/RELEASE_NOTES_1.0.10.md). Update every player and restart the presence relay.
+Version **1.0.20** fixes the Mega Serperior battle crash. Give Serperior Serperiorite, open Fight, and press **L + R** while choosing a move. The Multiplayer Debug tab can grant the stone. Serperior returns to normal after battle; this remains an experimental feature, and a live two-player Mega battle still needs playtesting.
+
+Update from the launcher or download the latest files above. Players still using launcher 1.0.5 can run [Repair-Launcher.exe](https://github.com/WhatWasMissing/Unova-Together/releases/latest/download/Repair-Launcher.exe) once and select their old launcher. See the [launcher guide](docs/LAUNCHER.md). Update every player before playing together.
 
 ## Features
 
@@ -31,7 +33,7 @@ The release includes 743 normal/shiny follower variants, supported female/forms,
 
 ## Guides and limits
 
-[Release notes](patchnotes/RELEASE_NOTES_1.0.19.md) · [All patch notes](patchnotes/) · [Release checks](docs/RELEASE_CHECKS_1.0.19.md) · [Known limits](docs/KNOWN_ISSUES.md)
+[Release notes](patchnotes/RELEASE_NOTES_1.0.20.md) · [All patch notes](patchnotes/) · [Release checks](docs/RELEASE_CHECKS_1.0.20.md) · [Known limits](docs/KNOWN_ISSUES.md)
 
 [Launcher](docs/LAUNCHER.md) · [Co-op tools](docs/COOP_TOOLS.md) · [Field tools](docs/FIELD_TOOLS.md) · [Followers](docs/FOLLOWING_POKEMON.md) · [Companions](docs/COMPANIONS_AND_SOARING.md) · [Party stats](docs/PARTY_STATS.md)
 

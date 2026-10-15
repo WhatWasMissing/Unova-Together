@@ -95,7 +95,7 @@
       "version": "1.0.5",
       "title": "Balanced solo experience",
       "file": "RELEASE_NOTES_1.0.5.md",
-      "body": "- The solo experience bonus is now 1.25× instead of 1.65×.\n- Existing experience, saves, and co-op rewards are unchanged."
+      "body": "- The solo experience bonus is now 1.25× instead of 1.65×.\n- Existing experience, saves, and co-op rewards are unchanged.\n- A separate launcher update on 13 October added a shared mod library with Unova Together and Pokémon X pages. Your Unova game and saves stay in place; Pokémon X needs its separately prepared prototype."
     },
     {
       "version": "1.0.4",
