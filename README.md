@@ -1,16 +1,16 @@
 # Unova Together
 
-**Current release: 1.0.24.** Improves Mega Evolution stability across consecutive battles and updates the launcher: [downloads](https://github.com/WhatWasMissing/Unova-Together/releases/latest). Made by mvq1303 / WhatWasMissing, built on melonDS.
+**Current release: 1.0.26.** Expands the Mega roster and updates the launcher: [downloads](https://github.com/WhatWasMissing/Unova-Together/releases/latest). Made by mvq1303 / WhatWasMissing, built on melonDS.
 
 Explore Unova with friends in supported English Pokémon Black 2 and Blaze Black 2 Redux. Each player uses their own matching ROM and independent save.
 
 ## Download and play
 
-1. [Download version 1.0.24](https://github.com/WhatWasMissing/Unova-Together/releases/latest). Choose **Unova-Together.exe**, or extract the complete Windows x64 ZIP.
+1. [Download version 1.0.26](https://github.com/WhatWasMissing/Unova-Together/releases/latest). Choose **Unova-Together.exe**, or extract the complete Windows x64 ZIP.
 2. Open the EXE, or run **Start Unova Together.cmd** in the extracted folder. Choose your ROM and select **Play**.
 3. Open launcher **Co-op** to configure your connection and host or join LAN. Follow the [player guide](docs/PLAYER_GUIDE.md).
 
-Version **1.0.24** adds 12 experimental Mega forms: Serperior, Arcanine, Aggron, Altaria, Banette, Gallade, Heracross, Latios, Manectric, Sableye, Salamence, and Scizor. Use Multiplayer → Debug to grant a matching stone, then press L + R while choosing a move in battle. The updated launcher is included so you can test downloading this build. Save normally first; all forms and linked two-player battles still need live playtesting.
+Version **1.0.26** adds 46 Mega Stone and form entries, bringing the roster to 49. Stones have matching names and icons and are sold at Pokémon Center Marts for ₽50,000. Give a Pokémon its matching stone, then press L + R while choosing a move in battle. Save normally first; the expanded roster and linked co-op Mega battles still need live testing.
 
 Update from the launcher or download the latest files above. Players still using launcher 1.0.5 can run [Repair-Launcher.exe](https://github.com/WhatWasMissing/Unova-Together/releases/latest/download/Repair-Launcher.exe) once and select their old launcher. See the [launcher guide](docs/LAUNCHER.md). Update every player before playing together.
 
@@ -20,7 +20,7 @@ Update from the launcher or download the latest files above. Players still using
 - **Trade and battle:** item offers, party Pokémon exchanges and friendly PvP from **Unova → Players**.
 - **Trainer co-op:** supported story encounters, Solo/Co-op mode and practice rematches with independent saves.
 - **Pokémon tools:** all 649 directional followers, ten companion interaction scenes with nature-aware dialogue and animated reactions, IVs/EVs, seasonal encounters and free level-up move relearning.
-- **Battle experiment:** 12 Mega forms for the supported Black 2 Redux profile. See the [Mega Evolution test guide](docs/MEGA_EVOLUTION.md) for stones, abilities, and stats.
+- **Battle experiment:** 49 Mega forms for the supported Black 2 Redux profile. See the [Mega Evolution test guide](docs/MEGA_EVOLUTION.md) for stones, abilities, and stats.
 - **Field HMs:** owned HMs work without taking learned battle move slots; native story requirements remain.
 - **Presentation:** custom camera and optional nearby battle scenery built locally from your ROM.
 - **Launcher:** simple save slots, Gen 5 ROM/save/XP tools, LAN Host/Join/Retry, controller navigation, music, settings, optional cheats, save backups/restore, diagnostics, verified updates and repair.
@@ -33,7 +33,7 @@ The release includes 743 normal/shiny follower variants, supported female/forms,
 
 ## Guides and limits
 
-[Release notes](patchnotes/RELEASE_NOTES_1.0.24.md) · [All patch notes](patchnotes/) · [Release checks](docs/RELEASE_CHECKS_1.0.24.md) · [Known limits](docs/KNOWN_ISSUES.md)
+[Release notes](patchnotes/RELEASE_NOTES_1.0.26.md) · [All patch notes](patchnotes/) · [Release checks](docs/RELEASE_CHECKS_1.0.26.md) · [Known limits](docs/KNOWN_ISSUES.md)
 
 [Launcher](docs/LAUNCHER.md) · [Co-op tools](docs/COOP_TOOLS.md) · [Field tools](docs/FIELD_TOOLS.md) · [Followers](docs/FOLLOWING_POKEMON.md) · [Companions](docs/COMPANIONS_AND_SOARING.md) · [Party stats](docs/PARTY_STATS.md)
 
