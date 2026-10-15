@@ -2,10 +2,16 @@
   "schema": 1,
   "notes": [
     {
+      "version": "1.0.27",
+      "title": "Mega Mewtwo X sprite update",
+      "file": "RELEASE_NOTES_1.0.27.md",
+      "body": "- Replaces generated Mega Mewtwo X artwork with the matching sourced sprite from the supplied PokeMMO X pack.\n- Keeps all 49 Mega forms, abilities, stones, and battle behavior unchanged.\n- Supplied GIF sprites still appear as static frames in the game."
+    },
+    {
       "version": "1.0.26",
       "title": "Mega Roster Expansion",
       "file": "RELEASE_NOTES_1.0.26.md",
-      "body": "- Adds 46 Mega Stone and form entries, bringing the roster to 49 Mega forms.\n- Replaces unused Mail, Apricorn, and Data Card slots with named stones and matching icons. Pokémon Center Marts sell every stone for ₽50,000.\n- To Mega Evolve, give the matching stone to a Pokémon and press **L + R together** while choosing a move. The form ends with the battle.\n- Supplied GIF art is imported as static sprites for now. Native Gen 5 frame animation is still being investigated.\n- Save normally before testing. Automated checks pass, but the expanded roster and linked co-op battles still need live testing."
+      "body": "- Adds 46 Mega Stone and form entries, bringing the roster to 49 Mega forms.\r\n- Every stone has a name and matching icon; Pokémon Center Marts sell them for ₽50,000.\r\n- Give a Pokémon its matching stone, then press L + R while choosing a move. It returns to normal when the battle ends.\r\n- Supplied GIF art currently appears as static sprites. Native Gen 5 animation is still being investigated.\r\n- Save normally first. New forms and linked co-op Mega battles still need live testing."
     },
     {
       "version": "1.0.25",
@@ -29,7 +35,7 @@
       "version": "1.0.21",
       "title": "Mega Serperior test",
       "file": "RELEASE_NOTES_1.0.21.md",
-      "body": "- Mega Serperior's ability changes to Adaptability instead of its normal Contrary.\n- Give it Serperiorite, open Fight, and press L + R together while choosing a move.\n- The Multiplayer Debug tab can grant a test stone. Save normally before testing."
+      "body": "- Mega Serperior's ability changes to Adaptability instead of its normal Contrary.\r\n- Give it Serperiorite, open Fight, and press L + R together while choosing a move.\r\n- The Multiplayer Debug tab can grant a test stone. Save normally before testing."
     },
     {
       "version": "1.0.20",
@@ -219,3 +225,4 @@
     }
   ]
 }
+
