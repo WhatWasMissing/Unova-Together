@@ -26,6 +26,19 @@ DOCS = ('PLAYER_GUIDE.md', 'KNOWN_ISSUES.md', 'TAILSCALE_COOP.md', 'UDP_SERVER_G
         'LAUNCHER.md', 'COMPANIONS_AND_SOARING.md', 'COOP_TOOLS.md', 'FEATURES.md',
         'ROADMAP.md', 'SOARING_DESIGN.md')
 FORBIDDEN = {'.nds', '.sav', '.dsv', '.ramdump', '.ml1', '.ml2', '.ml3', '.ml4', '.ml8', '.pem', '.key'}
+QT_WINDOWS_PLATFORM_PLUGIN = Path('platforms/qwindows.dll')
+
+def validate_windows_platform_plugin(runtime_root):
+    plugin = runtime_root / QT_WINDOWS_PLATFORM_PLUGIN
+    if not plugin.is_file():
+        raise RuntimeError(
+            f'Missing Qt Windows platform plugin: {plugin}. '
+            'Deploy Qt plugins to the runtime before packaging (windeployqt).'
+        )
+    with plugin.open('rb') as stream:
+        if stream.read(2) != b'MZ' or plugin.stat().st_size < 256 * 1024:
+            raise RuntimeError(f'Invalid Qt Windows platform plugin: {plugin}')
+    return plugin
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
@@ -41,6 +54,7 @@ def main():
     current = args.runtime_root.resolve() if args.runtime_root else ROOT/'builds/current'
     if not current.is_relative_to(ROOT/'builds'):
         raise ValueError('Runtime must be staged within workspace builds')
+    qt_windows_plugin = validate_windows_platform_plugin(current)
     launcher = args.launcher_root.resolve() if args.launcher_root else ROOT/'builds/mod-hub/current/Pokemon Together'
     if not launcher.is_relative_to(ROOT/'builds'):
         raise ValueError('Launcher must be staged within workspace builds')
@@ -147,6 +161,9 @@ def main():
             assert not any(Path(n).suffix.lower() in FORBIDDEN for n in z.namelist())
             assert not any('/.git/' in n or '/test-fixtures/' in n or '/diagnostics/' in n for n in z.namelist())
     with zipfile.ZipFile(runtime) as z:
+        plugin_entry = 'Unova-Together/builds/current/platforms/qwindows.dll'
+        assert plugin_entry in z.namelist(), 'Windows Qt platform plugin was not packaged'
+        assert z.read(plugin_entry) == qt_windows_plugin.read_bytes(), 'Packaged Qt platform plugin differs from staged runtime'
         assert z.read('Unova-Together/builds/current/melonDS.exe') == (current/'melonDS.exe').read_bytes()
         assert z.read('Unova-Together/builds/current/VERSION.txt').startswith(f'Unova Together {version}'.encode())
         packed = tomllib.loads(z.read('Unova-Together/builds/current/melonDS.toml').decode())
