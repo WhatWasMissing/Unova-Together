@@ -2,6 +2,12 @@
   "schema": 1,
   "notes": [
     {
+      "version": "1.0.21",
+      "title": "Mega Serperior test",
+      "file": "RELEASE_NOTES_1.0.21.md",
+      "body": "- Mega Serperior now uses the supplied art in the game's DS sprite format.\n- Its Mega form uses Sap Sipper instead of Contrary, so you can verify the ability change.\n- The exact armed battle state now passes without a crash; your saved Pokémon stays unchanged.\n- Use Black 2 Redux Complete v1.4.1, give Serperior Serperiorite, choose **Fight**, then press **L + R together** while choosing a move.\n- Mega Serperior is the only Mega in this build. The feature is still experimental; save first. A live two-player Mega battle has not been tested."
+    },
+    {
       "version": "1.0.20",
       "title": "Mega battle crash fix",
       "file": "RELEASE_NOTES_1.0.20.md",
@@ -95,7 +101,7 @@
       "version": "1.0.5",
       "title": "Balanced solo experience",
       "file": "RELEASE_NOTES_1.0.5.md",
-      "body": "- The solo experience bonus is now 1.25× instead of 1.65×.\n- Existing experience, saves, and co-op rewards are unchanged.\n- A separate launcher update on 13 October added a shared mod library with Unova Together and Pokémon X pages. Your Unova game and saves stay in place; Pokémon X needs its separately prepared prototype."
+      "body": "- The solo experience bonus is now 1.25× instead of 1.65×.\n- Existing experience, saves, and co-op rewards are unchanged.\n\n## Separate launcher update — 13 October 2026\n\n- A shared mod library adds separate Unova Together and Pokémon X pages.\n- Launcher messages are shorter. Your Unova game, saves, and settings stay in place.\n- Pokémon X still needs its separately prepared prototype. [Full launcher notes](LAUNCHER_NOTES_2026-10-13.md)."
     },
     {
       "version": "1.0.4",

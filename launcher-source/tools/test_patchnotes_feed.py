@@ -2,6 +2,7 @@
 from pathlib import Path
 import io
 import json
+import re
 import unittest
 
 import unova_updater as updater
@@ -11,18 +12,20 @@ class PatchNotesFeedTests(unittest.TestCase):
     def setUp(self):
         self.root = Path(__file__).resolve().parents[2]
         self.index = json.loads((self.root / 'patchnotes/index.json').read_text(encoding='utf-8'))
+        version_text = (self.root / 'VERSION.txt').read_text(encoding='utf-8')
+        self.latest_version = re.search(r'\d+\.\d+\.\d+', version_text).group(0)
 
     def test_repository_index_lists_every_note_in_new_folder(self):
         notes = updater.patch_note_news(self.index['notes'])
         self.assertEqual(len(notes), len(self.index['notes']))
-        self.assertEqual(notes[0]['version'], '1.0.20')
+        self.assertEqual(notes[0]['version'], self.latest_version)
         self.assertEqual(notes[-1]['version'], '0.3.5')
         for item in notes:
             self.assertTrue((self.root / 'patchnotes' / item['file']).is_file())
             self.assertIn('/blob/main/patchnotes/' + item['file'], item['url'])
 
     def test_launcher_feed_reads_github_index_separately_from_releases(self):
-        version = '1.0.20'
+        version = self.latest_version
         name = f'Unova-Together-{version}-Windows-x64.zip'
         sums_name = f'SHA256SUMS-Unova-Together-{version}.txt'
         base = f'https://github.com/{updater.REPO}/releases/download/v{version}/'
@@ -55,7 +58,7 @@ class PatchNotesFeedTests(unittest.TestCase):
         self.assertTrue(all('/blob/main/patchnotes/' in note['url'] for note in feed['news']))
 
     def test_unavailable_index_falls_back_to_release_notes(self):
-        version = '1.0.20'
+        version = self.latest_version
         name = f'Unova-Together-{version}-Windows-x64.zip'
         sums_name = f'SHA256SUMS-Unova-Together-{version}.txt'
         base = f'https://github.com/{updater.REPO}/releases/download/v{version}/'

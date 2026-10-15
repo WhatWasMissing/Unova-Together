@@ -2,6 +2,7 @@
 
 Pick a version to read what changed. The newest release is first.
 
+- [Unova Together 1.0.21 — Mega Serperior test](RELEASE_NOTES_1.0.21.md)
 - [Unova Together 1.0.20 — Mega battle crash fix](RELEASE_NOTES_1.0.20.md)
 - [Unova Together 1.0.19 — Fix for a startup problem](RELEASE_NOTES_1.0.19.md)
 - [Unova Together 1.0.18 — Another Mega Serperior test](RELEASE_NOTES_1.0.18.md)
@@ -34,8 +35,4 @@ Pick a version to read what changed. The newest release is first.
 - [Unova Together 0.3.6 — Clearer player locations](RELEASE_NOTES_0.3.6.md)
 - [Unova Together 0.3.5 — Easy setup and co-op](RELEASE_NOTES_0.3.5.md)
 
-The launcher reads this same history from [index.json](index.json), so removing older release downloads does not remove their notes.
-
-The separate [shared launcher update from 13 October 2026](LAUNCHER_NOTES_2026-10-13.md) is preserved here and mentioned in the 1.0.5 history shown by the launcher.
-
-Get the current game and launcher from the [latest release](https://github.com/WhatWasMissing/Unova-Together/releases/latest). Original release text remains in the [maintenance archive](archive/original-release-notes-2026-10-15.json) for reference.
+The launcher reads these same notes from `index.json` on GitHub.
