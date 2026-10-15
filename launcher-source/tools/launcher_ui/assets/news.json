@@ -1,21 +1,185 @@
-[
-  {
-    "version": "1.0.1",
-    "title": "Unova Together 1.0.1 - Maintenance release",
-    "body": "# Unova Together 1.0.1 \u2014 Maintenance release\n\nLauncher 1.0.1 and modified melonDS 1.0.1, based on melonDS 1.1. This full release packages the post-1.0.0 maintenance review, improved verification tools and current known limitations. Gameplay behavior is unchanged from 1.0.0.\n\nDownload **Unova-Together.exe**, or extract **Unova-Together-1.0.1-Windows-x64.zip** and run **Start Unova Together.cmd**. Existing players can use launcher Updates. Update both players; existing saves and ROMs need no conversion.\n\n## Maintenance changes\n\n- Cancellation/retry verification now independently boots both radios instead of cloning savestate wireless state.\n- Added a guest-process-loss recovery check and clearer relay/latency evidence names.\n- Added native touch-based NPC move selection and a strict save-input completion check.\n- HM verification accepts an explicit matching ROM; checks passed with JIT enabled and disabled.\n- Included the maintenance review and reproducible verification sources.\n\n## Verification and limits\n\nLocal independent-process cancellation/retry passed, including the encrypted UDP relay. Guest loss restored the host checkpoint and released battle allocations. A shared Cheren victory awarded the badge on both games, and separate fresh normal boots verified both saved awards. Saved EXP, levels, moves, IVs and EVs were preserved. This NPC test used disposable boosted combat stats; it does not validate normal difficulty.\n\nCo-op XP remains disabled. A simulated 100 ms round trip in Practice exposed asymmetric completion: one peer finished and the other rolled back. That issue is documented and remains unfixed. Physical two-PC/WAN reliability, complete Fly travel and independent save/reload of relearned moves are not newly verified. See **docs/MAINTENANCE_REVIEW_2026-10-11.md** and **docs/KNOWN_ISSUES.md**.\n\nThe complete Windows runtime, matching GPL source and SHA-256 checksums are included. No ROMs, firmware, user saves or private settings are distributed. Unova Together's original contributions are by **mvq1303 / WhatWasMissing**; melonDS and dependency notices are preserved.\n",
-    "date": "2026-10-11"
-  },
-  {
-    "version": "1.0.0",
-    "title": "Unova Together 1.0.0 \u00e2\u20ac\u201d Full release",
-    "body": "# Unova Together 1.0.0 \u00e2\u20ac\u201d Full release\n\nThe feature-complete Windows release of Unova Together, including **launcher 1.0.0** and **modified melonDS 1.0.0**, based on upstream melonDS 1.1.\n\n## Play\n\nDownload **Unova-Together.exe**, or extract **Unova-Together-1.0.0-Windows-x64.zip** and run **Start Unova Together.cmd**. Select your own supported Black 2 or Blaze Black 2 Redux ROM and press Play. Existing players can install this version through launcher Updates. Update every player and restart the presence relay.\n\n## Included features\n\n- Shared overworld exploration, teammate locations and joining maps.\n- Item offers, direct party Pok\u00c3\u00a9mon trades and friendly player battles.\n- Co-op trainer encounters, Solo/Co-op switching and practice rematches, with independent parties and story saves.\n- Directional following Pok\u00c3\u00a9mon for all 649 base species and optional companion interactions.\n- IV/EV viewing, seasonal encounter finder, free level-up move relearning and field HMs without learned battle move slots.\n- Custom camera and optional nearby battle scenery generated locally from your ROM.\n- Launcher profiles, LAN Host/Join/Retry, remembered connections, controller navigation, music, emulator settings and optional cheats.\n- Save backups and restore, troubleshooting reports, verified updates and installation repair.\n\n## Final polish\n\nBoth applications identify as 1.0.0. The launcher uses release wording, current in-game menu paths, a complete feature list and bundled 1.0.0 news. Setup and feature guides now describe the current build. The obsolete flight-preview instructions are removed: that prototype is absent from the current feature set. Upstream melonDS attribution and all project/dependency licenses are retained.\n\n## Known limits\n\nCo-op experience remains disabled to prevent desynchronisation. Saves and story progress remain independent; not every special trainer script has been verified. Keep fast-forward and C-Gear wireless off during native multiplayer. Interrupted battles may require returning to the field and recreating LAN; recovery can discard the interrupted battle's progress.\n\nTailscale is available for different networks. The optional UDP bridge remains experimental and requires your group's server and Python; there is no bundled public server. Nearby battle scenery and companion interactions remain optional. Companion interactions do not change friendship or HP. The encounter finder covers ordinary encounter tables, excluding gifts, scripted legendaries and Hidden Grottos. Direct Pok\u00c3\u00a9mon trades exclude eggs, held Mail and native trade evolutions; use the Union Room for those cases.\n\nSee [player guide](https://github.com/WhatWasMissing/Unova-Together/blob/main/docs/PLAYER_GUIDE.md), [known limits](https://github.com/WhatWasMissing/Unova-Together/blob/main/docs/KNOWN_ISSUES.md) and the included release checks for validation details. A full release does not imply every ROM hack, network or special event has been tested.\n\nMade by **mvq1303 / WhatWasMissing**. Playtesters: **maxback221** and **randomitem19**. Built on melonDS; matching GPL source and SHA-256 checksums are included. No ROMs, saves or firmware are bundled.\n",
-    "date": "2026-10-11"
-  },
-  {
-    "version": "0.3.5",
-    "title": "Unova Together beta 0.3.5",
-    "body": "# Unova Together beta 0.3.5\n\nDownload **Unova-Together-0.3.5-Windows-x64.zip**, extract the entire folder and open **Start Unova Together.cmd**. Choose your own matching Black 2/Redux ROM and select **Play**. Update both players and restart the player-sharing relay.\n\n## New and improved\n\n- A Windows launcher with official GitHub release checks and checksum-verified updates. Updates install beside the existing build and retain your emulator settings; ROMs and saves are not overwritten. The launcher does not need a separate Python installation.\n- Give item works while the idle co-op observer is enabled and from the custom trade overlay.\n- Better battle-status recovery: a returned field can clear the battle badge even if the camera projection is temporarily unavailable. Field rebuilds switch tracking to the current owned player object.\n- Different starter choices can agree at verified rival encounters. Both players use the host's matching ROM enemy variant while retaining their own story event and save.\n- Remote trainer sprites are suppressed on local stock menu screens. Your menu status remains available to teammates.\n- Hardened native wireless input, player-list handling and compressed/truncated ROM loading.\n\n## Before playing\n\nBack up your saves. Turn C-Gear wireless and fast-forward off. Co-op EXP gain remains disabled to prevent desynchronisation. The bundled Tailscale installer and setup guide remain available; the UDP bridge is experimental and has no default public server.\n\nNative cleanup can time out after completion and discard recovered battle progress. An immediate second co-op battle can also fail to reconnect. Let recovery return both games to the field, then recreate native LAN before retrying. Intermittent rendering issues and unverified trainer events remain listed in [known issues](docs/KNOWN_ISSUES.md). Testing details are in [release checks](docs/RELEASE_CHECKS_0.3.5.md); they do not establish every rival story/save branch or reliable internet UDP battle completion.\n\nMade by **mvq1303 / WhatWasMissing**, built on melonDS. The matching GPL source download and checksums are included. ROMs, saves and firmware are not included.\n",
-    "date": "2026-10-08",
-    "url": "https://github.com/WhatWasMissing/Unova-Together/releases/tag/v0.3.5"
-  }
-]
+{
+  "schema": 1,
+  "notes": [
+    {
+      "version": "1.0.19",
+      "title": "Fix for a startup problem",
+      "file": "RELEASE_NOTES_1.0.19.md",
+      "body": "- Fixed a Windows startup issue that could stop melonDS from opening.\n- Close the emulator before updating, then start it again from the launcher.\n- Mega Evolution gameplay was not changed in this update."
+    },
+    {
+      "version": "1.0.18",
+      "title": "Another Mega Serperior test",
+      "file": "RELEASE_NOTES_1.0.18.md",
+      "body": "- Mega Serperior remains the only playable Mega in this test build.\n- Start a fresh battle with Serperior holding Serperiorite, then press L and R together while choosing a move.\n- Earlier testing did not confirm that the battle stays playable afterward. Save normally and treat this as experimental."
+    },
+    {
+      "version": "1.0.17",
+      "title": "Mega Serperior battle test",
+      "file": "RELEASE_NOTES_1.0.17.md",
+      "body": "- The test build adds the custom Mega Serperior form and Serperiorite for the supported Black 2 Redux v1.4.1 game.\n- Press L and R together while choosing a move. Use the Debug tab to grant the stone if needed.\n- The replay did not cover a complete live battle, so this remains experimental. Save first."
+    },
+    {
+      "version": "1.0.16",
+      "title": "More Mega Serperior testing",
+      "file": "RELEASE_NOTES_1.0.16.md",
+      "body": "- The test now checks Serperior's Mega form and battle stats during a replay.\n- A live co-op battle still needs testing. Save normally before trying Mega Evolution."
+    },
+    {
+      "version": "1.0.15",
+      "title": "Mega Serperior arrives as a test feature",
+      "file": "RELEASE_NOTES_1.0.15.md",
+      "body": "- Serperior can Mega Evolve in battle in the supported English Black 2 Redux v1.4.1 game.\n- Give it Serperiorite, open Fight, then press L and R together. The Multiplayer Debug tab can grant a test stone.\n- This feature is experimental. Save normally before trying it, and use the same version with co-op partners."
+    },
+    {
+      "version": "1.0.14",
+      "title": "Smoother LAN hosting",
+      "file": "RELEASE_NOTES_1.0.14.md",
+      "body": "- Hosting a local game should feel smoother when several network events arrive together.\n- The launcher and emulator now show the same version number. Your ROMs, saves, and settings are kept."
+    },
+    {
+      "version": "1.0.13",
+      "title": "Safer game updates",
+      "file": "RELEASE_NOTES_1.0.13.md",
+      "body": "- Updates install alongside your current game, so a running game can finish before you switch.\n- An unrelated melonDS copy no longer blocks Play or repair.\n- Your settings, ROM, and saves stay in place."
+    },
+    {
+      "version": "1.0.12",
+      "title": "Safer Soaring landings",
+      "file": "RELEASE_NOTES_1.0.12.md",
+      "body": "- You can see more ground and scenery while flying, and the debug view can show landing areas.\n- The game now waits for the landing area to load before giving control back, helping prevent NPC conversations from getting stuck.\n- Returning to take-off asks you to confirm. Flight also stays steadier during speedup."
+    },
+    {
+      "version": "1.0.11",
+      "title": "A wider Soaring view",
+      "file": "RELEASE_NOTES_1.0.11.md",
+      "body": "- Soaring now shows more of the surrounding outdoor scenery, with distant areas softened by fog.\n- Enable it under Settings → Experimental features, then choose Unova → Pokémon → Take flight.\n- This is still a preview, not a complete map of Unova. The Town Map is not used."
+    },
+    {
+      "version": "1.0.10",
+      "title": "Smoother followers",
+      "file": "RELEASE_NOTES_1.0.10.md",
+      "body": "- Fixed follower hitching and made follower movement smoother.\n- A follower stays visible through brief data hiccups and updates correctly when your party or area changes.\n- Shiny followers now follow the odds used by the loaded game."
+    },
+    {
+      "version": "1.0.9",
+      "title": "A one-time launcher repair",
+      "file": "RELEASE_NOTES_1.0.9.md",
+      "body": "- If an older shortcut keeps opening an outdated launcher, run Repair-Launcher.exe once and select the shortcut's original Pokémon Together.exe.\n- Close the launcher if Windows asks; the repair never closes the game for you.\n- Your ROMs, profiles, saves, and backups stay in place. See the launcher migration guide before running the repair."
+    },
+    {
+      "version": "1.0.8",
+      "title": "Launcher updates work more smoothly",
+      "file": "RELEASE_NOTES_1.0.8.md",
+      "body": "- After an update, the launcher now opens the newly installed version.\n- Older shortcuts can follow the newer launcher without changing your saves or settings.\n- Soaring remains an experimental preview."
+    },
+    {
+      "version": "1.0.7",
+      "title": "A Soaring preview",
+      "file": "RELEASE_NOTES_1.0.7.md",
+      "body": "- Search the practice trainer list by name or class before starting a no-reward battle.\n- An optional Fly shortcut opens the game's own party menu and destinations.\n- Free-flying over Unova is not included in this preview."
+    },
+    {
+      "version": "1.0.6",
+      "title": "More ways to enjoy your companion",
+      "file": "RELEASE_NOTES_1.0.6.md",
+      "body": "- Talk to, pet, praise, and play with your lead Pokémon; its reactions reflect its nature and friendship.\n- Interactions are just for fun and do not change HP, friendship, items, or saves.\n- Hold R and press A while facing your follower, or tap it, to open the menu."
+    },
+    {
+      "version": "1.0.5",
+      "title": "Balanced solo experience",
+      "file": "RELEASE_NOTES_1.0.5.md",
+      "body": "- The solo experience bonus is now 1.25× instead of 1.65×.\n- Existing experience, saves, and co-op rewards are unchanged."
+    },
+    {
+      "version": "1.0.4",
+      "title": "Safely clean up old installs",
+      "file": "RELEASE_NOTES_1.0.4.md",
+      "body": "- The launcher can remove unused old game copies to free space.\n- It keeps the active game, one rollback copy, and running games. ROMs, saves, backups, and custom files are preserved."
+    },
+    {
+      "version": "1.0.3",
+      "title": "Easier save management",
+      "file": "RELEASE_NOTES_1.0.3.md",
+      "body": "- Create separate game slots and keep their saves apart.\n- Back up or restore saves from one place; the current save is backed up before a restore.\n- Added a simple calculator to help plan solo experience."
+    },
+    {
+      "version": "1.0.2",
+      "title": "More experience in solo battles",
+      "file": "RELEASE_NOTES_1.0.2.md",
+      "body": "- Solo battles now give extra experience to help make up for experience not earned while playing co-op.\n- Co-op rewards and Pokémon you have already trained are unchanged."
+    },
+    {
+      "version": "1.0.1",
+      "title": "A reliability update",
+      "file": "RELEASE_NOTES_1.0.1.md",
+      "body": "- Co-op reconnect and recovery checks have been improved.\n- The launcher gives clearer connection information and safer retry options.\n- This is mainly a behind-the-scenes maintenance update."
+    },
+    {
+      "version": "1.0.0",
+      "title": "The full release",
+      "file": "RELEASE_NOTES_1.0.0.md",
+      "body": "- Explore together, see teammates, trade items or Pokémon, and battle with friends.\n- Includes followers, companion interactions, co-op trainer battles, Pokémon tools, and optional battle scenery.\n- The launcher adds profiles, LAN hosting, backups, verified updates, and installation repair."
+    },
+    {
+      "version": "0.4.0",
+      "title": "Companion interactions and a flight preview",
+      "file": "RELEASE_NOTES_0.4.0.md",
+      "body": "- Talk to, pet, and play with your lead Pokémon. These interactions are cosmetic and do not change your save.\n- Try an experimental flight preview over your current surroundings. The game's normal Fly menu still chooses destinations and landing spots."
+    },
+    {
+      "version": "0.3.13",
+      "title": "Quicker menus and safer reconnects",
+      "file": "RELEASE_NOTES_0.3.13.md",
+      "body": "- Switch between Players, Pokémon, Co-op, and Settings from the tabs or with L/R.\n- The Options shortcut now opens the right menu, and reconnects recover more cleanly.\n- Follower controls and trainer battle settings are easier to find."
+    },
+    {
+      "version": "0.3.12",
+      "title": "Simpler menus and co-op tools",
+      "file": "RELEASE_NOTES_0.3.12.md",
+      "body": "- Pokémon tools, co-op settings, and game options are easier to find.\n- Choose solo or co-op trainer battles, start no-reward practice rematches, and challenge another player.\n- Show or hide followers and see clearer teammate status messages."
+    },
+    {
+      "version": "0.3.11",
+      "title": "Helpful Pokémon tools",
+      "file": "RELEASE_NOTES_0.3.11.md",
+      "body": "- Browse local encounters by season and relearn level-up moves for free.\n- Use field moves while keeping those moves out of your battle move slots. The game still controls whether you can use them."
+    },
+    {
+      "version": "0.3.10",
+      "title": "Followers and party stats",
+      "file": "RELEASE_NOTES_0.3.10.md",
+      "body": "- All 649 original Pokémon now have directional follower sprites.\n- Followers have a gentle idle bob, and you can view IVs and EVs in the launcher tools.\n- Viewing stats does not change your Pokémon."
+    },
+    {
+      "version": "0.3.9",
+      "title": "Battle scenery and followers",
+      "file": "RELEASE_NOTES_0.3.9.md",
+      "body": "- Try optional 3D battle scenery made from your own ROM. It is cached on your computer and does not change your game files.\n- Pokémon followers now use more accurate sprites and animations.\n- Fixed the in-game Options shortcut."
+    },
+    {
+      "version": "0.3.8",
+      "title": "Bigger LAN lobbies",
+      "file": "RELEASE_NOTES_0.3.8.md",
+      "body": "- Local games can now host up to 16 players, and guests can join after the host starts.\n- Co-op invitations and reconnects are more reliable.\n- Traded Pokémon follow the game's obedience rules in supported Black 2 versions."
+    },
+    {
+      "version": "0.3.7",
+      "title": "More reliable map tracking",
+      "file": "RELEASE_NOTES_0.3.7.md",
+      "body": "- Nearby players are matched to the area they are actually visiting.\n- Fixed several cases where a teammate's location or battle status could get stuck.\n- Teammates can remain visible behind in-game menus when the game camera is available."
+    },
+    {
+      "version": "0.3.6",
+      "title": "Clearer player locations",
+      "file": "RELEASE_NOTES_0.3.6.md",
+      "body": "- Teammate locations and battle status now recover more reliably after returning to the field.\n- The player list gives a clearer message when someone's location cannot be found."
+    },
+    {
+      "version": "0.3.5",
+      "title": "Easy setup and co-op",
+      "file": "RELEASE_NOTES_0.3.5.md",
+      "body": "- The launcher can check for updates, host or join a local game, and help you reconnect.\n- It now includes setup guides, gameplay screenshots, optional music, and keyboard or controller navigation.\n- Updates keep your ROM, saves, and emulator settings. Problem reports stay on your computer until you choose to share them."
+    }
+  ]
+}

@@ -118,7 +118,10 @@ def main():
         z.writestr('Unova-Together/Start Unova Together.cmd','@echo off\r\ncd /d "%~dp0"\r\nstart "" "launcher\\Pokemon Together.exe" --home "%~dp0."\r\n')
         for name in (*DOCS, f'RELEASE_CHECKS_{version}.md'):
             z.write(repo/'docs'/name, 'Unova-Together/docs/'+name)
-        z.write(repo/f'RELEASE_NOTES_{version}.md', f'Unova-Together/RELEASE_NOTES_{version}.md')
+        for path in sorted((repo/'patchnotes').glob('RELEASE_NOTES_*.md')):
+            z.write(path, 'Unova-Together/patchnotes/'+path.name)
+        z.write(repo/'patchnotes'/'index.json', 'Unova-Together/patchnotes/index.json')
+        z.write(repo/'patchnotes'/'README.md', 'Unova-Together/patchnotes/README.md')
         for name in ('README.md', 'LICENSE', 'LICENSING.md', 'AUTHORSHIP.md'):
             z.write(repo/name, 'Unova-Together/'+name)
         z.writestr('Unova-Together/START HERE.md', '# Start here\n\nRun **Start Unova Together.cmd**, choose your own ROM and select Play. The launcher checks official GitHub releases and offers verified updates. Follow docs/PLAYER_GUIDE.md to connect. Both players need matching ROMs/builds and independent saves.\n')
@@ -171,7 +174,9 @@ def main():
         assert all(k in {'PauseLostFocus','LimitFPS','TargetFPS','MP','JIT'} or k.startswith('Instance') for k in packed)
         assert not any('/source/' in n for n in z.namelist())
         assert 'Unova-Together/docs/COMPANIONS_AND_SOARING.md' in z.namelist()
-        assert f'Unova-Together/RELEASE_NOTES_{version}.md' in z.namelist()
+        note_files=[name for name in z.namelist() if name.startswith('Unova-Together/patchnotes/RELEASE_NOTES_') and name.endswith('.md')]
+        assert len(note_files)==30 and f'Unova-Together/patchnotes/RELEASE_NOTES_{version}.md' in note_files
+        assert 'Unova-Together/patchnotes/index.json' in z.namelist()
         launcher_info=json.loads(z.read('Unova-Together/launcher/BUILD_INFO.json'))
         assert launcher_info['product']=='pokemon-together' and launcher_info['version']==version
         assert json.loads(z.read('Unova-Together/launcher/_internal/launcher_ui/build-info.json'))==launcher_info

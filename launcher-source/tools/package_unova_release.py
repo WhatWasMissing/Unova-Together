@@ -104,7 +104,10 @@ def main():
         z.writestr('Unova-Together/Start Unova Together.cmd','@echo off\r\ncd /d "%~dp0"\r\nstart "" "launcher\\Pokemon Together.exe" --home "%~dp0."\r\n')
         for name in (*DOCS, f'RELEASE_CHECKS_{version}.md'):
             z.write(repo/'docs'/name, 'Unova-Together/docs/'+name)
-        z.write(repo/f'RELEASE_NOTES_{version}.md', f'Unova-Together/RELEASE_NOTES_{version}.md')
+        for path in sorted((repo/'patchnotes').glob('RELEASE_NOTES_*.md')):
+            z.write(path, 'Unova-Together/patchnotes/'+path.name)
+        z.write(repo/'patchnotes'/'index.json', 'Unova-Together/patchnotes/index.json')
+        z.write(repo/'patchnotes'/'README.md', 'Unova-Together/patchnotes/README.md')
         for name in ('README.md', 'LICENSE', 'LICENSING.md', 'AUTHORSHIP.md'):
             z.write(repo/name, 'Unova-Together/'+name)
         z.writestr('Unova-Together/START HERE.md', '# Start here\n\nRun **Start Unova Together.cmd**, choose your own ROM and select Play. The launcher checks official GitHub releases and offers verified updates. Follow docs/PLAYER_GUIDE.md to connect. Both players need matching ROMs/builds and independent saves.\n')
@@ -131,7 +134,7 @@ def main():
         for path in sorted((ROOT/'tools/launcher_ui').rglob('*')):
             if path.is_file() and '__pycache__' not in path.parts:
                 z.write(path,'Unova-Together-Source/tools/launcher_ui/'+path.relative_to(ROOT/'tools/launcher_ui').as_posix())
-        for name in ('test_unova_updater.py','test_unova_single_exe.py','unova_single_exe.py','build_unova_single_exe.py','test_launcher_ui.py','test_launcher_preferences.py','test_launcher_cheat_engine.py','test_launcher_services.py','test_release_input_bounds.py','test_companion_and_soaring.py','test_overworld_companion.py','check_lan_player_list_validation.cpp','check_battle_presence.cpp','check_post_battle_presence.cpp','check_rival_agreement.cpp','test_rival_payload.py','test_coop_boss_payload.py','test_coop_story_return.py','test_coop_field_return.py','verify_coop_runtime.py','audit_native_enemy_setup.py','verify_rival_startups.py'):
+        for name in ('test_unova_updater.py','test_unova_single_exe.py','unova_single_exe.py','build_unova_single_exe.py','test_launcher_ui.py','test_launcher_preferences.py','test_launcher_cheat_engine.py','test_launcher_services.py','test_patchnotes_feed.py','test_release_input_bounds.py','test_companion_and_soaring.py','test_overworld_companion.py','check_lan_player_list_validation.cpp','check_battle_presence.cpp','check_post_battle_presence.cpp','check_rival_agreement.cpp','test_rival_payload.py','test_coop_boss_payload.py','test_coop_story_return.py','test_coop_field_return.py','verify_coop_runtime.py','audit_native_enemy_setup.py','verify_rival_startups.py'):
             z.write(ROOT/'tools'/name,'Unova-Together-Source/tools/'+name)
         for name in COMMANDS:
             z.write(ROOT/name, 'Unova-Together-Source/'+name)
@@ -154,7 +157,9 @@ def main():
         assert all(k in {'PauseLostFocus','LimitFPS','TargetFPS','MP','JIT'} or k.startswith('Instance') for k in packed)
         assert not any('/source/' in n for n in z.namelist())
         assert 'Unova-Together/docs/COMPANIONS_AND_SOARING.md' in z.namelist()
-        assert f'Unova-Together/RELEASE_NOTES_{version}.md' in z.namelist()
+        note_files=[name for name in z.namelist() if name.startswith('Unova-Together/patchnotes/RELEASE_NOTES_') and name.endswith('.md')]
+        assert len(note_files)==30 and f'Unova-Together/patchnotes/RELEASE_NOTES_{version}.md' in note_files
+        assert 'Unova-Together/patchnotes/index.json' in z.namelist()
         launcher_info=json.loads(z.read('Unova-Together/launcher/BUILD_INFO.json'))
         assert launcher_info['product']=='pokemon-together' and launcher_info['version']==version
         assert json.loads(z.read('Unova-Together/launcher/_internal/launcher_ui/build-info.json'))==launcher_info

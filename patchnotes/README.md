@@ -1,0 +1,36 @@
+# Unova Together patch notes
+
+Pick a version to read what changed. The newest release is first.
+
+- [Unova Together 1.0.19 — Fix for a startup problem](RELEASE_NOTES_1.0.19.md)
+- [Unova Together 1.0.18 — Another Mega Serperior test](RELEASE_NOTES_1.0.18.md)
+- [Unova Together 1.0.17 — Mega Serperior battle test](RELEASE_NOTES_1.0.17.md)
+- [Unova Together 1.0.16 — More Mega Serperior testing](RELEASE_NOTES_1.0.16.md)
+- [Unova Together 1.0.15 — Mega Serperior arrives as a test feature](RELEASE_NOTES_1.0.15.md)
+- [Unova Together 1.0.14 — Smoother LAN hosting](RELEASE_NOTES_1.0.14.md)
+- [Unova Together 1.0.13 — Safer game updates](RELEASE_NOTES_1.0.13.md)
+- [Unova Together 1.0.12 — Safer Soaring landings](RELEASE_NOTES_1.0.12.md)
+- [Unova Together 1.0.11 — A wider Soaring view](RELEASE_NOTES_1.0.11.md)
+- [Unova Together 1.0.10 — Smoother followers](RELEASE_NOTES_1.0.10.md)
+- [Unova Together 1.0.9 — A one-time launcher repair](RELEASE_NOTES_1.0.9.md)
+- [Unova Together 1.0.8 — Launcher updates work more smoothly](RELEASE_NOTES_1.0.8.md)
+- [Unova Together 1.0.7 — A Soaring preview](RELEASE_NOTES_1.0.7.md)
+- [Unova Together 1.0.6 — More ways to enjoy your companion](RELEASE_NOTES_1.0.6.md)
+- [Unova Together 1.0.5 — Balanced solo experience](RELEASE_NOTES_1.0.5.md)
+- [Unova Together 1.0.4 — Safely clean up old installs](RELEASE_NOTES_1.0.4.md)
+- [Unova Together 1.0.3 — Easier save management](RELEASE_NOTES_1.0.3.md)
+- [Unova Together 1.0.2 — More experience in solo battles](RELEASE_NOTES_1.0.2.md)
+- [Unova Together 1.0.1 — A reliability update](RELEASE_NOTES_1.0.1.md)
+- [Unova Together 1.0.0 — The full release](RELEASE_NOTES_1.0.0.md)
+- [Unova Together 0.4.0 — Companion interactions and a flight preview](RELEASE_NOTES_0.4.0.md)
+- [Unova Together 0.3.13 — Quicker menus and safer reconnects](RELEASE_NOTES_0.3.13.md)
+- [Unova Together 0.3.12 — Simpler menus and co-op tools](RELEASE_NOTES_0.3.12.md)
+- [Unova Together 0.3.11 — Helpful Pokémon tools](RELEASE_NOTES_0.3.11.md)
+- [Unova Together 0.3.10 — Followers and party stats](RELEASE_NOTES_0.3.10.md)
+- [Unova Together 0.3.9 — Battle scenery and followers](RELEASE_NOTES_0.3.9.md)
+- [Unova Together 0.3.8 — Bigger LAN lobbies](RELEASE_NOTES_0.3.8.md)
+- [Unova Together 0.3.7 — More reliable map tracking](RELEASE_NOTES_0.3.7.md)
+- [Unova Together 0.3.6 — Clearer player locations](RELEASE_NOTES_0.3.6.md)
+- [Unova Together 0.3.5 — Easy setup and co-op](RELEASE_NOTES_0.3.5.md)
+
+The launcher reads these same notes from `index.json` on GitHub.

@@ -16,4 +16,4 @@ Current 1.25× production-dispatch checks passed against genuine Redux and Engli
 
 Release **1.0.2 used 1.65×**, before 1.0.5 reduced it to 1.25×. Its documented solo Cheren test awarded the badge, saved 5,951 Servine XP / level 20 and reloaded those records in a fresh emulator. Independent PKHeX parsing checked the save and Pokémon checksums. The fixture used boosted combat stats and the interpreter; it does not establish normal Challenge difficulty.
 
-That historical test verifies the recorded 1.0.2 result. It is **not** a fresh battle/save/reload validation of the current 1.25× release. Failed earlier saving attempts remain documented separately. See [measured battle results](XP_COMPENSATION_BATTLE_TEST.md), [1.0.5 notes](../RELEASE_NOTES_1.0.5.md) and [known limits](KNOWN_ISSUES.md).
+That historical test verifies the recorded 1.0.2 result. It is **not** a fresh battle/save/reload validation of the current 1.25× release. Failed earlier saving attempts remain documented separately. See [measured battle results](XP_COMPENSATION_BATTLE_TEST.md), [1.0.5 notes](../patchnotes/RELEASE_NOTES_1.0.5.md) and [known limits](KNOWN_ISSUES.md).

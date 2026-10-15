@@ -1,0 +1,78 @@
+"""Patch-note directory and launcher feed checks; uses no UI dependencies."""
+from pathlib import Path
+import io
+import json
+import unittest
+
+import unova_updater as updater
+
+
+class PatchNotesFeedTests(unittest.TestCase):
+    def setUp(self):
+        self.root = Path(__file__).resolve().parents[2]
+        self.index = json.loads((self.root / 'patchnotes/index.json').read_text(encoding='utf-8'))
+
+    def test_repository_index_lists_every_note_in_new_folder(self):
+        notes = updater.patch_note_news(self.index['notes'])
+        self.assertEqual(len(notes), 30)
+        self.assertEqual(notes[0]['version'], '1.0.19')
+        self.assertEqual(notes[-1]['version'], '0.3.5')
+        for item in notes:
+            self.assertTrue((self.root / 'patchnotes' / item['file']).is_file())
+            self.assertIn('/blob/main/patchnotes/' + item['file'], item['url'])
+
+    def test_launcher_feed_reads_github_index_separately_from_releases(self):
+        version = '1.0.19'
+        name = f'Unova-Together-{version}-Windows-x64.zip'
+        sums_name = f'SHA256SUMS-Unova-Together-{version}.txt'
+        base = f'https://github.com/{updater.REPO}/releases/download/v{version}/'
+        release = {'tag_name': 'v' + version, 'name': 'Latest', 'body': 'Fallback text',
+                   'published_at': '2026-10-15T00:00:00Z', 'draft': False, 'prerelease': False,
+                   'assets': [{'name': name, 'size': 1024, 'browser_download_url': base + name},
+                              {'name': sums_name, 'size': 80, 'browser_download_url': base + sums_name}]}
+        requests = []
+
+        class Response:
+            def __init__(self, url, data): self.url, self.data = url, data
+            def __enter__(self): return self
+            def __exit__(self, *args): pass
+            def geturl(self): return self.url
+            def read(self, limit): return self.data[:limit]
+
+        def opener(url):
+            requests.append(url)
+            if url == updater.API:
+                return Response(url, json.dumps([release]).encode())
+            if url == updater.PATCHNOTES_URL:
+                return Response(url, json.dumps(self.index).encode())
+            raise AssertionError(f'Unexpected launcher request: {url}')
+
+        feed = updater.launcher_feed(opener)
+        self.assertEqual(requests, [updater.API, updater.PATCHNOTES_URL])
+        self.assertEqual(feed['release']['version'], version)
+        self.assertEqual(feed['newsSource'], 'patchnotes')
+        self.assertEqual(len(feed['news']), 30)
+        self.assertTrue(all('/blob/main/patchnotes/' in note['url'] for note in feed['news']))
+
+    def test_unavailable_index_falls_back_to_release_notes(self):
+        version = '1.0.19'
+        name = f'Unova-Together-{version}-Windows-x64.zip'
+        sums_name = f'SHA256SUMS-Unova-Together-{version}.txt'
+        base = f'https://github.com/{updater.REPO}/releases/download/v{version}/'
+        release = {'tag_name': 'v' + version, 'name': 'Latest',
+                   'body': 'Available from the release page', 'published_at': '2026-10-15T00:00:00Z',
+                   'assets': [{'name': name, 'size': 1024, 'browser_download_url': base + name},
+                              {'name': sums_name, 'size': 80, 'browser_download_url': base + sums_name}]}
+
+        def opener(url):
+            if url == updater.API:
+                return io.BytesIO(json.dumps([release]).encode())
+            raise OSError('Offline test')
+
+        feed = updater.launcher_feed(opener)
+        self.assertEqual(feed['newsSource'], 'releases-fallback')
+        self.assertEqual(feed['news'][0]['body'], 'Available from the release page')
+
+
+if __name__ == '__main__':
+    unittest.main()

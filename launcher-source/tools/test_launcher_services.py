@@ -5,6 +5,7 @@ from unittest.mock import patch
 from launcher_ui import services as s
 import unova_updater as u
 
+
 class ServiceTests(unittest.TestCase):
     def test_companion_preference_preserves_explicit_choices_and_rejects_removed_options(self):
         item=s.profile();self.assertNotIn('companion_interactions',item['preferences'])

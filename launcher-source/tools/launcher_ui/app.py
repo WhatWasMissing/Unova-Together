@@ -24,7 +24,7 @@ class Launcher(tk.Tk):
         self.messages=queue.Queue();self.busy=False;self.release=None;self.game=None;self.operation='';self.guides_busy=False
         self._process_check_at=0;self._process_running=False
         self.cancel=threading.Event();self.rom=tk.StringVar();self.auto=tk.BooleanVar(value=True);self.music=tk.BooleanVar(value=False)
-        self.status=tk.StringVar(value='');self.news_status=tk.StringVar(value='Saved release notes · available offline')
+        self.status=tk.StringVar(value='');self.news_status=tk.StringVar(value='Saved patch notes · available offline')
         self.update_status=tk.StringVar(value='Check GitHub for the latest Windows release.')
         self.available=tk.StringVar(value='Not checked yet');self.phase=tk.StringVar(value='No download in progress')
         self.news=self._read_news();self.pages={};self.nav={};self.images=[];self.page_name=''
@@ -268,10 +268,15 @@ class Launcher(tk.Tk):
     def _read_news(self):
         for path in (self.home/'.updates/news-cache.json',HERE/'assets/news.json'):
             try:
-                if path.stat().st_size>220000:continue
+                if path.stat().st_size>512*1024:continue
                 raw=json.loads(path.read_text(encoding='utf-8'))
-                if not isinstance(raw,list):continue
-                news=updates.release_news([{'tag_name':'v'+n['version'],'name':n.get('title'),'body':n.get('body'),'published_at':n.get('date')} for n in raw[:12] if isinstance(n,dict)])
+                if isinstance(raw,dict) and raw.get('schema')==1:
+                    news=updates.patch_note_news(raw.get('notes'))
+                elif isinstance(raw,list):
+                    try:news=updates.patch_note_news(raw)
+                    except ValueError:
+                        news=updates.release_news([{'tag_name':'v'+n['version'],'name':n.get('title'),'body':n.get('body'),'published_at':n.get('date')} for n in raw[:30] if isinstance(n,dict)])
+                else:continue
                 if news:return news
             except (OSError,ValueError,KeyError,TypeError):continue
         return []
@@ -281,14 +286,16 @@ class Launcher(tk.Tk):
         for n in self.news:self.news_picker.insert('end',n['version']+'  ·  '+n['title'])
         if self.news:self.news_picker.selection_set(0);self.select_news()
         else:
-            self.news_text.configure(state='normal');self.news_text.delete('1.0','end');self.news_text.insert('end','No saved news yet. Select Refresh news to load official release notes.')
+            self.news_text.configure(state='normal');self.news_text.delete('1.0','end');self.news_text.insert('end','No saved patch notes yet. Select Refresh news to load them from GitHub.')
             self.news_text.configure(state='disabled');set_enabled(self.news_link,False)
 
     def select_news(self,event=None):
         chosen=self.news_picker.curselection()
         if not chosen or chosen[0]>=len(self.news):return
         n=self.news[chosen[0]];self.news_text.configure(state='normal');self.news_text.delete('1.0','end')
-        self.news_text.insert('end',n['title']+'\n','heading');self.news_text.insert('end','Published '+n['date']+' · Official release notes\n\n')
+        self.news_text.insert('end',n['title']+'\n','heading')
+        source=('Published '+n['date']+' · ' if n.get('date') else '')+'Official GitHub patch notes\n\n'
+        self.news_text.insert('end',source)
         lines=n['body'].splitlines()
         if lines and lines[0].startswith('# '):lines=lines[1:]
         for line in lines:
@@ -940,7 +947,7 @@ class Launcher(tk.Tk):
 
     def check(self):
         if self.busy:return
-        self.status.set('Checking official GitHub releases…');self.update_status.set('Checking GitHub…');self.news_status.set('Refreshing official release notes…')
+        self.status.set('Checking official GitHub releases…');self.update_status.set('Checking GitHub…');self.news_status.set('Refreshing patch notes from GitHub…')
         self._worker('feed',updates.launcher_feed)
 
     def install_update(self):
@@ -985,7 +992,8 @@ class Launcher(tk.Tk):
                 if action=='diagnostics':
                     self.status.set('Report prepared. Review before sharing.');self._review_report(Path(value));self._sync();continue
                 if action=='feed':
-                    latest=value['release'];self.available.set('Release '+latest['version']);self.news=value['news'];self._render_news();self.news_status.set('Up to date · official GitHub release notes')
+                    latest=value['release'];self.available.set('Release '+latest['version']);self.news=value['news'];self._render_news()
+                    self.news_status.set('Up to date · patch notes from GitHub' if value.get('newsSource')=='patchnotes' else 'Using release notes while patch notes are unavailable')
                     try:
                         cache=self.home/'.updates/news-cache.json';cache.parent.mkdir(exist_ok=True);pending=cache.with_suffix('.pending')
                         pending.write_text(json.dumps(self.news),encoding='utf-8');os.replace(pending,cache)
@@ -1004,7 +1012,7 @@ class Launcher(tk.Tk):
                     if finished_operation.startswith('lan-'):self.lan_status.set(value)
                     if finished_operation=='connection':
                         self.connection_status.set(value);self.status.set(value)
-                    if finished_operation=='feed':self.news_status.set('Could not refresh · showing saved release notes')
+                    if finished_operation=='feed':self.news_status.set('Could not refresh · showing saved patch notes')
                 self._sync()
         except queue.Empty:pass
         self._read_lan_status();self._sync();self.after(100,self._poll)

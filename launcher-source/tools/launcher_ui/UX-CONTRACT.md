@@ -19,7 +19,7 @@ Eight compact native sidebar buttons switch Play, Profiles, Co-op, News, Updates
 
 GitHub check fetches releases once for both news and update comparison. Checks and installs run in a worker; all Tk updates occur on the main thread. Duplicate check/install requests are rejected. A tracked running game disables update installation and duplicate Play, while news remains refreshable. Closing the launcher never terminates the game.
 
-News is release news, not a separately administered announcement service. Published semantic-version releases are bounded, sanitized plain text; drafts are excluded and link destinations are constructed from the pinned repository. Last successful news is cached atomically per installation, with bundled release notes as an offline fallback. A failed refresh explicitly says saved notes are shown. Missing news offers Refresh news.
+News lists the Markdown patch notes in the official repository's `patchnotes/` folder. The launcher checks update availability separately from notes, validates the small versioned index, and builds links to the matching GitHub files. Notes are cached atomically per installation, with the bundled index available offline. If a refresh fails, the launcher says saved notes are being shown.
 
 Updates distinguishes unrequested, checking, available, current, downloading, verifying/preparing, installed, cancelled and error states. Cancel download leaves the original active build intact. Validation errors remain on Updates as well as in the footer. Save/ROM paths and emulator control settings follow the existing backend policy. Beta limitations must not be described as solved unless validated independently.
 
