@@ -2,6 +2,12 @@
   "schema": 1,
   "notes": [
     {
+      "version": "1.0.31",
+      "title": "Smoother Soaring landings",
+      "file": "RELEASE_NOTES_1.0.31.md",
+      "body": "- Soaring landings now use Pokémon Black 2's Fly-style map transition.\n- Followers keep a one-tile trail and move smoothly through corners.\n\nTry flight from Unova → Pokémon → Take flight with Settings → Experimental features → Soaring flight enabled. Land on clear ground and check that you return to the right map and spot. To test Mega Salamence's battle animation, give it Salamencite and hold L + R while choosing a move."
+    },
+    {
       "version": "1.0.30",
       "title": "Fly between more areas",
       "file": "RELEASE_NOTES_1.0.30.md",
