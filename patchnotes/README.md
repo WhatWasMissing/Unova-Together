@@ -2,6 +2,7 @@
 
 Pick a version to read what changed. The newest release is first.
 
+- [Unova Together 1.0.35 — Mega level-up fix and menu sounds](RELEASE_NOTES_1.0.35.md)
 - [Unova Together 1.0.34 — Mega Evolution and steadier follower poses](RELEASE_NOTES_1.0.34.md)
 - [Unova Together 1.0.33 — Mega Pokémon and a Soaring preview](RELEASE_NOTES_1.0.33.md)
 - [Unova Together 1.0.32 — Soaring across Unova](RELEASE_NOTES_1.0.32.md)
@@ -49,4 +50,3 @@ Pick a version to read what changed. The newest release is first.
 - [Unova Together 0.3.5 — Easy setup and co-op](RELEASE_NOTES_0.3.5.md)
 
 The launcher reads these same notes from `index.json` on GitHub.
-

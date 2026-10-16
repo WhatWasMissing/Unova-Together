@@ -2,6 +2,12 @@
   "schema": 1,
   "notes": [
     {
+      "version": "1.0.35",
+      "title": "Mega level-up fix and menu sounds",
+      "file": "RELEASE_NOTES_1.0.35.md",
+      "body": "- Mega Pokémon can now gain levels in battle without crashing, and can still learn new moves.\n- Added classic Generation 5-style movement, confirm, and back sounds to the in-game menus. Turn them off in Settings if you prefer."
+    },
+    {
       "version": "1.0.34",
       "title": "Mega Evolution and steadier follower poses",
       "file": "RELEASE_NOTES_1.0.34.md",
@@ -11,7 +17,7 @@
       "version": "1.0.33",
       "title": "Mega Pokémon and a Soaring preview",
       "file": "RELEASE_NOTES_1.0.33.md",
-      "body": "- Try 49 Mega Pokémon with their matching Mega Stones. For example, Mega Serperior gains Adaptability and Mega Charizard Y gains Drought.\n- Animated battle artwork plays full timed sequences for 46 Mega forms, including all 67 frames for Mega Salamence.\n- The optional Soaring preview connects 69 outdoor areas. It is still unfinished: some routes are approximate, live testing is needed, and Marine Tube has no safe landing spot.\n\nFollower artwork still needed further alignment work; the fix is included in version 1.0.34. See the [Mega guide](../docs/MEGA_EVOLUTION.md), [Soaring guide](../docs/SOARING_FLIGHT.md), and [known limits](../docs/KNOWN_ISSUES.md). Update everyone in your co-op group to version 1.0.33 before playing together."
+      "body": "- Try 49 Mega Pokémon with their matching Mega Stones. For example, Mega Serperior gains Adaptability and Mega Charizard Y gains Drought.\n- Animated battle artwork now plays full timed sequences for 46 Mega forms. Mega Salamence uses 67 frames for both its front and back view.\n- Follower walking received a smoothing adjustment. Version 1.0.34 further aligns the visible artwork between poses to address vertical shifting.\n- Take flight across the unfinished Soaring preview, which connects 69 outdoor areas.\n\n**Soaring is still unfinished.** Some routes and locations are approximate, live playtesting is still needed, and Marine Tube has no safe landing spot. Save normally before trying it. See the [Mega guide](../docs/MEGA_EVOLUTION.md), [Soaring guide](../docs/SOARING_FLIGHT.md), and [known limits](../docs/KNOWN_ISSUES.md) for details.\n\nUpdate everyone in your co-op group to version 1.0.33 before playing together."
     },
     {
       "version": "1.0.32",
@@ -273,4 +279,3 @@
     }
   ]
 }
-

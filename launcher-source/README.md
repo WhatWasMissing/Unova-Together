@@ -14,4 +14,4 @@ Run python tools/unova_launcher.py --home <your-Unova-installation>.
 Build with python tools/build_unova_launcher.py; UI/routing tests run from tools.
 Cleanup scripts are development utilities; they preview by default.
 
-Launcher 1.0.20, build revision 2026101502, is paired with the 1.0.20 emulator package. Updates can stage beside a running game, and Play remains blocked only while an emulator from the same installation is open. News reads the simple version notes from the GitHub `patchnotes/` folder, even if old GitHub Releases are removed.
+Launcher 1.0.35, build revision 2026101601, is paired with the 1.0.35 emulator package. Updates can stage beside a running game, and Play remains blocked only while an emulator from the same installation is open. News reads the simple version notes from the GitHub `patchnotes/` folder, even if old GitHub Releases are removed.
