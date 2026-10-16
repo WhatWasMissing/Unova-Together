@@ -15,12 +15,12 @@ _PATCHES = {
     # the project's current test save are both supported by distinct patches.
     "332d07576e2077b4ef91e394603d144108098b7624c6a918b175f90530c0036a": (
         "cynthia-route7-redux-1.4.1.bps",
-        "6b550b64ad4ca9d674ecd2ea936c3ab74a035509ae980054f59c8c9468d10451",
+        "8ec292ee7fda14b583ab0638a319af8a24a6b3a88cdd4db204260e1affcc4b5f",
         289387720,
     ),
     "353fb0cf82c3e4eddfc8986efa8910b00eb1c4d6f106c220abef59d69d3a520a": (
         "cynthia-route7-unova-1.0.35.bps",
-        "46e6446a0039984921fb396a3c951389fe6c454118ed4cad3242cc67a3d212fc",
+        "1099144137c6d4026b2d06dff8723254d59456963eaaf05e093d7f377ba3a3fe",
         289389256,
     ),
 }
@@ -134,7 +134,7 @@ def prepare_variant(source_path, home, patch_root=None) -> Path:
     """Return a checked patch copy; the player's selected ROM remains read-only."""
     source = Path(source_path).expanduser().resolve()
     if not source.is_file() or source.suffix.lower() != ".nds":
-        raise ValueError("Choose an existing Black 2 / Redux ROM first.")
+        raise ValueError("Choose an existing Blaze Black 2 Redux game file first.")
     original_stat = source.stat()
     source_hash = _sha256(source)
     if any(source_hash == target_hash for _, target_hash, _ in _PATCHES.values()):

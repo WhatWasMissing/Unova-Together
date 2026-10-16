@@ -2,6 +2,12 @@
   "schema": 1,
   "notes": [
     {
+      "version": "2.0.2",
+      "title": "Route 7 movement fix",
+      "file": "RELEASE_NOTES_2.0.2.md",
+      "body": "Fixes a Route 7 issue that could stop movement after loading a save. Cynthia’s introduction and rematch now appear at the right points in the story. Update the launcher before continuing your save so it can prepare the corrected game copy."
+    },
+    {
       "version": "2.0.1",
       "title": "Clearer in-game menus",
       "file": "RELEASE_NOTES_2.0.1.md",
@@ -11,7 +17,7 @@
       "version": "2.0.0",
       "title": "Mega Evolution and a fresh look",
       "file": "RELEASE_NOTES_2.0.0.md",
-      "body": "- Explore with **49 Mega forms**, each with a matching Mega Stone sold at Pokémon Center Marts. Forty-six forms have animated battle artwork.\n- The launcher’s Features page now plays the supplied front and back animations for Mega Mawile.\n- Mega Evolution works in battle, keeps the Mega form through switching and level gains, and returns the Pokémon to normal when the battle ends.\n- The launcher now lets you choose an animated field character from your supported Black 2 game. Your choice applies the next time you start the game.\n- After defeating Skyla, meet Cynthia on Route 7 to learn about Mega Evolution and receive a matching Mega Stone. Return for a rematch against her team and Mega Garchomp. The launcher makes a separate event-ready copy of supported Redux games.\n- Added in-game mod menus have a Generation 5-inspired design, with menu sounds you can turn off in **Unova → Settings**.\n- The launcher’s old-version cleanup keeps your active game and saves while removing unused copies.\n\nSoaring remains an optional, unfinished preview. Read the [Soaring guide](../docs/SOARING_FLIGHT.md) before using it."
+      "body": "- Explore with **49 Mega forms**, each with a matching Mega Stone sold at Pokémon Center Marts. Forty-six forms have animated battle artwork.\n- The launcher’s Features page now plays the supplied front and back animations for Mega Mawile.\n- Mega Evolution works in battle, keeps the Mega form through switching and level gains, and returns the Pokémon to normal when the battle ends.\n- The launcher now lets you choose an animated field character from your game. Your choice applies the next time you start the game.\n- After defeating Skyla, meet Cynthia on Route 7 to learn about Mega Evolution and receive a matching Mega Stone. Return for a rematch against her team and Mega Garchomp. The launcher prepares a separate event-ready copy for Blaze Black 2 Redux Complete v1.4.1.\n- Added in-game mod menus have a Generation 5-inspired design, with menu sounds you can turn off in **Unova → Settings**.\n- The launcher’s old-version cleanup keeps your active game and saves while removing unused copies.\n\nSoaring remains an optional, unfinished preview. Read the [Soaring guide](../docs/SOARING_FLIGHT.md) before using it."
     },
     {
       "version": "1.0.35",
@@ -125,7 +131,7 @@
       "version": "1.0.17",
       "title": "Mega Serperior in battle",
       "file": "RELEASE_NOTES_1.0.17.md",
-      "body": "Mega Serperior and Serperiorite are available in supported Black 2 Redux v1.4.1 games. Hold L+R together while choosing a move to Mega Evolve."
+      "body": "Mega Serperior and Serperiorite are available in supported Blaze Black 2 Redux Complete v1.4.1 games. Hold L+R together while choosing a move to Mega Evolve."
     },
     {
       "version": "1.0.16",
@@ -137,7 +143,7 @@
       "version": "1.0.15",
       "title": "Mega Serperior arrives",
       "file": "RELEASE_NOTES_1.0.15.md",
-      "body": "Mega Evolve Serperior in supported English Black 2 Redux v1.4.1 games. Give it Serperiorite, then hold L+R together while choosing a move in battle."
+      "body": "Mega Evolve Serperior in supported English Blaze Black 2 Redux Complete v1.4.1 games. Give it Serperiorite, then hold L+R together while choosing a move in battle."
     },
     {
       "version": "1.0.14",
@@ -269,7 +275,7 @@
       "version": "0.3.8",
       "title": "Bigger LAN sessions",
       "file": "RELEASE_NOTES_0.3.8.md",
-      "body": "Host local sessions with up to 16 players, and let guests join after the host starts.\n\nCo-op invitations and reconnecting are clearer. Traded Pokémon follow the game’s obedience rules in supported Black 2 versions."
+      "body": "Host local sessions with up to 16 players, and let guests join after the host starts.\n\nCo-op invitations and reconnecting are clearer. Traded Pokémon follow the game’s obedience rules in supported Redux versions."
     },
     {
       "version": "0.3.7",

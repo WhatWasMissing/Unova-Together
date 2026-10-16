@@ -14,8 +14,10 @@ import ndspy.rom
 
 TRAINER_ID = 891
 GARCHOMPITE = 526
-REWARD_FLAG = 0x0C00
-REMATCH_FLAG = 0x0C01
+REWARD_FLAG = "EVENT_FLAG_0x09a1"
+REMATCH_FLAG = "EVENT_FLAG_0x09a2"
+TUTORIAL_HIDE_FLAG = "EVENT_FLAG_0x09a3"
+CHALLENGE_HIDE_FLAG = "EVENT_FLAG_0x09a4"
 REMATCH_POSITION = {"x": 111, "z": 244, "y": 0}
 SKYLA_TRAINER_ID = 155
 SKYLA_LEVELS = [51, 51, 51, 51, 52, 51]
@@ -30,7 +32,7 @@ def verify(rom_path: Path, decomp: Path) -> dict:
 
     rom = ndspy.rom.NintendoDSRom.fromFile(str(rom_path))
     if bytes(rom.idCode) != b"IREO":
-        raise ValueError("Practice test requires an English Black 2 / Redux ROM")
+        raise ValueError("Practice test requires an English Blaze Black 2 Redux game file")
     trainer_records = ndspy.narc.NARC(rom.getFileByName("a/0/9/1")).files
     parties = ndspy.narc.NARC(rom.getFileByName("a/0/9/2")).files
     names = unpack_file(ndspy.narc.NARC(rom.getFileByName("a/0/0/2")).files[382]).splitlines()
@@ -97,12 +99,28 @@ def verify(rom_path: Path, decomp: Path) -> dict:
     actor = next((npc for npc in events["npcs"] if npc["id"] == 18), None)
     if not actor or actor["script"] != 9 or actor["grid"] != REMATCH_POSITION:
         raise ValueError("Cynthia's rematch NPC is missing from northern Route 7")
-    if not any(condition["var"] == REWARD_FLAG and condition["value"] == 0 and condition["script"] == 11
-               for init in events["init_scripts"] if init["type"] == 1 for condition in init["conditions"]):
-        raise ValueError("The rematch NPC is not hidden before Cynthia gives the stone")
-    if not any(condition["var"] == REMATCH_FLAG and condition["value"] == 1 and condition["script"] == 12
-               for init in events["init_scripts"] if init["type"] == 1 for condition in init["conditions"]):
-        raise ValueError("The rematch NPC is not hidden after the challenge is won")
+    tutorial = next((npc for npc in events["npcs"] if npc["id"] == 17), None)
+    if not tutorial or tutorial["script"] != 7 or tutorial["type"] != 0:
+        raise ValueError("Cynthia's lesson NPC is missing or is not a talkable map actor")
+    if actor["type"] != 0:
+        raise ValueError("Cynthia's rematch NPC is not a talkable map actor")
+    if tutorial["flag"] != TUTORIAL_HIDE_FLAG or actor["flag"] != CHALLENGE_HIDE_FLAG:
+        raise ValueError("Cynthia's Route 7 actors are missing their spawn flags")
+    if not any(init["type"] == 2 and init.get("script") == 8 for init in events["init_scripts"]):
+        raise ValueError("Route 7 is missing the pre-spawn progress initializer")
+    for init in events["init_scripts"]:
+        if init["type"] != 1:
+            continue
+        for condition in init.get("conditions", []):
+            var = condition.get("var", 0)
+            if (isinstance(var, int) and var < 0x4000) or (
+                isinstance(var, str) and var.startswith("EVENT_FLAG_")
+            ):
+                raise ValueError("A Route 7 type-1 condition uses a flag ID instead of an event-work ID")
+    flag_ids = load_constants("flags")
+    if any(flag_ids[flag] >= 0x0BF8
+           for flag in (REWARD_FLAG, REMATCH_FLAG, TUTORIAL_HIDE_FLAG, CHALLENGE_HIDE_FLAG)):
+        raise ValueError("Cynthia's event uses flags outside the saved event-flag table")
 
     return {
         "rom": str(rom_path.resolve()),

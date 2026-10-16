@@ -2,4 +2,4 @@
 
 Host local sessions with up to 16 players, and let guests join after the host starts.
 
-Co-op invitations and reconnecting are clearer. Traded Pokémon follow the game’s obedience rules in supported Black 2 versions.
+Co-op invitations and reconnecting are clearer. Traded Pokémon follow the game’s obedience rules in supported Redux versions.

@@ -31,8 +31,12 @@ ACTOR_CONFIG_INDEX = ACTOR_CODE - 0x1000 + 0x179
 ACTOR_RESOURCE_INDEX = 975
 ACTOR_UID = 17
 CHALLENGE_ACTOR_UID = 18
-REWARD_FLAG = 0x0C00
-CHALLENGE_FLAG = 0x0C01
+# These four placeholder flags are unused by the BW2 decomp and fit in the
+# saved event-flag table (0x0000-0x0BF7).
+REWARD_FLAG = 0x09A1
+CHALLENGE_FLAG = 0x09A2
+TUTORIAL_HIDE_FLAG = 0x09A3
+CHALLENGE_HIDE_FLAG = 0x09A4
 REMATCH_TRAINER_ID = 891
 SKYLA_FLAG = "EVENT_FLAG_TRAINER_LEADER_SKYLA"
 STONE_FALLBACK = 113  # Serperiorite
@@ -154,7 +158,7 @@ def script_source(decomp: Path, messages_path: Path, header_path: Path, species:
     source_path = decomp / "data/field_scripts/route_7.s"
     source = source_path.read_text(encoding="utf-8")
     old_entries = "    ScriptEntry Script_6\n    ScriptEntriesEnd"
-    new_entries = "    ScriptEntry Script_6\n    ScriptEntry Script_7\n    ScriptEntry Script_8\n    ScriptEntry Script_9\n    ScriptEntry Script_10\n    ScriptEntry Script_11\n    ScriptEntry Script_12\n    ScriptEntriesEnd"
+    new_entries = "    ScriptEntry Script_6\n    ScriptEntry Script_7\n    ScriptEntry Script_8\n    ScriptEntry Script_9\n    ScriptEntriesEnd"
     if source.count(old_entries) != 1:
         raise ValueError("Route 7 source script entry list has an unexpected layout")
     source = source.replace(old_entries, new_entries)
@@ -257,7 +261,31 @@ L_CYNTHIA_DONE:
     VMHalt
 
 Script_8:
-    ActorDelete {ACTOR_UID}
+    // This runs before map actors spawn. Set their spawn flags from saved progress.
+    VMStackPushFlag {SKYLA_FLAG}
+    VMJumpIf CMP_STACK, L_CYNTHIA_SKYLA_DEFEATED
+    FlagSet {TUTORIAL_HIDE_FLAG}
+    FlagSet {CHALLENGE_HIDE_FLAG}
+    VMJump L_CYNTHIA_INIT_DONE
+
+L_CYNTHIA_SKYLA_DEFEATED:
+    VMStackPushFlag {REWARD_FLAG}
+    VMJumpIf CMP_STACK, L_CYNTHIA_GIFT_RECEIVED
+    FlagReset {TUTORIAL_HIDE_FLAG}
+    FlagSet {CHALLENGE_HIDE_FLAG}
+    VMJump L_CYNTHIA_INIT_DONE
+
+L_CYNTHIA_GIFT_RECEIVED:
+    FlagSet {TUTORIAL_HIDE_FLAG}
+    VMStackPushFlag {CHALLENGE_FLAG}
+    VMJumpIf CMP_STACK, L_CYNTHIA_CHALLENGE_COMPLETE
+    FlagReset {CHALLENGE_HIDE_FLAG}
+    VMJump L_CYNTHIA_INIT_DONE
+
+L_CYNTHIA_CHALLENGE_COMPLETE:
+    FlagSet {CHALLENGE_HIDE_FLAG}
+
+L_CYNTHIA_INIT_DONE:
     VMHalt
 
 // Cynthia moves to the northern end of Route 7 once the player has the gift.
@@ -298,18 +326,6 @@ L_CYNTHIA_REMATCH_COMPLETE:
 L_CYNTHIA_REMATCH_DONE:
     FinishAllEvents
     ActorsUnpauseAll
-    VMHalt
-
-Script_10:
-    ActorDelete {ACTOR_UID}
-    VMHalt
-
-Script_11:
-    ActorDelete {CHALLENGE_ACTOR_UID}
-    VMHalt
-
-Script_12:
-    ActorDelete {CHALLENGE_ACTOR_UID}
     VMHalt
 
     .balign 4, 0""",
@@ -550,7 +566,7 @@ def build(args: argparse.Namespace) -> dict:
 
     rom = ndspy.rom.NintendoDSRom.fromFile(str(args.rom))
     if bytes(rom.idCode) != GAME_CODE:
-        raise ValueError(f"Expected English Black 2 (IREO), found {bytes(rom.idCode)!r}")
+        raise ValueError(f"Expected English Blaze Black 2 Redux (IREO), found {bytes(rom.idCode)!r}")
     decomp = args.decomp.resolve()
     tmp = args.work.resolve()
     tmp.mkdir(parents=True, exist_ok=True)
@@ -583,7 +599,7 @@ def build(args: argparse.Namespace) -> dict:
     from tools.script.field_script import ScriptFile, load_commands, script_header
     base_commands, _, _, _ = load_commands()
     entries = script_header(compiled)
-    if entries is None or len(entries[0]) != 12:
+    if entries is None or len(entries[0]) != 9:
         raise ValueError("Compiled Route 7 script has an unexpected script table")
     traced = ScriptFile(compiled, base_commands, None)
     if not traced.trace(entries[0]) or traced.errors:
@@ -614,8 +630,8 @@ def build(args: argparse.Namespace) -> dict:
         "id": ACTOR_UID,
         "model": ACTOR_CODE,
         "movement": 0,
-        "type": 1,
-        "flag": 0,
+        "type": 0,
+        "flag": TUTORIAL_HIDE_FLAG,
         "script": 7,
         "direction": "DIR_LEFT",
         "params": [0, 0, 0],
@@ -626,23 +642,15 @@ def build(args: argparse.Namespace) -> dict:
         "id": CHALLENGE_ACTOR_UID,
         "model": ACTOR_CODE,
         "movement": 0,
-        "type": 1,
-        "flag": 0,
+        "type": 0,
+        "flag": CHALLENGE_HIDE_FLAG,
         "script": 9,
         "direction": "DIR_DOWN",
         "params": [0, 0, 0],
         "area": {"width": 0, "height": 0},
         "grid": REMATCH_POSITION,
     })
-    route_events["init_scripts"].append({
-        "type": 1,
-        "conditions": [{"var": SKYLA_FLAG, "value": 0, "script": 8}],
-    })
-    route_events["init_scripts"].extend((
-        {"type": 1, "conditions": [{"var": REWARD_FLAG, "value": 1, "script": 10}]},
-        {"type": 1, "conditions": [{"var": REWARD_FLAG, "value": 0, "script": 11}]},
-        {"type": 1, "conditions": [{"var": CHALLENGE_FLAG, "value": 1, "script": 12}]},
-    ))
+    route_events["init_scripts"].append({"type": 2, "script": 8})
     event_member = events_bytes(route_events, "route_7.json")
 
     # The original sheet has four poses per direction; native BW2 uses three walk frames.
