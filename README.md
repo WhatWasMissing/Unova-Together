@@ -1,6 +1,6 @@
 # Unova Together
 
-**Current release: 1.0.31.** Experimental Soaring now hands landings to Black 2's Fly-style map transition, with smoother follower movement and full-frame Mega battle animations: [downloads](https://github.com/WhatWasMissing/Unova-Together/releases/latest). Made by mvq1303 / WhatWasMissing, built on melonDS.
+**Current release: 1.0.31.** Followers now keep a little more space behind you, experimental Soaring returns through Black 2's Fly-style map transition, and Mega Salamence's full battle animation is ready for a live test: [downloads](https://github.com/WhatWasMissing/Unova-Together/releases/latest). Made by mvq1303 / WhatWasMissing, built on melonDS.
 
 Explore Unova with friends in supported English Pokémon Black 2 and Blaze Black 2 Redux. Each player uses their own matching ROM and independent save.
 
@@ -10,7 +10,7 @@ Explore Unova with friends in supported English Pokémon Black 2 and Blaze Black
 2. Open the EXE, or run **Start Unova Together.cmd** in the extracted folder. Choose your ROM and select **Play**.
 3. Open launcher **Co-op** to configure your connection and host or join LAN. Follow the [player guide](docs/PLAYER_GUIDE.md).
 
-Version **1.0.31** improves the handoff when experimental Soaring lands, using the game's Fly-style map transition. Turn on **Settings → Experimental features → Soaring flight**, then choose **Unova → Pokémon → Take flight**. Followers keep a HeartGold-style one-tile trail and move smoothly around corners. Mega battle animations use the supplied GIF frames; please check Mega Salamence with Salamencite and **L + R** while choosing a move.
+Version **1.0.31** gives followers a little more room behind you and keeps their walking motion smooth around turns. Experimental Soaring returns through the game's Fly-style map transition. Try Mega Salamence's full animation by giving it Salamencite and holding **L + R** while choosing a move in battle.
 
 Update from the launcher or download the latest files above. Players still using launcher 1.0.5 can run [Repair-Launcher.exe](https://github.com/WhatWasMissing/Unova-Together/releases/latest/download/Repair-Launcher.exe) once and select their old launcher. See the [launcher guide](docs/LAUNCHER.md). Update every player before playing together.
 
