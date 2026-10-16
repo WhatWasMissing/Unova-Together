@@ -27,7 +27,7 @@ Release 1.0.12 improves Soaring's regional scenery and protects the landing tran
 
 Nearby battle scenery remains experimental. Special cinematic scenes keep original backgrounds; not every environment has been playtested. Disable the option if a background looks wrong.
 
-Companion interactions are in Settings → Following Pokémon and enabled by default when no preference has been saved. Saved off choices are preserved. Use R+A or tap the follower; A alone advances game text. Regional Soaring remains experimental and off by default. It streams farther within the take-off map's outdoor matrix; smaller standalone outdoor maps are not positioned in the regional atlas yet. Unsupported map cells appear as open sky/sea, and landing is limited to verified clear terrain. Flight is local; B returns to the take-off point.
+Companion interactions are in Settings → Following Pokémon and enabled by default when no preference has been saved. Saved off choices are preserved. Use R+A or tap the follower; A alone advances game text. Regional Soaring remains experimental and off by default. Outdoor maps join the flight atlas when reciprocal fly-enabled warps define their shared position; standalone maps without a safe link stay separate. Unsupported cells appear as ocean or sky, and landing is limited to verified clear terrain. Flight is local; B returns to the take-off point.
 
 Field HMs retain native story requirements. Fly needs a party member with a move slot without another field action. Full obstacle traversal and every save/reload path have not been separately playtested. Encounter gifts, scripted legendaries and Hidden Grottos are excluded. Relearning offers the current species/form's level-up moves at or below its level.
 

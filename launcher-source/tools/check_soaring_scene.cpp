@@ -50,6 +50,20 @@ int main(int argc,char** argv) {
             {"collisionDebug",true},{"collisionTiles",QJsonArray{QJsonArray{6,6,0,0},QJsonArray{7,6,0,1},QJsonArray{8,6,0,2}}}}).toJson());debugFile.close();
         scene.reset();scene.map=191;assert(scene.load(debugFile.fileName()));
         const auto debugFrame=scene.render({},0);assert(debugFrame.size()==QSize(256,192) && debugFrame!=first);
+        QFile regionalFile(directory.filePath("regional-scene.json"));assert(regionalFile.open(QIODevice::WriteOnly));
+        regionalFile.write(QJsonDocument(QJsonObject{{"format",3},{"zone",191},{"sourceZone",191},{"world",QJsonArray{0,0,0}},
+            {"textures",QJsonArray{"red.png","blue.png"}},{"faces",QJsonArray{lower,upper}},
+            {"landings",QJsonArray{QJsonArray{191,10,20,0,520,1000}}},
+            {"atlasSize",QJsonArray{3,2}},{"atlasOriginCell",QJsonArray{-1,2}},
+            {"atlasGrid",QJsonArray{1,0,1,1,1,1}},
+            {"collisionDebug",true},{"collisionTiles",QJsonArray{QJsonArray{-4,70,0,0}}}}).toJson());regionalFile.close();
+        scene.reset();scene.map=191;assert(scene.load(regionalFile.fileName()));
+        scene.anchor={{"worldX",0.},{"worldY",0.},{"worldZ",0.}};scene.x=520;scene.z=1000;scene.altitude=96;
+        const auto destination=scene.nearestLanding(1);
+        assert(destination.value("map").toInt()==191 && destination.value("tileX").toInt()==10 &&
+               destination.value("tileZ").toInt()==20 && destination.value("worldX").toDouble()==520 &&
+               destination.value("worldZ").toDouble()==1000);
+        assert(scene.render({},1).size()==QSize(256,192));
     }
     if(argc>1) {
         scene.reset();scene.map=191;assert(scene.load(QString::fromLocal8Bit(argv[1])));

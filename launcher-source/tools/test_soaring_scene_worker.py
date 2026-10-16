@@ -4,12 +4,59 @@ from pathlib import Path
 from unittest.mock import patch
 import ndspy.texture
 from build_battle_surroundings import texture_pack
-from soaring_scene_worker import SoaringWorker,build_flyway_routes,make_flyway_faces,make_region_fill_faces,export_scene,export_with_budget
+from soaring_scene_worker import SoaringWorker,build_flyway_routes,make_flyway_faces,make_region_fill_faces,flight_matrix_offsets,export_scene,export_with_budget
 from soaring_geometry import collision_debug_tiles,landing_tiles
 from types import SimpleNamespace
 from PIL import Image
 
 class SoaringWorkerTests(unittest.TestCase):
+    @staticmethod
+    def _flight_fixture():
+        headers=bytearray(12*48)
+        for zone,area,matrix,event in ((7,0,0,0),(11,1,1,1)):
+            struct.pack_into('<HH',headers,zone*48+2,area,matrix)
+            struct.pack_into('<H',headers,zone*48+22,event)
+            struct.pack_into('<H',headers,zone*48+30,0x2000)
+        areas=bytearray(20);areas[6]=areas[16]=1
+        def event(destination,x,z):
+            warp=struct.pack('<HHHH6H',destination,0,0,0,x,0,z,1,1,0)
+            return struct.pack('<IBBBB',8+len(warp),0,0,1,0)+warp
+        matrices=[struct.pack('<IHHii',1,1,1,10,7),
+                  struct.pack('<IHHii',1,1,1,12,11)]
+        return SimpleNamespace(headers=headers,areas=areas,events=[event(11,160,320),event(7,32,16)],matrices=matrices)
+
+    def test_reciprocal_flyable_warps_merge_matrix_frames(self):
+        source=self._flight_fixture()
+        self.assertEqual(flight_matrix_offsets(source,0),{0:(0,0),1:(128,304)})
+        source=self._flight_fixture()
+        texture=SimpleNamespace(width=2,height=2,renderAsImage=lambda _:Image.new('RGBA',(2,2),'green'))
+        pack=SimpleNamespace(textures=[('grass',texture)],palettes=[('palette',SimpleNamespace(colors=[(0,31,0,31)]))])
+        calls=[]
+        def scene(zone,x,z,y,**kwargs):
+            calls.append((zone,x,z,kwargs['layout_matrix']))
+            tx,tz=(3,4) if zone==7 else (7,8)
+            return [(('terrain','grass','palette'),[(0,0,0,0,0),(1,0,0,1,0),(0,0,1,0,1)])],{ 'terrain':pack },{
+                'omittedProps':[],'chunks':[zone],'landings':[[zone,tx,tz,0]],
+                'collisionTiles':[[tx,tz,0,0]]}
+        source.scene=scene
+        source.collision_debug=True
+        with tempfile.TemporaryDirectory() as temporary:
+            result=export_scene(source,7,50,50,0,Path(temporary)/'linked')
+        self.assertEqual({call[0] for call in calls},{7,11})
+        self.assertEqual(result['format'],3)
+        self.assertEqual(result['matrixOffsets'],{'0':[0,0],'1':[128,304]})
+        self.assertEqual(result['atlasOriginCell'],[0,0])
+        self.assertEqual(result['atlasSize'],[2,2])
+        self.assertIn([7,3,4,0,56,72],result['landings'])
+        self.assertIn([11,7,8,0,248,440],result['landings'])
+        self.assertIn([15,27,0,0],result['collisionTiles'])
+        self.assertEqual(result['chunks'],[7,11])
+
+    def test_flight_links_require_the_decomp_fly_from_bit(self):
+        source=self._flight_fixture()
+        struct.pack_into('<H',source.headers,11*48+30,0x0008)
+        self.assertEqual(flight_matrix_offsets(source,0),{0:(0,0)})
+
     def test_region_gaps_get_visual_routes_without_collision_data(self):
         # Three real map islands in a line should be joined with two routes.
         routes=build_flyway_routes(5,1,(0,-1,1,-1,2))
@@ -97,7 +144,7 @@ class SoaringWorkerTests(unittest.TestCase):
             self.assertEqual(result['sourceZone'],1);self.assertEqual(result['zone'],2)
             self.assertEqual(calls[0][0],2);self.assertTrue(calls[0][1]['flight'])
             self.assertEqual(calls[0][1]['radius'],4096);self.assertEqual(calls[0][1]['layout_matrix'],0)
-            self.assertEqual(result['format'],2);self.assertEqual(result['radius'],4096)
+            self.assertEqual(result['format'],3);self.assertEqual(result['radius'],4096)
             self.assertEqual(result['seaTiles'],0) # The atlas sea is a zero-mesh background.
             self.assertEqual(len(result['regionFaces']),2)
             self.assertEqual(result['atlasBiome'],[2,2])
@@ -128,9 +175,10 @@ class SoaringWorkerTests(unittest.TestCase):
             with patch('soaring_scene_worker.ndspy.rom.NintendoDSRom.fromFile') as read:
                 worker=SoaringWorker(root/'private.nds',root/'cache')
                 try:
+                    worker.started=0 # Ignore filesystem timestamp precision in this deterministic test.
                     request=root/'cache/request-test.json'
                     request.write_text(json.dumps({'zone':191,'worldX':float('nan'),'worldZ':10,'worldY':0}))
-                    ready=root/'cache/ready-test.json';deadline=time.monotonic()+3
+                    ready=root/'cache/ready-test.json';deadline=time.monotonic()+6
                     while not ready.is_file() and time.monotonic()<deadline:time.sleep(.02)
                     self.assertTrue(ready.is_file());self.assertIn('error',json.loads(ready.read_text()));read.assert_not_called()
                 finally:worker.stop.set();worker.thread.join(timeout=3)

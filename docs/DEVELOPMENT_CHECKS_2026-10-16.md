@@ -14,7 +14,9 @@ These results cover the local development source. They are not a public release 
 - The retail Black 2 ROM and the supplied Redux ROM produced the same 13-matrix connected region.
 - All 11 Soaring worker tests passed. The cross-matrix fixture checks destination map/tile coordinates, atlas world positions and shifted collision tiles.
 - An export from the retail ROM rendered an atlas containing all 13 connected matrices (1,449 geometry faces, 41 textures). The native scene test loaded the exported scene and rendered it; the measured 120-frame test averaged 0.86 ms with a 0.94 ms p95. A native synthetic test also checked format 3, atlas origins and global landing coordinates.
-- The sampled location had no verified landing tiles, so this export alone does not validate a landing. Live flight, cross-map landing and in-game follower spacing still need playtesting.
+- A second read-only export pass sampled four locations in the Overworld and linked matrices 107, 255 and 414 from both retail Black 2 and Redux. Every scene carried the same 13 matrix offsets. At the take-off point, the exporter produced 22,106 terrain faces, 198 landing sites and 237 collision tiles; at linked matrix 107 it produced 23,156 faces, 204 landing sites and 496 collision tiles. Both ROMs produced matching counts and landing maps.
+- The native renderer loaded the real Redux take-off and linked-matrix scenes. The 120-frame render check averaged 4.9 ms (8.2 ms p95) at take-off and 8.8 ms (11.4 ms p95) in the linked scene. This confirms the scene format, scenery and landing data load within the renderer's frame budget; completing a landing through the game's live field transition still needs an in-game test.
+- Live flight, cross-map landing and in-game follower spacing still need playtesting.
 
 ## Cross-feature regression checks
 
