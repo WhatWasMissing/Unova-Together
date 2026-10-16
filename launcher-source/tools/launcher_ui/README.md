@@ -8,6 +8,8 @@ Run `python tools/test_unova_updater.py` and `python tools/test_launcher_ui.py` 
 
 theme.json is the runtime token owner. DESIGN.md and UX-CONTRACT.md document the visual and interaction rules. Frozen application assets are static PNG/ICO/JSON; runtime Pillow is not required. The gameplay capture shows the existing mod; Nintendo artwork remains third-party material.
 
+Launcher navigation, confirmation and cancel sounds are short original cues. Toggle them in Settings → Menu sounds; the setting is saved with the launcher and does not change game audio.
+
 Settings/code preservation: `python tools/test_launcher_preferences.py`. Captured-RAM/native-parser validation: `python tools/test_launcher_cheat_engine.py --output <fresh-output-folder>`. Bundled code catalog is separately attributed CC BY-SA 4.0; see assets/CHEATS-SOURCES.md.
 
 Maintenance checks: `python tools/test_launcher_services.py` uses disposable saves and mocked release downloads. Backups are kept under save-backups; repair slots remain alongside old runtimes.

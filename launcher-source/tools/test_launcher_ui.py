@@ -134,6 +134,29 @@ class LauncherTests(unittest.TestCase):
         self.assertEqual(self.app.page_name,'News')
         self.app.news_text.focus_force();self.app.news_text.event_generate('<Tab>');self.app.update()
         self.assertNotEqual(self.app.focus_get(),self.app.news_text)
+    def test_menu_feedback_cues_and_saved_sound_toggle(self):
+        import wave
+        self.assertTrue(self.app.menu_sounds.get())
+        self.app.menu_sound_events.clear()
+        self.app.nav['News'].focus_force();self.app.update()
+        self.assertIn('nav',self.app.menu_sound_events)
+        self.app.menu_sound_events.clear()
+        self.app.nav['News'].event_generate('<KeyPress-Return>');self.app.update()
+        self.assertIn('confirm',self.app.menu_sound_events)
+        self.assertEqual(self.app._action_sound(self.app.nav['News']),'confirm')
+        self.app.menu_sound_events.clear()
+        self.app.event_generate('<Escape>');self.app.update()
+        self.assertIn('cancel',self.app.menu_sound_events)
+        self.assertEqual(self.app._action_sound(self.app.cancel_button),'cancel')
+        for cue,max_seconds in (('nav',.06),('confirm',.12),('cancel',.13)):
+            with wave.open(str(HERE/'assets'/f'menu-{cue}.wav'),'rb') as audio:
+                self.assertEqual((audio.getnchannels(),audio.getsampwidth(),audio.getframerate()),(1,2,22050))
+                self.assertLess(audio.getnframes()/audio.getframerate(),max_seconds)
+        self.app.menu_sounds.set(False);self.app._save();self.app.menu_sound_events.clear()
+        self.app._play_menu_sound('confirm')
+        self.assertEqual(self.app.menu_sound_events,[])
+        self.assertFalse(json.loads(self.app.config_path.read_text())['menu_sounds'])
+
     def test_refresh_success_offline_error_and_cache(self):
         self.app.rom.set(str(self.rom))
         with patch.object(u,'launcher_feed',return_value=self.feed()):self.app.check();self.wait()

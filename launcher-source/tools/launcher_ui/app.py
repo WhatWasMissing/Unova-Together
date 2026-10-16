@@ -23,7 +23,8 @@ class Launcher(tk.Tk):
         except tk.TclError:pass
         self.messages=queue.Queue();self.busy=False;self.release=None;self.game=None;self.operation='';self.guides_busy=False
         self._process_check_at=0;self._process_running=False
-        self.cancel=threading.Event();self.rom=tk.StringVar();self.auto=tk.BooleanVar(value=True);self.music=tk.BooleanVar(value=False)
+        self.cancel=threading.Event();self.rom=tk.StringVar();self.auto=tk.BooleanVar(value=True);self.music=tk.BooleanVar(value=False);self.menu_sounds=tk.BooleanVar(value=True)
+        self.menu_sound_events=[];self._last_menu_pointer=0
         self.status=tk.StringVar(value='');self.news_status=tk.StringVar(value='Saved patch notes · available offline')
         self.update_status=tk.StringVar(value='Check GitHub for the latest Windows release.')
         self.available=tk.StringVar(value='Not checked yet');self.phase=tk.StringVar(value='No download in progress')
@@ -36,7 +37,15 @@ class Launcher(tk.Tk):
         self._read_settings();self._init_profiles();self._build();self._apply_navigation();self.show_page('Library');self._rom_changed()
         self.rom.trace_add('write',lambda *_:self._rom_changed());self.protocol('WM_DELETE_WINDOW',self._close)
         self.bind('<Control-Tab>',lambda e:self._cycle_page(1));self.bind('<Control-Shift-Tab>',lambda e:self._cycle_page(-1))
-        self.bind_class('Button','<Return>',lambda e:e.widget.invoke())
+        self.bind_class('Button','<Return>',self._keyboard_activate)
+        for control_class in ('Button','TButton','Checkbutton','TCheckbutton','Radiobutton','TRadiobutton'):
+            self.bind_class(control_class,'<FocusIn>',self._focus_sound,add='+')
+            self.bind_class(control_class,'<ButtonRelease-1>',self._mouse_sound,add='+')
+            if control_class!='Button':
+                self.bind_class(control_class,'<Return>',self._key_sound,add='+')
+                self.bind_class(control_class,'<space>',self._key_sound,add='+')
+        self.bind_all('<ButtonPress-1>',self._record_menu_pointer,add='+')
+        self.bind_all('<Escape>',self._cancel_key_sound,add='+')
         from .controller import Controller
         self.controller=Controller();self.after(125,self._poll_controller)
         self.bind('<MouseWheel>',self._wheel);self.after(100,self._poll);self._sync();self._music_changed(save=False)
@@ -649,6 +658,7 @@ class Launcher(tk.Tk):
         box=tk.Frame(general,bg=C['surface']);box.pack(fill='x',padx=18,pady=16)
         label(box,'LAUNCHER & GAME',size=9,bold=True,bg=C['surface']).pack(anchor='w',pady=(0,10))
         ttk.Checkbutton(box,text='Check for updates on startup',variable=self.auto,command=self._save).pack(anchor='w',pady=4)
+        ttk.Checkbutton(box,text='Menu sounds',variable=self.menu_sounds,command=self._save).pack(anchor='w',pady=4)
         values=prefs.defaults(self.root/'builds/current');values.update(self.preference_values)
         self.pause=tk.BooleanVar(value=values['pause']);self.filter=tk.BooleanVar(value=values['filter'])
         self.volume=tk.IntVar(value=values['volume'])
@@ -758,6 +768,7 @@ class Launcher(tk.Tk):
             self.active_profile_id=str(data.get('active_profile',''))
             if type(data.get('check')) is bool:self.auto.set(data['check'])
             if type(data.get('music')) is bool:self.music.set(data['music'])
+            if type(data.get('menu_sounds')) is bool:self.menu_sounds.set(data['menu_sounds'])
             if isinstance(data.get('preferences'),dict):self.preference_values={k:v for k,v in data['preferences'].items() if (k in ('pause','filter','area_scenery','companion_interactions','reduced_follower_motion','soaring','soaring_collision_debug') and type(v) is bool) or (k=='volume' and type(v) is int and 0<=v<=100)}
             if isinstance(data.get('cheats'),dict):self.cheat_choices={k:{ident:flag for ident,flag in v.items() if ident in self.cheat_vars_ids() and type(flag) is bool} for k,v in list(data['cheats'].items())[-32:] if isinstance(k,str) and len(k)<=32 and isinstance(v,dict)}
         except (OSError,ValueError,AttributeError):pass
@@ -768,7 +779,7 @@ class Launcher(tk.Tk):
             item=self._active_profile();item['rom']=self.rom.get();item['preferences']=dict(self.preference_values)
         try:
             self.config_path.parent.mkdir(parents=True,exist_ok=True);pending=self.config_path.with_suffix('.pending')
-            pending.write_text(json.dumps({'selected_game':self.selected_game.get(),'research_root':self.research_root.get(),'research_mode':self.research_mode.get(),'research_address':self.research_address.get(),'rom':self.rom.get(),'check':self.auto.get(),'music':self.music.get(),'preferences':self.preference_values,'cheats':self.cheat_choices,'profiles':self.play_profiles,'active_profile':self.active_profile_id}),encoding='utf-8');os.replace(pending,self.config_path)
+            pending.write_text(json.dumps({'selected_game':self.selected_game.get(),'research_root':self.research_root.get(),'research_mode':self.research_mode.get(),'research_address':self.research_address.get(),'rom':self.rom.get(),'check':self.auto.get(),'music':self.music.get(),'menu_sounds':self.menu_sounds.get(),'preferences':self.preference_values,'cheats':self.cheat_choices,'profiles':self.play_profiles,'active_profile':self.active_profile_id}),encoding='utf-8');os.replace(pending,self.config_path)
         except OSError as exc:self.status.set('Could not save settings: '+str(exc))
 
     def _sync(self):
@@ -1107,6 +1118,7 @@ class Launcher(tk.Tk):
         if action=='next':self._cycle_page(1)
         elif action=='previous':self._cycle_page(-1)
         elif action=='back':
+            self._play_menu_sound('cancel')
             if focused and focused.winfo_toplevel()!=self:focused.winfo_toplevel().destroy()
             else:
                 first=game_routes.MODS[self.active_mod]['pages'][0] if self.active_mod else 'Library'
@@ -1121,8 +1133,52 @@ class Launcher(tk.Tk):
             if values:focused.current((index+(-1 if action=='left' else 1))%len(values));focused.event_generate('<<ComboboxSelected>>')
         elif action in ('left','right') and isinstance(focused,tk.Scale):focused.set(focused.get()+(-5 if action=='left' else 5))
         elif action=='accept' and focused:
-            if hasattr(focused,'invoke'):focused.invoke()
-            elif isinstance(focused,ttk.Combobox):focused.event_generate('<Alt-Down>')
+            if hasattr(focused,'invoke'):self._play_menu_sound(self._action_sound(focused));focused.invoke()
+            elif isinstance(focused,ttk.Combobox):self._play_menu_sound('confirm');focused.event_generate('<Alt-Down>')
+
+    def _play_menu_sound(self,cue):
+        if cue not in ('nav','confirm','cancel') or not self.menu_sounds.get():return
+        if self.testing:
+            self.menu_sound_events.append(cue);return
+        try:
+            import winsound
+            path=HERE/'assets'/('menu-'+cue+'.wav')
+            winsound.PlaySound(str(path),winsound.SND_FILENAME|winsound.SND_ASYNC|winsound.SND_NODEFAULT)
+        except (ImportError,RuntimeError,OSError):pass
+
+    @staticmethod
+    def _action_sound(widget):
+        kind=getattr(widget,'_menu_sound_kind','action')
+        # Focusing a sidebar button is navigation; activating it confirms the
+        # selected page. Keep those cues distinct even though both use buttons.
+        if kind=='nav':return 'confirm'
+        if kind=='cancel':return 'cancel'
+        text=str(widget.cget('text') if 'text' in widget.keys() else '').casefold()
+        if any(word in text for word in ('cancel','close','back','return to')):return 'cancel'
+        return 'confirm'
+
+    def _focus_sound(self,event):
+        widget=event.widget
+        if time.monotonic()-self._last_menu_pointer>.15 and str(widget.cget('state'))!='disabled':self._play_menu_sound('nav')
+
+    def _record_menu_pointer(self,event):
+        self._last_menu_pointer=time.monotonic()
+
+    def _mouse_sound(self,event):
+        widget=event.widget
+        if str(widget.cget('state'))!='disabled':self._play_menu_sound(self._action_sound(widget))
+
+    def _key_sound(self,event):
+        widget=event.widget
+        if str(widget.cget('state'))!='disabled':self._play_menu_sound(self._action_sound(widget))
+
+    def _keyboard_activate(self,event):
+        widget=event.widget
+        if str(widget.cget('state'))=='disabled':return 'break'
+        self._play_menu_sound(self._action_sound(widget));widget.invoke();return 'break'
+
+    def _cancel_key_sound(self,event):
+        self._play_menu_sound('cancel')
 
     def _poll_controller(self):
         active=False

@@ -2,6 +2,12 @@
   "schema": 1,
   "notes": [
     {
+      "version": "1.0.29",
+      "title": "Smoother followers and Mega animations",
+      "file": "RELEASE_NOTES_1.0.29.md",
+      "body": "- Pokémon followers stay about one tile behind and move smoothly around corners.\n- Launcher menus now have navigation, confirm, and cancel sounds. Change the volume or turn them off in Settings.\n- Mega Pokémon with supplied animated artwork play the full animation during battle. Mega Salamence has 67 frames on each side.\n\nPlease test Mega Salamence in battle: give it Salamencite and press L + R together while choosing a move. Check whether it animates and stays correctly positioned."
+    },
+    {
       "version": "1.0.28",
       "title": "Mega Pokémon animations",
       "file": "RELEASE_NOTES_1.0.28.md",

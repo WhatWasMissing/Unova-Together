@@ -65,7 +65,7 @@ Some later-generation abilities do not exist in Generation V. Where needed, this
 
 ## Artwork and animation
 
-Mega battle art with a supplied GIF is now converted into a complete frame sequence for the emulator to play. Mega Salamence is the first live test for this change and has 67 frames. This release still needs an in-game check to confirm the animation cycles correctly during battle.
+Mega battle art with a supplied GIF is converted into a timed frame sequence. The emulator advances the sequence one frame at a time during battle; the complete pack contains 46 animated forms, including all 67 front and back frames for Mega Salamence. Automated checks walk every frame at its converted duration and verify that each clip maps to a supported Mega form. Please test the animations in battle, since automated playback checks cannot confirm how they look on screen.
 
 The supplied sprite folders and PokeMMO X/Y archives provide the Mega front, back, and shiny art. Mega Mewtwo X uses its sourced X-archive sprites instead of generated artwork.
 

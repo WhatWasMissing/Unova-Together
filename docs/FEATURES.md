@@ -16,7 +16,7 @@ Unova Together by **mvq1303 / WhatWasMissing**, built on melonDS. Current releas
 
 ## Following Pokémon and interactions
 
-Your lead Pokémon follows roughly one tile behind you. All **649 base species** have directional sprites and idle movement. The development build includes **743 assets** with normal/shiny palettes and supported female/form variations; unsupported forms use base art. Larger art keeps its original dimensions. Eggs and fainted leads stay hidden. **Unova → Settings** contains **My follower**, **Teammate followers** and **Greet teammate's Pokémon**. Launcher Settings adds reduced follower motion. See [coverage and credits](FOLLOWER_VARIANTS.md).
+Your lead Pokémon follows about 1¼ tiles behind you, moving smoothly along your route and around corners. All **649 base species** have directional sprites and idle movement. The development build includes **743 assets** with normal/shiny palettes and supported female/form variations; unsupported forms use base art. Larger art keeps its original dimensions. Eggs and fainted leads stay hidden. **Unova → Settings** contains **My follower**, **Teammate followers** and **Greet teammate's Pokémon**. Launcher Settings adds reduced follower motion. See [coverage and credits](FOLLOWER_VARIANTS.md).
 
 Stop, face your follower and hold **R** while pressing **A**, or click/tap its sprite. A alone remains available to advance ordinary game text.
 

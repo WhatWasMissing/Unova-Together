@@ -1,6 +1,8 @@
 # Following Pokémon
 
-The first Pokémon in your party follows your footsteps, roughly one tile behind.
+The first Pokémon in your party follows your footsteps, about one tile behind,
+matching HeartGold and SoulSilver's previous-step spacing. Movement
+stays smooth between steps and follows your turns instead of cutting across corners.
 Change the first party slot to change your follower. Eggs and fainted leads stay
 hidden. Following Pokémon default on. Show or hide your own or teammates' followers in **Unova → Settings**.
 
@@ -31,6 +33,28 @@ can still connect but discard this optional follower information.
 variants with normal/shiny palettes and 32/64-pixel widths. The same tests cover stopping,
 corners, map changes, warps, invalidation and lead changes. Relay tests validate
 optional metadata and reject invalid species/form values.
+
+The current motion regression now also checks the one-tile gap, smooth positions
+between updates, corner turns, walk-cycle steps and trail resets after map
+changes or teleports. It passes on the desktop build; a live field playtest is
+still needed to judge the spacing on screen.
+
+The 2026-10-16 motion pass additionally checks that the walking pose stays active
+at refresh boundaries. Both the focused regression and full Qt emulator build
+passed; live in-game spacing still needs visual review.
+
+The 60-fps refresh regression now advances the owner between 50-ms trail samples
+and verifies that follower position, facing, movement state, and gait do not jump
+when a new trail sample arrives. It also checks that the walk cycle continues to
+advance during sustained movement. The focused test passed on 2026-10-16.
+
+HeartGold/SoulSilver's `FollowMon_InitMapObject` creates the follower at the
+player's map location, then its movement scripts make the follower retrace the
+player's earlier tile steps. The overlay keeps that one-tile gap while
+interpolating fractional positions between samples, so the camera-projected
+sprites move smoothly instead of snapping from tile to tile.
+See the [HeartGold/SoulSilver follower implementation](https://github.com/pret/pokeheartgold/blob/master/src/follow_mon.c)
+and [map setup](https://github.com/pret/pokeheartgold/blob/master/src/field_warp_tasks.c#L287).
 
 The native menu fixture separately checks the actual copied-save first party
 record, ROM frames, camera projection, battle hiding/recovery and the toggle.
