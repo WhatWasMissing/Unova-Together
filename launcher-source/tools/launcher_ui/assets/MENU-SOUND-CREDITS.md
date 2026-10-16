@@ -1,3 +1,3 @@
 # Launcher sound credits
 
-The short launcher navigation, confirm, and back sounds were created for Unova Together. They are synthesized menu cues, not recordings from a Pokémon game.
+The launcher’s navigation, confirm, and back cues are short sine-wave tones created for Unova Together. They use no sampled Pokémon game or third-party audio. You can turn them off in Settings.
