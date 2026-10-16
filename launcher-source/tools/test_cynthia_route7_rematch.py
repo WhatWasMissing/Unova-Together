@@ -17,7 +17,9 @@ GARCHOMPITE = 526
 REWARD_FLAG = 0x0C00
 REMATCH_FLAG = 0x0C01
 REMATCH_POSITION = {"x": 111, "z": 244, "y": 0}
-EXPECTED_LEVELS = [42, 42, 42, 43, 42, 45]
+SKYLA_TRAINER_ID = 155
+SKYLA_LEVELS = [51, 51, 51, 51, 52, 51]
+EXPECTED_LEVELS = [51, 51, 52, 51, 51, 52]
 
 
 def verify(rom_path: Path, decomp: Path) -> dict:
@@ -32,6 +34,14 @@ def verify(rom_path: Path, decomp: Path) -> dict:
     trainer_records = ndspy.narc.NARC(rom.getFileByName("a/0/9/1")).files
     parties = ndspy.narc.NARC(rom.getFileByName("a/0/9/2")).files
     names = unpack_file(ndspy.narc.NARC(rom.getFileByName("a/0/0/2")).files[382]).splitlines()
+
+    skyla_record = trainer_records[SKYLA_TRAINER_ID]
+    skyla_kind = skyla_record[0] & 3
+    skyla_stride = 8 + (2 if skyla_kind & 2 else 0) + (8 if skyla_kind & 1 else 0)
+    skyla_party = parties[SKYLA_TRAINER_ID]
+    skyla_levels = [skyla_party[index * skyla_stride + 2] for index in range(skyla_record[3])]
+    if names[SKYLA_TRAINER_ID] != r"\cSkyla" or skyla_levels != SKYLA_LEVELS:
+        raise ValueError("Redux Skyla's reference team changed; refresh Cynthia's level comparison")
 
     # This mirrors Gen5Menu::npcTrainers/trainerSummary eligibility: the ID is
     # in range, the record has 1-6 party members, and each level/species is valid.
@@ -74,7 +84,9 @@ def verify(rom_path: Path, decomp: Path) -> dict:
         "SPECIES_LUCARIO", "SPECIES_GLACEON", "SPECIES_GARCHOMP",
     )]
     if species != expected_species or levels != EXPECTED_LEVELS:
-        raise ValueError("Cynthia's Practice roster or post-Skyla levels changed")
+        raise ValueError("Cynthia's Practice roster or Skyla-matched levels changed")
+    if any(abs(cynthia - skyla) > 1 for cynthia, skyla in zip(levels, skyla_levels, strict=True)):
+        raise ValueError("Cynthia's team is no longer close to Redux Skyla's level curve")
     if garchomp_item != GARCHOMPITE:
         raise ValueError("Cynthia's Garchomp is missing Garchompite")
 
@@ -99,6 +111,7 @@ def verify(rom_path: Path, decomp: Path) -> dict:
         "trainer_class": "TRAINER_CLASS_PKMN_TRAINER_CYNTHIA",
         "team_species": ["Spiritomb", "Milotic", "Togekiss", "Lucario", "Glaceon", "Garchomp"],
         "levels": levels,
+        "redux_skyla_levels": skyla_levels,
         "garchomp_held_item": "Garchompite",
         "route7_rematch_position": REMATCH_POSITION,
         "catalog_checks": "passed",

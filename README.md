@@ -1,8 +1,8 @@
 # Unova Together
 
-**Current release: 2.0.0.** Play Pokémon Black 2 and supported Blaze Black 2 Redux games with friends, explore with your Pokémon, and discover **49 Mega forms**.
+**Current release: 2.0.1.** Play Pokémon Black 2 and supported Blaze Black 2 Redux games with friends, explore with your Pokémon, and discover **49 Mega forms**.
 
-[Download Unova Together 2.0.0](https://github.com/WhatWasMissing/Unova-Together/releases/latest)
+[Download Unova Together 2.0.1](https://github.com/WhatWasMissing/Unova-Together/releases/latest)
 
 Unova Together is a free fan project by **mvq1303 / WhatWasMissing**, built on melonDS. Bring your own compatible game, save and firmware; downloads do not include them.
 

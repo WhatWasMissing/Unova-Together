@@ -15,12 +15,12 @@ _PATCHES = {
     # the project's current test save are both supported by distinct patches.
     "332d07576e2077b4ef91e394603d144108098b7624c6a918b175f90530c0036a": (
         "cynthia-route7-redux-1.4.1.bps",
-        "eebced3ae81522dae8b2db88e09524091a523c39f260c9e98006773b8f46369f",
+        "6b550b64ad4ca9d674ecd2ea936c3ab74a035509ae980054f59c8c9468d10451",
         289387720,
     ),
     "353fb0cf82c3e4eddfc8986efa8910b00eb1c4d6f106c220abef59d69d3a520a": (
         "cynthia-route7-unova-1.0.35.bps",
-        "876ccf689aeae3d96fe02ca63fdc3b932a815f7eaa615a78deca5489b9922337",
+        "46e6446a0039984921fb396a3c951389fe6c454118ed4cad3242cc67a3d212fc",
         289389256,
     ),
 }

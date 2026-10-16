@@ -435,7 +435,9 @@ def pack_cynthia_rematch_trainer(rom: ndspy.rom.NintendoDSRom, decomp: Path) -> 
         item_constants[source["reward"]],
     )
 
-    levels = (42, 42, 42, 43, 42, 45)
+    # Redux Complete's post-Skyla rematch uses five level-51 Pokémon and one
+    # level-52 Pokémon. Keep Cynthia at the same level range and progression.
+    levels = (51, 51, 52, 51, 51, 52)
     party = bytearray()
     species_report = []
     for mon, level in zip(source["party"], levels, strict=True):

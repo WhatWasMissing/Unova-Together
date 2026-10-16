@@ -2,6 +2,12 @@
   "schema": 1,
   "notes": [
     {
+      "version": "2.0.1",
+      "title": "Clearer in-game menus",
+      "file": "RELEASE_NOTES_2.0.1.md",
+      "body": "- In-game menu text, button hints and dialogue now fit inside their windows. Long labels end cleanly.\n- Cynthia’s rematch team is closer to Skyla’s Redux level, and her Garchomp can Mega Evolve."
+    },
+    {
       "version": "2.0.0",
       "title": "Mega Evolution and a fresh look",
       "file": "RELEASE_NOTES_2.0.0.md",

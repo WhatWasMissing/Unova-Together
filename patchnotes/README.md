@@ -2,6 +2,7 @@
 
 Pick a version to read what changed. The newest release is first.
 
+- [Unova Together 2.0.1 — Clearer in-game menus](RELEASE_NOTES_2.0.1.md)
 - [Unova Together 2.0.0 — Mega Evolution and a fresh look](RELEASE_NOTES_2.0.0.md)
 - [Unova Together 1.0.35 — Mega level-ups and menu sounds](RELEASE_NOTES_1.0.35.md)
 - [Unova Together 1.0.34 — Mega Evolution and steadier follower poses](RELEASE_NOTES_1.0.34.md)
