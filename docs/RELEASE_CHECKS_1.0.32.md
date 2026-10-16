@@ -23,3 +23,10 @@ py -3 -u audit_soaring_chunk_coverage.py --rom <Black 2 Redux ROM> --decomp <Bla
 ```
 
 The ROM, decomp, saves, RAM dumps, captures and generated test outputs are not included in the release.
+
+## Public launcher download verification
+
+- The production updater downloaded the public GitHub runtime ZIP, verified its checksum, and installed it into an isolated test home.
+- Version selection, archived patch notes, the Windows Qt plugin, settings preservation, and a save sentinel all passed. No downloaded executable was run.
+- Result: `{"downloadBytes": 173862690, "emulatorSha256": "f1ce80a0b010b5f0c26a973d9e8b927117fd7bfd6373e5834d9d21e927f7ad7e", "newsSource": "patchnotes", "patchNotes": 43, "saveSentinelPreserved": true, "settingsPreserved": true, "version": "1.0.32", "windowsQtPluginPresent": true}`
+- The generated download and extracted test installation were removed after recording these results.
