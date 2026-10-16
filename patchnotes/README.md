@@ -2,6 +2,7 @@
 
 Pick a version to read what changed. The newest release is first.
 
+- [Unova Together 1.0.34 — Mega Evolution and steadier follower poses](RELEASE_NOTES_1.0.34.md)
 - [Unova Together 1.0.33 — Mega Pokémon and a Soaring preview](RELEASE_NOTES_1.0.33.md)
 - [Unova Together 1.0.32 — Soaring across Unova](RELEASE_NOTES_1.0.32.md)
 - [Unova Together 1.0.31 — Smoother followers and landings](RELEASE_NOTES_1.0.31.md)

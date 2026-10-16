@@ -1,6 +1,6 @@
 # Mega Evolution
 
-Unova Together **1.0.33** includes **49 Mega forms** for the supported English Pokémon Black 2 Redux Complete v1.4.1 profile. Give a Pokémon its matching stone, then press **L + R together** while choosing a move in battle. Its Mega form lasts until that battle ends.
+Unova Together **1.0.34** includes **49 Mega forms** for the supported English Pokémon Black 2 Redux Complete v1.4.1 profile. Give a Pokémon its matching stone, then press **L + R together** while choosing a move in battle. Its Mega form lasts until that battle ends.
 
 All 49 stones are sold at Pokémon Center Marts for **₽50,000**. Stock is shared across the marts so each shop stays within the game's 45-item limit. The 46 new stone entries reuse Mail, Apricorn, and Data Card item slots; three earlier stones keep their existing slots. The bag and mart show each stone's name and matching artwork.
 

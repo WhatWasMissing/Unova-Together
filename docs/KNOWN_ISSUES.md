@@ -1,6 +1,6 @@
-# Unova Together 1.0.33 — known limits
+# Unova Together 1.0.34 — known limits
 
-This release includes 49 Mega forms and an unfinished, optional Soaring preview. Soaring has been checked with automated map and landing simulations, but has not been confirmed in a live playthrough. Some routes and positions are approximate; Marine Tube has no safe landing. Save normally before testing it. Followers received another animation adjustment, but their spacing and motion still need a live check on a player's game. Broader physical-PC, WAN, and every-species testing remains limited. See [release checks](RELEASE_CHECKS_1.0.33.md).
+This release includes 49 Mega forms and an unfinished, optional Soaring preview. Soaring has been checked with automated map and landing simulations, but has not been confirmed in a live playthrough. Some routes and positions are approximate; Marine Tube has no safe landing. Save normally before testing it. Follower poses now align by visible pixels to prevent padding-driven vertical shifts; the automated regression passes, but the change still needs a live visual check on a player's game. Broader physical-PC, WAN, and every-species testing remains limited. See [release checks](RELEASE_CHECKS_1.0.34.md).
 
 - **Other VPNs can block connections.** NordVPN caused a tester’s presence-relay connection to fail with WinError 10013. Disconnect other VPNs while using Tailscale; check their kill-switch and network-filter settings if access remains blocked. This is not evidence that the game server is offline.
 - **Online UDP is experimental.** It has been checked locally, but reliable battle completion between players on different networks has not yet been confirmed. Use Tailscale if it fails.

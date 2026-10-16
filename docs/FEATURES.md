@@ -1,6 +1,6 @@
 # Unova Together features
 
-Current release: **1.0.33**. Unova Together is made by **mvq1303 / WhatWasMissing** and built on melonDS. It supports reviewed English Pokémon Black 2 and Blaze Black 2 Redux profiles on Windows x64. Each player needs their own matching game file and save.
+Current release: **1.0.34**. Unova Together is made by **mvq1303 / WhatWasMissing** and built on melonDS. It supports reviewed English Pokémon Black 2 and Blaze Black 2 Redux profiles on Windows x64. Each player needs their own matching game file and save.
 
 ## Play with friends
 
@@ -30,7 +30,7 @@ The roster is designed for the supported Black 2 Redux profile. Mega stats and s
 
 ## Following Pokémon
 
-Your lead Pokémon follows about 1¼ tiles behind and walks along your route. All **649 base species** have directional follower sprites and idle movement. The artwork pack also includes supported shiny, female, and form variations; other forms use the base sprite. Eggs and fainted Pokémon stay hidden.
+Your lead Pokémon follows about 1¼ tiles behind and walks along your route. All **649 base species** have directional follower sprites and idle movement. Follower poses now align to their visible pixels so transparent image margins do not pull the artwork up and down between frames. The artwork pack also includes supported shiny, female, and form variations; other forms use the base sprite. Eggs and fainted Pokémon stay hidden. The latest alignment change has automated coverage and still needs a live visual check.
 
 Interact by facing your follower and pressing **R + A**, or tap/click its sprite. Choose from ten friendly actions, including talking, petting, playing, and telling a story. These interactions are cosmetic: they do not change friendship, heal Pokémon, or award items. Use **Unova → Settings** to control your follower and your teammate's follower. Reduced motion is available in launcher settings.
 

@@ -1065,6 +1065,13 @@ class Launcher(tk.Tk):
 
     def _features_page(self,parent):
         self._heading(parent,'FEATURES','Features','Unova Together · current development build')
+        mega=card(parent);mega.pack(fill='x',pady=(0,12))
+        image=tk.PhotoImage(file=HERE/'assets/features/pokemon.png');self.images.append(image)
+        tk.Label(mega,image=image,bg=C['surface'],bd=0).pack(anchor='w',padx=14,pady=(14,8))
+        label(mega,'Mega Evolution',size=15,bold=True,bg=C['surface']).pack(anchor='w',padx=14)
+        label(mega,'Try 49 Mega forms, each with its own matching Mega Stone. Give the stone to its Pokémon, then press L + R together while choosing a move in battle. Mega Evolution lasts until the battle ends.',size=10,color=C['muted'],bg=C['surface'],wraplength=570,justify='left').pack(anchor='w',padx=14,pady=(6,8))
+        label(mega,'Examples: Mega Serperior gains Adaptability; Mega Charizard Y gains Drought; Mega Salamence gains Intimidate. Animated battle artwork is available for 46 forms.',size=10,bg=C['surface'],wraplength=570,justify='left').pack(anchor='w',padx=14,pady=(0,4))
+        button(mega,'Mega Evolution guide',lambda:self.guide('MEGA_EVOLUTION.md')).pack(anchor='w',padx=14,pady=(8,14))
         companion=card(parent);companion.pack(fill='x',pady=(0,12))
         label(companion,'Companion interactions',size=13,bold=True,bg=C['surface']).pack(anchor='w',padx=14,pady=(14,4))
         label(companion,'Expanded in 1.0.6 · on by default in this launcher',size=9,color=C['muted'],bg=C['surface']).pack(anchor='w',padx=14)
@@ -1241,3 +1248,4 @@ class Launcher(tk.Tk):
         self.cancel.set();self._stop_music()
         for token in self.tk.call('after','info'):self.after_cancel(token)
         super().destroy()
+
