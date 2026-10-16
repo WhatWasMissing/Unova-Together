@@ -14,4 +14,4 @@ Development Settings offers **Reduced follower motion**, preserving sprites and 
 
 Interactions are read-only: they do not change HP, friendship, items or save data. They are unavailable during battles, movement, co-op preparation and native menus. Idle follower sprites bob subtly while their feet stay anchored.
 
-Normal native Fly remains available. The old soaring preview is no longer included; the historical filename is retained for existing guide links.
+Normal native Fly remains available alongside optional local Soaring flight. Soaring is a separate experimental feature and does not replace the game's regular Fly move.

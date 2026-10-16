@@ -1,6 +1,6 @@
 # Unova Together features
 
-Unova Together by **mvq1303 / WhatWasMissing**, built on melonDS. Current release: **1.0.12**. Soaring remains an optional experimental feature and is off by default. Supported games are reviewed English Pokémon Black 2 and Blaze Black 2 Redux profiles on Windows x64. Every player supplies a matching ROM and uses an independent save.
+Unova Together by **mvq1303 / WhatWasMissing**, built on melonDS. Current release: **1.0.30**. Soaring remains an optional experimental feature and is off by default. Supported games are reviewed English Pokémon Black 2 and Blaze Black 2 Redux profiles on Windows x64. Every player supplies a matching ROM and uses an independent save.
 
 ## Explore and play together
 

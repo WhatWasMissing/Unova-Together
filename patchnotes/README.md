@@ -2,6 +2,7 @@
 
 Pick a version to read what changed. The newest release is first.
 
+- [Unova Together 1.0.30 — Fly between more areas](RELEASE_NOTES_1.0.30.md)
 - [Unova Together 1.0.29 — Smoother followers and Mega animations](RELEASE_NOTES_1.0.29.md)
 - [Unova Together 1.0.28 — Mega Pokémon animations](RELEASE_NOTES_1.0.28.md)
 
