@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "baselineRelease": "Unova Together 1.0.29 source",
+  "baselineArchive": "Unova-Together-1.0.29-Source.zip",
+  "baselineArchiveSha256": "03d818187fe6ea6ef7ae99835e607a3fee52e98082fa14a29e5e219fea8866c6",
+  "baselineFiles": {
+    "src/frontend/qt_sdl/PokemonFollower.h": "d7d1bc2f8f88f9d87d5c368054a7fa5cc6c675b59febec14dda9dff26cbe55ea",
+    "src/frontend/qt_sdl/PresenceOverlay.h": "9c487b75407772444f78db1541390478a9e6ec9b3226a78a77cc79a1b6f9de4f",
+    "src/frontend/qt_sdl/PresenceOverlay.cpp": "f6d056eef7769789dfc60b47fd5f66d7b0750e1079ed3925d96e598a4ecf50e3",
+    "src/frontend/qt_sdl/MultiplayerPanel.cpp": "a0adb4efd8e9aa71d79bd4bef32fd8f6717883dedaa4e5fa95085a665b8ad1ee",
+    "tools/test_pokemon_follower.cpp": "ee4829b2598ee8d5db582215fd182b872806c00fe6520b4b23beaa8489fa7043",
+    "tools/CMakeLists.txt": "8a29035102f0a56db3f981cb94968cd575df6b232c707300c26465bccef07702"
+  },
+  "patch": "follower-motion-1.0.29.patch",
+  "patchSha256": "8dcfb98b6ae7c9f13f8e6088495be68ae03dd82218e5f91608738f8dc13bc0e3",
+  "resultFiles": {
+    "src/frontend/qt_sdl/PokemonFollower.h": "55951e63f159eebcdf2f558a9048d85df00929f31a81400d54e86cb453126b1d",
+    "src/frontend/qt_sdl/PresenceOverlay.h": "6b2f044fe7e63d225746e155225948efef5a5271d7ce59e23716b1d70a0fdd28",
+    "src/frontend/qt_sdl/PresenceOverlay.cpp": "9ab1ad2ce204da29a3c67e8a737d1481b55a52ca2217668d3af7cf030ac6e785",
+    "src/frontend/qt_sdl/MultiplayerPanel.cpp": "ff9d63fa3ad00635f9645a2558971c31d5d4069cb4f68cf44a8ee83ebab6d7fb",
+    "tools/test_pokemon_follower.cpp": "755e2e7646929d2ce337d56702e3fba00bb3a83823cee2cb4ffe94f5bac32955",
+    "tools/CMakeLists.txt": "c90e1852039d38ffe1a2d2ef326ac8187e7f90d2c96ae3135321308e1e66e022"
+  },
+  "scope": "Match the HeartGold/SoulSilver one-tile follower gap, keep gait phase continuous along the breadcrumb route through turns, preserve fractional follower movement and bobbing, and extend regression coverage."
+}

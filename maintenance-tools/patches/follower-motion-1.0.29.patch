@@ -1,0 +1,347 @@
+diff --git a/source/melonDS/src/frontend/qt_sdl/PokemonFollower.h b/source/melonDS/src/frontend/qt_sdl/PokemonFollower.h
+--- a/source/melonDS/src/frontend/qt_sdl/PokemonFollower.h
++++ b/source/melonDS/src/frontend/qt_sdl/PokemonFollower.h
+@@ -9,17 +9,18 @@
+ {
+     QPointF position;
+     double height=0;
++    double strideProgress=0;
+     QString facing="South";
+     bool moving=false,visible=false;
+ };
+ 
+-// A bounded breadcrumb trail. The follower stays one tile behind and walks
+-// the player's actual route, including corners. poseAt() also samples the
+-// newest interpolated owner position, so a 50 ms presence update does not make
+-// the sprite wait and then jump on the next UI tick.
++// A bounded breadcrumb trail. The follower walks the player's actual route,
++// including corners. Its small visual cushion keeps scaled sprites distinct.
++// poseAt() samples the newest interpolated owner position, so
++// 50 ms presence updates do not make the sprite wait and then jump.
+ class PokemonFollowerTrail
+ {
+-    struct Node { QPointF point; double height; };
++    struct Node { QPointF point; double height, strideProgress; };
+     std::deque<Node> path;
+     int map=-1;
+     unsigned species=0;
+@@ -33,15 +34,18 @@
+             const double distance=std::hypot(segment.x(),segment.y());
+             if(distance<=length-FollowDistance+0.000001) {length-=distance;path.pop_front();}
+             else {const double t=(length-FollowDistance)/distance;first.point+=segment*t;
+-                  first.height+=(second.height-first.height)*t;length=FollowDistance;break;}
++                  first.height+=(second.height-first.height)*t;
++                  first.strideProgress+=(second.strideProgress-first.strideProgress)*t;
++                  length=FollowDistance;break;}
+         }
+     }
+ public:
+-    // HeartGold/SoulSilver follows the player's previous map tile. Keep that
+-    // same one-tile gap while interpolating between the overlay's samples.
++    // HeartGold/SoulSilver keeps its follower one tile behind the player.
++    // Match that spacing in world units rather than adding an extra overlay gap.
+     static constexpr double FollowDistance=1.0;
+     QPointF position;
+     double height=0;
++    double strideProgress=0;
+     QString facing="South";
+     bool moving=false, visible=false;
+ 
+@@ -56,33 +60,37 @@
+         double remaining=FollowDistance;
+         QPointF newer=player;
+         double newerHeight=playerHeight;
+-        auto sampleSegment=[&](QPointF older,double olderHeight) {
++        double newerProgress=path.back().strideProgress+
++            std::hypot(player.x()-path.back().point.x(),player.y()-path.back().point.y());
++        auto sampleSegment=[&](QPointF older,double olderHeight,double olderProgress) {
+             const auto delta=newer-older;
+             const double segment=std::hypot(delta.x(),delta.y());
+-            if(segment<0.000001) {newer=older;newerHeight=olderHeight;return false;}
++            if(segment<0.000001) {newer=older;newerHeight=olderHeight;newerProgress=olderProgress;return false;}
+             if(segment+0.000001>=remaining) {
+                 const double fraction=remaining/segment;
+                 pose.position=newer+(older-newer)*fraction;
+                 pose.height=newerHeight+(olderHeight-newerHeight)*fraction;
++                pose.strideProgress=newerProgress-remaining;
+                 pose.facing=std::abs(delta.x())>std::abs(delta.y())?
+                     (delta.x()>0?"East":"West"):(delta.y()>0?"South":"North");
+                 pose.visible=true;
+                 // Keep the last observed movement state through the exact
+-                // refresh sample. Comparing only against `position` made the
+-                // follower briefly switch to its idle pose every 50 ms, when
+-                // the newly sampled pose naturally matched the saved one.
+-                pose.moving=visible && (moving ||
+-                    std::hypot(pose.position.x()-position.x(),pose.position.y()-position.y())>0.0001);
++                // refresh sample. Also allow the first visible trail pose to
++                // walk: it has no previous visible state yet, but its route
++                // has already accumulated enough movement to reach the player.
++                pose.moving=moving ||
++                    std::hypot(pose.position.x()-position.x(),pose.position.y()-position.y())>0.0001;
+                 return true;
+             }
+-            remaining-=segment;newer=older;newerHeight=olderHeight;return false;
++            remaining-=segment;newer=older;newerHeight=olderHeight;newerProgress=olderProgress;
++            return false;
+         };
+ 
+         // The newest interpolated camera point may be between two 50 ms
+         // samples. Treat it as a temporary tail node, then walk backwards along
+         // the retained route until the configured follow distance is reached.
+         for(auto it=path.crbegin();it!=path.crend();++it)
+-            if(sampleSegment(it->point,it->height)) return pose;
++            if(sampleSegment(it->point,it->height,it->strideProgress)) return pose;
+         return pose;
+     }
+ 
+@@ -95,16 +103,16 @@
+             std::abs(playerHeight-path.back().height)>32))) clear();
+         map=nextMap;species=nextSpecies;
+         moving=false;
+-        if(path.empty()) {path.push_back({player,playerHeight});return;}
++        if(path.empty()) {path.push_back({player,playerHeight,0});return;}
+         const auto delta=player-path.back().point;
+         const double step=std::hypot(delta.x(),delta.y());
+-        if(step>=0.0001) {path.push_back({player,playerHeight});length+=step;}
++        if(step>=0.0001) {path.push_back({player,playerHeight,path.back().strideProgress+step});length+=step;}
+         trim();
+         if(path.size()>256) {clear();return;}
+         const auto pose=poseAt(player,playerHeight);
+         if(pose.visible) {
+             moving=pose.moving;position=pose.position;height=pose.height;
+-            facing=pose.facing;visible=true;
++            facing=pose.facing;strideProgress=pose.strideProgress;visible=true;
+         }
+     }
+ };
+diff --git a/source/melonDS/src/frontend/qt_sdl/PresenceOverlay.h b/source/melonDS/src/frontend/qt_sdl/PresenceOverlay.h
+--- a/source/melonDS/src/frontend/qt_sdl/PresenceOverlay.h
++++ b/source/melonDS/src/frontend/qt_sdl/PresenceOverlay.h
+@@ -6,11 +6,12 @@
+ #include <QRectF>
+ #include <QString>
+ #include <QList>
+-#include <chrono>
+-#include <cmath>
++#include <chrono>
++#include <cmath>
+ #include <QVariantMap>
+ #include <functional>
+ #include <array>
++#include <limits>
+ 
+ // Frontend-only pixels. No ROM/RAM writes; GUI producer and render-thread consumer.
+ class PresenceSurface
+@@ -85,16 +86,19 @@
+     QList<QImage> sprites;
+     bool inBattle = false;
+     // Empty preserves older clients. Ready/busy are advisory frontend states.
+-    QString activity;
+-    bool running = false;
+-    bool positionDrivenStride = false;
+-    bool inMenu = false;
++    QString activity;
++    bool running = false;
++    bool positionDrivenStride = false;
++    bool inMenu = false;
+     bool companion = false;
+     unsigned companionSpecies = 0, companionForm = 0;
+     QString companionEmote, companionMotion;
+     QPointF companionOwnerPosition;
+     qint64 companionReactionStarted = 0, companionReactionUntil = 0;
+     double companionMotionScale = 1.0;
++    // Companions use distance along their breadcrumb trail so turns do not
++    // reset the walking cycle when the dominant world axis changes.
++    double strideProgress = std::numeric_limits<double>::quiet_NaN();
+ };
+ 
+ // The local silhouette and remote sprites must use the same Gen 5 pose rules.
+@@ -102,17 +106,19 @@
+ {
+     const int direction=avatar.facing=="North"?0:avatar.facing=="West"?2:avatar.facing=="East"?3:1;
+     constexpr int poses[4]={0,1,0,2};
+-    const bool walking=avatar.moving && !avatar.inBattle && !avatar.inMenu;
+-    int phase=int((qMax<qint64>(0,elapsedMs)/140)%4);
+-    if (walking && avatar.positionDrivenStride)
+-    {
+-        const double coordinate=direction>=2?avatar.position.x():avatar.position.y();
+-        // Alternate legs over two tiles. Animation follows interpolated travel,
+-        // rather than an unrelated clock which makes fast movement slide.
+-        if (std::isfinite(coordinate)) phase=((int(std::floor(coordinate*2))%4)+4)%4;
+-    }
+-    const int group=walking && avatar.running && avatar.sprites.size()>=24?12:0;
+-    return group+direction*3+(walking?poses[phase]:0);
++    const bool walking=avatar.moving && !avatar.inBattle && !avatar.inMenu;
++    int phase=int((qMax<qint64>(0,elapsedMs)/140)%4);
++    if (walking && avatar.positionDrivenStride)
++    {
++        // Alternate legs over two tiles. Followers carry cumulative distance
++        // from their breadcrumb route, keeping the gait continuous at corners.
++        // Remote trainers retain their world-axis phase for compatibility.
++        const double coordinate=std::isfinite(avatar.strideProgress)?avatar.strideProgress:
++            direction>=2?avatar.position.x():avatar.position.y();
++        if (std::isfinite(coordinate)) phase=((int(std::floor(coordinate*2))%4)+4)%4;
++    }
++    const int group=walking && avatar.running && avatar.sprites.size()>=24?12:0;
++    return group+direction*3+(walking?poses[phase]:0);
+ }
+ 
+ struct PresenceMotionFrame
+diff --git a/source/melonDS/src/frontend/qt_sdl/PresenceOverlay.cpp b/source/melonDS/src/frontend/qt_sdl/PresenceOverlay.cpp
+--- a/source/melonDS/src/frontend/qt_sdl/PresenceOverlay.cpp
++++ b/source/melonDS/src/frontend/qt_sdl/PresenceOverlay.cpp
+@@ -356,7 +356,11 @@
+             ?pos.y()<localFeet.y()-3.0
+             :avatarDepth(c,local,avatar)<=localDepth+(c.automatic?0.03125:0.5);
+         if(!localSilhouette.isEmpty() && behindLocal) p.setClipRegion(QRegion(QRect(0,0,256,192)).subtracted(localSilhouette),Qt::IntersectClip);
+-        p.translate(std::round(pos.x()),std::round(pos.y()));
++        // Pixel art stays unfiltered, but fractional companion positions keep
++        // the overlay from holding for a frame and then hopping one pixel as
++        // its 3D-projected world position crosses integer screen coordinates.
++        p.translate(avatar.companion?pos.x():std::round(pos.x()),
++                    avatar.companion?pos.y():std::round(pos.y()));
+         p.translate(actionLean*motionScale,0);
+         p.setPen(Qt::NoPen); p.setBrush(QColor(0,0,0,100)); p.drawEllipse(QRectF(-6,-2,12,4));
+         if (markers && !avatar.companion)
+@@ -395,7 +399,7 @@
+             // Move the complete sprite without changing its proportions.
+             // Pixel-aligned offsets avoid resampling shimmer during idle motion;
+             // the ground shadow stays anchored beneath the Pokemon.
+-            const double bobOffset=std::round(idleBob);
++            const double bobOffset=avatar.companion?idleBob:std::round(idleBob);
+             p.drawImage(QRectF(-width*scale/2,-ground*scale-bobOffset,width*scale,height*scale),sprite);
+             p.restore();
+         }
+diff --git a/source/melonDS/src/frontend/qt_sdl/MultiplayerPanel.cpp b/source/melonDS/src/frontend/qt_sdl/MultiplayerPanel.cpp
+--- a/source/melonDS/src/frontend/qt_sdl/MultiplayerPanel.cpp
++++ b/source/melonDS/src/frontend/qt_sdl/MultiplayerPanel.cpp
+@@ -1232,6 +1232,7 @@
+                 const auto sprites=pokemonFollowerSprites(species,form,gender,shiny);
+                 if(sprites.size()!=12) return;
+                 PresenceAvatar follower{id+"/follower",{},trail.facing,trail.position,trail.moving,trail.height,sprites};
++                follower.strideProgress=trail.strideProgress;
+                 const auto greeting=std::max(followerGreetings.value(id=="local"?selfId:id),id=="local"?companionReactionUntil:qint64(0));
+                 if(id=="local" && (menuMode=="companionDialogue" || companionReactionUntil>now)) {
+                     const auto toPlayer=position-trail.position;
+@@ -1301,6 +1302,7 @@
+                     const auto pose=trails.value(owner).poseAt(ownerPositions.value(owner),ownerHeights.value(owner));
+                     if(!pose.visible) continue;
+                     avatar.position=pose.position;avatar.height=pose.height;avatar.facing=pose.facing;avatar.moving=pose.moving;
++                    avatar.strideProgress=pose.strideProgress;
+                 }
+                 auto currentAvatar=localAvatar;currentAvatar.position=currentLocal;
+                 currentAvatar.height=camera.value("worldY").toDouble();currentAvatar.facing=camera.value("facing").toString();currentAvatar.moving=camera.value("moving").toBool();
+diff --git a/source/melonDS/tools/test_pokemon_follower.cpp b/source/melonDS/tools/test_pokemon_follower.cpp
+--- a/source/melonDS/tools/test_pokemon_follower.cpp
++++ b/source/melonDS/tools/test_pokemon_follower.cpp
+@@ -9,21 +9,34 @@
+     return std::abs(a-b)<=epsilon;
+ }
+ 
++static bool imagesDiffer(const QImage& a,const QImage& b)
++{
++    if(a.size()!=b.size() || a.format()!=b.format()) return true;
++    for(int y=0;y<a.height();++y)
++        for(int x=0;x<a.width();++x)
++            if(a.pixel(x,y)!=b.pixel(x,y)) return true;
++    return false;
++}
++
+ int main()
+ {
+-    // Straight travel keeps the follower at the one-tile offset while
+-    // interpolated render-time samples advance it in small, even steps.
++    assert(near(PokemonFollowerTrail::FollowDistance,1.0));
++
++    // Straight travel matches HeartGold's one-tile gap while interpolated
++    // render-time samples advance the follower in small, even steps.
+     PokemonFollowerTrail straight;
+     straight.update(10,1,{0,0},0,true);
+     for(int i=1;i<=16;++i) straight.update(10,1,{i*.25,0},i*.25,true);
+     assert(straight.visible);
+-    assert(near(straight.position.x(),3.0));
+-    assert(near(straight.height,3.0));
++    assert(near(straight.position.x(),4.0-PokemonFollowerTrail::FollowDistance));
++    assert(near(straight.height,4.0-PokemonFollowerTrail::FollowDistance));
+     auto frameA=straight.poseAt({4.1,0},4.1);
+     auto frameB=straight.poseAt({4.2,0},4.2);
+     assert(frameA.visible && frameB.visible);
+-    assert(near(frameA.position.x(),3.1));
+-    assert(near(frameB.position.x(),3.2));
++    assert(near(frameA.position.x(),4.1-PokemonFollowerTrail::FollowDistance));
++    assert(near(frameB.position.x(),4.2-PokemonFollowerTrail::FollowDistance));
++    assert(near(frameA.strideProgress,3.1));
++    assert(near(frameB.strideProgress,3.2));
+     assert(near(std::hypot(4.1-frameA.position.x(),frameA.position.y()),PokemonFollowerTrail::FollowDistance));
+     assert(frameA.moving && frameB.moving);
+     assert(frameA.facing=="East");
+@@ -41,7 +54,7 @@
+         const double x=i*.01;
+         if(i%5==0) smooth.update(11,1,{x,0},0,true);
+         const auto pose=smooth.poseAt({x,0},0);
+-        if(x>=1.05) {
++        if(x>=PokemonFollowerTrail::FollowDistance+0.05) {
+             assert(pose.visible);
+             assert(pose.moving);
+             if(previousPose.visible)
+@@ -64,12 +77,24 @@
+     const auto turning=corner.poseAt({2,2},0);
+     assert(turning.visible);
+     assert(near(turning.position.x(),2));
+-    assert(near(turning.position.y(),1));
++    assert(near(turning.position.y(),2-PokemonFollowerTrail::FollowDistance));
+     assert(turning.facing=="South");
++    assert(near(turning.strideProgress,3.0));
+     const auto afterTurn=corner.poseAt({2,2.1},0);
+     assert(near(afterTurn.position.x(),2));
+-    assert(near(afterTurn.position.y(),1.1));
++    assert(near(afterTurn.position.y(),2.1-PokemonFollowerTrail::FollowDistance));
++    assert(near(afterTurn.strideProgress,3.1));
+     assert(near(std::hypot(afterTurn.position.x()-turning.position.x(),afterTurn.position.y()-turning.position.y()),.1));
++
++    // A follower's gait uses cumulative route distance rather than switching
++    // from the X axis to the Y axis at a turn. This prevents its leg pose from
++    // resetting when it rounds a corner.
++    PresenceAvatar routeGait;
++    routeGait.facing="South";routeGait.moving=true;routeGait.positionDrivenStride=true;
++    routeGait.position={0,1.75};routeGait.strideProgress=.25;
++    assert(PresenceSpriteFrame(routeGait,1000)==3); // route phase 0, South idle pose
++    routeGait.strideProgress=.75;
++    assert(PresenceSpriteFrame(routeGait,1000)==4); // route phase 1, South step pose
+ 
+     // A map change or a teleport clears stale breadcrumbs and cannot draw the
+     // follower on the new scene until enough valid route has been recorded.
+@@ -138,5 +163,21 @@
+     }
+     assert(frameChanges>=10);
+ 
++    // Companion pixel art moves at subpixel screen positions instead of
++    // snapping to an integer and visibly hopping at 60 fps.
++    PresenceCalibration calibration;
++    assert(calibration.calibrate(31,{100,100},{116,100},{100,116},{0,0}));
++    PresenceAvatar companion;
++    companion.id="local/follower";companion.position={.38125,1};
++    companion.companion=true;companion.companionMotionScale=0;
++    for(int i=0;i<12;++i) {
++        QImage sprite(4,4,QImage::Format_RGBA8888_Premultiplied);
++        sprite.fill(Qt::white);companion.sprites.append(sprite);
++    }
++    const auto subpixelA=DrawPresenceOverlay(calibration,{0,0},{companion},false,false,0);
++    companion.position.setX(companion.position.x()+.00625); // 0.1 screen pixel
++    const auto subpixelB=DrawPresenceOverlay(calibration,{0,0},{companion},false,false,0);
++    assert(imagesDiffer(subpixelA,subpixelB));
++
+     return 0;
+ }
+diff --git a/source/melonDS/tools/CMakeLists.txt b/source/melonDS/tools/CMakeLists.txt
+--- a/source/melonDS/tools/CMakeLists.txt
++++ b/source/melonDS/tools/CMakeLists.txt
+@@ -35,7 +35,7 @@
+     endif()
+ endif()
+ if(UNOVA_QT_CORE AND UNOVA_QT_GUI)
+-    add_executable(pokemon_follower_trail test_pokemon_follower.cpp)
++    add_executable(pokemon_follower_trail test_pokemon_follower.cpp ../src/frontend/qt_sdl/PresenceOverlay.cpp)
+     target_link_libraries(pokemon_follower_trail PRIVATE ${UNOVA_QT_CORE} ${UNOVA_QT_GUI})
+     if(MSVC)
+         target_compile_options(pokemon_follower_trail PRIVATE /UNDEBUG)
