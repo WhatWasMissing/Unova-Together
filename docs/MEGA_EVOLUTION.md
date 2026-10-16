@@ -1,12 +1,12 @@
 # Mega Evolution
 
-Unova Together **1.0.35** includes **49 Mega forms** for supported English Pokémon Black 2 Redux Complete v1.4.1 games. Buy a Pokémon’s matching Mega Stone at any Pokémon Center Mart for **₽50,000**. Give it to the matching Pokémon, then hold **L + R together** while choosing a move in battle. The Pokémon returns to normal when the battle ends.
+Unova Together **2.0.0** includes **49 Mega forms** for supported English Pokémon Black 2 Redux Complete v1.4.1 games. Buy a Pokémon’s matching Mega Stone at any Pokémon Center Mart for **₽50,000**. Give it to the matching Pokémon, then hold **L + R together** while choosing a move in battle. The Pokémon returns to normal when the battle ends.
+
+You can also receive a free Mega Stone from Cynthia after defeating Skyla. Find her near the Mistralton City and Route 7 transition. If no Pokémon in your party can Mega Evolve, she gives you Serperiorite. Later, challenge her on the northern end of Route 7; her Garchomp holds Garchompite. Read the [Cynthia Route 7 guide](CYNTHIA_ROUTE_7.md) for game-version support details.
 
 ## Forms, abilities, and stats
 
 The table lists each Mega Stone and item ID, the Pokémon’s usual abilities, the ability it has while Mega Evolved, and its base-stat total (BST). BST adds HP, Attack, Defense, Speed, Special Attack, and Special Defense.
-
-## Forms, abilities, and stats
 
 The values below use Black 2 Redux base stats and the Mega profile values in this build. BST is the total of HP, Attack, Defense, Speed, Special Attack, and Special Defense.
 

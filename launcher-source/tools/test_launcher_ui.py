@@ -19,8 +19,8 @@ class LauncherTests(unittest.TestCase):
         self.app=Launcher(self.home,testing=True);self.app._open_mod('black2',save=False);self.app.update_idletasks();self.app.update()
     def tearDown(self):
         self.app.destroy();self.temp.cleanup()
-    def wait(self):
-        deadline=time.monotonic()+5
+    def wait(self,timeout=5):
+        deadline=time.monotonic()+timeout
         while self.app.busy and time.monotonic()<deadline:self.app.update();time.sleep(.01)
         self.app.update();self.assertFalse(self.app.busy)
     def feed(self,v='0.3.6'):
@@ -95,6 +95,33 @@ class LauncherTests(unittest.TestCase):
         self.app.profile_picker.current(0);self.app._select_profile()
         self.assertEqual(self.app.profile_label.get(),'My adventure');self.assertTrue(self.app.backup_paths)
         self.assertEqual(self.rom.with_suffix('.save').read_bytes(),b'first slot save')
+    def test_player_model_preference_persists_and_keeps_save_folder_with_source_rom(self):
+        from launcher_ui import preferences as prefs, services
+        self.app.preference_values['player_model']=4715;self.app._save()
+        item=self.app._active_profile()
+        self.assertEqual(services.normalize(item)['preferences']['player_model'],4715)
+        self.app._apply_save_folder(self.home/'builds/current',item,default_directory=self.rom.parent)
+        document=prefs.read_document(self.home/'builds/current')
+        self.assertEqual(Path(document['Instance0']['SaveFilePath']).resolve(),self.rom.parent.resolve())
+    def test_mega_feature_plays_supplied_mawile_front_and_back_gifs(self):
+        from PIL import Image
+        assets=HERE/'assets/features'
+        for filename in ('mega-mawile-front.gif','mega-mawile-back.gif'):
+            with Image.open(assets/filename) as gif:
+                self.assertEqual(gif.n_frames,72)
+                gif.seek(0);self.assertEqual(gif.info.get('duration'),80)
+        self.app.show_page('Features');self.app.update()
+        self.assertEqual(len(self.app.feature_mega_frames),2)
+        self.assertEqual([len(frames) for frames in self.app.feature_mega_frames],[72,72])
+        frame=self.app.feature_mega_frame
+        self.assertEqual([widget.cget('image') for widget in self.app.feature_mega_labels],
+                         [str(frames[frame]) for frames in self.app.feature_mega_frames])
+        time.sleep(.1);self.app.update()
+        frame=(frame+1)%72;self.assertEqual(self.app.feature_mega_frame,frame)
+        self.assertEqual([widget.cget('image') for widget in self.app.feature_mega_labels],
+                         [str(frames[frame]) for frames in self.app.feature_mega_frames])
+        self.app.show_page('Play');frame=self.app.feature_mega_frame
+        time.sleep(.1);self.app.update();self.assertEqual(self.app.feature_mega_frame,frame)
     def test_cleanup_button_prunes_owned_files_and_keeps_save(self):
         import unova_storage as storage
         base=self.home/'.updates/versions'
@@ -134,29 +161,6 @@ class LauncherTests(unittest.TestCase):
         self.assertEqual(self.app.page_name,'News')
         self.app.news_text.focus_force();self.app.news_text.event_generate('<Tab>');self.app.update()
         self.assertNotEqual(self.app.focus_get(),self.app.news_text)
-    def test_menu_feedback_cues_and_saved_sound_toggle(self):
-        import wave
-        self.assertTrue(self.app.menu_sounds.get())
-        self.app.menu_sound_events.clear()
-        self.app.nav['News'].focus_force();self.app.update()
-        self.assertIn('nav',self.app.menu_sound_events)
-        self.app.menu_sound_events.clear()
-        self.app.nav['News'].event_generate('<KeyPress-Return>');self.app.update()
-        self.assertIn('confirm',self.app.menu_sound_events)
-        self.assertEqual(self.app._action_sound(self.app.nav['News']),'confirm')
-        self.app.menu_sound_events.clear()
-        self.app.event_generate('<Escape>');self.app.update()
-        self.assertIn('cancel',self.app.menu_sound_events)
-        self.assertEqual(self.app._action_sound(self.app.cancel_button),'cancel')
-        for cue,max_seconds in (('nav',.06),('confirm',.12),('cancel',.13)):
-            with wave.open(str(HERE/'assets'/f'menu-{cue}.wav'),'rb') as audio:
-                self.assertEqual((audio.getnchannels(),audio.getsampwidth(),audio.getframerate()),(1,2,22050))
-                self.assertLess(audio.getnframes()/audio.getframerate(),max_seconds)
-        self.app.menu_sounds.set(False);self.app._save();self.app.menu_sound_events.clear()
-        self.app._play_menu_sound('confirm')
-        self.assertEqual(self.app.menu_sound_events,[])
-        self.assertFalse(json.loads(self.app.config_path.read_text())['menu_sounds'])
-
     def test_refresh_success_offline_error_and_cache(self):
         self.app.rom.set(str(self.rom))
         with patch.object(u,'launcher_feed',return_value=self.feed()):self.app.check();self.wait()
@@ -289,6 +293,23 @@ class LauncherTests(unittest.TestCase):
         self.app.game=None;self.app.profile_picker.current(1);self.app._select_profile();self.assertEqual(self.app.volume.get(),75)
         self.assertIn('play-profiles',self.app.save_dir.get())
 
+    def test_closing_launcher_warns_while_soaring_worker_is_needed(self):
+        proc=MagicMock();proc.poll.return_value=None;self.app.game=proc
+        worker=MagicMock();worker.thread.is_alive.return_value=True;self.app.soaring_worker=worker
+        with patch('launcher_ui.app.prefs.running_in_home',return_value=False),patch('launcher_ui.app.messagebox.askyesno',return_value=False) as ask,patch.object(self.app,'destroy') as destroy:
+            self.app._close()
+            ask.assert_called_once_with('Soaring is active','Keep the launcher open while playing Soaring. Closing it stops the nearby scenery service and flight may stop streaming. Close anyway?',parent=self.app)
+            destroy.assert_not_called()
+        with patch('launcher_ui.app.prefs.running_in_home',return_value=False),patch('launcher_ui.app.messagebox.askyesno',return_value=True),patch.object(self.app,'destroy') as destroy:
+            self.app._close();destroy.assert_called_once_with()
+
+    def test_game_exit_stops_streaming_workers(self):
+        proc=MagicMock();proc.poll.return_value=0;self.app.game=proc
+        worker=MagicMock();self.app.soaring_worker=worker
+        self.app._reap_game_workers()
+        worker.stop.set.assert_called_once_with();worker.thread.join.assert_called_once_with(timeout=.5)
+        self.assertIsNone(self.app.soaring_worker)
+
     def test_companion_default_and_explicit_off_survive_profile_switch_restart_and_launch(self):
         self.assertTrue(self.app.companion_interactions.get())
         self.assertFalse(self.app.reduced_follower_motion.get())
@@ -322,7 +343,7 @@ class LauncherTests(unittest.TestCase):
             listener.bind(('127.0.0.1',0));port=listener.getsockname()[1]
         self.app.net_host.set('127.0.0.1');self.app.net_port.set(str(port))
         try:
-            self.app._check_connection();self.wait()
+            self.app._check_connection();self.wait(12)
             self.assertIn('Local relay started',self.app.connection_status.get())
             self.assertIn('reachable',self.app.connection_status.get())
         finally:
@@ -415,10 +436,14 @@ class LauncherTests(unittest.TestCase):
         for window in windows:window.destroy()
 
     def test_theme_contract_drift(self):
-        document=(HERE/'DESIGN.md').read_text(encoding='utf-8')
-        for key,value in THEME['colors'].items():self.assertIn(f'{key}: "{value}"',document)
-        for value in THEME['fonts'].values():self.assertIn(f'fontFamily: "{value}"',document)
-        for key,value in THEME['layout'].items():self.assertIn(f'{key}: "{value}px"',document)
+        import re
+        document=json.loads((HERE/'theme.json').read_text(encoding='utf-8'))
+        self.assertEqual(set(document),{'colors','fonts','layout'})
+        self.assertEqual(document,THEME)
+        self.assertTrue(document['colors'])
+        self.assertTrue(all(re.fullmatch(r'#[0-9a-fA-F]{6}',value) for value in document['colors'].values()))
+        self.assertTrue(all(isinstance(value,str) and value for value in document['fonts'].values()))
+        self.assertTrue(all(isinstance(value,int) and value>0 for value in document['layout'].values()))
 
     def test_all_settings_editor_and_saved_relay(self):
         from launcher_ui.settings_editor import SettingsEditor

@@ -9,6 +9,8 @@ import launcher_migration
 from . import preferences as prefs
 from . import services
 from . import gen5_tools
+from . import player_models
+from . import cynthia_event
 from . import game_routes
 from . import versioning
 from .components import C, F, HERE, THEME, ScrollPage, button, card, emblem, label, set_enabled
@@ -23,12 +25,12 @@ class Launcher(tk.Tk):
         except tk.TclError:pass
         self.messages=queue.Queue();self.busy=False;self.release=None;self.game=None;self.operation='';self.guides_busy=False
         self._process_check_at=0;self._process_running=False
-        self.cancel=threading.Event();self.rom=tk.StringVar();self.auto=tk.BooleanVar(value=True);self.music=tk.BooleanVar(value=False);self.menu_sounds=tk.BooleanVar(value=True)
-        self.menu_sound_events=[];self._last_menu_pointer=0
+        self.cancel=threading.Event();self.rom=tk.StringVar();self.auto=tk.BooleanVar(value=True);self.music=tk.BooleanVar(value=False)
         self.status=tk.StringVar(value='');self.news_status=tk.StringVar(value='Saved patch notes · available offline')
         self.update_status=tk.StringVar(value='Check GitHub for the latest Windows release.')
         self.available=tk.StringVar(value='Not checked yet');self.phase=tk.StringVar(value='No download in progress')
         self.news=self._read_news();self.pages={};self.nav={};self.images=[];self.page_name=''
+        self.feature_mega_frames=[];self.feature_mega_labels=[];self.feature_mega_frame=0;self.feature_mega_after=None
         self.preference_values={};self.cheat_choices={};self.profile=None;self.rom_timer=None
         self.play_profiles=[];self.active_profile_id='';self.repair_release=None;self._switching=False
         self.presence_process=None;self.lan_request='';self.lan_status_time=0;self.lan_started=0;self.last_lan_action='host';self.lan_was_connected=False
@@ -37,15 +39,7 @@ class Launcher(tk.Tk):
         self._read_settings();self._init_profiles();self._build();self._apply_navigation();self.show_page('Library');self._rom_changed()
         self.rom.trace_add('write',lambda *_:self._rom_changed());self.protocol('WM_DELETE_WINDOW',self._close)
         self.bind('<Control-Tab>',lambda e:self._cycle_page(1));self.bind('<Control-Shift-Tab>',lambda e:self._cycle_page(-1))
-        self.bind_class('Button','<Return>',self._keyboard_activate)
-        for control_class in ('Button','TButton','Checkbutton','TCheckbutton','Radiobutton','TRadiobutton'):
-            self.bind_class(control_class,'<FocusIn>',self._focus_sound,add='+')
-            self.bind_class(control_class,'<ButtonRelease-1>',self._mouse_sound,add='+')
-            if control_class!='Button':
-                self.bind_class(control_class,'<Return>',self._key_sound,add='+')
-                self.bind_class(control_class,'<space>',self._key_sound,add='+')
-        self.bind_all('<ButtonPress-1>',self._record_menu_pointer,add='+')
-        self.bind_all('<Escape>',self._cancel_key_sound,add='+')
+        self.bind_class('Button','<Return>',lambda e:e.widget.invoke())
         from .controller import Controller
         self.controller=Controller();self.after(125,self._poll_controller)
         self.bind('<MouseWheel>',self._wheel);self.after(100,self._poll);self._sync();self._music_changed(save=False)
@@ -258,6 +252,7 @@ class Launcher(tk.Tk):
         if name=='Profiles':self._save();self._refresh_backups()
         for page in self.pages.values():page.pack_forget()
         self.pages[name].pack(fill='both',expand=True);self.page_name=name
+        self._set_feature_mega_animation(name=='Features')
         context=game_routes.MODS[self.active_mod]['name']+' · ' if self.active_mod and name!='Library' else ''
         self.title('Pokemon Together · '+context+game_routes.PAGE_LABELS.get(name,name))
         if isinstance(self.pages[name],ScrollPage):self.pages[name].canvas.yview_moveto(0)
@@ -384,7 +379,7 @@ class Launcher(tk.Tk):
         if index<0:return
         self._save();self.active_profile_id=self.play_profiles[index]['id'];self._init_profiles();self._switching=True
         item=self._active_profile();self.profile_label.set(item['label']);self.player.set(item['player']);self.save_dir.set(item['save_dir'])
-        values=prefs.defaults(self.root/'builds/current');values.update(self.preference_values);self.pause.set(values['pause']);self.filter.set(values['filter']);self.volume.set(values['volume']);self.area_scenery.set(values.get('area_scenery',False));self.companion_interactions.set(values['companion_interactions']);self.reduced_follower_motion.set(values.get('reduced_follower_motion',False));self.soaring.set(values.get('soaring',False));self.soaring_collision_debug.set(values.get('soaring_collision_debug',False))
+        values=prefs.defaults(self.root/'builds/current');values.update(self.preference_values);self.pause.set(values['pause']);self.filter.set(values['filter']);self.volume.set(values['volume']);self.area_scenery.set(values.get('area_scenery',False));self.companion_interactions.set(values['companion_interactions']);self.reduced_follower_motion.set(values.get('reduced_follower_motion',False));self.soaring.set(values.get('soaring',False));self.soaring_collision_debug.set(values.get('soaring_collision_debug',False));self._refresh_player_model_label()
         self.lan_slots.set(str(item.get('lan_slots',16)))
         self.connection_role.set(item['lan_role']);self.last_lan_action=item['lan_role'].lower()
         self.net_mode.set(item['network']['mode']);self.net_host.set(item['network']['host']);self.net_port.set(str(item['network']['port']));self.net_room.set(item['network']['room'])
@@ -644,8 +639,9 @@ class Launcher(tk.Tk):
         button(controls,'Open GitHub issues',lambda:webbrowser.open('https://github.com/'+updates.REPO+'/issues')).pack(side='left',padx=8)
         button(controls,'Close',window.destroy).pack(side='right')
 
-    def _apply_save_folder(self,runtime,item):
+    def _apply_save_folder(self,runtime,item,default_directory=None):
         doc=prefs.read_document(runtime);value=item.get('save_dir','')
+        if not value and default_directory:value=str(default_directory)
         if value:
             folder=Path(value).expanduser().resolve();folder.mkdir(parents=True,exist_ok=True);value=str(folder)
         for key in [k for k in doc if re.fullmatch(r'Instance\d+',k)] or ['Instance0']:
@@ -658,7 +654,6 @@ class Launcher(tk.Tk):
         box=tk.Frame(general,bg=C['surface']);box.pack(fill='x',padx=18,pady=16)
         label(box,'LAUNCHER & GAME',size=9,bold=True,bg=C['surface']).pack(anchor='w',pady=(0,10))
         ttk.Checkbutton(box,text='Check for updates on startup',variable=self.auto,command=self._save).pack(anchor='w',pady=4)
-        ttk.Checkbutton(box,text='Menu sounds',variable=self.menu_sounds,command=self._save).pack(anchor='w',pady=4)
         values=prefs.defaults(self.root/'builds/current');values.update(self.preference_values)
         self.pause=tk.BooleanVar(value=values['pause']);self.filter=tk.BooleanVar(value=values['filter'])
         self.volume=tk.IntVar(value=values['volume'])
@@ -701,6 +696,14 @@ class Launcher(tk.Tk):
         ttk.Checkbutton(follower_box,text='Reduced follower motion',variable=self.reduced_follower_motion,
             command=lambda:self._preference('reduced_follower_motion',self.reduced_follower_motion.get())).pack(anchor='w',pady=(8,4))
         label(follower_box,'Keeps reaction symbols; disables decorative bobbing and reaction movement.',size=9,color=C['muted'],bg=C['surface'],wraplength=620,justify='left').pack(anchor='w')
+        appearance=card(parent);appearance.pack(fill='x',pady=(0,18))
+        appearance_box=tk.Frame(appearance,bg=C['surface']);appearance_box.pack(fill='x',padx=18,pady=16)
+        label(appearance_box,'PLAYER APPEARANCE',size=9,bold=True,bg=C['surface']).pack(anchor='w')
+        self.player_model_label=tk.StringVar()
+        self._refresh_player_model_label()
+        label(appearance_box,textvariable=self.player_model_label,size=11,bold=True,bg=C['surface']).pack(anchor='w',pady=(8,4))
+        button(appearance_box,'Choose a field character',self._choose_player_model).pack(anchor='w',pady=(6,8))
+        label(appearance_box,'Choose from animated characters stored in your ROM. This changes your walking character; bike and surf forms keep their normal game animations. Applies next launch.',size=9,color=C['muted'],bg=C['surface'],wraplength=620,justify='left').pack(anchor='w')
         cheats=card(parent);cheats.pack(fill='x')
         box=tk.Frame(cheats,bg=C['surface']);box.pack(fill='x',padx=18,pady=16)
         label(box,'OPTIONAL CHEATS',size=9,bold=True,bg=C['surface']).pack(anchor='w')
@@ -719,6 +722,61 @@ class Launcher(tk.Tk):
 
     def _preference(self,key,value):
         self.preference_values[key]=value;self._save()
+
+    def _refresh_player_model_label(self):
+        model_id=self.preference_values.get('player_model',0)
+        self.player_model_label.set('Default character' if model_id==0 else player_models.display_name(model_id))
+
+    def _choose_player_model(self):
+        source=Path(self.rom.get())
+        if not source.is_file() or source.suffix.lower()!='.nds':
+            self.status.set('Choose a Black 2 ROM on Play before selecting a character.');return
+        window=tk.Toplevel(self);window.title('Choose field character');window.geometry('460x540');window.minsize(360,420);window.transient(self)
+        outer=tk.Frame(window,bg=C['background']);outer.pack(fill='both',expand=True,padx=16,pady=16)
+        label(outer,'Choose an animated character',size=16,bold=True,bg=C['background']).pack(anchor='w')
+        label(outer,'Search by name or model number. Characters are read from the selected ROM.',size=9,color=C['muted'],bg=C['background'],wraplength=420,justify='left').pack(anchor='w',pady=(6,12))
+        query=tk.StringVar();entry=tk.Entry(outer,textvariable=query,font=(F['body'],11),highlightthickness=2,highlightcolor=C['focus']);entry.pack(fill='x',pady=(0,10))
+        body=tk.Frame(outer,bg=C['surface']);body.pack(fill='both',expand=True)
+        choices=tk.Listbox(body,font=(F['body'],11),bg=C['surface'],fg=C['text'],selectbackground=C['primary'],selectforeground=C['surface'],activestyle='none',exportselection=False,relief='flat',highlightthickness=0)
+        scroll=ttk.Scrollbar(body,command=choices.yview);scroll.pack(side='right',fill='y');choices.configure(yscrollcommand=scroll.set);choices.pack(fill='both',expand=True)
+        state=label(outer,'Reading character models…',size=9,color=C['muted'],bg=C['background']);state.pack(anchor='w',pady=(8,6))
+        actions=tk.Frame(outer,bg=C['background']);actions.pack(fill='x',pady=(8,0))
+        result_queue=queue.Queue();models=[];visible=[];ready=False
+        def load_models():
+            try:result_queue.put(('models',player_models.list_models(source)))
+            except Exception as exc:result_queue.put(('error',str(exc)))
+        threading.Thread(target=load_models,daemon=True).start()
+        def populate(*_):
+            nonlocal visible
+            term=query.get().strip().casefold();current=choices.curselection();selected=visible[current[0]] if current else None
+            visible=[model for model in models if not term or term in player_models.display_name(model).casefold() or term in str(model)]
+            choices.delete(0,'end')
+            for model in visible:choices.insert('end',player_models.display_name(model))
+            if selected in visible:
+                index=visible.index(selected);choices.selection_set(index);choices.see(index)
+        def apply_selection():
+            if not ready:return
+            selected=choices.curselection()
+            if not selected:return
+            self.preference_values['player_model']=visible[selected[0]];self._refresh_player_model_label();self._save()
+            self.status.set('Character saved · applies next launch.');window.destroy()
+        def use_default():
+            self.preference_values['player_model']=0;self._refresh_player_model_label();self._save()
+            self.status.set('Default character selected · applies next launch.');window.destroy()
+        def poll_catalog():
+            nonlocal ready
+            if not window.winfo_exists():return
+            try:
+                kind,value=result_queue.get_nowait();ready=True
+                if kind=='error':state.configure(text='Could not read models: '+str(value))
+                else:
+                    models.extend(value);populate();state.configure(text=f'{len(models)} animated characters available.');entry.focus_set()
+            except queue.Empty:window.after(100,poll_catalog)
+        query.trace_add('write',populate)
+        choices.bind('<Double-Button-1>',lambda _event:apply_selection())
+        button(actions,'Default character',use_default).pack(side='left')
+        button(actions,'Use selected',apply_selection,kind='primary').pack(side='right')
+        poll_catalog()
 
     def _all_settings(self):
         from .settings_editor import SettingsEditor
@@ -768,8 +826,7 @@ class Launcher(tk.Tk):
             self.active_profile_id=str(data.get('active_profile',''))
             if type(data.get('check')) is bool:self.auto.set(data['check'])
             if type(data.get('music')) is bool:self.music.set(data['music'])
-            if type(data.get('menu_sounds')) is bool:self.menu_sounds.set(data['menu_sounds'])
-            if isinstance(data.get('preferences'),dict):self.preference_values={k:v for k,v in data['preferences'].items() if (k in ('pause','filter','area_scenery','companion_interactions','reduced_follower_motion','soaring','soaring_collision_debug') and type(v) is bool) or (k=='volume' and type(v) is int and 0<=v<=100)}
+            if isinstance(data.get('preferences'),dict):self.preference_values={k:v for k,v in data['preferences'].items() if (k in ('pause','filter','area_scenery','companion_interactions','reduced_follower_motion','soaring','soaring_collision_debug') and type(v) is bool) or (k=='volume' and type(v) is int and 0<=v<=100) or (k=='player_model' and type(v) is int and 0<=v<=65535)}
             if isinstance(data.get('cheats'),dict):self.cheat_choices={k:{ident:flag for ident,flag in v.items() if ident in self.cheat_vars_ids() and type(flag) is bool} for k,v in list(data['cheats'].items())[-32:] if isinstance(k,str) and len(k)<=32 and isinstance(v,dict)}
         except (OSError,ValueError,AttributeError):pass
 
@@ -779,7 +836,7 @@ class Launcher(tk.Tk):
             item=self._active_profile();item['rom']=self.rom.get();item['preferences']=dict(self.preference_values)
         try:
             self.config_path.parent.mkdir(parents=True,exist_ok=True);pending=self.config_path.with_suffix('.pending')
-            pending.write_text(json.dumps({'selected_game':self.selected_game.get(),'research_root':self.research_root.get(),'research_mode':self.research_mode.get(),'research_address':self.research_address.get(),'rom':self.rom.get(),'check':self.auto.get(),'music':self.music.get(),'menu_sounds':self.menu_sounds.get(),'preferences':self.preference_values,'cheats':self.cheat_choices,'profiles':self.play_profiles,'active_profile':self.active_profile_id}),encoding='utf-8');os.replace(pending,self.config_path)
+            pending.write_text(json.dumps({'selected_game':self.selected_game.get(),'research_root':self.research_root.get(),'research_mode':self.research_mode.get(),'research_address':self.research_address.get(),'rom':self.rom.get(),'check':self.auto.get(),'music':self.music.get(),'preferences':self.preference_values,'cheats':self.cheat_choices,'profiles':self.play_profiles,'active_profile':self.active_profile_id}),encoding='utf-8');os.replace(pending,self.config_path)
         except OSError as exc:self.status.set('Could not save settings: '+str(exc))
 
     def _sync(self):
@@ -811,6 +868,26 @@ class Launcher(tk.Tk):
             self._process_running=prefs.running_in_home(self.home)
             self._process_check_at=now+1.0
         return child or self._process_running
+
+    def _stop_game_workers(self,timeout=.5):
+        for name in ('soaring_worker','surroundings_worker'):
+            worker=getattr(self,name,None)
+            if worker is None:continue
+            stop=getattr(worker,'stop',None)
+            if hasattr(stop,'set'):stop.set()
+            thread=getattr(worker,'thread',None)
+            if thread is not None and callable(getattr(thread,'join',None)):
+                thread.join(timeout=max(0.,float(timeout)))
+            setattr(self,name,None)
+
+    def _soaring_worker_is_alive(self):
+        worker=getattr(self,'soaring_worker',None)
+        thread=getattr(worker,'thread',None) if worker is not None else None
+        return bool(thread is not None and callable(getattr(thread,'is_alive',None)) and thread.is_alive())
+
+    def _reap_game_workers(self):
+        if self.game is not None and self.game.poll() is not None:
+            self._stop_game_workers()
 
     def _game_selected(self,save=True):
         mod=next((key for key,spec in game_routes.MODS.items() if spec['game']==self.selected_game.get()),None)
@@ -893,8 +970,16 @@ class Launcher(tk.Tk):
             selected=self.cheat_choices.get(self.profile['key'],{}) if self.profile else {}
             item=self._active_profile();net=services.network(item['network'])
             settings=dict(self.preference_values);settings['pause']=False if net['mode']!='Solo' else settings.get('pause',False)
+            model_id=settings.pop('player_model',0)
+            try:
+                self.status.set('Preparing Cynthia’s Route 7 story event…');self.update_idletasks()
+                launch_rom=cynthia_event.prepare_variant(path,self.home)
+            except cynthia_event.UnsupportedRomError as exc:
+                launch_rom=path
+                self.status.set(str(exc)+' The game will start without the Route 7 event.')
+            if model_id:launch_rom=player_models.prepare_variant(launch_rom,self.home,model_id)
             prefs.apply(exe.parent,path,settings,selected,self.profile,self.home)
-            self._apply_save_folder(exe.parent,item)
+            self._apply_save_folder(exe.parent,item,default_directory=path.parent if (model_id or launch_rom != path) else None)
             env=dict(os.environ);env.update({'UNOVA_PLAYER_NAME':item['player'],'UNOVA_RELAY_HOST':net['host'],'UNOVA_RELAY_PORT':str(net['port']),'UNOVA_RELAY_ROOM':net['room'],'UNOVA_TRAINER_COOP':'0' if net['mode']=='Solo' else '1','UNOVA_AUTO_CONNECT':'0' if net['mode']=='Solo' else '1'})
             companion='1' if settings.get('companion_interactions',True) else '0'
             env['UNOVA_COMPANION_INTERACTIONS']=companion
@@ -902,8 +987,7 @@ class Launcher(tk.Tk):
             env['UNOVA_FOLLOWER_REDUCED_MOTION']='1' if settings.get('reduced_follower_motion',False) else '0'
             env['UNOVA_EXPERIMENTAL_SOARING']='1' if settings.get('soaring',False) else '0'
             env.pop('UNOVA_SOARING_CACHE',None)
-            previous=getattr(self,'soaring_worker',None)
-            if previous:previous.stop.set()
+            self._stop_game_workers()
             if settings.get('soaring',False):
                 from soaring_scene_worker import SoaringWorker
                 directory=self.home/'soaring-scenes'/uuid.uuid4().hex
@@ -916,8 +1000,6 @@ class Launcher(tk.Tk):
                 self.status.set('Preparing battle scenery…');self.update_idletasks()
                 env['UNOVA_AREA_CATALOG']=str(prepare_catalog(path,self.home/'area-scenes'))
                 from battle_surroundings_worker import SurroundingsWorker
-                previous=getattr(self,'surroundings_worker',None)
-                if previous:previous.stop.set()
                 directory=Path(env['UNOVA_AREA_CATALOG']).parent/'nearby'
                 self.surroundings_worker=SurroundingsWorker(path,directory)
                 env['UNOVA_SURROUNDINGS_DIR']=str(directory)
@@ -928,9 +1010,10 @@ class Launcher(tk.Tk):
                 env.update({'UNOVA_LAN_ACTION':lan_action,'UNOVA_LAN_HOST':net['host'],'UNOVA_LAN_REQUEST':self.lan_request,'UNOVA_LAN_SLOTS':str(item.get('lan_slots',16))})
                 self.lan_status.set('Starting LAN host…' if lan_action=='host' else 'Joining LAN host…')
             self._stop_music()
-            self.game=subprocess.Popen([str(exe),str(path.resolve())],cwd=exe.parent,env=env)
+            self.game=subprocess.Popen([str(exe),str(launch_rom.resolve())],cwd=exe.parent,env=env)
             self.status.set('Game running. Save normally and close it before starting another session.');self._sync()
-        except (OSError,ValueError,subprocess.SubprocessError) as exc:self.status.set('Unable to start the game: '+str(exc))
+        except (OSError,ValueError,subprocess.SubprocessError) as exc:
+            self._stop_game_workers();self.status.set('Unable to start the game: '+str(exc))
 
     def guide(self,name='PLAYER_GUIDE.md'):
         if name not in services.GUIDES:return
@@ -1033,7 +1116,7 @@ class Launcher(tk.Tk):
                     if finished_operation=='feed':self.news_status.set('Could not refresh · showing saved patch notes')
                 self._sync()
         except queue.Empty:pass
-        self._read_lan_status();self._sync();self.after(100,self._poll)
+        self._reap_game_workers();self._read_lan_status();self._sync();self.after(100,self._poll)
 
     def _read_lan_status(self):
         if not self.lan_request or time.monotonic()-self.lan_status_time<1:return
@@ -1064,14 +1147,23 @@ class Launcher(tk.Tk):
         self._start_lan(self.last_lan_action)
 
     def _features_page(self,parent):
-        self._heading(parent,'FEATURES','Features','Unova Together · current development build')
+        self._heading(parent,'FEATURES','Features','Explore Mega Evolution, co-op and more')
         mega=card(parent);mega.pack(fill='x',pady=(0,12))
-        image=tk.PhotoImage(file=HERE/'assets/features/pokemon.png');self.images.append(image)
-        tk.Label(mega,image=image,bg=C['surface'],bd=0).pack(anchor='w',padx=14,pady=(14,8))
+        art=tk.Frame(mega,bg=C['surface']);art.pack(anchor='w',padx=14,pady=(14,8))
+        for side,filename in (('FRONT','mega-mawile-front.gif'),('BACK','mega-mawile-back.gif')):
+            pose=tk.Frame(art,bg=C['surface']);pose.pack(side='left',padx=(0,18))
+            label(pose,side,size=8,color=C['muted'],bg=C['surface']).pack(anchor='center')
+            frames=[tk.PhotoImage(file=HERE/'assets/features'/filename,format=f'gif -index {frame}').zoom(2,2) for frame in range(72)]
+            sprite=tk.Label(pose,image=frames[0],bg=C['surface'],bd=0);sprite.pack()
+            self.feature_mega_frames.append(frames);self.feature_mega_labels.append(sprite)
         label(mega,'Mega Evolution',size=15,bold=True,bg=C['surface']).pack(anchor='w',padx=14)
         label(mega,'Try 49 Mega forms, each with its own matching Mega Stone. Give the stone to its Pokémon, then press L + R together while choosing a move in battle. Mega Evolution lasts until the battle ends.',size=10,color=C['muted'],bg=C['surface'],wraplength=570,justify='left').pack(anchor='w',padx=14,pady=(6,8))
         label(mega,'Examples: Mega Serperior gains Adaptability; Mega Charizard Y gains Drought; Mega Salamence gains Intimidate. Animated battle artwork is available for 46 forms.',size=10,bg=C['surface'],wraplength=570,justify='left').pack(anchor='w',padx=14,pady=(0,4))
+        label(mega,'The launcher shows Mawile’s supplied front and back animation.',size=9,color=C['muted'],bg=C['surface']).pack(anchor='w',padx=14,pady=(2,0))
         button(mega,'Mega Evolution guide',lambda:self.guide('MEGA_EVOLUTION.md')).pack(anchor='w',padx=14,pady=(8,14))
+        story=card(parent);story.pack(fill='x',pady=(0,12))
+        label(story,'Cynthia’s Route 7 challenge',size=13,bold=True,bg=C['surface']).pack(anchor='w',padx=14,pady=(14,4))
+        label(story,'After you defeat Skyla, Cynthia appears near the Mistralton City and Route 7 transition. She explains Mega Evolution and gives you a stone for a Pokémon in your party, or a Serperiorite if no one is ready. Return later to challenge her team and Mega Garchomp. On supported Redux ROMs, the launcher prepares a separate event-ready copy and keeps your selected ROM and saves intact.',size=10,color=C['muted'],bg=C['surface'],wraplength=570,justify='left').pack(anchor='w',padx=14,pady=(4,14))
         companion=card(parent);companion.pack(fill='x',pady=(0,12))
         label(companion,'Companion interactions',size=13,bold=True,bg=C['surface']).pack(anchor='w',padx=14,pady=(14,4))
         label(companion,'Expanded in 1.0.6 · on by default in this launcher',size=9,color=C['muted'],bg=C['surface']).pack(anchor='w',padx=14)
@@ -1108,6 +1200,8 @@ class Launcher(tk.Tk):
             ('Area battle scenery · optional','Generate nearby battle scenery locally from your ROM. Enable Nearby battle scenery in Settings. This remains experimental; special scenes keep original backgrounds, and environments are not all playtested.'),
             ('LAN & internet play','Host, join and retry from Co-op. Use Tailscale across networks. The UDP bridge is experimental and needs your group’s server and Python; no public server is supplied.'),
             ('Games & saves','Separate save slots, automatic names and per-slot settings. Back up and restore saves from Games & saves or Tools; old installations can be cleaned while keeping saves and backups.'),
+            ('Player appearance','Choose an animated character model stored in your Black 2 ROM. It changes your walking character; bike and surf forms keep their original animations.'),
+            ('Generation 5 menu sounds','The added in-game menus use movement, confirmation and back sounds inspired by Pokémon Black 2. Turn them off from the in-game Unova → Settings menu.'),
             ('Gen 5 tools','Check ROM compatibility, compare copied saves and estimate Redux Challenge XP budgets. These tools read data; they do not edit your game.'),
             ('Settings & maintenance','Controller navigation, music, emulator settings and reviewed optional cheats. Verified updates, repair and reviewed troubleshooting reports are available.')):
             label(extras,title,size=12,bold=True,bg=C['surface']).pack(anchor='w',padx=14,pady=(12,4))
@@ -1117,6 +1211,21 @@ class Launcher(tk.Tk):
         for title,doc in (('Feature guide','FEATURES.md'),('Known issues','KNOWN_ISSUES.md'),('Roadmap','ROADMAP.md')):
             button(guides,title,lambda name=doc:self.guide(name)).pack(side='left',padx=(0,8))
 
+    def _set_feature_mega_animation(self,active):
+        if active:
+            if self.feature_mega_after is None and self.feature_mega_frames:
+                self.feature_mega_after=self.after(80,self._advance_feature_mega_animation)
+        elif self.feature_mega_after is not None:
+            self.after_cancel(self.feature_mega_after);self.feature_mega_after=None
+
+    def _advance_feature_mega_animation(self):
+        self.feature_mega_after=None
+        if not self.feature_mega_frames:return
+        self.feature_mega_frame=(self.feature_mega_frame+1)%len(self.feature_mega_frames[0])
+        for widget,frames in zip(self.feature_mega_labels,self.feature_mega_frames):
+            widget.configure(image=frames[self.feature_mega_frame])
+        if self.page_name=='Features':self.feature_mega_after=self.after(80,self._advance_feature_mega_animation)
+
     def _cycle_page(self,direction):
         names=list(self.visible_pages);self.show_page(names[(names.index(self.page_name)+direction)%len(names)]);self.nav[self.page_name].focus_set();return 'break'
 
@@ -1125,7 +1234,6 @@ class Launcher(tk.Tk):
         if action=='next':self._cycle_page(1)
         elif action=='previous':self._cycle_page(-1)
         elif action=='back':
-            self._play_menu_sound('cancel')
             if focused and focused.winfo_toplevel()!=self:focused.winfo_toplevel().destroy()
             else:
                 first=game_routes.MODS[self.active_mod]['pages'][0] if self.active_mod else 'Library'
@@ -1140,52 +1248,8 @@ class Launcher(tk.Tk):
             if values:focused.current((index+(-1 if action=='left' else 1))%len(values));focused.event_generate('<<ComboboxSelected>>')
         elif action in ('left','right') and isinstance(focused,tk.Scale):focused.set(focused.get()+(-5 if action=='left' else 5))
         elif action=='accept' and focused:
-            if hasattr(focused,'invoke'):self._play_menu_sound(self._action_sound(focused));focused.invoke()
-            elif isinstance(focused,ttk.Combobox):self._play_menu_sound('confirm');focused.event_generate('<Alt-Down>')
-
-    def _play_menu_sound(self,cue):
-        if cue not in ('nav','confirm','cancel') or not self.menu_sounds.get():return
-        if self.testing:
-            self.menu_sound_events.append(cue);return
-        try:
-            import winsound
-            path=HERE/'assets'/('menu-'+cue+'.wav')
-            winsound.PlaySound(str(path),winsound.SND_FILENAME|winsound.SND_ASYNC|winsound.SND_NODEFAULT)
-        except (ImportError,RuntimeError,OSError):pass
-
-    @staticmethod
-    def _action_sound(widget):
-        kind=getattr(widget,'_menu_sound_kind','action')
-        # Focusing a sidebar button is navigation; activating it confirms the
-        # selected page. Keep those cues distinct even though both use buttons.
-        if kind=='nav':return 'confirm'
-        if kind=='cancel':return 'cancel'
-        text=str(widget.cget('text') if 'text' in widget.keys() else '').casefold()
-        if any(word in text for word in ('cancel','close','back','return to')):return 'cancel'
-        return 'confirm'
-
-    def _focus_sound(self,event):
-        widget=event.widget
-        if time.monotonic()-self._last_menu_pointer>.15 and str(widget.cget('state'))!='disabled':self._play_menu_sound('nav')
-
-    def _record_menu_pointer(self,event):
-        self._last_menu_pointer=time.monotonic()
-
-    def _mouse_sound(self,event):
-        widget=event.widget
-        if str(widget.cget('state'))!='disabled':self._play_menu_sound(self._action_sound(widget))
-
-    def _key_sound(self,event):
-        widget=event.widget
-        if str(widget.cget('state'))!='disabled':self._play_menu_sound(self._action_sound(widget))
-
-    def _keyboard_activate(self,event):
-        widget=event.widget
-        if str(widget.cget('state'))=='disabled':return 'break'
-        self._play_menu_sound(self._action_sound(widget));widget.invoke();return 'break'
-
-    def _cancel_key_sound(self,event):
-        self._play_menu_sound('cancel')
+            if hasattr(focused,'invoke'):focused.invoke()
+            elif isinstance(focused,ttk.Combobox):focused.event_generate('<Alt-Down>')
 
     def _poll_controller(self):
         active=False
@@ -1241,11 +1305,12 @@ class Launcher(tk.Tk):
 
     def _close(self):
         if self.busy and not messagebox.askyesno('Cancel update?','Close the launcher and cancel the current check/download?',parent=self):return
+        if self._game_is_running() and self._soaring_worker_is_alive():
+            if not messagebox.askyesno('Soaring is active','Keep the launcher open while playing Soaring. Closing it stops the nearby scenery service and flight may stop streaming. Close anyway?',parent=self):return
         self.cancel.set();self._save();self.destroy()
 
     def destroy(self):
         # Cancel this Tcl interpreter's UI timers before disposing its widgets.
-        self.cancel.set();self._stop_music()
+        self.cancel.set();self._stop_music();self._stop_game_workers()
         for token in self.tk.call('after','info'):self.after_cancel(token)
         super().destroy()
-

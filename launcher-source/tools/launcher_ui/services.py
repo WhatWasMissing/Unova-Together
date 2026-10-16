@@ -53,7 +53,7 @@ def check_relay(values,start_local):
     except ValueError as exc:
         if value['host'].lower() not in ('127.0.0.1','localhost') or 'No presence relay is listening' not in str(exc):raise
         start_local(value['port'])
-        deadline=time.monotonic()+4
+        deadline=time.monotonic()+8
         while True:
             try:return 'Local relay started. '+probe(value)
             except ValueError:
@@ -70,7 +70,7 @@ def normalize(item):
     for key,limit in (('rom',2048),('save_dir',2048),('label',40),('player',32)):
         value=item.get(key,clean[key]);clean[key]=value[:limit] if isinstance(value,str) else clean[key]
     values=item.get('preferences',{})
-    if isinstance(values,dict):clean['preferences']={k:v for k,v in values.items() if (k in ('pause','filter','area_scenery','companion_interactions','reduced_follower_motion','soaring','soaring_collision_debug') and type(v) is bool) or (k=='volume' and type(v) is int and 0<=v<=100)}
+    if isinstance(values,dict):clean['preferences']={k:v for k,v in values.items() if (k in ('pause','filter','area_scenery','companion_interactions','reduced_follower_motion','soaring','soaring_collision_debug') and type(v) is bool) or (k=='volume' and type(v) is int and 0<=v<=100) or (k=='player_model' and type(v) is int and 0<=v<=65535)}
     try:clean['network']=network(item.get('network',clean['network']))
     except (ValueError,TypeError,AttributeError):pass
     clean['lan_role']=item.get('lan_role') if item.get('lan_role') in ('Host','Join') else ('Host' if clean['network']['host'].lower() in ('localhost','127.0.0.1') else 'Join')

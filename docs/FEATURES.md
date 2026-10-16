@@ -1,6 +1,6 @@
 # Features
 
-Unova Together **1.0.35** brings friends, Pokémon tools, and Mega Evolution to supported English Pokémon Black 2 and Blaze Black 2 Redux profiles on Windows.
+Unova Together **2.0.0** brings friends, Pokémon tools, and Mega Evolution to supported English Pokémon Black 2 and Blaze Black 2 Redux profiles on Windows.
 
 ## Play with friends
 
@@ -18,6 +18,8 @@ There are **49 Mega forms**, each paired with its own Mega Stone. Buy a stone at
 Examples: Mega Serperior gains **Adaptability**; Mega Charizard Y gains **Drought**; Mega Salamence uses **Intimidate**; Mega Lucario Z gains **Adaptability**. The full roster, abilities, stones, and base-stat totals are in the [Mega Evolution guide](MEGA_EVOLUTION.md).
 
 Animated battle artwork is available for 46 Mega forms. Pokémon with supplied animations play through the full timed sequence.
+
+After defeating Skyla, meet Cynthia near the Mistralton City and Route 7 transition for a Mega Evolution lesson and a free matching stone. Visit her again farther north on Route 7 to battle her team and Mega Garchomp. The launcher prepares a separate event-ready copy for supported game revisions; see the [Cynthia Route 7 guide](CYNTHIA_ROUTE_7.md).
 
 ## Following Pokémon
 
@@ -40,3 +42,5 @@ Soaring is an unfinished, optional preview that connects 69 outdoor areas. Some 
 ## Launcher and presentation
 
 The launcher helps you choose a game, manage save slots and backups, connect with friends, and install verified updates. You can adjust controls, display, camera, audio, music, and reduced motion. Optional battle scenery is built from your own game data and can be disabled at any time.
+
+From launcher settings, choose an animated field character available in your supported Black 2 game. The selection takes effect the next time you start the game; bike and surf forms keep their original animations. Added in-game menus now use a Generation 5-inspired layout and optional menu sounds.
