@@ -63,13 +63,6 @@ The values below use Black 2 Redux base stats and the Mega profile values in thi
 | Mega Latios | Latiosite (123) | Levitate / None / None | Levitate / Levitate / Levitate | 600 → 700 |
 Some later-generation abilities do not exist in Generation V. Where needed, this build uses an available ability or a battle hook that reproduces the move effect. The roster document in the source package explains each fallback. Lucario Z's stat spread is provisional.
 
-## Artwork and animation
-
-Mega battle art with a supplied GIF is converted into a timed frame sequence. The emulator advances the sequence one frame at a time during battle; the complete pack contains 46 animated forms, including all 67 front and back frames for Mega Salamence. Automated checks walk every frame at its converted duration and verify that each clip maps to a supported Mega form. Please test the animations in battle, since automated playback checks cannot confirm how they look on screen.
-
-The supplied sprite folders and PokeMMO X/Y archives provide the Mega front, back, shiny, and animated art. Mega Mewtwo X uses its sourced X-archive sprites instead of generated artwork. **46 of the 49 forms have timed animated battle sprites**, including all 67 front and back frames for Mega Salamence.
-
-The Mega system and imported assets pass automated regression checks. The expanded roster still needs individual live testing, and linked co-op Mega battles have not been verified. Automated passes do not guarantee every form will work in a live battle.
 
 This is a free, non-commercial fan mod. The art was supplied by the project owner, who confirmed non-commercial use with creator credit. The original artist's name is still being checked. The release does not include a ROM, save, firmware, or RAM dump.
 
