@@ -1,8 +1,8 @@
 # Mega Evolution
 
-Unova Together 1.0.27 includes **49 Mega forms** for the supported English Pokémon Black 2 Redux Complete v1.4.1 game. Give a Pokémon its matching stone, then press **L + R together** while choosing a move in battle. Its Mega form lasts until that battle ends.
+Unova Together **1.0.33** includes **49 Mega forms** for the supported English Pokémon Black 2 Redux Complete v1.4.1 profile. Give a Pokémon its matching stone, then press **L + R together** while choosing a move in battle. Its Mega form lasts until that battle ends.
 
-All 49 stones are sold at Pokémon Center Marts for **₽50,000**. Stock is shared across the marts so each shop stays within the game's 45-item limit. The 46 new stone entries reuse Mail, Apricorn, and Data Card item slots; three earlier stones keep their existing slots.
+All 49 stones are sold at Pokémon Center Marts for **₽50,000**. Stock is shared across the marts so each shop stays within the game's 45-item limit. The 46 new stone entries reuse Mail, Apricorn, and Data Card item slots; three earlier stones keep their existing slots. The bag and mart show each stone's name and matching artwork.
 
 Save normally before testing. To grant a test stone, open the emulator's **Multiplayer** panel while idle in the overworld with C-Gear wireless off, choose **Debug**, select the stone, then choose **Grant Mega Stone (debug)**.
 
@@ -67,8 +67,9 @@ Some later-generation abilities do not exist in Generation V. Where needed, this
 
 Mega battle art with a supplied GIF is converted into a timed frame sequence. The emulator advances the sequence one frame at a time during battle; the complete pack contains 46 animated forms, including all 67 front and back frames for Mega Salamence. Automated checks walk every frame at its converted duration and verify that each clip maps to a supported Mega form. Please test the animations in battle, since automated playback checks cannot confirm how they look on screen.
 
-The supplied sprite folders and PokeMMO X/Y archives provide the Mega front, back, and shiny art. Mega Mewtwo X uses its sourced X-archive sprites instead of generated artwork.
+The supplied sprite folders and PokeMMO X/Y archives provide the Mega front, back, shiny, and animated art. Mega Mewtwo X uses its sourced X-archive sprites instead of generated artwork. **46 of the 49 forms have timed animated battle sprites**, including all 67 front and back frames for Mega Salamence.
 
 The Mega system and imported assets pass automated regression checks. The expanded roster still needs individual live testing, and linked co-op Mega battles have not been verified. Automated passes do not guarantee every form will work in a live battle.
 
 This is a free, non-commercial fan mod. The art was supplied by the project owner, who confirmed non-commercial use with creator credit. The original artist's name is still being checked. The release does not include a ROM, save, firmware, or RAM dump.
+

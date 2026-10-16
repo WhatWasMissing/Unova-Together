@@ -2,12 +2,12 @@
 
 Pick a version to read what changed. The newest release is first.
 
+- [Unova Together 1.0.33 — Mega Pokémon and a Soaring preview](RELEASE_NOTES_1.0.33.md)
 - [Unova Together 1.0.32 — Soaring across Unova](RELEASE_NOTES_1.0.32.md)
 - [Unova Together 1.0.31 — Smoother followers and landings](RELEASE_NOTES_1.0.31.md)
 - [Unova Together 1.0.30 — Fly between more areas](RELEASE_NOTES_1.0.30.md)
 - [Unova Together 1.0.29 — Smoother followers and Mega animations](RELEASE_NOTES_1.0.29.md)
 - [Unova Together 1.0.28 — Mega Pokémon animations](RELEASE_NOTES_1.0.28.md)
-
 - [Unova Together 1.0.27 — Updated Mega Mewtwo X artwork](RELEASE_NOTES_1.0.27.md)
 - [Unova Together 1.0.26 — A bigger Mega roster](RELEASE_NOTES_1.0.26.md)
 - [Unova Together 1.0.25 — More Mega Pokémon](RELEASE_NOTES_1.0.25.md)
@@ -48,3 +48,4 @@ Pick a version to read what changed. The newest release is first.
 - [Unova Together 0.3.5 — Easy setup and co-op](RELEASE_NOTES_0.3.5.md)
 
 The launcher reads these same notes from `index.json` on GitHub.
+

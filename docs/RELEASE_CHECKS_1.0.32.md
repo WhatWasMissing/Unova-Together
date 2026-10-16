@@ -3,11 +3,11 @@
 ## Verified locally
 
 - The Windows Qt emulator target linked successfully after melonDS was closed.
-- All 35 Soaring geometry and worker unit tests passed.
+- All 33 Soaring worker and geometry unit tests passed (28 worker, 5 geometry).
 - Native checks passed for map ID 0 and the Fly-style landing call.
-- The end-to-end renderer sweep loaded all 69 outdoor maps, simulated flight and landing, and passed on every map. Sixty-eight have safe landing sites; Marine Tube correctly offers return to take-off.
+- The native renderer sweep loaded all 69 outdoor maps, simulated flight and landing, and reloaded nearby scenery mid-flight without losing position or motion. Sixty-eight have safe landing sites; Marine Tube correctly offers return to take-off. Every map stayed under the 33.3 ms p95 frame budget. A one-off 47.68 ms frame on matrix 337 did not repeat in a focused run (10.58 ms maximum).
 - The 30×30 regional atlas joins all mapped areas with no enclosed holes or unfilled cells beside mapped terrain. The Black 2 decomp confirmed dimensions for all 68 original outdoor matrices; Redux adds matrix 416.
-- Public updater, patch-note discovery, settings preservation and save preservation passed on release 1.0.31. The 1.0.32 package will be checked after upload.
+- The 1.0.32 package was downloaded and installed in an isolated test home after upload; checksum, patch-note discovery, Windows Qt plugin, settings and save preservation passed.
 
 ## Needs an in-game check
 
@@ -36,3 +36,4 @@ The ROM, decomp, saves, RAM dumps, captures and generated test outputs are not i
 - Removed the older v1.0.30 and v1.0.31 release entries and their binary assets after publishing v1.0.32.
 - Kept both source tags and their user-facing notes under `patchnotes/`; the launcher still reads the complete 43-note index from that folder.
 - Confirmed v1.0.32 is the only published release and remains GitHub's latest release.
+

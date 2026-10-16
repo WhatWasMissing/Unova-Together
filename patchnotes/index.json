@@ -2,34 +2,40 @@
   "schema": 1,
   "notes": [
     {
+      "version": "1.0.33",
+      "title": "Mega Pokémon and a Soaring preview",
+      "file": "RELEASE_NOTES_1.0.33.md",
+      "body": "- Try 49 Mega Pokémon with their matching Mega Stones. For example, Mega Serperior gains Adaptability and Mega Charizard Y gains Drought.\n- Animated battle artwork now plays full timed sequences for 46 Mega forms. Mega Salamence uses 67 frames for both its front and back view.\n- Pokémon followers have smoother walking motion and no longer bob up and down inside their sprite while walking.\n- Take flight across the unfinished Soaring preview, which connects 69 outdoor areas.\n\n**Soaring is still unfinished.** Some routes and locations are approximate, live playtesting is still needed, and Marine Tube has no safe landing spot. Save normally before trying it. See the [Mega guide](../docs/MEGA_EVOLUTION.md), [Soaring guide](../docs/SOARING_FLIGHT.md), and [known limits](../docs/KNOWN_ISSUES.md) for details.\n\nUpdate everyone in your co-op group to version 1.0.33 before playing together."
+    },
+    {
       "version": "1.0.32",
       "title": "Soaring across Unova",
       "file": "RELEASE_NOTES_1.0.32.md",
-      "body": "- Experimental Soaring now reaches all 69 outdoor areas supported by this build, including Black City.\n- Clear landing spots return through the game's Fly-style transition.\n- Places without safe ground keep the option to return to take-off.\n\nTo try it, enable Settings → Experimental features → Soaring flight, then choose Unova → Pokémon → Take flight. Fly between a few routes and towns, land on clear ground, and check that you return to the right map and spot. Soaring remains experimental, so please save before testing."
+      "body": "- Experimental Soaring now reaches all 69 outdoor areas supported by this build, including Black City.\n- Clear landing spots return through the game's Fly-style transition.\n- Places without safe ground keep the option to return to take-off.\n\nTo try it, enable **Settings → Experimental features → Soaring flight**, then choose **Unova → Pokémon → Take flight**. Fly between a few routes and towns, land on clear ground, and check that you return to the right map and spot. Soaring remains experimental, so please save before testing."
     },
     {
       "version": "1.0.31",
       "title": "Smoother followers and landings",
       "file": "RELEASE_NOTES_1.0.31.md",
-      "body": "- Followers now stay a little farther behind and keep a smooth walking rhythm around turns.\n- Soaring landings now return through Pokémon Black 2's Fly-style transition.\n- Mega Salamence's full battle animation is ready for a live test.\n\nWalk and turn with a follower to check its spacing and movement. To test Mega Salamence, give it Salamencite and hold L + R while choosing a move in battle. To test Soaring, enable Settings → Experimental features → Soaring flight, choose Unova → Pokémon → Take flight, then land on clear ground and check that you return to the right map and spot."
+      "body": "- Followers now stay a little farther behind and keep a smooth walking rhythm around turns.\n- Soaring landings now return through Pokémon Black 2's Fly-style transition.\n- Mega Salamence's full battle animation is ready for a live test.\n\nWalk and turn with a follower to check its spacing and movement. To test Mega Salamence, give it Salamencite and hold **L + R** while choosing a move in battle. To test Soaring, enable **Settings → Experimental features → Soaring flight**, choose **Unova → Pokémon → Take flight**, then land on clear ground and check that you return to the right map and spot."
     },
     {
       "version": "1.0.30",
       "title": "Fly between more areas",
       "file": "RELEASE_NOTES_1.0.30.md",
-      "body": "- Experimental Soaring flight now reaches more connected outdoor routes and towns.\n- Followers keep a little more room behind you, and their walking steps stay in time around corners.\n- Mega battle animations play the supplied artwork frame by frame.\n\nTry Soaring from Settings → Experimental features → Soaring flight, then Unova → Pokémon → Take flight. Please check that you can cross between areas and land in the right place. To test Mega Salamence, give it Salamencite and press L + R while choosing a move in battle."
+      "body": "- Experimental Soaring flight now reaches more connected outdoor routes and towns.\n- Followers keep a little more room behind you, and their walking steps stay in time around corners.\n- Mega battle animations play the supplied artwork frame by frame.\n\nTry Soaring from **Settings → Experimental features → Soaring flight**, then **Unova → Pokémon → Take flight**. Please check that you can cross between areas and land in the right place. To test Mega Salamence, give it Salamencite and press **L + R** while choosing a move in battle."
     },
     {
       "version": "1.0.29",
       "title": "Smoother followers and Mega animations",
       "file": "RELEASE_NOTES_1.0.29.md",
-      "body": "- Pokémon followers stay about one tile behind and move smoothly around corners.\n- Launcher menus now have navigation, confirm, and cancel sounds. Change the volume or turn them off in Settings.\n- Mega Pokémon with supplied animated artwork play the full animation during battle. Mega Salamence has 67 frames on each side.\n\nPlease test Mega Salamence in battle: give it Salamencite and press L + R together while choosing a move. Check whether it animates and stays correctly positioned."
+      "body": "- Pokémon followers stay about one tile behind and move smoothly around corners.\n- Launcher menus now have navigation, confirm, and cancel sounds. Change the volume or turn them off in Settings.\n- Mega Pokémon with supplied animated artwork play the full animation during battle. Mega Salamence has 67 frames on each side.\n\nPlease test Mega Salamence in battle: give it Salamencite and press **L + R together** while choosing a move. Check whether it animates and stays correctly positioned."
     },
     {
       "version": "1.0.28",
       "title": "Mega Pokémon animations",
       "file": "RELEASE_NOTES_1.0.28.md",
-      "body": "- Mega Pokémon with supplied animated artwork now play through their GIF frames during battle.\n- Mega Salamence is the first animation test, with 67 frames.\n- Give it Salamencite and press L + R together while choosing a move."
+      "body": "Mega Pokémon with supplied animated artwork can now play through the full set of GIF frames during battle. Mega Salamence is the main test for this update, with 67 frames.\n\nGive Salamence Salamencite, then press **L + R together** while choosing a move. After it Mega Evolves, check whether its sprite cycles through the animation. Let us know if it stays still or looks misaligned.\n\nThis is a test build. Save normally before playing, and update every player before connecting together."
     },
     {
       "version": "1.0.27",
@@ -261,3 +267,4 @@
     }
   ]
 }
+

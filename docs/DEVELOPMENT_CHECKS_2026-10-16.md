@@ -6,22 +6,24 @@ These results cover the local development source. They are not a public release 
 
 - The trail now keeps HeartGold/SoulSilver's one-tile gap and interpolates between 50 ms route samples. Its walk-cycle phase follows distance traveled along the breadcrumb route, so turns do not restart the gait. The overlay also retains fractional positions for followers instead of snapping them to whole screen pixels.
 - The focused follower regression checks the gap, straight-line movement, stopping, corner turns, 60 fps sampling across 50 ms updates, continuous gait and visible subpixel motion. It passed; the full Qt emulator target also rebuilt successfully.
+- A visual regression showed animation poses sliding vertically inside the sprite box. The renderer now anchors each pose by its own feet and adds a route-timed whole-sprite lift while walking. Pixel-output checks confirm the feet stay planted across frame changes and the sprite itself rises during its gait; the focused test and Qt build pass.
 - The implementation is data-level and build-verified. A live field playtest is still needed to confirm the spacing and motion on the user's game setup.
 
 ## Regional Soaring
 
-- The worker reads the Black 2 zone-header `fly_from` bit and reciprocal, non-rail warp records, then resolves connected outdoor matrix offsets. The field layout and warp records were checked against the Black 2 decomp.
-- The retail Black 2 ROM and the supplied Redux ROM produced the same 13-matrix connected region.
-- All 11 Soaring worker tests passed. The cross-matrix fixture checks destination map/tile coordinates, atlas world positions and shifted collision tiles.
-- An export from the retail ROM rendered an atlas containing all 13 connected matrices (1,449 geometry faces, 41 textures). The native scene test loaded the exported scene and rendered it; the measured 120-frame test averaged 0.86 ms with a 0.94 ms p95. A native synthetic test also checked format 3, atlas origins and global landing coordinates.
-- A second read-only export pass sampled four locations in the Overworld and linked matrices 107, 255 and 414 from both retail Black 2 and Redux. Every scene carried the same 13 matrix offsets. At the take-off point, the exporter produced 22,106 terrain faces, 198 landing sites and 237 collision tiles; at linked matrix 107 it produced 23,156 faces, 204 landing sites and 496 collision tiles. Both ROMs produced matching counts and landing maps.
-- The native renderer loaded the real Redux take-off and linked-matrix scenes. The 120-frame render check averaged 4.9 ms (8.2 ms p95) at take-off and 8.8 ms (11.4 ms p95) in the linked scene. This confirms the scene format, scenery and landing data load within the renderer's frame budget; completing a landing through the game's live field transition still needs an in-game test.
-- Live flight, cross-map landing and in-game follower spacing still need playtesting.
+- The worker reads Black 2 Redux terrain and collision data. Matrix dimensions and Fly-style landing behavior were checked against `F:\gen5decomps\pokebw2-main`.
+- The 30×30 regional atlas covers all 69 outdoor matrix IDs. Its 440 authored cells and 327 sea-fill cells form one connected footprint with no enclosed holes or empty cells beside mapped terrain. All 69 possible take-off roots resolve to the same world placements. The decomp confirms all 68 original outdoor matrix dimensions; Redux adds matrix 416.
+- All 33 Soaring Python tests passed (28 worker and 5 geometry). The audit decoded 427 unique chunks: 361 WB, 45 GC and 21 NG. NG chunks render as scenery but do not supply landing ground.
+- The native real-ROM sweep loaded and rendered the outdoor roots, exercised flight movement, selected clear ground and simulated landing. With streaming enabled, it reloaded nearby scenery and confirmed flight position and motion stayed intact for every root. Sixty-eight maps have safe ground; Marine Tube (matrix 273) correctly keeps the return-to-take-off option.
+- All roots stayed below the 33.3 ms p95 frame budget. One initial 120-frame run reported a 47.68 ms maximum on matrix 337; an immediate focused rerun measured a 10.58 ms maximum there, so the spike did not repeat.
+- Three decorative flyways bridge groups that lack a reciprocal warp path. Twenty-eight supplemental placements anchor areas without a unique spatial warp; some story variants sit beside related areas at approximate positions.
+- Native Black City map-ID 0 tracking and the decomp-matched Fly warp ABI regressions passed. These checks do not replace a live emulator test of flight, landing and returning to the field.
 
 ## Cross-feature regression checks
 
 - The native Mega/follower/menu-sound suite passed all 12 tests. This includes full GIF-frame playback for the 46 packed Mega animation clips and a regression for the Black 2 Fly-style warp call layout.
 - The launcher UI suite passed all 30 tests, and the GitHub patch-note feed passed all 4 tests.
-- All 11 Soaring geometry/stream tests passed, and the native Soaring check passed take-off, controls, altitude limits, map bounds, landing and rendering.
+- All 33 Soaring worker/geometry tests passed; the real-ROM native sweep and mid-flight scenery reload checks covered all 69 roots.
 - Black 2's decomp shows Fly chains `EventMapChangeWarp_CreateGrid` from `s028A_MapChangeFlyWarp`. The Soaring bridge now calls that same overlay-35 Thumb function (`0x0217DB41`) with the decompiled register/stack ABI. The regression and full Qt target compile pass; a live landing is still required to confirm map reload behavior.
-- These checks validate the local source and fixtures. The launcher update/download flow, Soaring landings and follower motion still need a real end-to-end test with the published build and emulator.
+- These checks validate the local source and fixtures. A live in-game Soaring flight/landing/return and follower-motion playtest remain outstanding.
+

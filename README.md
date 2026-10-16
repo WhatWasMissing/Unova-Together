@@ -1,45 +1,33 @@
 # Unova Together
 
-**Current release: 1.0.32.** Experimental Soaring now reaches every outdoor area in this build, including Black City, and returns you through the game's Fly-style landing transition: [downloads](https://github.com/WhatWasMissing/Unova-Together/releases/latest). Made by mvq1303 / WhatWasMissing, built on melonDS.
+**Current release: 1.0.33.** Play Pokémon Black 2 and Blaze Black 2 Redux with friends, try 49 Mega forms, and explore an unfinished Soaring preview. [Download the latest release](https://github.com/WhatWasMissing/Unova-Together/releases/latest).
 
-Explore Unova with friends in supported English Pokémon Black 2 and Blaze Black 2 Redux. Each player uses their own matching ROM and independent save.
+Unova Together is a free fan project by **mvq1303 / WhatWasMissing**, built on melonDS. Each player needs their own compatible game file and save. The download does not include a game ROM, save, or firmware.
 
-## Download and play
+## Get started
 
-1. [Download version 1.0.32](https://github.com/WhatWasMissing/Unova-Together/releases/latest). Choose **Unova-Together.exe**, or extract the complete Windows x64 ZIP.
-2. Open the EXE, or run **Start Unova Together.cmd** in the extracted folder. Choose your ROM and select **Play**.
-3. Open launcher **Co-op** to configure your connection and host or join LAN. Follow the [player guide](docs/PLAYER_GUIDE.md).
+1. Download **Unova-Together.exe** for the easiest setup, or download and extract the Windows x64 ZIP.
+2. Open the launcher, choose your own supported ROM, and select **Play**.
+3. Open **Co-op** to host or join a local multiplayer session. Everyone playing together should update to the same release and use matching game revisions.
 
-Version **1.0.32** expands experimental Soaring across all outdoor areas supported by this build, including Black City. Clear landings return through the game's Fly-style transition; if an area has no safe landing spot, return to take-off. Enable **Settings → Experimental features → Soaring flight**, then choose **Unova → Pokémon → Take flight** and check a few destinations in your game.
+The launcher offers verified updates and keeps save files when updating. See the [player guide](docs/PLAYER_GUIDE.md) for setup and connection help.
 
-Update from the launcher or download the latest files above. Players still using launcher 1.0.5 can run [Repair-Launcher.exe](https://github.com/WhatWasMissing/Unova-Together/releases/latest/download/Repair-Launcher.exe) once and select their old launcher. See the [launcher guide](docs/LAUNCHER.md). Update every player before playing together.
+## What you can do
 
-## Features
+- **Play together:** explore shared maps, trade items and Pokémon, and join supported trainer battles.
+- **Try Mega Evolution:** 49 forms use matching Mega Stones. For example, Mega Serperior gains Adaptability with Serperiorite, and Mega Charizard Y gains Drought with Charizardite Y. See the [Mega guide](docs/MEGA_EVOLUTION.md) for the full roster, abilities, stats, and controls.
+- **See animated Mega sprites:** 46 forms use their supplied animated battle artwork; Mega Salamence, for example, plays a 67-frame animation on both sides.
+- **Bring a Pokémon along:** all 649 base species have follower sprites, with walk cycles and optional interactions.
+- **Use extra Pokémon and field tools:** check IVs and EVs, find regular wild encounters, relearn level-up moves, and use owned HMs without spending battle move slots.
+- **Explore together more easily:** use save slots, backups, ROM checks, optional camera and battle scenery, controller navigation, and launcher repair tools.
 
-- **Explore together:** shared trainer movement, teammate locations and joining maps.
-- **Trade and battle:** item offers, party Pokémon exchanges and friendly PvP from **Unova → Players**.
-- **Trainer co-op:** supported story encounters, Solo/Co-op mode and practice rematches with independent saves.
-- **Pokémon tools:** all 649 directional followers, ten companion interaction scenes with nature-aware dialogue and animated reactions, IVs/EVs, seasonal encounters and free level-up move relearning.
-- **Battle experiment:** 49 Mega forms for the supported Black 2 Redux profile. See the [Mega Evolution test guide](docs/MEGA_EVOLUTION.md) for stones, abilities, and stats.
-- **Field HMs:** owned HMs work without taking learned battle move slots; native story requirements remain.
-- **Presentation:** custom camera and optional nearby battle scenery built locally from your ROM.
-- **Launcher:** simple save slots, Gen 5 ROM/save/XP tools, LAN Host/Join/Retry, controller navigation, music, settings, optional cheats, save backups/restore, diagnostics, verified updates and repair.
+**Soaring is unfinished and experimental.** It is an optional early preview, not a complete travel system. Some map connections and positions are approximate, and live playtesting is still needed. Marine Tube has no safe landing spot, so return to take-off there. Save normally before trying it. Details and known limits are in the [Soaring guide](docs/SOARING_FLIGHT.md).
 
-See the [complete feature guide](docs/FEATURES.md) for controls, menu paths and limitations, and the [roadmap](docs/ROADMAP.md) for proposed additions. Soaring remains optional and experimental; gaps use decorative regional terrain, and landings wait for the native map transition to settle before restoring game input.
+## Guides
 
-Companion interactions are in **Settings → Following Pokémon** and enabled by default when no preference has been saved. Explicit off choices are preserved.
+[All features](docs/FEATURES.md) · [Player guide](docs/PLAYER_GUIDE.md) · [Mega Evolution](docs/MEGA_EVOLUTION.md) · [Soaring](docs/SOARING_FLIGHT.md) · [Co-op tools](docs/COOP_TOOLS.md) · [Known limits](docs/KNOWN_ISSUES.md) · [Release notes](patchnotes/README.md)
 
-The release includes 743 normal/shiny follower variants, supported female/forms, sprite stability fixes, contextual dialogue, reduced motion, co-op compatibility/readiness checks, rematch filters and **₽10 Super Repels**. Practice completion passed a targeted local latency test; broader recovery/network playtesting remains required. Soaring is still experimental and needs an in-game flight and landing check. See [Soaring flight](docs/SOARING_FLIGHT.md) and [changes, evidence and source reconstruction](docs/DEVELOPMENT_POLISH_2026-10-13.md).
+For internet connections between different networks, see the [Tailscale guide](docs/TAILSCALE_COOP.md). Optional UDP connections need a server run by your group; this project does not provide a public server.
 
-## Guides and limits
-
-[Release notes](patchnotes/RELEASE_NOTES_1.0.31.md) · [All patch notes](patchnotes/) · [Release checks](docs/RELEASE_CHECKS_1.0.31.md) · [Known limits](docs/KNOWN_ISSUES.md)
-
-[Launcher](docs/LAUNCHER.md) · [Co-op tools](docs/COOP_TOOLS.md) · [Field tools](docs/FIELD_TOOLS.md) · [Followers](docs/FOLLOWING_POKEMON.md) · [Companions](docs/COMPANIONS_AND_SOARING.md) · [Party stats](docs/PARTY_STATS.md)
-
-For different networks use [Tailscale](docs/TAILSCALE_COOP.md). The optional [UDP bridge](docs/UDP_SERVER_GUIDE.md) remains experimental and needs your group's server; no public server is supplied. Co-op experience is disabled. Keep fast-forward and C-Gear wireless off during native multiplayer. Some special trainer events and network conditions remain unverified; interrupted battle recovery may discard that battle's progress.
-
-Matching GPL source and checksums accompany the downloads. No ROMs, saves or firmware are bundled. [Authorship](AUTHORSHIP.md) · [Licensing](LICENSING.md). Playtesters: maxback221 and randomitem19.
-
-Solo battles award **1.25× XP**; co-op XP remains suppressed. See [XP compensation](docs/XP_COMPENSATION.md) and [measured battle results](docs/XP_COMPENSATION_BATTLE_TEST.md). The current multiplier passed production-dispatch checks. The documented normal save/reload battle test used historical release 1.0.2's 1.65× multiplier; it is not a new 1.0.5/1.0.6 gameplay test.
+The project preserves melonDS and other third-party notices. See [authorship](AUTHORSHIP.md) and [licensing](LICENSING.md). Playtesters: maxback221 and randomitem19.
 

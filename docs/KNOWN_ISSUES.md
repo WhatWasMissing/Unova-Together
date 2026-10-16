@@ -1,6 +1,6 @@
-# Unova Together 1.0.30 — known limits
+# Unova Together 1.0.33 — known limits
 
-Release 1.0.30 expands experimental Soaring across outdoor areas connected by verified warps. Live playtesting is still needed to confirm flight between routes and towns and that landings return to the right place. The previously reported movement hitching, idle follower disappearance, distorted bobbing and Redux shiny follower colours were confirmed fixed in 1.0.10 gameplay. Broader physical-PC, WAN and every-species testing remains limited. See [release checks](RELEASE_CHECKS_1.0.30.md).
+This release includes 49 Mega forms and an unfinished, optional Soaring preview. Soaring has been checked with automated map and landing simulations, but has not been confirmed in a live playthrough. Some routes and positions are approximate; Marine Tube has no safe landing. Save normally before testing it. Followers received another animation adjustment, but their spacing and motion still need a live check on a player's game. Broader physical-PC, WAN, and every-species testing remains limited. See [release checks](RELEASE_CHECKS_1.0.33.md).
 
 - **Other VPNs can block connections.** NordVPN caused a tester’s presence-relay connection to fail with WinError 10013. Disconnect other VPNs while using Tailscale; check their kill-switch and network-filter settings if access remains blocked. This is not evidence that the game server is offline.
 - **Online UDP is experimental.** It has been checked locally, but reliable battle completion between players on different networks has not yet been confirmed. Use Tailscale if it fails.
@@ -27,7 +27,7 @@ Release 1.0.30 expands experimental Soaring across outdoor areas connected by ve
 
 Nearby battle scenery remains experimental. Special cinematic scenes keep original backgrounds; not every environment has been playtested. Disable the option if a background looks wrong.
 
-Companion interactions are in Settings → Following Pokémon and enabled by default when no preference has been saved. Saved off choices are preserved. Use R+A or tap the follower; A alone advances game text. Regional Soaring remains experimental and off by default. Outdoor maps join the flight atlas when reciprocal fly-enabled warps define their shared position; standalone maps without a safe link stay separate. Unsupported cells appear as ocean or sky, and landing is limited to verified clear terrain. Flight is local; B returns to the take-off point.
+Companion interactions are in Settings → Following Pokémon and enabled by default when no preference has been saved. Saved off choices are preserved. Use R+A or tap the follower; A alone advances game text. Regional Soaring is unfinished, experimental, and off by default. Its atlas connects all 69 outdoor maps, but some areas use approximate placements. Landing is limited to checked clear terrain, and Marine Tube has none. Flight is local; B returns to the take-off point. Live flight and landing on a player's save still need testing.
 
 Field HMs retain native story requirements. Fly needs a party member with a move slot without another field action. Full obstacle traversal and every save/reload path have not been separately playtested. Encounter gifts, scripted legendaries and Hidden Grottos are excluded. Relearning offers the current species/form's level-up moves at or below its level.
 
@@ -38,3 +38,4 @@ Direct party Pokémon trades exclude eggs, held Mail and native trade-evolution 
 - **Boosted solo XP persistence has a targeted pass.** A published 1.0.2 solo Cheren victory saved 5,951 Servine XP / level 20 and the badge, independently parsed with PKHeX, then reloaded in a fresh emulator process. This interpreter fixture does not establish JIT or full-playthrough behavior. See `XP_COMPENSATION_BATTLE_TEST.md`.
 
 The historical 1.0.2 test used 1.65× XP. Current releases use **1.25×**, validated by production-dispatch checks; a fresh end-to-end battle/save/reload test for that multiplier has not been established. Co-op XP remains disabled. Proposed fixes and additions are listed in the [roadmap](ROADMAP.md).
+
