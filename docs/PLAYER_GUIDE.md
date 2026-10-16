@@ -1,11 +1,11 @@
 # Play Unova Together with friends
 
-Unova Together adds shared exploration, trading, co-op trainer battles, and Mega Evolution to supported Pokémon Black 2 and Blaze Black 2 Redux games.
+Unova Together adds shared exploration, trading, co-op trainer battles, and Mega Evolution to compatible English Blaze Black 2 Redux games.
 
 ## What each player needs
 
 - A Windows x64 PC and the latest Unova Together launcher or portable ZIP.
-- Your own compatible game file and save. Both players need the same game version and Redux revision.
+- Your own English Blaze Black 2 Redux Complete v1.4.1 game file and save. No full Unova Together game patch is currently bundled. If one is released for another Redux version, use a copy with the patch listed for that exact version. Both players need the same game version and Redux revision.
 - A network connection method. Players on the same home network can use LAN; players on different networks can use [Tailscale](TAILSCALE_COOP.md).
 
 Unova Together does not include Pokémon ROMs, save files, or firmware. Change your controls under **Config → Input** if you want to adjust the defaults.

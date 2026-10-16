@@ -1,4 +1,4 @@
-"""Read-only Black 2 tools by mvq1303 / WhatWasMissing."""
+"""Read-only Redux tools by mvq1303 / WhatWasMissing."""
 import bisect, binascii, hashlib, itertools, struct
 from pathlib import Path
 import ndspy.code, ndspy.narc, ndspy.rom
@@ -17,8 +17,8 @@ def load_rom(path):
     return ndspy.rom.NintendoDSRom.fromFile(str(path))
 
 def compatibility(path):
-    rom=load_rom(path);lines=['English Black 2 / solo XP hook checks']
-    identity=rom.idCode==b'IREO';lines.append(('PASS' if identity else 'FAIL')+': English Black 2 game code IREO')
+    rom=load_rom(path);lines=['English Redux / solo XP hook checks']
+    identity=rom.idCode==b'IREO';lines.append(('PASS' if identity else 'FAIL')+': English Redux game code IREO')
     try:
         overlay=ndspy.code.loadOverlayTable(rom.arm9OverlayTable,lambda oid,fid:rom.files[fid])[167]
         matched=all(overlay.data[a-overlay.ramAddress:a-overlay.ramAddress+len(bytes.fromhex(h))]==bytes.fromhex(h) for a,h in FINGERPRINTS)
@@ -52,7 +52,7 @@ def crypt(data,seed):
 
 def inspect_save(path):
     path=Path(path)
-    if not 0x4c000<=path.stat().st_size<=16*1024*1024:raise ValueError('Not a supported Black 2 save size.')
+    if not 0x4c000<=path.stat().st_size<=16*1024*1024:raise ValueError('Not a supported Redux save size.')
     raw=path.read_bytes();banks=[]
     for bank in (0,0x26000):
         offset=bank+0x18e00
@@ -66,12 +66,12 @@ def inspect_save(path):
             order=list(itertools.permutations(range(4)))[((pid>>13)&31)%24];canonical=b''.join(blocks[order.index(j)*32:order.index(j)*32+32] for j in range(4));ext=crypt(record[136:],pid)
             party.append(dict(pid=pid,species=struct.unpack_from('<H',canonical)[0],xp=struct.unpack_from('<I',canonical,8)[0],level=ext[4],hp=struct.unpack_from('<H',ext,6)[0],moves=list(struct.unpack_from('<4H',canonical,32))))
         banks.append(dict(bank=hex(bank),party=party))
-    if not banks:raise ValueError('No checksum-valid Black 2 party block found. Other games and save states are unsupported.')
+    if not banks:raise ValueError('No checksum-valid Redux party block found. Other games and save states are unsupported.')
     return dict(name=path.name,sha256=hashlib.sha256(raw).hexdigest(),banks=banks)
 
 def compare_saves(first,second):
     a,b=inspect_save(first),inspect_save(second)
-    lines=['Read-only Black 2 party comparison. Party block and Pokémon checksums verified; this does not validate every save block.','Both bank snapshots are shown; differing banks are not assumed to be the latest.']
+    lines=['Read-only Redux party comparison. Party block and Pokémon checksums verified; this does not validate every save block.','Both bank snapshots are shown; differing banks are not assumed to be the latest.']
     for item in (a,b):
         lines+=['',item['name']+' • SHA-256 '+item['sha256']]
         for bank in item['banks']:

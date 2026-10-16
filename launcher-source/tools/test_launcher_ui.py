@@ -31,7 +31,7 @@ class LauncherTests(unittest.TestCase):
         from launcher_ui import game_routes
         self.app.rom.set(str(self.rom));profile=self.app.active_profile_id
         self.app.selected_game.set(game_routes.GAMES['pokemon-x']);self.app._game_selected();self.app.update()
-        self.assertTrue(self.app.research_card.winfo_ismapped());self.assertFalse(self.app.ds_game_card.winfo_ismapped())
+        self.assertTrue(self.app.research_card.winfo_viewable());self.assertFalse(self.app.ds_game_card.winfo_viewable())
         self.assertEqual(self.app.rom.get(),str(self.rom));self.assertEqual(self.app.active_profile_id,profile)
         stored=json.loads(self.app.config_path.read_text());self.assertEqual(stored['selected_game'],game_routes.GAMES['pokemon-x'])
         if OUTPUT:
@@ -39,7 +39,7 @@ class LauncherTests(unittest.TestCase):
             x,y=self.app.winfo_rootx(),self.app.winfo_rooty();w,h=self.app.winfo_width(),self.app.winfo_height()
             ImageGrab.grab(bbox=(x,y,x+w,y+h)).save(OUTPUT/'pokemon-x.png')
         self.app.selected_game.set(game_routes.GAMES['black2']);self.app._game_selected();self.app.update()
-        self.assertTrue(self.app.ds_game_card.winfo_ismapped());self.assertFalse(self.app.research_card.winfo_ismapped())
+        self.assertTrue(self.app.ds_game_card.winfo_viewable());self.assertFalse(self.app.research_card.winfo_viewable())
 
     def test_library_is_startup_even_after_last_mod_was_saved(self):
         from launcher_ui import game_routes

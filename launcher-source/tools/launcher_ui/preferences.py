@@ -153,7 +153,7 @@ def apply(runtime,rom,preferences,selected,profile,home):
         # Re-check at write time: changing the file after UI detection cannot
         # enable a code on an unreviewed ROM.
         current=identify(rom)
-        if not current or not profile or current['digest']!=profile['digest']:raise ValueError('Cheats require a supported Black 2 / Redux ROM.')
+        if not current or not profile or current['digest']!=profile['digest']:raise ValueError('Cheats require a supported Blaze Black 2 Redux game file.')
         directory=Path(home).resolve()/'.launcher-cheats'/current['key']
         path=directory/(rom.stem+'.mch')
         instance=doc.setdefault('Instance0',tomlkit.table())

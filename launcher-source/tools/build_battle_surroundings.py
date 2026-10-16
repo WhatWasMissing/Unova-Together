@@ -56,7 +56,7 @@ def container(data, signature):
 class FieldSource:
     def __init__(self,rom):
         self.rom=rom
-        if rom.idCode!=b'IREO':raise ValueError('English Black 2 required')
+        if rom.idCode!=b'IREO':raise ValueError('English Blaze Black 2 Redux required')
         self.headers=self.arc('a/0/1/2')[0]
         self.areas=rom.getFileByName('a/0/1/3')
         self.events=self.arc('a/1/2/6')

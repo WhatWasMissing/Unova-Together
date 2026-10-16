@@ -73,7 +73,7 @@ def render_preview(output, faces, names):
 
 def area_assets(rom, zone):
     if rom.idCode != b'IREO':
-        raise ValueError('English Black 2 is required')
+        raise ValueError('English Blaze Black 2 Redux is required')
     zones = ndspy.narc.NARC(rom.getFileByName('a/0/1/2')).files[0]
     if len(zones) % 48 or not 0 <= zone < len(zones) // 48:
         raise ValueError('Zone is outside the verified 48-byte zone table')

@@ -18,4 +18,4 @@ Save normally after making a change.
 
 Supported HMs can be used from the field without taking up one of the Pokémon’s four battle move slots. Keep the HM in your bag and follow the game’s normal story requirements. Fly continues to use the game’s party menu and destinations.
 
-These tools use the loaded English Black 2 game, including compatible Redux changes. Unsupported profiles keep their original game behavior.
+These tools use the loaded supported English Redux game. Unsupported profiles keep their original game behavior.

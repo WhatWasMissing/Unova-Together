@@ -1,6 +1,6 @@
 # Features
 
-Unova Together **2.0.0** brings friends, Pokémon tools, and Mega Evolution to supported English Pokémon Black 2 and Blaze Black 2 Redux profiles on Windows.
+Unova Together **2.0.4** brings friends, Pokémon tools, and Mega Evolution to supported English Blaze Black 2 Redux profiles on Windows.
 
 ## Play with friends
 
@@ -13,7 +13,7 @@ Both players should use the same release and matching game version. Co-op experi
 
 ## Mega Evolution
 
-There are **49 Mega forms**, each paired with its own Mega Stone. Buy a stone at a Pokémon Center Mart for **₽50,000**. Give it to the matching Pokémon, then hold **L + R together** while choosing a move in battle. The form lasts until the battle ends.
+There are **49 Mega forms**, each paired with its own Mega Stone. Buy a stone at a Pokémon Center Mart for **₽50,000**. Give it to the matching Pokémon, then hold **L + R together** while choosing a move in battle, including double battles. The form lasts until the battle ends.
 
 Examples: Mega Serperior gains **Adaptability**; Mega Charizard Y gains **Drought**; Mega Salamence uses **Intimidate**; Mega Lucario Z gains **Adaptability**. The full roster, abilities, stones, and base-stat totals are in the [Mega Evolution guide](MEGA_EVOLUTION.md).
 
@@ -43,4 +43,4 @@ Soaring is an unfinished, optional preview that connects 69 outdoor areas. Some 
 
 The launcher helps you choose a game, manage save slots and backups, connect with friends, and install verified updates. You can adjust controls, display, camera, audio, music, and reduced motion. Optional battle scenery is built from your own game data and can be disabled at any time.
 
-From launcher settings, choose an animated field character available in your supported Black 2 game. The selection takes effect the next time you start the game; bike and surf forms keep their original animations. Added in-game menus now use a Generation 5-inspired layout and optional menu sounds.
+From launcher settings, choose an animated field character available in your supported game. The selection takes effect the next time you start the game; bike and surf forms keep their original animations. Added in-game menus now use a Generation 5-inspired layout and optional menu sounds.

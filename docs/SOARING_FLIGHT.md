@@ -1,6 +1,6 @@
 # Soaring flight preview
 
-Soaring is an **unfinished, optional preview** that lets you fly between outdoor areas in Pokémon Black 2. Its map connects 69 outdoor areas. Some routes and positions are approximate, and safe landing spots are limited.
+Soaring is an **unfinished, optional preview** that lets you fly between outdoor areas in Blaze Black 2 Redux. Its map connects 69 outdoor areas. Some routes and positions are approximate, and safe landing spots are limited.
 
 ## Start a flight
 

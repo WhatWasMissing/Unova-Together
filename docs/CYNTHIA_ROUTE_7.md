@@ -4,6 +4,6 @@ After you defeat Skyla, look for Cynthia near the path between Mistralton City a
 
 After you receive the stone, Cynthia moves to the northern end of Route 7 and waits for a rematch. Her team is around the same level as Redux Skyla's team. Her level 52 Garchomp holds Garchompite and can Mega Evolve. You can also find Cynthia in the Practice battle list.
 
-On the reviewed English Blaze Black 2 Redux Complete 1.4.1 game file and the matching Unova Together 1.0.35 game, the launcher creates a separate event-ready copy the first time you press Play. Your selected game file and save files stay in place. The event is skipped for other game revisions so the launcher can start them normally.
+On supported English Blaze Black 2 Redux Complete v1.4.1 games, the launcher prepares a separate copy when you press Play. Your selected game file and save files stay in place. The Route 7 story event is available with this supported game version.
 
-The Route 7 event has been rebuilt and Cynthia’s rematch checks pass. For the final check, load an existing Route 7 save and confirm that movement still responds before speaking to her.
+Visit the route after defeating Skyla to meet Cynthia, then return after receiving her Mega Stone to take on her rematch.

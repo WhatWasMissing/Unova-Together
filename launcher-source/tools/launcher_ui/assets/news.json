@@ -2,6 +2,12 @@
   "schema": 1,
   "notes": [
     {
+      "version": "2.0.4",
+      "title": "Mega Evolution in double battles",
+      "file": "RELEASE_NOTES_2.0.4.md",
+      "body": "Mega Evolution now works reliably in double battles, even when the other Pokémon on your side chooses its move afterward. The launcher also makes old-version cleanup easier to follow and lets you choose a supported player character before starting the game."
+    },
+    {
       "version": "2.0.3",
       "title": "Steadier follower Pokémon",
       "file": "RELEASE_NOTES_2.0.3.md",

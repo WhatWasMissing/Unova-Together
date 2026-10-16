@@ -159,7 +159,7 @@ class Launcher(tk.Tk):
         except tk.TclError:picture=None
         art=tk.Label(hero,image=picture,bg=C['hero'],bd=0);art.pack(side='right',padx=(0,18),pady=18)
         words=tk.Frame(hero,bg=C['hero']);words.pack(side='left',fill='both',expand=True,padx=24,pady=24)
-        label(words,'BLACK 2 · CO-OP',size=9,bold=True,color=C['accent'],bg=C['hero']).pack(anchor='w')
+        label(words,'BLAZE BLACK 2 REDUX · CO-OP',size=9,bold=True,color=C['accent'],bg=C['hero']).pack(anchor='w')
         label(words,'Pokemon\nTogether',size=25,bold=True,color=C['surface'],bg=C['hero'],role='display',justify='left').pack(anchor='w',pady=(10,12))
         starters=tk.Frame(words,bg=C['hero']);starters.pack(anchor='w')
         for species in (495,498,501):
@@ -529,6 +529,18 @@ class Launcher(tk.Tk):
         button(parent,'Verify installed files',lambda:self._worker('integrity',lambda:services.integrity(self.root))).pack(anchor='w',pady=8)
         self.cleanup_button=button(parent,'Clean old installations',self._clean_installations);self.cleanup_button.pack(anchor='w',pady=8)
         label(parent,'Keeps your current build, one previous build, saves and backups.',size=9,color=C['muted'],wraplength=630,justify='left').pack(anchor='w')
+        cleanup_panel=card(parent);cleanup_panel.pack(fill='x',pady=(12,16))
+        label(cleanup_panel,'Cleanup progress',size=12,bold=True,bg=C['surface']).pack(anchor='w',padx=14,pady=(12,4))
+        self.cleanup_eta=tk.StringVar(value='No cleanup in progress.')
+        label(cleanup_panel,textvariable=self.cleanup_eta,size=9,color=C['muted'],bg=C['surface'],wraplength=650,justify='left').pack(anchor='w',padx=14,pady=(0,8))
+        self.cleanup_bar=ttk.Progressbar(cleanup_panel,maximum=1,mode='determinate');self.cleanup_bar.pack(fill='x',padx=14,pady=(0,10),ipady=3)
+        cleanup_log_frame=tk.Frame(cleanup_panel,bg=C['surface']);cleanup_log_frame.pack(fill='x',padx=14,pady=(0,14))
+        self.cleanup_log=tk.Text(cleanup_log_frame,height=7,wrap='none',font=(F['utility'],9),bg=C['background'],fg=C['text'],relief='flat',padx=8,pady=6,state='disabled')
+        cleanup_y=ttk.Scrollbar(cleanup_log_frame,orient='vertical',command=self.cleanup_log.yview)
+        cleanup_x=ttk.Scrollbar(cleanup_panel,orient='horizontal',command=self.cleanup_log.xview)
+        self.cleanup_log.configure(yscrollcommand=cleanup_y.set,xscrollcommand=cleanup_x.set)
+        cleanup_y.pack(side='right',fill='y');self.cleanup_log.pack(side='left',fill='x',expand=True);cleanup_x.pack(fill='x',padx=14,pady=(0,10))
+        self.cleanup_started=0.0;self.cleanup_total=0;self.cleanup_done=0
         actions=tk.Frame(parent,bg=C['background']);actions.pack(fill='x',pady=15)
         self.verify_button=button(actions,'Find repair download',self._find_repair);self.verify_button.pack(side='left')
         self.repair_button=button(actions,'Repair game files',self._repair);self.repair_button.pack(side='left',padx=8)
@@ -536,7 +548,7 @@ class Launcher(tk.Tk):
         self.export_button=button(parent,'Report a problem',self._export_diagnostics);self.export_button.pack(anchor='w',pady=15)
         self._refresh_backups()
 
-        self._heading(parent,'READ-ONLY TOOLS','ROM & progression','Inspect the selected profile ROM and compare Black 2 party saves without changing them.')
+        self._heading(parent,'READ-ONLY TOOLS','ROM & progression','Inspect the selected Redux game and compare party saves without changing them.')
         button(parent,'Check ROM compatibility',self._check_rom).pack(anchor='w',pady=8)
         self.xp_loss=tk.StringVar(value='0');self.xp_growth=tk.StringVar(value='Medium Slow')
         options=tk.Frame(parent,bg=C['background']);options.pack(fill='x',pady=8)
@@ -552,12 +564,53 @@ class Launcher(tk.Tk):
 
     def _automatic_cleanup(self):
         if self.busy:self.after(2000,self._automatic_cleanup);return
-        self._worker('storage-auto',lambda:storage.cleanup(self.home))
+        self._start_storage_cleanup('storage-auto',recheck=False)
 
     def _clean_installations(self):
         if self.busy:return
         self.status.set('Cleaning old installations. Saves and backups are kept…')
-        self._worker('storage-clean',lambda:storage.cleanup(self.home,recheck=True))
+        self._start_storage_cleanup('storage-clean',recheck=True)
+
+    def _start_storage_cleanup(self,action,recheck):
+        self.cleanup_started=time.monotonic();self.cleanup_total=0;self.cleanup_done=0
+        self.cleanup_eta.set('Scanning old installations and checking file records… ETA will appear during removal.')
+        self.cleanup_bar.stop();self.cleanup_bar.configure(mode='indeterminate',maximum=100,value=0);self.cleanup_bar.start(12)
+        self.cleanup_log.configure(state='normal');self.cleanup_log.delete('1.0','end');self.cleanup_log.insert('end','Scanning for removable files…\n');self.cleanup_log.configure(state='disabled')
+        def report(event):self.messages.put(('storage-progress',event))
+        self._worker(action,lambda:storage.cleanup(self.home,recheck=recheck,progress=report))
+
+    def _storage_progress(self,event):
+        phase=event.get('phase');stage=event.get('stage')
+        if phase=='scan':
+            if stage=='checking':self.cleanup_eta.set(f"Scanning file records… {event.get('scanned',0)} checked; estimating work and ETA.")
+            elif stage=='complete':self.cleanup_eta.set('No old installations need cleanup.')
+            return
+        if phase!='delete':return
+        total=int(event.get('total',0));done=int(event.get('completed',0))
+        if stage=='start':
+            self.cleanup_bar.stop();self.cleanup_bar.configure(mode='determinate',maximum=max(1,total),value=0)
+            self.cleanup_started=time.monotonic();self.cleanup_total=total;self.cleanup_done=0
+            self.cleanup_eta.set(f'Checking and removing {total} verified file(s)… calculating ETA.')
+        elif stage in ('deleted','checked','skipped'):
+            self.cleanup_total=total;self.cleanup_done=done;self.cleanup_bar.configure(maximum=max(1,total),value=done)
+            if total and done:
+                elapsed=max(.001,time.monotonic()-self.cleanup_started);rate=done/elapsed;seconds=max(0,int((total-done)/rate))
+                eta=f'{seconds//60}m {seconds%60:02d}s remaining' if seconds>=60 else f'{seconds}s remaining'
+                self.cleanup_eta.set(f'Processed {done} of {total} files · ETA {eta}.')
+            elif total:self.cleanup_eta.set(f'Processed {done} of {total} files · calculating ETA…')
+            path=event.get('path')
+            if path and stage in ('deleted','checked','skipped'):
+                entry=('Deleted: ' if stage=='deleted' else 'Kept: ')+path
+                if stage=='skipped' and event.get('reason'):entry+=' ('+event['reason']+')'
+                elif stage=='checked':entry+=' (changed after the safety scan)'
+                self.cleanup_log.configure(state='normal');self.cleanup_log.insert('end',entry+'\n');self.cleanup_log.see('end');self.cleanup_log.configure(state='disabled')
+        elif stage=='directory':
+            path=event.get('path')
+            if path:
+                self.cleanup_log.configure(state='normal');self.cleanup_log.insert('end','Removed empty folder: '+path+'\n');self.cleanup_log.see('end');self.cleanup_log.configure(state='disabled')
+        elif stage=='complete':
+            self.cleanup_bar.stop();self.cleanup_bar.configure(mode='determinate',maximum=max(1,total),value=max(1,total))
+            self.cleanup_eta.set('Cleanup complete. '+('No verified files needed removal.' if total==0 else f'Processed {done} file(s).'))
 
     def _calculate_progression(self):
         rom=self._active_profile()['rom'];loss=self.xp_loss.get();growth=gen5_tools.GROWTH.index(self.xp_growth.get())
@@ -565,9 +618,9 @@ class Launcher(tk.Tk):
 
     def _compare_saves(self):
         kinds=[('Save files','*.sav *.save *.dsv'),('All files','*.*')]
-        first=filedialog.askopenfilename(parent=self,title='Choose the first Black 2 save',filetypes=kinds)
+        first=filedialog.askopenfilename(parent=self,title='Choose the first Redux save',filetypes=kinds)
         if not first:return
-        second=filedialog.askopenfilename(parent=self,title='Choose the second Black 2 save',filetypes=kinds)
+        second=filedialog.askopenfilename(parent=self,title='Choose the second Redux save',filetypes=kinds)
         if second:self._worker('tool-result',lambda:gen5_tools.compare_saves(first,second))
 
     def _refresh_backups(self):
@@ -730,7 +783,7 @@ class Launcher(tk.Tk):
     def _choose_player_model(self):
         source=Path(self.rom.get())
         if not source.is_file() or source.suffix.lower()!='.nds':
-            self.status.set('Choose a Black 2 ROM on Play before selecting a character.');return
+            self.status.set('Choose a supported Redux game on Play before selecting a character.');return
         window=tk.Toplevel(self);window.title('Choose field character');window.geometry('460x540');window.minsize(360,420);window.transient(self)
         outer=tk.Frame(window,bg=C['background']);outer.pack(fill='both',expand=True,padx=16,pady=16)
         label(outer,'Choose an animated character',size=16,bold=True,bg=C['background']).pack(anchor='w')
@@ -803,7 +856,7 @@ class Launcher(tk.Tk):
         for ident,control in self.cheat_buttons.items():
             control.state(['!disabled'] if self.profile else ['disabled']);self.cheat_vars[ident].set(bool(choices.get(ident,False)))
         text=('Compatible: '+self.profile['profile']+' · off unless selected.' if self.profile else
-            'Cheats unavailable for this ROM. Reviewed: Black 2 USA/Europe and Redux Complete v1.4.1. You can still play normally.')
+            'Cheats unavailable for this game file. Reviewed: Blaze Black 2 Redux Complete v1.4.1. You can still play normally.')
         self.cheat_status.configure(text=text)
 
     def cheat_sources(self):
@@ -858,7 +911,7 @@ class Launcher(tk.Tk):
         set_enabled(self.backup_button,not self.busy,'primary');set_enabled(self.restore_button,bool(self.backup_paths) and not self.busy and not running)
         set_enabled(self.cleanup_button,not self.busy)
         message=('Game running. Save normally and close it before starting another session.' if running else 'Emulator missing. Extract the complete release folder.' if not present else
-            'Choose your own matching Black 2 or Redux ROM.' if not self.rom.get() else 'ROM not found. Browse to an existing .nds file.' if not valid else 'Ready to play.')
+            'Requires Blaze Black 2 Redux Complete v1.4.1. Use a patch only when it is listed for your exact Redux version.' if not self.rom.get() else 'Game file not found. Browse to an existing .nds file.' if not valid else 'Game file selected. Use a supported Redux version to play.')
         self.game_hint.configure(text=message)
 
     def _game_is_running(self):
@@ -935,7 +988,7 @@ class Launcher(tk.Tk):
         self._worker('research-launch',lambda:game_routes.launch_research(research_root,selected,research_address))
 
     def browse(self):
-        path=filedialog.askopenfilename(title='Choose your Pokémon Black 2 / Redux ROM',filetypes=[('Nintendo DS ROM','*.nds')])
+        path=filedialog.askopenfilename(title='Choose your Blaze Black 2 Redux game file',filetypes=[('Nintendo DS game file','*.nds')])
         if path:self.rom.set(path);self._save()
 
     def _start_lan(self,action):
@@ -1059,6 +1112,8 @@ class Launcher(tk.Tk):
                 action,value=self.messages.get_nowait()
                 if action in ('guides','guides-offline'):
                     self.guides_busy=False;self.guide_status.set('Guides up to date' if action=='guides' else 'Offline · using saved guides');continue
+                if action=='storage-progress':
+                    self._storage_progress(value);continue
                 if action=='progress':
                     self.bar['value']=value
                     if not self.cancel.is_set():self.phase.set('Verifying and preparing update…' if value>=100 else f'Downloading · {value:.0f}%')
@@ -1070,6 +1125,7 @@ class Launcher(tk.Tk):
                         self.status.set(message);self.preflight_text.configure(state='normal');self.preflight_text.delete('1.0','end');self.preflight_text.insert('1.0',message);self.preflight_text.configure(state='disabled')
                     self._sync();continue
                 if action=='error' and finished_operation.startswith('storage-'):
+                    self.cleanup_bar.stop();self.cleanup_eta.set('Cleanup could not complete: '+value)
                     self.status.set('Cleanup skipped: '+value);self._sync();continue
                 if action=='tool-result' or action=='error' and finished_operation=='tool-result':
                     self.tool_text.configure(state='normal');self.tool_text.delete('1.0','end');self.tool_text.insert('1.0',value);self.tool_text.configure(state='disabled');self.status.set('Read-only inspection complete.' if action=='tool-result' else 'Inspection could not complete: '+value);self._sync();continue
@@ -1163,7 +1219,7 @@ class Launcher(tk.Tk):
         button(mega,'Mega Evolution guide',lambda:self.guide('MEGA_EVOLUTION.md')).pack(anchor='w',padx=14,pady=(8,14))
         story=card(parent);story.pack(fill='x',pady=(0,12))
         label(story,'Cynthia’s Route 7 challenge',size=13,bold=True,bg=C['surface']).pack(anchor='w',padx=14,pady=(14,4))
-        label(story,'After you defeat Skyla, Cynthia appears near the Mistralton City and Route 7 transition. She explains Mega Evolution and gives you a stone for a Pokémon in your party, or a Serperiorite if no one is ready. Return later to challenge her team and Mega Garchomp. On supported Redux ROMs, the launcher prepares a separate event-ready copy and keeps your selected ROM and saves intact.',size=10,color=C['muted'],bg=C['surface'],wraplength=570,justify='left').pack(anchor='w',padx=14,pady=(4,14))
+        label(story,'After you defeat Skyla, Cynthia appears near the Mistralton City and Route 7 transition. She explains Mega Evolution and gives you a stone for a Pokémon in your party, or a Serperiorite if no one is ready. Return later to challenge her team and Mega Garchomp. For Blaze Black 2 Redux Complete v1.4.1, the launcher prepares a separate event-ready copy and keeps your selected game file and saves intact.',size=10,color=C['muted'],bg=C['surface'],wraplength=570,justify='left').pack(anchor='w',padx=14,pady=(4,14))
         companion=card(parent);companion.pack(fill='x',pady=(0,12))
         label(companion,'Companion interactions',size=13,bold=True,bg=C['surface']).pack(anchor='w',padx=14,pady=(14,4))
         label(companion,'Expanded in 1.0.6 · on by default in this launcher',size=9,color=C['muted'],bg=C['surface']).pack(anchor='w',padx=14)
@@ -1200,8 +1256,8 @@ class Launcher(tk.Tk):
             ('Area battle scenery · optional','Generate nearby battle scenery locally from your ROM. Enable Nearby battle scenery in Settings. This remains experimental; special scenes keep original backgrounds, and environments are not all playtested.'),
             ('LAN & internet play','Host, join and retry from Co-op. Use Tailscale across networks. The UDP bridge is experimental and needs your group’s server and Python; no public server is supplied.'),
             ('Games & saves','Separate save slots, automatic names and per-slot settings. Back up and restore saves from Games & saves or Tools; old installations can be cleaned while keeping saves and backups.'),
-            ('Player appearance','Choose an animated character model stored in your Black 2 ROM. It changes your walking character; bike and surf forms keep their original animations.'),
-            ('Generation 5 menu sounds','The added in-game menus use movement, confirmation and back sounds inspired by Pokémon Black 2. Turn them off from the in-game Unova → Settings menu.'),
+            ('Player appearance','Choose an animated character model stored in your supported game. It changes your walking character; bike and surf forms keep their original animations.'),
+            ('Generation 5 menu sounds','The added in-game menus use movement, confirmation and back sounds inspired by Generation 5 games. Turn them off from the in-game Unova → Settings menu.'),
             ('Gen 5 tools','Check ROM compatibility, compare copied saves and estimate Redux Challenge XP budgets. These tools read data; they do not edit your game.'),
             ('Settings & maintenance','Controller navigation, music, emulator settings and reviewed optional cheats. Verified updates, repair and reviewed troubleshooting reports are available.')):
             label(extras,title,size=12,bold=True,bg=C['surface']).pack(anchor='w',padx=14,pady=(12,4))

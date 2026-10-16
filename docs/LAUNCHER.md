@@ -1,12 +1,12 @@
 # Pokémon Together launcher guide
 
-Use the launcher to choose a supported Pokémon Black 2 or Blaze Black 2 Redux game, start Unova Together, connect with friends, and keep your game up to date.
+Use the launcher with an English Blaze Black 2 Redux Complete v1.4.1 game file to start Unova Together, connect with friends, and keep your game up to date. The launcher prepares Cynthia’s Route 7 event in a separate copy. No full game patch is currently bundled; use one for another Redux version only when it is listed for that exact version.
 
 ## Choose a game and save
 
 Open **Unova Together** in **Mod library**, choose your own compatible game file, then select **Play**. The launcher can keep separate game slots and save backups. Your ROMs and saves stay on your computer.
 
-Use **Games & saves** to manage profiles, backups, or save slots. **Tools** includes file checks and cleanup for older game copies. Save in the game before closing the emulator or restoring an older save.
+Use **Games & saves** to manage profiles, backups, or save slots. **Tools** includes file checks and cleanup for older game copies. Cleanup shows its progress, estimated time remaining, and the full paths of files it removes. Save in the game before closing the emulator or restoring an older save.
 
 ## Connect with friends
 

@@ -1,10 +1,10 @@
 # Unova Together
 
-**Current release: 2.0.1.** Play Pokémon Black 2 and supported Blaze Black 2 Redux games with friends, explore with your Pokémon, and discover **49 Mega forms**.
+**Current release: 2.0.4.** Play Blaze Black 2 Redux with friends, explore with your Pokémon, and discover **49 Mega forms**.
 
-[Download Unova Together 2.0.1](https://github.com/WhatWasMissing/Unova-Together/releases/latest)
+[Download Unova Together 2.0.4](https://github.com/WhatWasMissing/Unova-Together/releases/latest)
 
-Unova Together is a free fan project by **mvq1303 / WhatWasMissing**, built on melonDS. Bring your own compatible game, save and firmware; downloads do not include them.
+Unova Together is a free fan project by **mvq1303 / WhatWasMissing**, built on melonDS. It requires an English **Blaze Black 2 Redux Complete v1.4.1** game file. The launcher prepares the Cynthia Route 7 event in a separate copy for this version. No full game patch is currently bundled; if a compatible Unova Together patch is released for another Redux version, use the patch listed for that exact version. Downloads do not include game files, saves, or firmware.
 
 ## Mega Evolution
 
@@ -17,15 +17,15 @@ After defeating Skyla, meet Cynthia near the Route 7 entrance for a Mega Evoluti
 ## Get started
 
 1. Download **Unova-Together.exe** for the launcher or the Windows x64 ZIP for a portable copy.
-2. Open the launcher and choose your own supported game file.
+2. Open the launcher and choose your own compatible Blaze Black 2 Redux game file. Use a copy patched with Unova Together only when a patch for your exact Redux version is listed.
 3. Select **Play**. Open **Co-op** to host or join a game with friends.
 
-Everyone in a co-op session should use the same release and game version. The launcher can install updates while keeping saves in place. See the [player guide](docs/PLAYER_GUIDE.md) for setup help.
+Everyone in a co-op session should use the same release and Redux version. The launcher can install updates while keeping saves in place. See the [player guide](docs/PLAYER_GUIDE.md) for setup help.
 
 ## More to explore
 
 - Explore together, trade eligible items and Pokémon, and join supported trainer battles.
-- Choose an animated field character from your Black 2 game in launcher settings.
+- Choose an animated field character from your game in launcher settings.
 - Bring a Pokémon along; all 649 base species have follower artwork.
 - Check IVs and EVs, search ordinary wild encounters, relearn eligible moves, and use supported field HMs.
 - Adjust the camera, save slots, controls, music and optional battle scenery.

@@ -2,6 +2,7 @@
 
 Pick a version to read what changed. The newest release is first.
 
+- [Unova Together 2.0.4 — Mega Evolution in double battles](RELEASE_NOTES_2.0.4.md)
 - [Unova Together 2.0.3 — Steadier follower Pokémon](RELEASE_NOTES_2.0.3.md)
 - [Unova Together 2.0.2 — Route 7 movement fix](RELEASE_NOTES_2.0.2.md)
 - [Unova Together 2.0.1 — Clearer in-game menus](RELEASE_NOTES_2.0.1.md)

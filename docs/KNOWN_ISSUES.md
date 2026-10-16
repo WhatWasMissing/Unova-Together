@@ -1,6 +1,6 @@
 # Known limits
 
-Unova Together adds many features to Pokémon Black 2, and some optional modes have limits to keep in mind.
+Unova Together adds many features to Blaze Black 2 Redux, and some optional modes have limits to keep in mind.
 
 ## Co-op
 

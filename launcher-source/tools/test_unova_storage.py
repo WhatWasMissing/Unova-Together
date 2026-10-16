@@ -35,6 +35,15 @@ class StorageTests(unittest.TestCase):
         for name in ('Redux.save','Redux.sav','Redux.2.dsv','Redux.ml8','my-picture.png','README.md'):self.assertEqual((old/name).read_bytes(),b'user data')
         self.assertEqual(backup.read_bytes(),b'backup');self.assertTrue((active/'builds/current/melonDS.exe').exists());self.assertTrue((previous/'builds/current/melonDS.exe').exists())
         self.assertEqual(s.cleanup(self.home,processes=[])['removedFiles'],0)
+    def test_cleanup_reports_progress_and_absolute_deleted_paths(self):
+        old=self.slot('1.0.1');previous=self.slot('1.0.2');self.slot('1.0.3');self.active('1.0.3');s.remember_previous(self.home,previous,'1.0.3')
+        events=[];report=s.cleanup(self.home,processes=[],progress=events.append)
+        start=next(event for event in events if event.get('phase')=='delete' and event.get('stage')=='start')
+        deleted=[event for event in events if event.get('phase')=='delete' and event.get('stage')=='deleted']
+        self.assertEqual(start['total'],report['removedFiles']);self.assertEqual(len(deleted),report['removedFiles'])
+        self.assertTrue(deleted);self.assertTrue(all(Path(event['path']).is_absolute() for event in deleted))
+        self.assertTrue(all(event['path'].startswith(str(old)) for event in deleted))
+        self.assertEqual(events[-1]['stage'],'complete')
     def test_legacy_removes_only_verified_files_and_duplicate_launcher_binaries(self):
         old=self.slot('1.0.1',False);self.slot('1.0.2');self.slot('1.0.3');self.active('1.0.3')
         (old/'builds/current/user.dll').write_bytes(b'custom DLL');(old/'builds/current/shared.dll').write_bytes(b'modified DLL')

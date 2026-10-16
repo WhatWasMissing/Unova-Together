@@ -3,13 +3,13 @@ from pathlib import Path
 import ipaddress
 import subprocess
 
-GAMES={'black2':'Pokemon Black 2 / Redux (Nintendo DS)','pokemon-x':'Pokemon X (3DS research)'}
+GAMES={'black2':'Blaze Black 2 Redux (Nintendo DS)','pokemon-x':'Pokemon X (3DS research)'}
 MODES={'Local two players':'local','LAN host':'host','LAN guest':'guest'}
 
 # Stable mod IDs own navigation; adding a mod never reuses another mod's pages.
 MODS={
     'black2':{'name':'Unova Together','game':GAMES['black2'],'platform':'Nintendo DS',
-        'description':'Black 2 / Redux',
+        'description':'Blaze Black 2 Redux',
         'status':'Available','pages':('Play','Co-op','Features','Profiles','News','Updates','Settings','Tools','Setup')},
     'pokemon-x':{'name':'Pokemon X Together','game':GAMES['pokemon-x'],'platform':'Nintendo 3DS',
         'description':'Exploration and trainer battles',

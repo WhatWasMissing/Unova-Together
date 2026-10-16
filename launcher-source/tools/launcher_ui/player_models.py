@@ -1,4 +1,4 @@
-"""Safe Black 2 field-character model selection for the launcher.
+"""Safe Redux field-character model selection for the launcher.
 
 The game resolves the walking avatar through overlay 36's PLAYER_SPRITE_MAP.
 We replace only the two gender-specific normal-walking object codes; cycling,
@@ -55,7 +55,7 @@ def _player_map_offset(data):
             offsets.append(offset)
         start = found + 1
     if len(offsets) != 1:
-        raise ValueError('This ROM does not have the reviewed Black 2 player-model table.')
+        raise ValueError('This game does not have the reviewed Redux player-model table.')
     return offsets[0]
 
 
@@ -76,7 +76,7 @@ def _actor_models(config_data, resources):
         raise ValueError('The field actor table has an unexpected size; no ROM changes were made.')
     count = struct.unpack_from('<I', config_data)[0]
     if count != CONFIG_COUNT:
-        raise ValueError('The field actor table is not the reviewed Black 2 layout.')
+        raise ValueError('The field character table is not the reviewed Redux layout.')
     eligible = []
     seen = set()
     for index in range(count):
@@ -105,7 +105,7 @@ def _actor_models(config_data, resources):
 def _load_rom(path):
     rom = ndspy.rom.NintendoDSRom.fromFile(str(path))
     if rom.idCode != b'IREO':
-        raise ValueError('Player models are supported for the reviewed English Black 2 Redux ROM.')
+        raise ValueError('Player models are supported for the reviewed English Blaze Black 2 Redux game.')
     return rom
 
 
@@ -113,7 +113,7 @@ def _catalog_from_rom(rom):
     overlays = ndspy.code.loadOverlayTable(
         rom.arm9OverlayTable, lambda overlay_id, file_id: rom.files[file_id])
     if OVERLAY_ID not in overlays:
-        raise ValueError('This ROM is missing the Black 2 player-model table.')
+        raise ValueError('This game is missing the Redux player-model table.')
     _player_map_offset(overlays[OVERLAY_ID].data)
     config = ndspy.narc.NARC(rom.getFileByName(CONFIG_ARCHIVE))
     resources = ndspy.narc.NARC(rom.getFileByName(RESOURCE_ARCHIVE))

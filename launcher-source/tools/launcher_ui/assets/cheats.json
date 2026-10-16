@@ -2,8 +2,7 @@
   "source": "https://github.com/libretro/libretro-database",
   "license": "CC-BY-SA-4.0",
   "profiles": {
-    "8edfc3483e1744fba7814264630e427c721f4f983e17507af3d196618a7e88d9": "Black 2 (USA/Europe)",
-    "9ae8bd45702fad226d5605872fd7634b972d5217c6eb24529326ddc6e968c8ba": "Redux Complete v1.4.1 / Unova Together"
+    "9ae8bd45702fad226d5605872fd7634b972d5217c6eb24529326ddc6e968c8ba": "Blaze Black 2 Redux Complete v1.4.1 / Unova Together"
   },
   "codes": [
     {

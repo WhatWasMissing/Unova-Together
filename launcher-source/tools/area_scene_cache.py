@@ -7,7 +7,7 @@ from build_area_battle_catalog import catalog
 def prepare_catalog(rom, cache):
     rom=Path(rom).resolve();cache=Path(cache).resolve()
     with rom.open('rb') as file:
-        if file.read(16)[12:16]!=b'IREO': raise ValueError('Area scenery requires English Black 2')
+        if file.read(16)[12:16]!=b'IREO': raise ValueError('Area scenery requires an English Blaze Black 2 Redux game')
         file.seek(0);digest=hashlib.file_digest(file,'sha256').hexdigest()
     destination=cache/digest
     manifest=destination/'catalog.json'

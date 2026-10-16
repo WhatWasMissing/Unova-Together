@@ -122,15 +122,22 @@ def entries(root,reference):
             except OSError:pass
     return owned,True
 
-def cleanup(home,processes=None,recheck=False):
-    home=Path(home).resolve()
-    with installation_lock(home):return _cleanup(home,processes,recheck)
+def _progress(callback, **event):
+    if callback is None:return
+    try:callback(event)
+    except Exception:pass
 
-def _cleanup(home,processes,recheck):
+def cleanup(home,processes=None,recheck=False,progress=None):
+    home=Path(home).resolve()
+    with installation_lock(home):return _cleanup(home,processes,recheck,progress)
+
+def _cleanup(home,processes,recheck,progress=None):
     from unova_updater import active_root
     base=home/'.updates/versions';active=active_root(home,allow_missing=True)
     report={'removedBytes':0,'reclaimedBytes':0,'sharedBytes':0,'removedFiles':0,'prunedSlots':[],'keptSlots':[],'skipped':[]}
-    if not base.exists():return report
+    if not base.exists():
+        _progress(progress,phase='scan',stage='complete',total=0,completed=0)
+        return report
     if not safe(base,home) or not safe(active,home):raise ValueError('Unsafe installation path. Nothing was cleaned.')
     if not (active/'builds/current/melonDS.exe').is_file():raise ValueError('Active installation is incomplete. Repair it before cleaning older builds.')
     running=running_paths() if processes is None else [Path(p).resolve() for p in processes]
@@ -148,7 +155,9 @@ def _cleanup(home,processes,recheck):
     for slot in slots:
         if any(p.is_relative_to(slot.resolve()) for p in running):keep.add(slot.name)
     report['keptSlots']=sorted(keep)
+    _progress(progress,phase='scan',stage='start',slots=len(slots))
     if rollback and safe(base/rollback,home):report['sharedBytes']=share_binaries(active,base/rollback/'Unova-Together')
+    plans=[];slot_state={};scanned=0
     for slot in slots:
         if slot.name in keep:continue
         root=slot/'Unova-Together'
@@ -160,8 +169,9 @@ def _cleanup(home,processes,recheck):
         try:owned,legacy=entries(root,active)
         except (OSError,ValueError,KeyError,TypeError):report['skipped'].append(slot.name+': no valid installation record');continue
         if not isinstance(owned,dict) or len(owned)>10000:report['skipped'].append(slot.name+': invalid file list');continue
-        removed=0;locked=False
+        slot_state[slot.name]={'root':root,'removed':0,'locked':False}
         for name,expected in owned.items():
+            scanned+=1
             if not isinstance(name,str) or not isinstance(expected,str) or not re.fullmatch('[0-9a-f]{64}',expected):continue
             relative=PurePosixPath(name)
             if relative.is_absolute() or '..' in relative.parts or '\\' in name or ':' in name:continue
@@ -171,21 +181,42 @@ def _cleanup(home,processes,recheck):
             if name in {'launcher/Unova Together.exe','builds/current/VERSION.txt'}:continue
             if not safe(path,home) or not path.is_file():continue
             try:
-                if digest(path)!=expected:continue
-                stat=path.stat();path.unlink();removed+=1;report['removedFiles']+=1;report['removedBytes']+=stat.st_size
-                if stat.st_nlink==1:report['reclaimedBytes']+=stat.st_size
-            except OSError:locked=True;continue
-        if removed:report['prunedSlots'].append(slot.name)
-        if not locked:atomic(root/'.storage-pruned.json',{'schema':1})
+                if digest(path)==expected:plans.append((slot.name,path,expected))
+            except OSError:slot_state[slot.name]['locked']=True
+            if scanned%25==0:
+                _progress(progress,phase='scan',stage='checking',slots=len(slots),scanned=scanned,slot=slot.name)
+    _progress(progress,phase='delete',stage='start',total=len(plans),completed=0)
+    completed=0
+    for slot_name,path,expected in plans:
+        state=slot_state[slot_name]
+        try:
+            if not safe(path,home) or not path.is_file() or digest(path)!=expected:
+                completed+=1
+                _progress(progress,phase='delete',stage='checked',total=len(plans),completed=completed,path=str(path))
+                continue
+            stat=path.stat();path.unlink();state['removed']+=1;report['removedFiles']+=1;report['removedBytes']+=stat.st_size
+            if stat.st_nlink==1:report['reclaimedBytes']+=stat.st_size
+            _progress(progress,phase='delete',stage='deleted',total=len(plans),completed=completed+1,path=str(path))
+        except OSError:
+            state['locked']=True
+            _progress(progress,phase='delete',stage='skipped',total=len(plans),completed=completed+1,path=str(path),reason='File is in use or could not be removed.')
+        completed+=1
+    for slot_name,state in slot_state.items():
+        root=state['root'];slot=root.parent
+        if state['removed']:report['prunedSlots'].append(slot_name)
+        if not state['locked']:atomic(root/'.storage-pruned.json',{'schema':1})
         directories=[]
         for directory,dirs,names in os.walk(slot):
             dirs[:]=[name for name in dirs if not linked(Path(directory)/name)]
             directories.append(Path(directory))
         for path in reversed(directories):
             if path in (slot,root) or not safe(path,home):continue
-            try:path.rmdir()
+            try:
+                path.rmdir()
+                _progress(progress,phase='delete',stage='directory',total=len(plans),completed=completed,path=str(path))
             except OSError:pass
     atomic(home/'.updates/storage-last.json',report)
+    _progress(progress,phase='delete',stage='complete',total=len(plans),completed=completed)
     return report
 
 def summary(report):

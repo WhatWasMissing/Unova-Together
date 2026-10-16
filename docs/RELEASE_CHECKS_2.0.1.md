@@ -1,3 +1,3 @@
-# Release 2.0.1
+# Unova Together 2.0.1
 
-In-game Settings and companion menus were rendered from Black 2 Redux and checked at the DS screen size. Long labels, button hints, help text and companion dialogue stayed inside their windows. Cynthia’s updated rematch patch was checked against Redux’s Skyla level range and her Mega Stone. The Windows downloads are packaged with matching version information and checksums.
+This update made in-game menus easier to read and brought Cynthia’s rematch closer to Skyla’s level. See the [2.0.1 patch notes](../patchnotes/RELEASE_NOTES_2.0.1.md) or download the [latest release](https://github.com/WhatWasMissing/Unova-Together/releases/latest).
