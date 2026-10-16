@@ -30,3 +30,9 @@ The ROM, decomp, saves, RAM dumps, captures and generated test outputs are not i
 - Version selection, archived patch notes, the Windows Qt plugin, settings preservation, and a save sentinel all passed. No downloaded executable was run.
 - Result: `{"downloadBytes": 173862690, "emulatorSha256": "f1ce80a0b010b5f0c26a973d9e8b927117fd7bfd6373e5834d9d21e927f7ad7e", "newsSource": "patchnotes", "patchNotes": 43, "saveSentinelPreserved": true, "settingsPreserved": true, "version": "1.0.32", "windowsQtPluginPresent": true}`
 - The generated download and extracted test installation were removed after recording these results.
+
+## GitHub release history cleanup
+
+- Removed the older v1.0.30 and v1.0.31 release entries and their binary assets after publishing v1.0.32.
+- Kept both source tags and their user-facing notes under `patchnotes/`; the launcher still reads the complete 43-note index from that folder.
+- Confirmed v1.0.32 is the only published release and remains GitHub's latest release.
