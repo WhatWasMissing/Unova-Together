@@ -19,3 +19,15 @@ Follower spacing and motion, the full Mega roster, and linked co-op Mega battles
 
 The latest focused results are recorded in [development checks](DEVELOPMENT_CHECKS_2026-10-16.md). The ROM, decomp, saves, RAM dumps, captures, and generated test outputs are not included in this release.
 
+## Public launcher download verification
+
+- The production updater downloaded the public GitHub runtime ZIP, verified its checksum, and installed it into an isolated test home.
+- Version selection, archived patch notes, the Windows Qt plugin, settings preservation, and a save sentinel all passed. No downloaded executable was run.
+- Result: `{"downloadBytes": 173851211, "emulatorSha256": "8780aa7509c56e649a854fc971ce2e70434cb5cd1b3a7996011ccc37b12360c6", "newsSource": "patchnotes", "patchNotes": 44, "saveSentinelPreserved": true, "settingsPreserved": true, "version": "1.0.33", "windowsQtPluginPresent": true}`
+- The generated download and extracted test installation were removed after recording these results.
+
+## GitHub release cleanup
+
+- After verifying 1.0.33, removed the older 1.0.32 release entry and its binary downloads. The 1.0.32 source tag and patch note remain available.
+- The launcher still discovers all 44 notes from `patchnotes/index.json`; 1.0.33 is the only published release entry.
+
