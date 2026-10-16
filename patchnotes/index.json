@@ -2,6 +2,12 @@
   "schema": 1,
   "notes": [
     {
+      "version": "2.0.6",
+      "title": "Stable-build rollback",
+      "file": "RELEASE_NOTES_2.0.6.md",
+      "body": "Returns to the earlier stable game build while a fix is prepared for the save-loading stall introduced in versions 2.0.4 and 2.0.5. A dedicated fix is in progress."
+    },
+    {
       "version": "2.0.5",
       "title": "Mega-capable trainer battles",
       "file": "RELEASE_NOTES_2.0.5.md",
