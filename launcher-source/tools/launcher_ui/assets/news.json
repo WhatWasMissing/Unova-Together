@@ -2,6 +2,12 @@
   "schema": 1,
   "notes": [
     {
+      "version": "2.0.3",
+      "title": "Steadier follower Pokémon",
+      "file": "RELEASE_NOTES_2.0.3.md",
+      "body": "Follower Pokémon now stay planted while idle and walking, preventing a small vertical hop while preserving their walking poses and reactions."
+    },
+    {
       "version": "2.0.2",
       "title": "Route 7 movement fix",
       "file": "RELEASE_NOTES_2.0.2.md",
