@@ -2,6 +2,7 @@
 
 Pick a version to read what changed. The newest release is first.
 
+- [Unova Together 2.0.7 — Save-loading fix](RELEASE_NOTES_2.0.7.md)
 - [Unova Together 2.0.6 — Stable-build rollback](RELEASE_NOTES_2.0.6.md)
 - [Unova Together 2.0.5 — Mega-capable trainer battles](RELEASE_NOTES_2.0.5.md)
 - [Unova Together 2.0.4 — Mega Evolution in double battles](RELEASE_NOTES_2.0.4.md)
@@ -57,3 +58,4 @@ Pick a version to read what changed. The newest release is first.
 - [Unova Together 0.3.5 — Easy setup and co-op](RELEASE_NOTES_0.3.5.md)
 
 The launcher reads these same notes from `index.json` on GitHub.
+

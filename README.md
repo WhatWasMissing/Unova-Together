@@ -1,8 +1,8 @@
 # Unova Together
 
-**Current release: 2.0.5.** Play Blaze Black 2 Redux with friends, explore with your Pokémon, and discover **49 Mega forms**.
+**Current release: 2.0.7.** Play Blaze Black 2 Redux with friends, explore with your Pokémon, and discover **49 Mega forms**.
 
-[Download Unova Together 2.0.5](https://github.com/WhatWasMissing/Unova-Together/releases/latest)
+[Download Unova Together 2.0.7](https://github.com/WhatWasMissing/Unova-Together/releases/latest)
 
 Unova Together is a free fan project by **mvq1303 / WhatWasMissing**, built on melonDS. It requires an English **Blaze Black 2 Redux Complete v1.4.1** game file. The launcher prepares the Cynthia Route 7 event in a separate copy for this version. No full game patch is currently bundled; if a compatible Unova Together patch is released for another Redux version, use the patch listed for that exact version. Downloads do not include game files, saves, or firmware.
 
@@ -42,3 +42,4 @@ Soaring is unfinished and optional. Routes are approximate and safe landing area
 For play across different networks, see the [Tailscale guide](docs/TAILSCALE_COOP.md). Optional UDP connections need a server provided by your group; the project does not provide a public server.
 
 See [authorship](AUTHORSHIP.md), [art credits](docs/FOLLOWER_ART_CREDITS.md), and [licensing](LICENSING.md) for project and third-party notices.
+

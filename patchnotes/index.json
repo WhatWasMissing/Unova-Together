@@ -2,6 +2,12 @@
   "schema": 1,
   "notes": [
     {
+      "version": "2.0.7",
+      "title": "Save-loading fix",
+      "file": "RELEASE_NOTES_2.0.7.md",
+      "body": "Fixes a freeze that could occur when loading a save in versions 2.0.4 and 2.0.5. Update through the launcher before loading your save; your save files are kept."
+    },
+    {
       "version": "2.0.6",
       "title": "Stable-build rollback",
       "file": "RELEASE_NOTES_2.0.6.md",
@@ -321,3 +327,4 @@
     }
   ]
 }
+
