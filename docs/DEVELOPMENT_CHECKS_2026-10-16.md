@@ -20,7 +20,8 @@ These results cover the local development source. They are not a public release 
 
 ## Cross-feature regression checks
 
-- The native Mega/follower/menu-sound suite passed all 11 tests. This includes full GIF-frame playback for the 46 packed Mega animation clips.
+- The native Mega/follower/menu-sound suite passed all 12 tests. This includes full GIF-frame playback for the 46 packed Mega animation clips and a regression for the Black 2 Fly-style warp call layout.
 - The launcher UI suite passed all 30 tests, and the GitHub patch-note feed passed all 4 tests.
 - All 11 Soaring geometry/stream tests passed, and the native Soaring check passed take-off, controls, altitude limits, map bounds, landing and rendering.
-- These checks validate the local source and fixtures. The launcher update/download flow and follower motion still need a real end-to-end test with the published build and emulator.
+- Black 2's decomp shows Fly chains `EventMapChangeWarp_CreateGrid` from `s028A_MapChangeFlyWarp`. The Soaring bridge now calls that same overlay-35 Thumb function (`0x0217DB41`) with the decompiled register/stack ABI. The regression and full Qt target compile pass; a live landing is still required to confirm map reload behavior.
+- These checks validate the local source and fixtures. The launcher update/download flow, Soaring landings and follower motion still need a real end-to-end test with the published build and emulator.

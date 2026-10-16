@@ -1,16 +1,16 @@
 # Unova Together
 
-**Current release: 1.0.30.** Adds more connected outdoor areas to experimental Soaring flight, gives followers a little more room and smoother steps, and includes full-frame Mega battle animations: [downloads](https://github.com/WhatWasMissing/Unova-Together/releases/latest). Made by mvq1303 / WhatWasMissing, built on melonDS.
+**Current release: 1.0.31.** Experimental Soaring now hands landings to Black 2's Fly-style map transition, with smoother follower movement and full-frame Mega battle animations: [downloads](https://github.com/WhatWasMissing/Unova-Together/releases/latest). Made by mvq1303 / WhatWasMissing, built on melonDS.
 
 Explore Unova with friends in supported English Pokémon Black 2 and Blaze Black 2 Redux. Each player uses their own matching ROM and independent save.
 
 ## Download and play
 
-1. [Download version 1.0.30](https://github.com/WhatWasMissing/Unova-Together/releases/latest). Choose **Unova-Together.exe**, or extract the complete Windows x64 ZIP.
+1. [Download version 1.0.31](https://github.com/WhatWasMissing/Unova-Together/releases/latest). Choose **Unova-Together.exe**, or extract the complete Windows x64 ZIP.
 2. Open the EXE, or run **Start Unova Together.cmd** in the extracted folder. Choose your ROM and select **Play**.
 3. Open launcher **Co-op** to configure your connection and host or join LAN. Follow the [player guide](docs/PLAYER_GUIDE.md).
 
-Version **1.0.30** expands experimental Soaring flight across more connected outdoor areas. Turn on **Settings → Experimental features → Soaring flight**, then choose **Unova → Pokémon → Take flight**. Followers now keep a little more room behind you, with steps that stay in time as they move around corners. Mega battle animations use the supplied GIF frames; please check Mega Salamence with Salamencite and **L + R** while choosing a move.
+Version **1.0.31** improves the handoff when experimental Soaring lands, using the game's Fly-style map transition. Turn on **Settings → Experimental features → Soaring flight**, then choose **Unova → Pokémon → Take flight**. Followers keep a HeartGold-style one-tile trail and move smoothly around corners. Mega battle animations use the supplied GIF frames; please check Mega Salamence with Salamencite and **L + R** while choosing a move.
 
 Update from the launcher or download the latest files above. Players still using launcher 1.0.5 can run [Repair-Launcher.exe](https://github.com/WhatWasMissing/Unova-Together/releases/latest/download/Repair-Launcher.exe) once and select their old launcher. See the [launcher guide](docs/LAUNCHER.md). Update every player before playing together.
 
@@ -33,7 +33,7 @@ The release includes 743 normal/shiny follower variants, supported female/forms,
 
 ## Guides and limits
 
-[Release notes](patchnotes/RELEASE_NOTES_1.0.30.md) · [All patch notes](patchnotes/) · [Release checks](docs/RELEASE_CHECKS_1.0.30.md) · [Known limits](docs/KNOWN_ISSUES.md)
+[Release notes](patchnotes/RELEASE_NOTES_1.0.31.md) · [All patch notes](patchnotes/) · [Release checks](docs/RELEASE_CHECKS_1.0.31.md) · [Known limits](docs/KNOWN_ISSUES.md)
 
 [Launcher](docs/LAUNCHER.md) · [Co-op tools](docs/COOP_TOOLS.md) · [Field tools](docs/FIELD_TOOLS.md) · [Followers](docs/FOLLOWING_POKEMON.md) · [Companions](docs/COMPANIONS_AND_SOARING.md) · [Party stats](docs/PARTY_STATS.md)
 
