@@ -1,17 +1,9 @@
 # Companion interactions
 
-**Companion interactions** is under **Settings → Following Pokémon** and is on by default when no preference has been saved. A previously saved off choice remains off. Changes apply on the next game launch. Following Pokémon already default on; show or hide them in **Unova → Settings**. Walk at least one tile so your lead Pokémon appears behind you.
+Your lead Pokémon can react when you stop beside it. Face the follower and hold **R**, then press **A** to open the interaction menu. You can also tap or click the follower sprite. Pressing A by itself continues the game as usual.
 
-Stop and face the follower, then hold **R** and press **A** to open its interaction menu. You can also click or tap its sprite. A by itself always goes to the game, so you can advance an NPC text box while facing your follower.
+Choose Talk, Pet, Play, Praise, Tell a story, Ask about today, Sit together, Show a trick, Tell a joke, or Sing together. Use the directional buttons and A, or tap an option. Reactions such as hearts, stars, notes, and short movements are for fun only.
 
-Choose **Talk**, **Pet**, **Play**, **Praise**, **Tell a story**, **Ask about today**, **Sit together**, **Show a trick**, **Tell a joke** or **Sing together**. Use the D-pad and A, or tap an option. In a reply, A or B returns to the actions; X closes the menu. Each action has four rotating lines across five friendship bands. The lead Pokémon's nickname, health, nature and current friendship shape its response. Nature appears through small changes in tone and behavior instead of being named.
+Interactions do not change HP, friendship, items, or save data. They are unavailable during battles and some menus. Following Pokémon can be turned on or off in **Unova → Settings**. Companion interactions can be managed in launcher settings.
 
-The interaction system uses area, DS time/season, loaded-ROM Pokémon types and neutral recent-battle context. Visit counts are separate for each Pokémon/action for the current session; they do not create permanent memories in the save. Weather and battle-result-specific dialogue remain future work. Gen 5 nature is read from its independently stored record field.
-
-Reactions appear over the follower as a question or exclamation mark, heart, star, musical note or ellipsis. Depending on the action, friendship and personality, the Pokémon may peek, sway, hop, spin or run a short loop around you.
-
-Development Settings offers **Reduced follower motion**, preserving sprites and symbols while disabling decorative bobbing, leaning and reaction movement. See [development evidence](DEVELOPMENT_POLISH_2026-10-13.md).
-
-Interactions are read-only: they do not change HP, friendship, items or save data. They are unavailable during battles, movement, co-op preparation and native menus. Idle follower sprites bob subtly while their feet stay anchored.
-
-Normal native Fly remains available alongside optional local Soaring flight. Soaring is a separate experimental feature and does not replace the game's regular Fly move.
+Soaring is a separate unfinished preview. See the [Soaring guide](SOARING_FLIGHT.md) before using it.

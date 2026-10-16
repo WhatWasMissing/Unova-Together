@@ -1,4 +1,3 @@
-# Unova Together 1.0.18 — Mega Serperior preview update
+# Unova Together 1.0.18 — Mega Serperior update
 
-- Continue trying Mega Serperior in battle with Serperiorite.
-- Choose Fight, then hold L + R while selecting a move. Save your game before trying this preview.
+Continue using Serperiorite to Mega Evolve Serperior during battle. Press L+R together while choosing a move.

@@ -1,12 +1,7 @@
-Pokemon Together now opens a shared mod library on every launch, with separate
-Unova and Pokemon X pages. The idle status line is blank and copy is shortened.
+# Pokémon Together launcher
 
-Extract the Windows launcher overlay into your existing Unova Together folder and
-run Start Pokemon Together.cmd. Unova's runtime, saves and update policy stay with
-Unova. Pokemon X requires its separately prepared prototype; its gameplay has not
-been rebuilt yet. ROMs, saves, firmware and room credentials are excluded.
+The shared launcher opens a library with a page for Unova Together and a separate Pokémon X entry. Use the Unova Together page to choose your game and start playing. The Pokémon X entry is an early listing and may require its own separate setup.
 
-Validation: 29 UI/routing tests, frozen launcher self-test, SHA-256 verified package,
-ZIP integrity, minimum-window keyboard checks, and strict frontend design audit.
-Matching launcher source and checksums are included. Original Unova contributions
-are by mvq1303 / WhatWasMissing, with upstream credits and licenses preserved.
+The launcher does not include ROMs, saves, firmware, or room credentials. Your Unova Together game, save files, and update settings remain in their own folder.
+
+For help, read the [launcher guide](LAUNCHER.md) and [player guide](PLAYER_GUIDE.md).

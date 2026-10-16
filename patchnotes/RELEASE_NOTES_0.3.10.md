@@ -1,4 +1,3 @@
 # Unova Together 0.3.10 — Followers and party stats
 
-- Followers are now available for all 649 Pokémon, with a gentle idle animation.
-- View your Pokémon's IVs and EVs from the launcher.
+All 649 base Pokémon can follow you with a gentle idle animation. Check your Pokémon’s IVs and EVs from the launcher.

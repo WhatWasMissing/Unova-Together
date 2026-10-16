@@ -1,5 +1,5 @@
 # Licensing and source
 
-Unova Together distributes a modified melonDS emulator under GPL-3.0. Its complete matching source is available in **Unova-Together-0.3.2-Source.zip** alongside the Windows download on this release page. Source is optional for playing. See LICENSE for the emulator's license and the source archive for dependency notices.
+Unova Together is a free fan project. Its modified melonDS emulator is distributed under **GPL-3.0-or-later**. The matching source code and third-party notices are available alongside the Windows downloads on the [release page](https://github.com/WhatWasMissing/Unova-Together/releases/latest). You do not need the source archive to play.
 
-The official unmodified Tailscale installer has its own license and terms; see setup/Tailscale in the Windows package. No Nintendo ROMs, saves or firmware are distributed.
+The official Tailscale installer has separate terms. The Windows package does not include Pokémon ROMs, save files, or firmware; provide your own compatible game files.

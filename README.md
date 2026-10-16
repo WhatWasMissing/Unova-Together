@@ -1,38 +1,40 @@
 # Unova Together
 
-**Current release: 1.0.35.** Battle and explore Pokémon Black 2 and Blaze Black 2 Redux with friends, and try 49 Mega forms. [Download the latest release](https://github.com/WhatWasMissing/Unova-Together/releases/latest).
+**Current release: 1.0.35.** Play Pokémon Black 2 and supported Blaze Black 2 Redux versions with friends, explore together, and discover **49 Mega Pokémon**.
 
-Unova Together is a free fan project by **mvq1303 / WhatWasMissing**, built on melonDS. Each player needs their own compatible game file and save. The download does not include a game ROM, save, or firmware.
+[Download the latest release](https://github.com/WhatWasMissing/Unova-Together/releases/latest)
+
+Unova Together is a free fan project by **mvq1303 / WhatWasMissing**, built on melonDS. Each player supplies their own compatible game file and save. The download does not include Pokémon ROMs, save files, or firmware.
 
 ## Mega Evolution
 
-Mega Evolution is a headline feature: **49 Pokémon have Mega forms and matching Mega Stones**. Buy stones at Pokémon Center Marts for **₽50,000**, give a Pokémon its matching stone, then press **L + R together** while choosing a move in battle. The Pokémon returns to normal when the battle ends.
+Mega Evolution is a featured part of Unova Together. The game includes **49 Mega forms and matching Mega Stones**. Buy a stone at a Pokémon Center Mart for **₽50,000**, give it to the matching Pokémon, then hold **L + R together** while choosing a move in battle. The Pokémon returns to its normal form when the battle ends.
 
-Examples: **Mega Serperior** gains Adaptability with Serperiorite; **Mega Charizard Y** gains Drought with Charizardite Y; **Mega Salamence** gains Intimidate with Salamencite. Animated battle artwork is available for 46 forms, including all 67 frames for Mega Salamence. See the [Mega Evolution guide](docs/MEGA_EVOLUTION.md) for the complete roster, abilities, stats, and controls.
+For example, Mega Serperior gains Adaptability, Mega Charizard Y gains Drought, and Mega Salamence uses Intimidate. Animated battle artwork is available for 46 forms. See the [Mega Evolution guide](docs/MEGA_EVOLUTION.md) for the full list of stones, abilities, and stats.
 
 ## Get started
 
-1. Download **Unova-Together.exe** for the easiest setup, or download and extract the Windows x64 ZIP.
-2. Open the launcher, choose your own supported ROM, and select **Play**.
-3. Open **Co-op** to host or join a local multiplayer session. Everyone playing together should use the same release and matching game revision.
+1. Download **Unova-Together.exe** for the launcher or the Windows x64 ZIP for a portable copy.
+2. Open the launcher and choose your own supported game file.
+3. Select **Play**. Open **Co-op** to host or join a game with friends.
 
-The launcher offers verified updates and keeps save files while updating. Follow the [player guide](docs/PLAYER_GUIDE.md) for setup and connection help.
+Everyone in a co-op session should use the same Unova Together release and matching game version. The launcher can download updates while keeping your saves in place. The [player guide](docs/PLAYER_GUIDE.md) has setup and connection instructions.
 
-## Play and explore
+## More to explore
 
-- **Play together:** explore shared maps, trade items and Pokémon, and join supported trainer battles.
-- **Bring a Pokémon along:** all 649 base species have follower sprites. Walking poses now stay aligned as the Pokémon bobs along the route. Please check the updated motion in-game; the alignment fix has automated coverage but still needs a live visual check.
-- **Use Pokémon tools:** check IVs and EVs, find regular wild encounters, relearn level-up moves, and use owned HMs without taking up battle move slots.
-- **Customize play:** use save slots and backups, ROM checks, optional camera and battle scenery, controller navigation, and launcher repair tools.
+- **Play together:** explore maps, trade eligible items and Pokémon, and join supported trainer battles.
+- **Bring a Pokémon along:** choose the first Pokémon in your party to follow you. All 649 base species have follower artwork.
+- **Use Pokémon tools:** check IVs and EVs, look up ordinary wild encounters, relearn eligible level-up moves, and use supported field HMs.
+- **Make it your own:** manage save slots and backups, adjust the camera and display, or choose optional battle scenery.
 
 ## Optional Soaring preview
 
-**Soaring is unfinished and experimental.** Some map positions and routes are approximate, and it still needs live playtesting. Marine Tube has no safe landing spot, so return to take-off there. Save normally before trying it. See the [Soaring guide](docs/SOARING_FLIGHT.md) and [known limits](docs/KNOWN_ISSUES.md).
+Soaring is an unfinished optional feature. Some routes are approximate, and some areas do not have a safe landing point. In Marine Tube, return to your take-off point. Read the [Soaring guide](docs/SOARING_FLIGHT.md) before using this preview.
 
 ## Guides
 
-[All features](docs/FEATURES.md) · [Player guide](docs/PLAYER_GUIDE.md) · [Mega Evolution](docs/MEGA_EVOLUTION.md) · [Soaring](docs/SOARING_FLIGHT.md) · [Co-op tools](docs/COOP_TOOLS.md) · [Known limits](docs/KNOWN_ISSUES.md) · [Release notes](patchnotes/README.md)
+[Features](docs/FEATURES.md) · [Player guide](docs/PLAYER_GUIDE.md) · [Mega Evolution](docs/MEGA_EVOLUTION.md) · [Co-op tools](docs/COOP_TOOLS.md) · [Following Pokémon](docs/FOLLOWING_POKEMON.md) · [Known limits](docs/KNOWN_ISSUES.md) · [Release notes](patchnotes/README.md)
 
-For internet connections between different networks, see the [Tailscale guide](docs/TAILSCALE_COOP.md). Optional UDP connections need a server run by your group; this project does not provide a public server.
+For a connection across different networks, see the [Tailscale guide](docs/TAILSCALE_COOP.md). The optional UDP connection requires a server provided by your group; Unova Together does not run a public server.
 
-The project preserves melonDS and other third-party notices. See [authorship](AUTHORSHIP.md) and [licensing](LICENSING.md). Playtesters: maxback221 and randomitem19.
+See [authorship](AUTHORSHIP.md), [art credits](docs/FOLLOWER_ART_CREDITS.md), and [licensing](LICENSING.md) for project and third-party notices.

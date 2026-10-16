@@ -1,4 +1,3 @@
 # Unova Together 1.0.12 — Better Soaring landings
 
-- See more of the ground while flying and return to a landing area more smoothly.
-- Confirm before returning to take-off, and enjoy steadier flight while using speedup.
+See more ground while flying, return to landing areas more smoothly, and confirm before returning to your take-off point.

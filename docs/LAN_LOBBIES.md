@@ -1,11 +1,12 @@
-# LAN lobby fix — beta 0.3.8
+# Host or join a LAN co-op game
 
-1. Close the game on every participating device and use the same 0.3.8 build. The LAN protocol changed; older versions cannot join this lobby.
-2. Open Co-op in the launcher. The host chooses Host & play. Lobby size defaults to 16; Advanced settings allows 2–16.
-3. Each guest chooses Join & play using the host address. Keep fast-forward and C-Gear wireless off.
-4. For a story co-op battle, the lobby host and the chosen guest both enable Co-op trainer battles and approach the same trainer. Other guests should stay outside that encounter or use Solo trainer battles.
-5. Battles contain two human players. The host can partner with a later-joining guest without removing earlier guests. Guest-to-guest story battles are not part of this change.
+Everyone playing together should use the same Unova Together release and matching game version. Turn off fast-forward before connecting.
 
-Local LAN and Tailscale support the larger lobby. The Internet UDP bridge remains a two-player path.
+1. Choose one player to host. From the launcher, select **Host & play**.
+2. Guests select **Join & play** and enter the host’s address.
+3. Pick a distinct player name and use the same room name.
+4. Once everyone appears in the player list, the host can invite a guest to a supported trainer battle.
 
-Tested: real three-player ENet discovery, pairing with the second guest, switching partners, readiness/results/cleanup, mismatched-result rejection, spectator isolation and disconnects. Three muted emulator processes joined through the launcher. Native co-op combat ran around 59–60 FPS with the first guest idle. Automatic NPC victory/badge progression in a three-player lobby was not verified.
+Local sessions can include up to 16 players. Story co-op battles pair the host with one invited guest. Other players can continue exploring separately. The optional Internet UDP connection supports a smaller two-player battle path and needs a server provided by your group.
+
+If a battle disconnects, return to the field and create a new session. See [Playing with friends](PLAYER_GUIDE.md) and the [Tailscale guide](TAILSCALE_COOP.md) for other connection options.

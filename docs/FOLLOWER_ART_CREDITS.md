@@ -1,4 +1,6 @@
-# credits
+# Follower art credits
+
+The follower artwork in Unova Together comes from contributors who shared their work with the Pokémon community. Thank you to everyone listed below. Their artwork remains credited to its original creators.
 
 Contributors: Aero,
 agathaGengar,

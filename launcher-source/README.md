@@ -1,17 +1,7 @@
-# Pokemon Together launcher
+# Unova Together launcher
 
-Shared mod library for Unova Together and the prepared Pokemon X prototype.
-Unova's original multiplayer work is by mvq1303 / WhatWasMissing, built on melonDS.
-This launcher retains upstream attribution and licensing.
+Use the official launcher to choose your game, manage saves, connect with friends, and download updates. Get the latest Windows version from the [release page](https://github.com/WhatWasMissing/Unova-Together/releases/latest).
 
-Install the Windows launcher overlay into your existing Unova Together folder,
-then run Start Pokemon Together.cmd. It opens Mod library on every launch.
-Pokemon X requires your separately prepared modified emulator, own ROM and checkpoints.
-No ROM, save, firmware, room credential or game checkpoint is included.
+For setup instructions, see the [Player guide](../docs/PLAYER_GUIDE.md) and [launcher guide](../docs/LAUNCHER.md). The launcher does not include game ROMs, saves, firmware, or room credentials.
 
-Source: Python 3.12, tomlkit, ndspy, Pillow and PyInstaller.
-Run python tools/unova_launcher.py --home <your-Unova-installation>.
-Build with python tools/build_unova_launcher.py; UI/routing tests run from tools.
-Cleanup scripts are development utilities; they preview by default.
-
-Launcher 1.0.35, build revision 2026101601, is paired with the 1.0.35 emulator package. Updates can stage beside a running game, and Play remains blocked only while an emulator from the same installation is open. News reads the simple version notes from the GitHub `patchnotes/` folder, even if old GitHub Releases are removed.
+Unova Together was created by **mvq1303 / WhatWasMissing** and is built on melonDS. See [authorship](AUTHORSHIP.md) and [licensing](LICENSING.md).

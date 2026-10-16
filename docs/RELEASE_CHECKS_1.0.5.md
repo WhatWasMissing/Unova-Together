@@ -1,3 +1,3 @@
-# Release checks 1.0.5
+# Unova Together 1.0.5
 
-Production XP dispatch checks passed for Redux and English Black 2. Launcher Challenge curve recalculated at 1.25×. Packaging checks verify matching source, preserved controls, ZIP integrity and absence of ROMs, firmware and user saves. Published asset hashes are checked against GitHub.
+For a player-friendly summary, read the [Balanced solo experience](../patchnotes/RELEASE_NOTES_1.0.5.md). The latest release is on the [official download page](https://github.com/WhatWasMissing/Unova-Together/releases/latest).

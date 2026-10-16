@@ -1,5 +1,3 @@
-# Launcher menu cues
+# Launcher sound credits
 
-`menu-nav.wav`, `menu-confirm.wav`, and `menu-cancel.wav` are brief tones
-generated from sine waves by `tools/generate_menu_sounds.py`. They contain no
-sampled game or third-party audio. The launcher can disable them in Settings.
+The short launcher navigation, confirm, and back sounds were created for Unova Together. They are synthesized menu cues, not recordings from a Pokémon game.

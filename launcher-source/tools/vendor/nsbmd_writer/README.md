@@ -1,5 +1,5 @@
-# Headless NSBMD writer
+# Optional scenery support
 
-Source: https://github.com/Yackerw/Blender-NSBMD (MIT, Yackerw 2025). License retained.
+This source folder supports optional battle scenery. Players do not need to open or change it. See [Optional battle scenery](../../../../docs/AREA_BATTLE_SCENES.md) for how to enable the feature.
 
-Adaptations: removed the Blender import for binary writing; allow empty texture and palette dictionaries and untextured material indices; write the correct one-block header for model-only output. Blender UI helpers in util.py are unused. The installer creates a single-node, single-material original courtyard with vertex colours, fixes mesh counts, and writes native Black 2 field and collision data.
+This tool is adapted from [Yackerw/Blender-NSBMD](https://github.com/Yackerw/Blender-NSBMD), © Yackerw 2025, under the MIT License. Its license notice remains with the source.

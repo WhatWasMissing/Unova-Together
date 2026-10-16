@@ -1,8 +1,8 @@
-# Unova Together patch notes
+# Unova Together updates
 
-Pick a version to read what changed. The newest release is first.
+See what changed in each version. The latest release is at the top.
 
-- [Unova Together 1.0.35 — Mega level-up fix and menu sounds](RELEASE_NOTES_1.0.35.md)
+- [Unova Together 1.0.35 — Mega level-ups and menu sounds](RELEASE_NOTES_1.0.35.md)
 - [Unova Together 1.0.34 — Mega Evolution and steadier follower poses](RELEASE_NOTES_1.0.34.md)
 - [Unova Together 1.0.33 — Mega Pokémon and a Soaring preview](RELEASE_NOTES_1.0.33.md)
 - [Unova Together 1.0.32 — Soaring across Unova](RELEASE_NOTES_1.0.32.md)
@@ -14,12 +14,12 @@ Pick a version to read what changed. The newest release is first.
 - [Unova Together 1.0.26 — A bigger Mega roster](RELEASE_NOTES_1.0.26.md)
 - [Unova Together 1.0.25 — More Mega Pokémon](RELEASE_NOTES_1.0.25.md)
 - [Unova Together 1.0.24 — 12 more Mega Pokémon](RELEASE_NOTES_1.0.24.md)
-- [Unova Together 1.0.23 — Mega Serperior ready for the next battle](RELEASE_NOTES_1.0.23.md)
+- [Unova Together 1.0.23 — Mega Serperior is ready for another battle](RELEASE_NOTES_1.0.23.md)
 - [Unova Together 1.0.22 — Open your party after Mega Evolution](RELEASE_NOTES_1.0.22.md)
 - [Unova Together 1.0.21 — Mega Serperior gains Adaptability](RELEASE_NOTES_1.0.21.md)
 - [Unova Together 1.0.20 — Mega Serperior battle fix](RELEASE_NOTES_1.0.20.md)
 - [Unova Together 1.0.19 — Fix for a Windows startup problem](RELEASE_NOTES_1.0.19.md)
-- [Unova Together 1.0.18 — Mega Serperior preview update](RELEASE_NOTES_1.0.18.md)
+- [Unova Together 1.0.18 — Mega Serperior update](RELEASE_NOTES_1.0.18.md)
 - [Unova Together 1.0.17 — Mega Serperior in battle](RELEASE_NOTES_1.0.17.md)
 - [Unova Together 1.0.16 — Mega Serperior preview](RELEASE_NOTES_1.0.16.md)
 - [Unova Together 1.0.15 — Mega Serperior arrives](RELEASE_NOTES_1.0.15.md)
@@ -49,4 +49,4 @@ Pick a version to read what changed. The newest release is first.
 - [Unova Together 0.3.6 — Clearer teammate locations](RELEASE_NOTES_0.3.6.md)
 - [Unova Together 0.3.5 — Easy setup and co-op](RELEASE_NOTES_0.3.5.md)
 
-The launcher reads these same notes from `index.json` on GitHub.
+The launcher also shows these release notes on its Updates and News pages.

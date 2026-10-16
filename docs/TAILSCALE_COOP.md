@@ -1,85 +1,29 @@
-# Play together across different networks
+# Play together across different networks with Tailscale
 
-Each Windows release includes the official Tailscale x64 installer in
-`setup/Tailscale`. Skip installation if Tailscale is already installed.
-Use matching Unova Together builds and exactly the same ROM version on both PCs.
-Each player supplies their own ROM and save. Tailscale connects the computers;
-Unova Together still needs both its presence connection and its native LAN connection.
+Tailscale connects the computers in your group as if they were on the same private network. It is a separate service; every player needs their own account and must accept the group invitation.
 
-## One-time setup for each tester
+## Set up Tailscale
 
-1. Extract the entire Unova Together ZIP into a folder you will keep using.
-2. Run the `.msi` installer in `setup/Tailscale`. Allow the Windows
-   administrator prompt. Windows 10 or later on an x64 PC is required.
-3. Open Tailscale from the system tray and choose **Log in**.
-4. The organiser invites testers into their Tailscale network (tailnet).
-   Accept using your own account, then connect your PC to that invited network.
-   Accepting an invitation alone does not connect a PC. If you have several
-   networks, select the organiser's network.
-5. The organiser checks the Tailscale admin device list: both PCs must appear
-   online. Approve new devices if approval is enabled.
-6. On each PC that will host, run this in PowerShell **as Administrator**,
-   replacing the folder with your extracted Unova Together folder:
+1. Install Tailscale on each Windows PC. The official installer is included in the Unova Together ZIP under setup/Tailscale; you can also download it from [Tailscale](https://tailscale.com/docs/install/windows/msi).
+2. Sign in and accept the host’s invitation to the group network.
+3. Confirm each computer is online in the Tailscale app.
+4. On each PC that will host a game, run the setup_tailscale_firewall.ps1 script in Unova Together’s tools folder from an Administrator PowerShell window.
 
-   ```powershell
-   powershell -NoProfile -ExecutionPolicy Bypass -File "C:\Games\Unova Together\tools\setup_tailscale_firewall.ps1"
-   ```
+## Connect for a play session
 
-   This allows UDP 7064 and TCP 8765 only from Tailscale IPv4 addresses.
-   Repeat after moving the emulator to a different folder.
+1. Everyone connects to the same Tailscale network and starts the same Unova Together release with matching game versions.
+2. Choose one player to host. Find their Tailscale IPv4 address in the Tailscale app; it begins with 100.
+3. On the host’s Multiplayer panel, use relay host 127.0.0.1, port 8765, choose a room, and select **Connect**.
+4. On the guest’s Multiplayer panel, enter the host’s Tailscale address, port 8765, and the same room. Use a different player name.
+5. Confirm everyone appears in the player list. For native co-op battles, the host starts a LAN game and the guest joins using the same Tailscale address.
 
-## Every play session
-
-1. Both players connect Tailscale. Choose one PC as the host.
-2. On the host, copy its Tailscale IPv4 address from the tray menu/device list
-   (a `100.x.x.x` address). Send that address to the guest.
-3. Both start `Start Emulator.cmd`, load their matching ROMs and enter play.
-4. On the host's Multiplayer panel, set **Relay host** to `127.0.0.1`,
-   **Port** to `8765`, choose a room and press **Connect**. This starts or
-   checks the host's local presence relay.
-5. On the guest, use the host's **Tailscale address**, port `8765` and the
-   exact same room. Choose distinct player names. Press **Connect**.
-6. Confirm both players appear in the list. Stand on the same map and check
-   movement and item trading.
-7. For native wireless/co-op tests, the host selects **System → Host LAN game**,
-   with two players. The guest selects **Join LAN game** and enters the host's
-   Tailscale address directly. Broadcast discovery does not cross networks.
-8. Confirm the native LAN player list shows both players before initiating
-   an interaction. Use copied saves for experimental shared battles.
-
-No router port forwarding or exit node is needed. Do not run `Online Co-op.cmd`
-alongside this direct setup. Keep Tailscale connected. Movement and native
-wireless use separate connections: working movement alone does not confirm
-that the native LAN game is joined.
+No router port forwarding is needed. Movement sharing and the game’s native wireless connection are separate, so check both player lists before starting a co-op battle.
 
 ## Troubleshooting
 
-- **WinError 10013 / access forbidden:** Another VPN or its network filter may block the connection. NordVPN caused this in a beta test. Disconnect other VPNs and check their kill-switch settings, then retry with Tailscale connected. If it persists, check security software and firewall application rules.
+- If a PC is missing, make sure it is signed in, connected to the invited network, and approved if the host requires device approval.
+- If the connection is refused, check the host address, room name, and firewall rules. Guests should not use the host’s local-only address to connect to another computer.
+- If another VPN or firewall blocks the connection, temporarily disconnect it or allow Unova Together through its settings.
+- If a battle stops responding, return to the field and create a new session. A disconnected battle may not resume.
 
-- **PC missing/offline:** Log in on that PC, select the invited network and
-  check device approval. An accepted user invite is not a connected device.
-- **Connection refused:** The host must connect its local relay first.
-  Check the host address, port and firewall. The guest must not use
-  `127.0.0.1` to connect to another PC.
-- **Native game missing:** Join by address directly, then check the host's
-  emulator firewall rule. Do not rely on discovery.
-- **Slow battles:** Latency or a relayed Tailscale path can affect native
-  wireless. Shared battles remain experimental; bundling Tailscale does not
-  establish that battle startup/completion or performance issues are fixed.
-
-Optional checks on the guest, replacing HOST_IP with the host's address:
-
-```powershell
-tailscale status
-tailscale ping HOST_IP
-Test-NetConnection HOST_IP -Port 8765
-```
-
-The TCP check works after the presence relay starts; it does not test native
-UDP wireless. Check the LAN player list for that connection.
-
-Official instructions: [Windows installation](https://tailscale.com/docs/install/windows/msi)
-and [connecting devices](https://tailscale.com/docs/how-to/connect-to-devices).
-The unmodified installer is checksum verified and signed by Tailscale Inc.
-No accounts, invitations, authentication keys or personal addresses are bundled.
-Tailscale is a separate product with its own [terms](https://tailscale.com/terms).
+The optional Internet UDP relay is a separate connection method. It needs a server provided by your group; see the [UDP server guide](UDP_SERVER_GUIDE.md).

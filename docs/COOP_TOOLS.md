@@ -1,31 +1,9 @@
 # Co-op tools
 
-Unova Together by mvq1303 / WhatWasMissing.
+Open **Unova** from the game’s pause menu and choose the **Co-op** tab. Choose a teammate on the **Players** page before selecting an action that involves them.
 
-Open **Unova** from the game’s pause menu, then choose the **Co-op** tab. Select a teammate in Players first for
-actions involving another player. These additions need the updated presence
-relay; an older relay still supports its existing features.
+Invite a friend to supported trainer battles, choose solo or co-op trainer battles, and browse practice battles that do not award story progress. In story battles, each player’s game remains responsible for that player’s results and rewards.
 
-- **Followers:** open **Unova → Settings** to show or hide your own or teammates' followers, or greet a teammate's Pokémon. Stop and face your own follower, then press **R+A**, or tap its sprite, for the ten companion actions. See the [interaction guide](COMPANIONS_AND_SOARING.md) for launcher settings.
-- **Practice battles:** opens the existing challenge catalog. Choose **Practice**
-  for a non-progressing battle; it does not award badges or story progress.
+Use **Players** to see teammates and offer eligible trades. Use **Pokémon** for party tools. Use **Settings** to control your followers and other options. Switch pages with L/R or touch a tab; press B to close the menu.
 
-NPC assistance retains the existing invitation and dialogue hold: choose Join,
-then reach the matching trainer in your own game. Each original story script
-keeps ownership of its own result and rewards. The invitation explains when LAN
-is missing, and teammate status distinguishes menu, waiting and preparation.
-
-## Limits
-
-Spectate controls were removed in beta 0.3.13.
-
-Extra challenge-rule enforcement, spectator control and coordinated fainting
-rules are not part of these tools. Neither game is given authority over the
-other player's story flags or save.
-
-
-## Menu pages
-
-The pause-menu entry is **Unova**. Its four tabs are peers: **Players** for teammate actions, **Pokémon** for party tools, **Co-op** for battle controls, and **Settings** for game options and followers. Use L/R or touch a tab to switch; B closes the menu.
-
-Current capabilities and restrictions are listed in the [feature guide](FEATURES.md). Proposed improvements are in the [roadmap](ROADMAP.md).
+For connection help, see [Playing with friends](PLAYER_GUIDE.md). Some special battles and unstable connections may not work as expected; see [Known limits](KNOWN_ISSUES.md).

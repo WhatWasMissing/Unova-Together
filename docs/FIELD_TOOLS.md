@@ -1,49 +1,21 @@
-# Encounter finder and move relearning
+# Pokémon and field tools
 
-Open **Unova → Pokémon** for both tools. They work offline and use the loaded
-English Black 2 ROM, including compatible Redux changes.
+Open **Unova → Pokémon** to use the encounter finder, move relearning, party stats, and supported field actions.
 
-## Encounter finder
+## Find wild encounters
 
-Choose a season with the season button. Browse with the page arrows and select
-a Pokémon to see its encounter method. Percentages are the chance of that
-species/form within that method, not the chance of encountering it per step.
-Grass, dark grass, rustling grass, surfing, rippling water, fishing and fishing
-spots are included. These are ordinary ROM encounter tables: gifts, scripted
-legendary encounters, Hidden Grottos and special encounter systems are excluded.
-An invalid level range in the ROM displays **Lv?** instead of inventing a level.
-Caught/seen tracking is not included in this version.
+Choose a season and browse the ordinary wild encounter tables from your loaded game. Grass, dark grass, surfing, rippling water, and fishing spots are included. A listed percentage describes the chance for that Pokémon within that encounter method.
 
-## Relearn moves
+The finder does not include gifts, scripted legendary encounters, or Hidden Grottos.
 
-Choose a party Pokémon, choose a move, choose its replacement slot, then confirm
-**Learn move**. Relearning is free. Cancel is selected by default.
-Only the current species/form's level-up moves at or below its current level are
-offered. Already-known moves and eggs are excluded. This does not teach arbitrary
-TM, tutor, egg or previous-evolution moves.
+## Relearn a move
 
-The new move receives its ROM-defined base PP with no PP Ups. The other moves,
-identity, IVs, EVs and remaining party members are preserved. Save normally after
-relearning. No `.sav` file is edited directly. Battles, pending item/Pokémon
-trades, unsupported profiles and changed party records block the write.
+Choose a party Pokémon and select an eligible level-up move it has learned by its current level. Choose which move it should replace, then confirm **Learn move**. Relearning is free. Moves already known, egg moves, TM moves, tutor moves, and moves from previous species are not offered.
 
-## Field HMs
+Save normally after making a change.
 
-This build lets a non-egg party Pokémon perform field HMs without
-learning them. Keep the HM in your bag. Cut, Surf, Strength, Waterfall and Dive
-use the game's normal obstacle interaction; Fly is offered by the original
-Pokémon party menu. The original event checks, destinations and animations
-remain in charge. Battle moves, PP, Pokémon records and saves are not rewritten.
+## Use field HMs
 
-This supports the reviewed English Black 2 field routines, including Redux
-Complete v1.4.1. Unknown routines fail back to their original behavior. Flash,
-Dig, Teleport and other non-HM field moves are unchanged.
+Supported HMs can be used from the field without taking up one of the Pokémon’s four battle move slots. Keep the HM in your bag and follow the game’s normal story requirements. Fly continues to use the game’s party menu and destinations.
 
-Fly is added through a move slot which the native field-action filter would
-otherwise omit. If that Pokémon already knows Fly, its normal Fly entry is
-used. If all four moves already have native field actions, use another party
-Pokémon; this version does not replace an existing field action.
-
-## Gameplay verification limits
-
-Native Fly destination selection and focused HM checks passed. Full obstacle traversal, completed Fly travel and save/reload after relearning still need gameplay testing. Back up your save.
+These tools use the loaded English Black 2 game, including compatible Redux changes. Unsupported profiles keep their original game behavior.

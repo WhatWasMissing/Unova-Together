@@ -3,279 +3,279 @@
   "notes": [
     {
       "version": "1.0.35",
-      "title": "Mega level-up fix and menu sounds",
+      "title": "Mega level-ups and menu sounds",
       "file": "RELEASE_NOTES_1.0.35.md",
-      "body": "- Mega Pokémon can now gain levels in battle without crashing, and can still learn new moves.\n- Added classic Generation 5-style movement, confirm, and back sounds to the in-game menus. Turn them off in Settings if you prefer."
+      "body": "Mega Pokémon can gain levels in battle and learn new moves. In-game menus now include Generation 5-style movement, confirm, and back sounds; turn the sounds off in Settings if you prefer."
     },
     {
       "version": "1.0.34",
       "title": "Mega Evolution and steadier follower poses",
       "file": "RELEASE_NOTES_1.0.34.md",
-      "body": "- Mega Evolution now has a featured place in the launcher, with quick examples and a guide to all 49 forms and their stones.\n- Follower poses now line up by their visible artwork, preventing transparent image borders from making the Pokémon jump inside its frame.\n\nThe follower fix passes an automated test using matching artwork with different transparent padding. Please check it in-game and let us know if the bobbing now looks right. The optional Soaring preview is still unfinished."
+      "body": "The launcher now features Mega Evolution and a guide to all 49 forms. Pokémon follower poses line up more consistently as they walk. Soaring remains an unfinished optional preview."
     },
     {
       "version": "1.0.33",
       "title": "Mega Pokémon and a Soaring preview",
       "file": "RELEASE_NOTES_1.0.33.md",
-      "body": "- Try 49 Mega Pokémon with their matching Mega Stones. For example, Mega Serperior gains Adaptability and Mega Charizard Y gains Drought.\n- Animated battle artwork now plays full timed sequences for 46 Mega forms. Mega Salamence uses 67 frames for both its front and back view.\n- Follower walking received a smoothing adjustment. Version 1.0.34 further aligns the visible artwork between poses to address vertical shifting.\n- Take flight across the unfinished Soaring preview, which connects 69 outdoor areas.\n\n**Soaring is still unfinished.** Some routes and locations are approximate, live playtesting is still needed, and Marine Tube has no safe landing spot. Save normally before trying it. See the [Mega guide](../docs/MEGA_EVOLUTION.md), [Soaring guide](../docs/SOARING_FLIGHT.md), and [known limits](../docs/KNOWN_ISSUES.md) for details.\n\nUpdate everyone in your co-op group to version 1.0.33 before playing together."
+      "body": "Use 49 Mega forms with matching stones. Animated battle artwork is available for 46 forms, including Mega Salamence’s 67-frame front and back animations. Soaring remains an unfinished optional preview with approximate routes and limited landing areas."
     },
     {
       "version": "1.0.32",
       "title": "Soaring across Unova",
       "file": "RELEASE_NOTES_1.0.32.md",
-      "body": "- Experimental Soaring now reaches all 69 outdoor areas supported by this build, including Black City.\n- Clear landing spots return through the game's Fly-style transition.\n- Places without safe ground keep the option to return to take-off.\n\nTo try it, enable **Settings → Experimental features → Soaring flight**, then choose **Unova → Pokémon → Take flight**. Fly between a few routes and towns, land on clear ground, and check that you return to the right map and spot. Soaring remains experimental, so please save before testing."
+      "body": "The optional Soaring preview reaches 69 outdoor areas, including Black City. Land on clear ground or return to your take-off point where a safe landing is unavailable."
     },
     {
       "version": "1.0.31",
       "title": "Smoother followers and landings",
       "file": "RELEASE_NOTES_1.0.31.md",
-      "body": "- Followers now stay a little farther behind and keep a smooth walking rhythm around turns.\n- Soaring landings now return through Pokémon Black 2's Fly-style transition.\n- Mega Salamence's full battle animation is ready for a live test.\n\nWalk and turn with a follower to check its spacing and movement. To test Mega Salamence, give it Salamencite and hold **L + R** while choosing a move in battle. To test Soaring, enable **Settings → Experimental features → Soaring flight**, choose **Unova → Pokémon → Take flight**, then land on clear ground and check that you return to the right map and spot."
+      "body": "Followers keep a smoother walking rhythm around turns. Soaring landings return through the game’s Fly-style transition."
     },
     {
       "version": "1.0.30",
       "title": "Fly between more areas",
       "file": "RELEASE_NOTES_1.0.30.md",
-      "body": "- Experimental Soaring flight now reaches more connected outdoor routes and towns.\n- Followers keep a little more room behind you, and their walking steps stay in time around corners.\n- Mega battle animations play the supplied artwork frame by frame.\n\nTry Soaring from **Settings → Experimental features → Soaring flight**, then **Unova → Pokémon → Take flight**. Please check that you can cross between areas and land in the right place. To test Mega Salamence, give it Salamencite and press **L + R** while choosing a move in battle."
+      "body": "The optional Soaring preview reaches more connected outdoor routes and towns. Followers have more room behind you, and Mega battle animations play frame by frame."
     },
     {
       "version": "1.0.29",
       "title": "Smoother followers and Mega animations",
       "file": "RELEASE_NOTES_1.0.29.md",
-      "body": "- Pokémon followers stay about one tile behind and move smoothly around corners.\n- Launcher menus now have navigation, confirm, and cancel sounds. Change the volume or turn them off in Settings.\n- Mega Pokémon with supplied animated artwork play the full animation during battle. Mega Salamence has 67 frames on each side.\n\nPlease test Mega Salamence in battle: give it Salamencite and press **L + R together** while choosing a move. Check whether it animates and stays correctly positioned."
+      "body": "Followers keep a steady pace around corners. Launcher menus have navigation, confirm, and back sounds. Mega Pokémon with supplied animations play their full sequences during battle."
     },
     {
       "version": "1.0.28",
       "title": "Mega Pokémon animations",
       "file": "RELEASE_NOTES_1.0.28.md",
-      "body": "Mega Pokémon with supplied animated artwork can now play through the full set of GIF frames during battle. Mega Salamence is the main test for this update, with 67 frames.\n\nGive Salamence Salamencite, then press **L + R together** while choosing a move. After it Mega Evolves, check whether its sprite cycles through the animation. Let us know if it stays still or looks misaligned.\n\nThis is a test build. Save normally before playing, and update every player before connecting together."
+      "body": "Mega Pokémon with animated artwork now play through the full timed sequence during battle. Mega Salamence includes 67 frames for both front and back views."
     },
     {
       "version": "1.0.27",
       "title": "Updated Mega Mewtwo X artwork",
       "file": "RELEASE_NOTES_1.0.27.md",
-      "body": "- Mega Mewtwo X now uses updated battle artwork."
+      "body": "Mega Mewtwo X has updated battle artwork."
     },
     {
       "version": "1.0.26",
       "title": "A bigger Mega roster",
       "file": "RELEASE_NOTES_1.0.26.md",
-      "body": "- The game now supports 49 Mega forms, with matching Mega Stones.\n- Buy Mega Stones at Pokémon Center Marts for ₽50,000 each. Give a Pokémon its matching stone, then hold L + R while choosing a move.\n- Mega Evolution lasts until the battle ends."
+      "body": "The game now has 49 Mega forms and matching Mega Stones. Buy stones at Pokémon Center Marts for ₽50,000 each, then give the matching stone to a Pokémon to use Mega Evolution in battle."
     },
     {
       "version": "1.0.25",
       "title": "More Mega Pokémon",
       "file": "RELEASE_NOTES_1.0.25.md",
-      "body": "- Mega forms arrive for Ampharos, Venusaur, Charizard Y, Gengar, Alakazam, Mawile, and Garchomp.\n- Matching Mega Stones are sold at Pokémon Center Marts for ₽50,000 each.\n- Hold L + R while choosing a move in battle to Mega Evolve."
+      "body": "Mega forms arrive for Ampharos, Venusaur, Charizard Y, Gengar, Alakazam, Mawile, and Garchomp. Matching stones are sold at Pokémon Center Marts."
     },
     {
       "version": "1.0.24",
       "title": "12 more Mega Pokémon",
       "file": "RELEASE_NOTES_1.0.24.md",
-      "body": "- Mega forms arrive for Serperior, Arcanine, Aggron, Altaria, Banette, Gallade, Heracross, Latios, Manectric, Sableye, Salamence, and Scizor.\n- Give a Pokémon its matching Mega Stone and hold L + R while choosing a move in battle."
+      "body": "Mega forms arrive for Serperior, Arcanine, Aggron, Altaria, Banette, Gallade, Heracross, Latios, Manectric, Sableye, Salamence, and Scizor. Give each Pokémon its matching stone and press L+R together while choosing a move."
     },
     {
       "version": "1.0.23",
-      "title": "Mega Serperior ready for the next battle",
+      "title": "Mega Serperior is ready for another battle",
       "file": "RELEASE_NOTES_1.0.23.md",
-      "body": "- Improved Mega Serperior's appearance during battle.\n- Mega Evolution is ready to use again after a battle ends."
+      "body": "Mega Serperior’s battle appearance is improved, and you can Mega Evolve again in later battles."
     },
     {
       "version": "1.0.22",
       "title": "Open your party after Mega Evolution",
       "file": "RELEASE_NOTES_1.0.22.md",
-      "body": "- Fixed a crash that could happen when opening the Pokémon menu after Mega Evolving Serperior.\n- Serperior stays Mega Evolved during battle. The party screen shows its regular icon."
+      "body": "You can open the Pokémon menu after Mega Evolving Serperior. It remains Mega Evolved for the rest of the battle."
     },
     {
       "version": "1.0.21",
       "title": "Mega Serperior gains Adaptability",
       "file": "RELEASE_NOTES_1.0.21.md",
-      "body": "- Mega Serperior now has the Adaptability ability instead of Contrary while Mega Evolved.\n- Give it Serperiorite and hold L + R while choosing a move in battle."
+      "body": "Mega Serperior now has Adaptability while Mega Evolved. Give it Serperiorite and press L+R together while choosing a move."
     },
     {
       "version": "1.0.20",
       "title": "Mega Serperior battle fix",
       "file": "RELEASE_NOTES_1.0.20.md",
-      "body": "- Fixed a problem that could occur after choosing a move while Mega Evolving Serperior.\n- Mega Serperior now keeps its form and stats through the battle, then returns to normal when the battle ends.\n- Give Serperior Serperiorite and hold L + R while choosing a move to try it."
+      "body": "Mega Serperior now keeps its form and stats through battle, then returns to normal when the battle ends."
     },
     {
       "version": "1.0.19",
       "title": "Fix for a Windows startup problem",
       "file": "RELEASE_NOTES_1.0.19.md",
-      "body": "- Fixed a Windows issue that could stop the game from opening.\n- Close the emulator before updating, then start it again from the launcher."
+      "body": "Fixed a Windows issue that could prevent the game from opening. Close the emulator before updating, then start it again from the launcher."
     },
     {
       "version": "1.0.18",
-      "title": "Mega Serperior preview update",
+      "title": "Mega Serperior update",
       "file": "RELEASE_NOTES_1.0.18.md",
-      "body": "- Continue trying Mega Serperior in battle with Serperiorite.\n- Choose Fight, then hold L + R while selecting a move. Save your game before trying this preview."
+      "body": "Continue using Serperiorite to Mega Evolve Serperior during battle. Press L+R together while choosing a move."
     },
     {
       "version": "1.0.17",
       "title": "Mega Serperior in battle",
       "file": "RELEASE_NOTES_1.0.17.md",
-      "body": "- Mega Serperior and Serperiorite are available in supported Black 2 Redux v1.4.1 games.\n- Hold L + R while choosing a move to Mega Evolve. The Multiplayer Debug menu can grant the stone."
+      "body": "Mega Serperior and Serperiorite are available in supported Black 2 Redux v1.4.1 games. Hold L+R together while choosing a move to Mega Evolve."
     },
     {
       "version": "1.0.16",
       "title": "Mega Serperior preview",
       "file": "RELEASE_NOTES_1.0.16.md",
-      "body": "- Continue trying Mega Serperior's battle form and stats in this preview.\n- Give it Serperiorite, then hold L + R while choosing a move. Save your game before trying new features."
+      "body": "Mega Serperior’s battle form and stats are available in this preview. Give it Serperiorite and hold L+R together while choosing a move."
     },
     {
       "version": "1.0.15",
       "title": "Mega Serperior arrives",
       "file": "RELEASE_NOTES_1.0.15.md",
-      "body": "- Mega Evolve Serperior in supported English Black 2 Redux v1.4.1 games.\n- Give Serperior Serperiorite, choose Fight, then hold L + R while selecting a move.\n- If you need the stone for this preview, use Multiplayer → Debug to grant it."
+      "body": "Mega Evolve Serperior in supported English Black 2 Redux v1.4.1 games. Give it Serperiorite, then hold L+R together while choosing a move in battle."
     },
     {
       "version": "1.0.14",
       "title": "Smoother LAN hosting",
       "file": "RELEASE_NOTES_1.0.14.md",
-      "body": "- Hosting a local game is smoother when several network events happen at once."
+      "body": "Hosting a local game now handles several network events more smoothly."
     },
     {
       "version": "1.0.13",
       "title": "Safer game updates",
       "file": "RELEASE_NOTES_1.0.13.md",
-      "body": "- Updates install alongside your current game, so you can finish a session before switching versions.\n- The launcher only checks for a running game from your Unova Together installation.\n- Your ROM, saves, and settings stay in place."
+      "body": "Updates install beside your current game, so you can finish playing before switching. Your ROMs, saves, and settings stay in place."
     },
     {
       "version": "1.0.12",
       "title": "Better Soaring landings",
       "file": "RELEASE_NOTES_1.0.12.md",
-      "body": "- See more of the ground while flying and return to a landing area more smoothly.\n- Confirm before returning to take-off, and enjoy steadier flight while using speedup."
+      "body": "See more ground while flying, return to landing areas more smoothly, and confirm before returning to your take-off point."
     },
     {
       "version": "1.0.11",
       "title": "A wider view while soaring",
       "file": "RELEASE_NOTES_1.0.11.md",
-      "body": "- Soaring shows more of the surrounding scenery.\n- Turn it on under Settings → Experimental features, then choose Unova → Pokémon → Take flight.\n- Soaring is an optional preview."
+      "body": "Soaring shows more of the surrounding scenery. Turn on the optional preview in Settings → Experimental features, then choose Unova → Pokémon → Take flight."
     },
     {
       "version": "1.0.10",
       "title": "Smoother Pokémon followers",
       "file": "RELEASE_NOTES_1.0.10.md",
-      "body": "- Follower movement is smoother, and followers stay visible through brief connection hiccups.\n- Followers update correctly when your party or area changes.\n- Shiny followers use the odds from your loaded game."
+      "body": "Followers move more smoothly, stay visible through brief connection hiccups, and update when your party or area changes. Shiny followers use the odds from your game."
     },
     {
       "version": "1.0.9",
       "title": "Repair older launcher shortcuts",
       "file": "RELEASE_NOTES_1.0.9.md",
-      "body": "- If an old shortcut keeps opening an outdated launcher, run Repair-Launcher.exe once and choose the Pokémon Together.exe that shortcut used.\n- Your ROMs, profiles, saves, and backups stay in place."
+      "body": "Use Repair-Launcher.exe once if an older desktop shortcut still opens an outdated launcher. Your game profiles, saves, and backups stay in place."
     },
     {
       "version": "1.0.8",
       "title": "Smoother launcher updates",
       "file": "RELEASE_NOTES_1.0.8.md",
-      "body": "- After an update, the launcher opens the newly installed game.\n- Older shortcuts can now open the latest launcher without changing your saves or settings."
+      "body": "After an update, the launcher opens the new game version. Older shortcuts can also open the latest launcher without changing your saves or settings."
     },
     {
       "version": "1.0.7",
       "title": "Trainer search and a flight shortcut",
       "file": "RELEASE_NOTES_1.0.7.md",
-      "body": "- Find practice trainers by name or class before starting a no-reward battle.\n- An optional Fly shortcut opens the game's usual party menu and destinations."
+      "body": "Find practice trainers by name or class before starting a battle that does not change story progress. The Fly shortcut opens the game’s usual party menu and destinations."
     },
     {
       "version": "1.0.6",
       "title": "Spend time with your companion",
       "file": "RELEASE_NOTES_1.0.6.md",
-      "body": "- Talk to, pet, praise, and play with your lead Pokémon. Its reactions reflect its nature and friendship.\n- Face your follower and hold R while pressing A, or tap the follower, to open the interaction menu."
+      "body": "Talk to, pet, praise, and play with your lead Pokémon. Face it and press R+A, or tap its sprite, to open the interaction menu."
     },
     {
       "version": "1.0.5",
       "title": "Balanced solo experience",
       "file": "RELEASE_NOTES_1.0.5.md",
-      "body": "- The extra experience earned in solo battles has been adjusted for a more balanced pace."
+      "body": "The extra experience earned in solo battles has been adjusted for a steadier pace."
     },
     {
       "version": "1.0.4",
       "title": "Free up storage safely",
       "file": "RELEASE_NOTES_1.0.4.md",
-      "body": "- Remove unused old game copies from the launcher to free up space.\n- Your active game, saves, backups, ROMs, and custom files are kept safe."
+      "body": "Remove unused older game copies from the launcher to make room. Your active game, saves, backups, ROMs, and custom files are kept."
     },
     {
       "version": "1.0.3",
       "title": "Manage saves with ease",
       "file": "RELEASE_NOTES_1.0.3.md",
-      "body": "- Create separate game slots so each one keeps its own save.\n- Back up or restore saves from one place.\n- Use the experience calculator to plan solo battles."
+      "body": "Create separate game slots, back up or restore saves, and use the experience calculator to plan solo battles."
     },
     {
       "version": "1.0.2",
       "title": "A boost for solo battles",
       "file": "RELEASE_NOTES_1.0.2.md",
-      "body": "- Solo battles now award extra experience to help you progress while playing alone."
+      "body": "Solo battles award extra experience to help your team progress while playing alone."
     },
     {
       "version": "1.0.1",
       "title": "More reliable co-op",
       "file": "RELEASE_NOTES_1.0.1.md",
-      "body": "- Reconnecting and recovering a co-op session is more reliable.\n- The launcher gives clearer connection messages and retry options."
+      "body": "Reconnect more easily and get clearer connection messages and retry options from the launcher."
     },
     {
       "version": "1.0.0",
       "title": "Unova Together is here",
       "file": "RELEASE_NOTES_1.0.0.md",
-      "body": "- Explore with friends, see nearby teammates, trade items or Pokémon, and battle together.\n- Enjoy Pokémon followers, companion interactions, co-op trainer battles, Pokémon tools, and optional battle scenery.\n- The launcher includes profiles, local hosting, save backups, updates, and installation repair."
+      "body": "Explore alongside friends, see nearby teammates, trade eligible items and Pokémon, and join supported trainer battles.\n\nThe launcher includes Pokémon followers, companion interactions, Pokémon tools, save backups, updates, and optional battle scenery."
     },
     {
       "version": "0.4.0",
       "title": "Companion interactions and flight",
       "file": "RELEASE_NOTES_0.4.0.md",
-      "body": "- Talk to, pet, praise, and play with your lead Pokémon.\n- Try an experimental flight preview over the area around you.\n- These interactions are cosmetic and do not change your save."
+      "body": "Talk to, pet, praise, and play with your lead Pokémon. An optional flight preview is also available. Companion interactions are for fun and do not change your save."
     },
     {
       "version": "0.3.13",
       "title": "Quicker menus and reconnects",
       "file": "RELEASE_NOTES_0.3.13.md",
-      "body": "- Move between the Players, Pokémon, Co-op, and Settings pages from the tabs or with L/R.\n- The Options shortcut and reconnects work more reliably.\n- Follower controls and trainer battle settings are easier to find."
+      "body": "Switch between Players, Pokémon, Co-op, and Settings with the tabs or L/R. The Options shortcut and reconnect controls are easier to use."
     },
     {
       "version": "0.3.12",
       "title": "Easier co-op tools",
       "file": "RELEASE_NOTES_0.3.12.md",
-      "body": "- Pokémon tools, co-op settings, and game options are easier to find.\n- Choose solo or co-op trainer battles, try no-reward practice rematches, or challenge another player.\n- Show or hide followers and see clearer teammate status."
+      "body": "Find Pokémon tools, co-op settings, and game options more easily. Choose solo or co-op trainer battles, start practice rematches without story rewards, and see clearer teammate status."
     },
     {
       "version": "0.3.11",
       "title": "More Pokémon tools",
       "file": "RELEASE_NOTES_0.3.11.md",
-      "body": "- Browse nearby encounters by season and relearn level-up moves for free.\n- Use field moves without taking up one of a Pokémon's four battle move slots."
+      "body": "Look up nearby wild encounters by season, relearn eligible level-up moves, and use supported field HMs without using a battle move slot."
     },
     {
       "version": "0.3.10",
       "title": "Followers and party stats",
       "file": "RELEASE_NOTES_0.3.10.md",
-      "body": "- Followers are now available for all 649 Pokémon, with a gentle idle animation.\n- View your Pokémon's IVs and EVs from the launcher."
+      "body": "All 649 base Pokémon can follow you with a gentle idle animation. Check your Pokémon’s IVs and EVs from the launcher."
     },
     {
       "version": "0.3.9",
       "title": "Battle scenery and better followers",
       "file": "RELEASE_NOTES_0.3.9.md",
-      "body": "- Try optional 3D battle scenery created from your own game copy.\n- Pokémon followers have improved sprites and animations.\n- The in-game Options shortcut now opens the right menu."
+      "body": "Choose optional battle scenery based on your own game files, enjoy updated follower sprites and movement, and use the in-game Options shortcut."
     },
     {
       "version": "0.3.8",
       "title": "Bigger LAN sessions",
       "file": "RELEASE_NOTES_0.3.8.md",
-      "body": "- Host local sessions with up to 16 players, and let guests join after the host starts.\n- Co-op invitations and reconnects are more reliable.\n- Traded Pokémon follow the game's obedience rules in supported Black 2 versions."
+      "body": "Host local sessions with up to 16 players, and let guests join after the host starts.\n\nCo-op invitations and reconnecting are clearer. Traded Pokémon follow the game’s obedience rules in supported Black 2 versions."
     },
     {
       "version": "0.3.7",
       "title": "More reliable player tracking",
       "file": "RELEASE_NOTES_0.3.7.md",
-      "body": "- The player list better reflects which area your teammates are visiting.\n- Teammate locations and battle status recover more reliably after menus and battles.\n- Teammates can stay visible behind in-game menus when the game view allows it."
+      "body": "Teammate locations and battle status now recover more reliably after menus and battles. The player list better reflects which area each person is visiting."
     },
     {
       "version": "0.3.6",
       "title": "Clearer teammate locations",
       "file": "RELEASE_NOTES_0.3.6.md",
-      "body": "- See your teammates' locations and battle status more reliably.\n- The player list gives a clearer message when a teammate's location is unavailable."
+      "body": "See teammate locations and battle status more clearly. The player list explains when a teammate’s location is unavailable."
     },
     {
       "version": "0.3.5",
       "title": "Easy setup and co-op",
       "file": "RELEASE_NOTES_0.3.5.md",
-      "body": "- Set up or update your game, host or join a local session, and reconnect from the launcher.\n- Find setup guides, optional music, and keyboard or controller controls in one place.\n- Your game files and saves stay on your computer when you update."
+      "body": "Set up Unova Together, host or join a local game, and reconnect from the launcher.\n\nFind controls, optional music, and setup guides in one place. Your ROM and save stay on your computer when you update."
     }
   ]
 }

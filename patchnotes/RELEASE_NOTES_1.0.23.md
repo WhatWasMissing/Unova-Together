@@ -1,4 +1,3 @@
-# Unova Together 1.0.23 — Mega Serperior ready for the next battle
+# Unova Together 1.0.23 — Mega Serperior is ready for another battle
 
-- Improved Mega Serperior's appearance during battle.
-- Mega Evolution is ready to use again after a battle ends.
+Mega Serperior’s battle appearance is improved, and you can Mega Evolve again in later battles.

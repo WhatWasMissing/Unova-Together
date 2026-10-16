@@ -1,36 +1,5 @@
-# Soaring design
+# About the Soaring preview
 
-**Status: unfinished and experimental.** Automated map, movement, streaming, and landing checks pass, but a live playthrough still needs to verify routes and landings on a player's save. Some placements are approximate; Marine Tube has no safe landing. Keep Soaring optional and save normally before testing it.
+Soaring is an unfinished optional flight preview. Its map includes 69 outdoor areas, but some routes and positions are approximate and safe landing places are limited. Marine Tube has no safe landing spot; return to your take-off point there.
 
-Soaring is an optional, local flight mode for Black 2. Enable **Settings → Experimental features → Soaring flight**, then open **Unova → Pokémon → Take flight** and choose a healthy Flying-type Pokémon or a Pokémon with Fly. D-pad steers; hold A while moving forward to boost; L/R changes altitude; X lands near verified clear ground; B returns to take-off. The Town Map is never used as the flight display, and flight positions are not sent to other players.
-
-The Black 2 decomp confirms the game has no native Soaring mechanic. Its field engine loads an outdoor map matrix, swaps zone data as the player crosses matrix cells, and implements Fly as a warp to a zone's saved spawn point. Unova Together therefore renders flight locally from ROM terrain and sends the final landing through the same native warp event that the game's Fly script uses. This keeps the save and field actor under the game's existing movement and warp rules. The relevant decomp references are `src/ov012/map_matrix.c` (`ProcessMapMatrix`), `src/system/zonedata.c` (`GetZoneMatrixId`), `src/ov036/fieldmap.c` (`Field_ShouldSwapZone` / `Field_SwapZoneByMatrix`), `src/ov036/scrcmd_mapchange.c` (`s028A_MapChangeFlyWarp`), `src/ov035/event_mapchange.c` (`EventMapChangeWarp_CreateGrid`), `include/field/event_mapchange.h`, `include/field/zone.h` (`ZoneWarp`), and `tools/data/zone_data.py` (`fly_from`).
-
-### Native Fly-style landing transition
-
-In Black 2's `s028A_MapChangeFlyWarp`, the game reads a `ZoneSpawnInfo`, then chains `EventMapChangeWarp_CreateGrid(gsys, field, zoneId, &spawn.pos.vec, dir, FALSE)` as the next game event. The Soaring landing bridge now uses that same constructor at overlay-35 Thumb address `0x0217DB41`, supplying its verified clear-tile position in the native fixed-point `VecFx32` layout, direction zero, and `FALSE` for the warp flag. A regression checks the register arguments, stack arguments and vector-pointer offset against the decompiled function signature. This replaces the generic grid-change constructor used by the earlier bridge; the native event is expected to perform the game's field, terrain and camera reload as it does for Fly. This ABI-level check and frontend build do not substitute for an in-game landing test.
-
-## Regional atlas preview
-
-Black 2 stores outdoor scenery in discrete map matrices. The main Unova matrix is a 29×27 layout with 277 real terrain cells referencing 52 outdoor zones. The flight worker keeps the take-off matrix as its regional coordinate system and streams nearby chunks as the player crosses the region. Each request stays on the launcher worker, outside the game and render loops. The scene window now reaches 4,096 world units; dense areas fall back through 3,072, 2,560, 2,048, 1,536 and 1,024 until the native face and memory limits are met. The renderer draws visible terrain out to 1,750 units and fades it into fog before the camera far clip.
-
-The renderer shows real ROM terrain and supported buildings, fades distant geometry into fog, and places a deep-sea floor beneath the flight region. Empty cells surrounded by at least eight authored land cells receive small low-poly forest islets, while open coast and unsupported edges remain ocean. These generated faces are decorative only: they do not create collision or landing points.
-
-## Regional flyways and collision debug (development follow-up)
-
-The main Unova matrix contains nine disconnected groups of real map chunks. The flight worker finds the shortest empty-cell corridors between groups and joins them with lightweight, elevated scenery ribbons inspired by Unova's roads, bridges and waterways. They sit beneath the rider as visual landmarks and are never inserted into collision or landing data. This fills the black gaps without inventing walkable ground.
-
-The 30×30 atlas covers all 69 outdoor matrix IDs in the checked Black 2 Redux ROM. Reciprocal grid warps establish exact offsets where available. Decomp, Town Map and Fly markers anchor other areas; 28 explicit placements cover scenes without a unique spatial warp path. Some story variants are grouped beside related areas because the game data supplies no outdoor link, so their exact spacing is approximate. Every outdoor matrix can serve as a take-off point and resolves to the same atlas placements. The Black 2 decomp confirms dimensions for all 68 original outdoor matrices; Redux adds matrix 416.
-
-The atlas footprint contains 440 authored terrain cells and 327 native sea-fill cells, with no enclosed holes or unfilled cells beside mapped terrain. The reciprocal-warp graph still has four groups; three decorative flyways visually connect them. Flyways and contextual forest/sea fill are scenery only and cannot be landed on. Landing records keep the destination's map and local tile coordinates for the game's native warp while using the atlas position for flight.
-
-The launcher adds **Show Soaring collision data (debug)** under Experimental features. Enable Soaring flight as well; the option is saved per profile and applies next launch. The flight view marks walkable ground in green, blocked tiles in red, slopes or special behavior in yellow, generated forest in green, and open ocean in blue on the region inset. Gold lines show generated flyways and a red dot shows the current position. These overlays are inspection aids only.
-
-Landings use only ROM-verified, flat walkable tiles and keep a two-tile buffer around authored NPC event positions. Returning to take-off asks for confirmation. A landing keeps game input blocked until the native map warp reaches the requested map/tile and the player position remains stable for 60 emulator frames, preventing NPC dialogue from interrupting the transition. The flight renderer publishes a cached image at up to 30 frames per second; emulator speedup cannot expire the flight overlay or force a full scene render on every screen paint.
-
-## Current limits and next checks
-
-The atlas uses explicit fallback placements for scenes without spatially linked warps, so a few distant story variants appear beside their related areas at approximate positions. The flyways and generated forest/sea are scenery rather than landable bridges. NPC clearance uses authored event positions; moving event actors are not tracked in real time. Encounters in flight, multiplayer mounts and new story destinations remain outside this feature.
-
-Python checks cover all-map placement, streaming, collision and landing geometry. The real-ROM native sweep checks all 69 take-off roots, flight motion, renderer loading, clear-ground selection and scenery reloads mid-flight. Sixty-eight maps contain safe ground; Marine Tube has none, so **B** returns to take-off there. A live emulator flight, landing and return-to-field playthrough is still needed. Verify routes and towns, landing next to NPCs, speedup, fog transitions, save/reload, and the rendered landing position.
-
+See the [Soaring flight guide](SOARING_FLIGHT.md) for how to turn it on and use it. The normal Fly move remains available through the game’s party menu.

@@ -1,10 +1,10 @@
 # Mega Evolution
 
-Unova Together **1.0.34** includes **49 Mega forms** for the supported English Pokémon Black 2 Redux Complete v1.4.1 profile. Give a Pokémon its matching stone, then press **L + R together** while choosing a move in battle. Its Mega form lasts until that battle ends.
+Unova Together **1.0.35** includes **49 Mega forms** for supported English Pokémon Black 2 Redux Complete v1.4.1 games. Buy a Pokémon’s matching Mega Stone at any Pokémon Center Mart for **₽50,000**. Give it to the matching Pokémon, then hold **L + R together** while choosing a move in battle. The Pokémon returns to normal when the battle ends.
 
-All 49 stones are sold at Pokémon Center Marts for **₽50,000**. Stock is shared across the marts so each shop stays within the game's 45-item limit. The 46 new stone entries reuse Mail, Apricorn, and Data Card item slots; three earlier stones keep their existing slots. The bag and mart show each stone's name and matching artwork.
+## Forms, abilities, and stats
 
-Save normally before testing. To grant a test stone, open the emulator's **Multiplayer** panel while idle in the overworld with C-Gear wireless off, choose **Debug**, select the stone, then choose **Grant Mega Stone (debug)**.
+The table lists each Mega Stone and item ID, the Pokémon’s usual abilities, the ability it has while Mega Evolved, and its base-stat total (BST). BST adds HP, Attack, Defense, Speed, Special Attack, and Special Defense.
 
 ## Forms, abilities, and stats
 
@@ -61,8 +61,5 @@ The values below use Black 2 Redux base stats and the Mega profile values in thi
 | Mega Gallade | Galladite (530) | Justified / Hyper Cutter / Justified | Inner Focus / Inner Focus / Inner Focus | 518 → 618 |
 | Mega Audino | Audinite (531) | Natural Cure / Regenerator / Klutz | Healer / Healer / Healer | 445 → 545 |
 | Mega Latios | Latiosite (123) | Levitate / None / None | Levitate / Levitate / Levitate | 600 → 700 |
-Some later-generation abilities do not exist in Generation V. Where needed, this build uses an available ability or a battle hook that reproduces the move effect. The roster document in the source package explains each fallback. Lucario Z's stat spread is provisional.
 
-
-This is a free, non-commercial fan mod. The art was supplied by the project owner, who confirmed non-commercial use with creator credit. The original artist's name is still being checked. The release does not include a ROM, save, firmware, or RAM dump.
-
+Some abilities introduced after Generation V are represented with an available ability or a similar battle effect. Lucario Z’s stat spread is a custom value for this mod. This is a free fan project; the download does not include a game ROM, save, or firmware.
