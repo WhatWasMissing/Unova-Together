@@ -16,7 +16,7 @@ import ndspy.texture
 import ndspy.color
 import ndspy.model
 from PIL import Image
-from extract_battle_surroundings import matrix_cells, terrain_model
+from extract_battle_surroundings import field_chunk_model, matrix_cells, terrain_model
 from field_scene_geometry import decode, crop_face
 from vendor.nsbmd_writer import WriteFile as writer
 from ndspy import _common
@@ -100,13 +100,17 @@ class FieldSource:
         self.props_cache[area]=(models,pack)
         return models,pack
 
-    def scene(self,zone,x,z,height,radius=176,keep_centre=False,flight=False,layout_matrix=None,collision_debug=False):
+    def scene(self,zone,x,z,height,radius=176,keep_centre=False,flight=False,layout_matrix=None,layout_zones=None,layout_mask=None,collision_debug=False):
         if not 0<=zone<len(self.headers)//48 or not all(math.isfinite(v) for v in (x,z,height)):
             raise ValueError('Invalid encounter')
         area,matrix=struct.unpack_from('<HH',self.headers,zone*48+2)
         if layout_matrix is not None:
             matrix=layout_matrix
         width,depth,ids,zones=self.matrix(matrix)
+        if layout_zones is not None:
+            if len(layout_zones)!=len(ids):raise ValueError('Invalid flight zone overlay')
+            zones=layout_zones
+        if layout_mask is not None and len(layout_mask)!=len(ids):raise ValueError('Invalid flight matrix mask')
         cx,cz=int(x//512),int(z//512)
         if (x<0 or z<0 or cx>=width or cz>=depth or ids[cz*width+cx]<0) and not flight:
             raise ValueError('Encounter outside occupied matrix')
@@ -119,6 +123,7 @@ class FieldSource:
         min_mz=max(0,math.floor((z-radius)/512));max_mz=min(depth-1,math.floor((z+radius)/512))
         for mz in range(min_mz,max_mz+1):
             for mx in range(min_mx,max_mx+1):
+                if layout_mask is not None and not layout_mask[mz*width+mx]:continue
                 cid=ids[mz*width+mx]
                 if cid<0:continue
                 neighbor=zones[mz*width+mx] if zones is not None else zone
@@ -132,16 +137,20 @@ class FieldSource:
                     neighbor_tid=struct.unpack_from('<H',self.areas,neighbor_area*10+2)[0]
                     packs[terrain_key]=texture_pack(self.packs[neighbor_tid])
                 try:
-                    model,props=terrain_model(self.chunks[cid])
+                    if flight:
+                        model,props,has_terrain=field_chunk_model(self.chunks[cid])
+                    else:
+                        model,props=terrain_model(self.chunks[cid]);has_terrain=True
+                    terrain_geometry=decode(bytes(model))
                 except ValueError:
                     if flight:continue
                     raise
                 origin=(mx*512+256-x,0,mz*512+256-z)
                 sources.append(cid)
                 terrain=[];obstacles=[]
-                for pair,vertices in decode(bytes(model)):
+                for pair,vertices in terrain_geometry:
                     transformed=[(v[0]+origin[0],v[1]-height,v[2]+origin[2],v[3],v[4]) for v in vertices]
-                    if flight:terrain.append((pair,transformed))
+                    if flight and has_terrain:terrain.append((pair,transformed))
                     cropped=crop_face(transformed,radius)
                     if len(cropped)>=3:faces.append(((terrain_key,)+pair,cropped))
                 count=struct.unpack_from('<I',props)[0] if len(props)>=4 else 0
@@ -167,7 +176,7 @@ class FieldSource:
                     except (ValueError,KeyError,IndexError,struct.error) as error:
                         omitted.append(f'prop {uid}: {error}')
                         if flight:obstacles.append((px-64,px+64,pz-64,pz+64))
-                if flight:
+                if flight and has_terrain:
                     npcs=[(mx*32+nx,mz*32+nz) for nx,nz in self.event_objects(neighbor)]
                     landings.extend(landing_tiles(self.chunks[cid],terrain,neighbor,mx,mz,origin,height,obstacles,npcs))
                     if collision_debug:collisions.extend(collision_debug_tiles(self.chunks[cid],terrain,mx,mz,origin,height,obstacles,radius=650))

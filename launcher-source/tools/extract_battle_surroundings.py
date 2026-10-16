@@ -44,6 +44,53 @@ def terrain_model(data):
     return model, data[offsets[-2]:offsets[-1]]
 
 
+def field_chunk_model(data):
+    """Return a field chunk's model, props, and whether it has native terrain.
+
+    BW2's decomp distinguishes WB chunks (model, terrain and props) from NG
+    chunks (model and props only). NG maps still need their authored geometry
+    drawn, but their models do not define collision or landing ground.
+    """
+    if data[:4] == b'WB\x03\0':
+        model, props = terrain_model(data)
+        return model, props, True
+    if data[:4] == b'GC\x04\0' and len(data) >= 24:
+        _magic, section_count, model_offset, terrain0_offset, terrain1_offset, props_offset, end_offset = struct.unpack_from('<HHIIIII', data)
+        if (section_count != 4 or model_offset < 24 or
+                not model_offset < terrain0_offset < terrain1_offset <= props_offset <= end_offset <= len(data)):
+            raise ValueError('Invalid GC field chunk offsets')
+        model = data[model_offset:terrain0_offset]
+        props = data[props_offset:end_offset]
+        if len(model) < 24 or model[:4] != b'BMD0' or struct.unpack_from('<I', model, 8)[0] != len(model):
+            raise ValueError('Invalid GC field model')
+        if not props:
+            props = bytes(4)
+        if len(props) < 4:
+            raise ValueError('Truncated GC props')
+        count = struct.unpack_from('<I', props)[0]
+        if count > 1024 or 4 + count * 16 > len(props):
+            raise ValueError('Invalid GC props')
+        return model, props, True
+    if data[:4] != b'NG\x02\0' or len(data) < 16:
+        raise ValueError('Unsupported field chunk container')
+    _magic, section_count, model_offset, props_offset, end_offset = struct.unpack_from('<HHIII', data)
+    if (section_count != 2 or model_offset < 16 or
+            not model_offset < props_offset <= end_offset <= len(data)):
+        raise ValueError('Invalid NG field chunk offsets')
+    model = data[model_offset:props_offset]
+    props = data[props_offset:end_offset]
+    if len(model) < 24 or model[:4] != b'BMD0' or struct.unpack_from('<I', model, 8)[0] != len(model):
+        raise ValueError('Invalid NG field model')
+    if len(props) < 4:
+        raise ValueError('Truncated NG props')
+    count = struct.unpack_from('<I', props)[0]
+    if count > 1024 or len(props) != 4 + count * 16:
+        raise ValueError('Invalid NG props')
+    if model[:4] != b'BMD0':
+        raise ValueError('Invalid NG field model')
+    return model, props, False
+
+
 def capture(rom, zone, x, z, output, radius=1):
     if not all(math.isfinite(v) and v >= 0 for v in (x,z)) or radius not in (0,1,2):
         raise ValueError('Invalid capture coordinates or radius')

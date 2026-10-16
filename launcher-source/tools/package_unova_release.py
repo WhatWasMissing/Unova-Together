@@ -19,13 +19,13 @@ HELPERS = (
     'online_udp_bridge.py', 'requirements-online-udp.txt', 'setup_tailscale_firewall.ps1',
     'unova_launcher.py', 'unova_updater.py', 'unova_storage.py', 'build_unova_launcher.py',
     'launcher_migration.py', 'unova_launcher_bootstrap.py', 'build_unova_bootstrap.py',
-    'soaring_scene_worker.py','battle_surroundings_worker.py','build_battle_surroundings.py',
+    'soaring_scene_worker.py','soaring_geometry.py','soaring_height_tables.py','battle_surroundings_worker.py','build_battle_surroundings.py',
     'field_scene_geometry.py','extract_battle_surroundings.py','area_scene_cache.py',
     'build_area_battle_scene.py','build_area_battle_catalog.py',
 )
 COMMANDS = ('Online Co-op.cmd', 'Install UDP Dependencies.cmd', 'Start LAN Presence Relay.cmd')
 DOCS = ('PLAYER_GUIDE.md', 'KNOWN_ISSUES.md', 'TAILSCALE_COOP.md', 'UDP_SERVER_GUIDE.md',
-        'LAUNCHER.md', 'COMPANIONS_AND_SOARING.md', 'COOP_TOOLS.md', 'FEATURES.md',
+        'LAUNCHER.md', 'COMPANIONS_AND_SOARING.md', 'SOARING_FLIGHT.md', 'COOP_TOOLS.md', 'FEATURES.md',
         'ROADMAP.md', 'SOARING_DESIGN.md')
 FORBIDDEN = {'.nds', '.gba', '.sav', '.save', '.dsv', '.ramdump', '.ml1', '.ml2', '.ml3', '.ml4', '.ml5', '.ml6', '.ml7', '.ml8', '.pem', '.key', '.pyc'}
 
@@ -136,7 +136,7 @@ def main():
         for path in sorted((ROOT/'tools/launcher_ui').rglob('*')):
             if path.is_file() and '__pycache__' not in path.parts:
                 z.write(path,'Unova-Together-Source/tools/launcher_ui/'+path.relative_to(ROOT/'tools/launcher_ui').as_posix())
-        for name in ('test_unova_updater.py','test_unova_single_exe.py','unova_single_exe.py','build_unova_single_exe.py','test_launcher_ui.py','test_launcher_preferences.py','test_launcher_cheat_engine.py','test_launcher_services.py','test_release_input_bounds.py','test_companion_and_soaring.py','test_overworld_companion.py','check_lan_player_list_validation.cpp','check_battle_presence.cpp','check_post_battle_presence.cpp','check_rival_agreement.cpp','test_rival_payload.py','test_coop_boss_payload.py','test_coop_story_return.py','test_coop_field_return.py','verify_coop_runtime.py','audit_native_enemy_setup.py','verify_rival_startups.py'):
+        for name in ('test_unova_updater.py','test_unova_single_exe.py','unova_single_exe.py','build_unova_single_exe.py','test_launcher_ui.py','test_launcher_preferences.py','test_launcher_cheat_engine.py','test_launcher_services.py','test_release_input_bounds.py','test_companion_and_soaring.py','test_overworld_companion.py','check_lan_player_list_validation.cpp','check_battle_presence.cpp','check_post_battle_presence.cpp','check_rival_agreement.cpp','test_rival_payload.py','test_coop_boss_payload.py','test_coop_story_return.py','test_coop_field_return.py','verify_coop_runtime.py','audit_native_enemy_setup.py','verify_rival_startups.py','test_soaring_geometry.py','test_soaring_scene_worker.py','test_soaring_real_scene_matrix_set.py','test_field_zone_native.py','audit_soaring_chunk_coverage.py','import_soaring_height_tables.py','check_field_zone.cpp','check_soaring_scene.cpp'):
             z.write(WORKSPACE/'tools'/name,'Unova-Together-Source/tools/'+name)
         z.write(ROOT/'tools/test_patchnotes_feed.py','Unova-Together-Source/tools/test_patchnotes_feed.py')
         for name in COMMANDS:
@@ -160,6 +160,7 @@ def main():
         assert all(k in {'PauseLostFocus','LimitFPS','TargetFPS','MP','JIT'} or k.startswith('Instance') for k in packed)
         assert not any('/source/' in n for n in z.namelist())
         assert 'Unova-Together/docs/COMPANIONS_AND_SOARING.md' in z.namelist()
+        assert 'Unova-Together/docs/SOARING_FLIGHT.md' in z.namelist()
         note_files=[name for name in z.namelist() if name.startswith('Unova-Together/patchnotes/RELEASE_NOTES_') and name.endswith('.md')]
         patch_index = json.loads((repo/'patchnotes'/'index.json').read_text(encoding='utf-8'))
         assert len(note_files)==len(patch_index['notes']) and f'Unova-Together/patchnotes/RELEASE_NOTES_{version}.md' in note_files
@@ -173,6 +174,8 @@ def main():
         assert 'Unova-Together-Source/tools/test_launcher_versioning.py' in z.namelist()
         assert 'Unova-Together-Source/tools/test_companion_and_soaring.py' in z.namelist()
         assert 'Unova-Together-Source/tools/test_overworld_companion.py' in z.namelist()
+        assert 'Unova-Together-Source/tools/soaring_height_tables.py' in z.namelist()
+        assert 'Unova-Together-Source/tools/test_soaring_real_scene_matrix_set.py' in z.namelist()
     stage_root.mkdir(parents=True)
     (stage_root/'.disposable-release-stage').write_text('Temporary extracted release staging; final archives are in downloads/releases.\n', encoding='utf-8')
     with zipfile.ZipFile(runtime) as z:z.extractall(stage_root)

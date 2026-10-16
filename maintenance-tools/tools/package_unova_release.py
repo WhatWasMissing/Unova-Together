@@ -17,13 +17,13 @@ HELPERS = (
     'online_udp_bridge.py', 'requirements-online-udp.txt', 'setup_tailscale_firewall.ps1',
     'unova_launcher.py', 'unova_updater.py', 'unova_storage.py', 'build_unova_launcher.py',
     'launcher_migration.py', 'unova_launcher_bootstrap.py', 'build_unova_bootstrap.py',
-    'soaring_scene_worker.py','battle_surroundings_worker.py','build_battle_surroundings.py',
+    'soaring_scene_worker.py','soaring_geometry.py','soaring_height_tables.py','battle_surroundings_worker.py','build_battle_surroundings.py',
     'field_scene_geometry.py','extract_battle_surroundings.py','area_scene_cache.py',
     'build_area_battle_scene.py','build_area_battle_catalog.py',
 )
 COMMANDS = ('Online Co-op.cmd', 'Install UDP Dependencies.cmd', 'Start LAN Presence Relay.cmd')
 DOCS = ('PLAYER_GUIDE.md', 'KNOWN_ISSUES.md', 'TAILSCALE_COOP.md', 'UDP_SERVER_GUIDE.md',
-        'LAUNCHER.md', 'COMPANIONS_AND_SOARING.md', 'COOP_TOOLS.md', 'FEATURES.md',
+        'LAUNCHER.md', 'COMPANIONS_AND_SOARING.md', 'SOARING_FLIGHT.md', 'COOP_TOOLS.md', 'FEATURES.md',
         'ROADMAP.md', 'SOARING_DESIGN.md')
 FORBIDDEN = {'.nds', '.sav', '.dsv', '.ramdump', '.ml1', '.ml2', '.ml3', '.ml4', '.ml8', '.pem', '.key'}
 QT_WINDOWS_PLATFORM_PLUGIN = Path('platforms/qwindows.dll')
@@ -174,6 +174,7 @@ def main():
         assert all(k in {'PauseLostFocus','LimitFPS','TargetFPS','MP','JIT'} or k.startswith('Instance') for k in packed)
         assert not any('/source/' in n for n in z.namelist())
         assert 'Unova-Together/docs/COMPANIONS_AND_SOARING.md' in z.namelist()
+        assert 'Unova-Together/docs/SOARING_FLIGHT.md' in z.namelist()
         note_files=[name for name in z.namelist() if name.startswith('Unova-Together/patchnotes/RELEASE_NOTES_') and name.endswith('.md')]
         assert len(note_files)==len(patch_index['notes']) and f'Unova-Together/patchnotes/RELEASE_NOTES_{version}.md' in note_files
         assert 'Unova-Together/patchnotes/index.json' in z.namelist()

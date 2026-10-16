@@ -5,10 +5,582 @@ from functools import lru_cache
 import heapq, json, math, os, threading, uuid, time, struct
 import ndspy.rom
 import ndspy.color
-from build_battle_surroundings import FieldSource
+from build_battle_surroundings import FieldSource, texture_pack
 from battle_surroundings_worker import atomic_json
 from extract_battle_surroundings import matrix_cells
 from soaring_geometry import collision_debug_tiles
+
+
+_MATRIX_SCALE=512  # 32 map tiles per matrix cell, at 16 world units per tile.
+_WATER_ZONE=240  # Undella Bay in the user's English Black 2 Redux decomp.
+
+# Absolute placements in the Black 2 Redux overworld frame. The first group is
+# solved from reciprocal outdoor grid warps. The remaining town-map anchors
+# are calibrated from the BW2 decomp's place markers and zone fly coordinates,
+# then snapped to chunk boundaries. They fill standalone outdoor maps that do
+# not have one unambiguous reciprocal grid-warp path.
+_FLIGHT_WORLD_OFFSETS={
+    0:(0,0),14:(12752,8864),16:(7968,8240),41:(8880,8128),107:(6832,7168),
+    136:(3632,352),183:(3264,1856),190:(10032,4848),208:(2528,1440),
+    224:(9440,8304),238:(7536,5824),255:(1536,9200),256:(3072,10816),
+    337:(8640,176),414:(1632,9392),
+    87:(8192,0),106:(4608,6144),117:(6656,4608),128:(-512,2048),
+    132:(7168,10240),133:(8704,9216),135:(8192,6656),182:(8192,2560),
+    273:(13312,3584),338:(12288,11776),357:(9216,6144),380:(2560,8192),
+}
+# Exact reciprocal-grid placements currently discovered from the Black 2
+# overworld frame. Keeping them explicit lets flight start from these maps as
+# well as from the overworld without needing to rediscover a possibly
+# ambiguous path from that local takeoff point.
+_FLIGHT_CONFIRMED_WARP_WORLD_OFFSETS={
+    1:(6640,10544),3:(6656,9536),11:(5472,9488),210:(8208,-96),
+    250:(11744,11456),251:(11744,11456),275:(432,11040),
+    296:(4896,9520),297:(4480,9008),348:(12064,11776),356:(9168,6160),
+    383:(8128,-688),384:(8176,-1088),390:(8176,-1088),
+}
+# Supported supplemental placements. These fill Black 2 Redux's exterior
+# matrices that cannot be placed by the reciprocal warp graph. Parent Fly
+# points anchor the named maps; small route/story scenes without a spatial
+# warp are packed next to their matching outdoor area. The Redux-only 416 map
+# is tied to Route 19 by its area id and its populated centre chunk.
+_FLIGHT_SUPPLEMENTAL_WORLD_OFFSETS={
+    # Castelia's rail-style city sections form one contiguous extension.
+    2:(8192,10240),4:(8704,10240),5:(9216,10240),6:(9728,10240),
+    7:(8192,11264),8:(8704,11264),9:(9216,11264),10:(9728,11264),
+    # Decomp parent Fly points: Twist Mountain, Desert Resort, and Route 7.
+    93:(2240,3296),103:(5856,7920),189:(1696,4192),
+    # Entrée Forest base and eight separate story scenes, beside Entralink.
+    119:(8192,4608),228:(7680,4096),229:(8192,4096),230:(8704,4096),
+    231:(7680,4608),232:(8704,4608),233:(7680,5120),234:(8192,5120),
+    235:(8704,5120),
+    # Victory Road sections with rail/indoor-only transitions.
+    162:(10176,176),387:(8640,1200),
+    # League approach and Black/White version-specific gates.
+    211:(8016,-544),225:(9920,6016),226:(9904,6016),
+    # A shared Hidden Grotto beside Lostlorn; Nature Preserve beside Anville.
+    314:(8048,5824),372:(512,2048),
+    # Redux-only zone 615/616 has no decomp coordinates. Keep its populated
+    # centre chunk beside Aspertia's Route 19 entrance without overlaying Gym.
+    416:(944,10608),
+}
+_FLIGHT_WORLD_ANCHOR_TILES={
+    14:(5,4),87:(19,49),106:(20,48),117:(16,16),128:(5,4),132:(3,1),
+    133:(0,0),135:(5,4),136:(5,4),182:(5,4),183:(5,4),190:(5,4),
+    238:(5,4),273:(0,0),337:(43,18),338:(5,4),357:(42,38),380:(31,50),
+    93:(5,4),103:(5,4),119:(16,16),162:(16,16),189:(5,4),211:(30,83),
+    225:(5,4),226:(5,4),228:(5,4),229:(5,4),230:(5,4),231:(5,4),
+    232:(5,4),233:(5,4),234:(5,4),235:(5,4),314:(5,4),372:(16,16),
+    387:(5,4),416:(32,32),
+}
+
+
+def flight_matrix_aliases(source):
+    """Find matrices that reuse the exact same placed chunk grid.
+
+    Black 2's OVERWORLD and OVERWORLD_2 have identical dimensions and chunk
+    ids; the second matrix supplies alternate per-cell zone ids for gates.
+    They are two zone tables over one world coordinate frame, not two places
+    to draw on top of each other.
+    """
+    cached=getattr(source,'_flight_matrix_aliases',None)
+    if cached is not None:return cached
+    groups={}
+    for matrix,data in enumerate(getattr(source,'matrices',())):
+        try:width,depth,cell_ids,_zones=matrix_cells(data)
+        except (ValueError,struct.error):continue
+        groups.setdefault((width,depth,cell_ids),[]).append(matrix)
+    aliases={}
+    for members in groups.values():
+        canonical=min(members)
+        for matrix in members:aliases[matrix]=canonical
+    source._flight_matrix_aliases=aliases
+    return aliases
+
+
+def flight_matrix_layout(source,matrix,aliases=None):
+    """Return a canonical chunk grid with outdoor zone tables combined."""
+    aliases=aliases if aliases is not None else flight_matrix_aliases(source)
+    canonical=aliases.get(matrix,matrix)
+    width,depth,cell_ids,zones=matrix_cells(source.matrices[canonical])
+    if zones is None:return width,depth,cell_ids,zones
+    combined=list(zones)
+    members=sorted(candidate for candidate,base in aliases.items() if base==canonical)
+    headers=getattr(source,'headers',b'');areas=getattr(source,'areas',b'')
+    for alias in members:
+        if alias==canonical:continue
+        _w,_d,_ids,other_zones=matrix_cells(source.matrices[alias])
+        if other_zones is None:continue
+        for cell,candidate in enumerate(other_zones):
+            if combined[cell]>=0 or candidate<0 or candidate>=len(headers)//48:continue
+            area=struct.unpack_from('<H',headers,candidate*48+2)[0]
+            if area*10+7<=len(areas) and areas[area*10+6]:combined[cell]=candidate
+    return width,depth,cell_ids,tuple(combined)
+
+
+def _flight_matrix_owner_score(matrix,offset,dimensions,world_cell_x,world_cell_z,
+                               preferred_matrix=None):
+    """Use the same anchor priority for atlas ownership and current-zone lookup."""
+    if matrix==0:
+        score=(1,0,matrix)
+    else:
+        width,depth=dimensions
+        anchor=_FLIGHT_WORLD_ANCHOR_TILES.get(matrix)
+        if anchor is None:anchor=((width-1)*16,(depth-1)*16)
+        anchor_x=offset[0]+anchor[0]*16;anchor_z=offset[1]+anchor[1]*16
+        centre_x=(world_cell_x+.5)*_MATRIX_SCALE
+        centre_z=(world_cell_z+.5)*_MATRIX_SCALE
+        score=(0,(anchor_x-centre_x)**2+(anchor_z-centre_z)**2,matrix)
+    if preferred_matrix is not None:
+        return (0 if matrix==preferred_matrix else 1,*score)
+    return score
+
+
+def flight_matrix_owner_at(source,offsets,x,z,layouts=None,preferred_matrix=None):
+    """Return the matrix and local cell whose chunk owns this world cell."""
+    layouts=layouts if layouts is not None else {
+        matrix:flight_matrix_layout(source,matrix) for matrix in offsets
+    }
+    world_cell_x=math.floor(x/_MATRIX_SCALE);world_cell_z=math.floor(z/_MATRIX_SCALE)
+    candidates=[]
+    for matrix,(ox,oz) in offsets.items():
+        width,depth,ids,zones=layouts[matrix]
+        cx=math.floor((x-ox)/_MATRIX_SCALE);cz=math.floor((z-oz)/_MATRIX_SCALE)
+        if not (0<=cx<width and 0<=cz<depth):continue
+        local_cell=cz*width+cx
+        if ids[local_cell]<0:continue
+        score=_flight_matrix_owner_score(matrix,(ox,oz),(width,depth),world_cell_x,
+                                         world_cell_z,preferred_matrix)
+        candidates.append((score,matrix,local_cell))
+    if not candidates:return None
+    _score,matrix,local_cell=min(candidates)
+    return matrix,local_cell
+
+
+def active_flight_matrix_preference(matrix,x,z,layouts,masks):
+    """Prefer the takeoff map only when its occupied launch cell is occluded."""
+    if matrix==0 or matrix not in layouts:return None
+    width,depth,ids,_zones=layouts[matrix]
+    cx,cz=math.floor(x/_MATRIX_SCALE),math.floor(z/_MATRIX_SCALE)
+    if not (0<=cx<width and 0<=cz<depth):return None
+    cell=cz*width+cx
+    if ids[cell]<0 or masks[matrix][cell]:return None
+    return matrix
+
+
+def flight_matrix_offsets(source, root_matrix):
+    """Place outdoor matrices from reciprocal grid warps in the ROM.
+
+    BW2 stores warp positions in 1/16-tile world units. A reciprocal pair
+    gives an exact translation between map matrices. Outdoor placements are
+    established first; indoor-only matrices may relay a placement only when
+    every discovered path agrees. The native ``fly_from`` zone flag only
+    controls the game's Fly move; it does not mark whether a destination is
+    outdoor or safe to render during custom Soaring.
+    """
+    if not all(hasattr(source,key) for key in ('headers','events','areas','matrices')):
+        return {root_matrix:(0,0)}
+    aliases=flight_matrix_aliases(source)
+    root_matrix=aliases.get(root_matrix,root_matrix)
+    cached=getattr(source,'_flight_matrix_offsets',None)
+    if cached is not None and root_matrix in cached:return cached[root_matrix]
+    count=len(source.headers)//48
+    eligible=[];matrix_zones={}
+    for zone in range(count):
+        offset=zone*48
+        area,matrix=struct.unpack_from('<HH',source.headers,offset+2)
+        if (matrix>=len(source.matrices) or
+                area*10+7>len(source.areas) or not source.areas[area*10+6]):continue
+        matrix=aliases.get(matrix,matrix)
+        eligible.append(zone);matrix_zones.setdefault(matrix,[]).append(zone)
+    # Read warp coordinates for every zone, including gate/alternate-area
+    # headers whose own area is not marked exterior. A destination warp still
+    # supplies the exact local coordinate frame for its matrix. Several
+    # Redux outdoor matrices enter through a non-exterior gate zone that
+    # shares the anchored overworld matrix; filtering those records out loses
+    # an otherwise exact placement (for example, the Black/White Forest
+    # gate transition).
+    zone_warps={}
+    for zone in range(count):
+        header=zone*48
+        event_id=struct.unpack_from('<H',source.headers,header+22)[0]
+        if event_id==0xffff or event_id>=len(source.events):continue
+        data=source.events[event_id]
+        if len(data)<8:continue
+        bg_count,npc_count,warp_count,_trigger_count=data[4:8]
+        pos=8+bg_count*20+npc_count*36
+        if warp_count>255 or pos+warp_count*20>len(data):continue
+        records=[]
+        for index in range(warp_count):
+            item=pos+index*20
+            dest,dest_warp=struct.unpack_from('<HH',data,item)
+            is_rail=struct.unpack_from('<H',data,item+6)[0]
+            if is_rail:
+                records.append(None);continue
+            x,_y,z,_width,_height,_unknown=struct.unpack_from('<6H',data,item+8)
+            records.append((dest,dest_warp,x,z))
+        zone_warps[zone]=records
+    outdoor_matrices=set(matrix_zones)
+    edge_offsets={}
+    all_edge_offsets={}
+    for zone,records in zone_warps.items():
+        raw_matrix=struct.unpack_from('<H',source.headers,zone*48+4)[0]
+        matrix=aliases.get(raw_matrix,raw_matrix)
+        for index,warp in enumerate(records):
+            if warp is None:continue
+            dest,dest_warp,x,z=warp
+            reverse=zone_warps.get(dest,())
+            if dest not in zone_warps or dest_warp>=len(reverse):continue
+            back=reverse[dest_warp]
+            if back is None or back[0]!=zone or back[1]!=index:continue
+            raw_dest_matrix=struct.unpack_from('<H',source.headers,dest*48+4)[0]
+            dest_matrix=aliases.get(raw_dest_matrix,raw_dest_matrix)
+            if dest_matrix==matrix:continue
+            dx=x-back[2];dz=z-back[3]
+            if dx%16 or dz%16:continue
+            edge=(min(matrix,dest_matrix),max(matrix,dest_matrix))
+            signed=(dx,dz) if matrix<dest_matrix else (-dx,-dz)
+            all_edge_offsets.setdefault(edge,set()).add(signed)
+            # Preserve the original outdoor-only graph for root placements:
+            # some indoor warps are portals between distant areas and must not
+            # move already established scenery.
+            if matrix in outdoor_matrices and dest_matrix in outdoor_matrices:
+                edge_offsets.setdefault(edge,set()).add(signed)
+    graph={}
+    for (a,b),values in sorted(edge_offsets.items()):
+        if len(values)!=1:continue
+        dx,dz=next(iter(values))
+        graph.setdefault(a,[]).append((b,(dx,dz)))
+        graph.setdefault(b,[]).append((a,(-dx,-dz)))
+    offsets={root_matrix:(0,0)};pending=[root_matrix]
+    while pending:
+        matrix=pending.pop(0)
+        for other,delta in sorted(graph.get(matrix,())):
+            proposed=(offsets[matrix][0]+delta[0],offsets[matrix][1]+delta[1])
+            if other not in offsets:
+                offsets[other]=proposed;pending.append(other)
+            # Conflicting loops are intentionally ignored; the first exact
+            # reciprocal path remains deterministic and prevents map jumps.
+
+    # The decomp supplies Town Map anchors for outdoor places on matrices that
+    # are not reachable through a unique reciprocal grid warp. Use these only
+    # for the matching Black 2 ROM and only when the matrix is actually used by
+    # an outdoor zone. Existing warp-derived placements always take precedence.
+    rom=getattr(source,'rom',None)
+    world_offsets=_FLIGHT_WORLD_OFFSETS
+    # Supplemental story/transition placements describe the full local Redux
+    # ROM, not small synthetic sources used by the warp-graph tests. Requiring
+    # the real BW2 zone and matrix counts prevents those fixtures from being
+    # silently forced onto unrelated hand-authored positions.
+    is_full_redux=(getattr(rom,'idCode',None)==b'IREO' and
+                   len(source.headers)//48>600 and len(source.matrices)>416)
+    if is_full_redux:
+        world_offsets={**_FLIGHT_WORLD_OFFSETS,
+                       **_FLIGHT_CONFIRMED_WARP_WORLD_OFFSETS,
+                       **_FLIGHT_SUPPLEMENTAL_WORLD_OFFSETS}
+    if getattr(rom,'idCode',None)==b'IREO' and root_matrix in world_offsets:
+        root_world=world_offsets[root_matrix]
+        for matrix,world in world_offsets.items():
+            if matrix in matrix_zones and matrix<len(source.matrices):
+                offsets.setdefault(matrix,(world[0]-root_world[0],world[1]-root_world[1]))
+
+        # Grow from every confirmed placement over unique reciprocal links.
+        # If two placed neighbours disagree about an unknown matrix, leave it
+        # unresolved rather than choosing an arbitrary story instance.
+        while True:
+            proposals={}
+            for matrix,position in offsets.items():
+                for other,delta in graph.get(matrix,()):
+                    if other in offsets:continue
+                    candidate=(position[0]+delta[0],position[1]+delta[1])
+                    proposals.setdefault(other,set()).add(candidate)
+            additions={matrix:next(iter(values)) for matrix,values in proposals.items()
+                       if len(values)==1 and matrix in matrix_zones}
+            if not additions:break
+            offsets.update(additions)
+
+        # Indoor-only matrices can still carry exact, reciprocal grid warp
+        # coordinates between outdoor parts of one continuous field (notably
+        # the Castelia Sewers and Victory Road). Use them as transit nodes
+        # after the established outdoor placements are fixed. A candidate is
+        # accepted only when all currently anchored paths agree; if a later
+        # path exposes a conflicting placement, keep that matrix unresolved.
+        bridge_graph={}
+        for (a,b),values in sorted(all_edge_offsets.items()):
+            if len(values)!=1:continue
+            dx,dz=next(iter(values))
+            bridge_graph.setdefault(a,[]).append((b,(dx,dz)))
+            bridge_graph.setdefault(b,[]).append((a,(-dx,-dz)))
+        bridge_positions=dict(offsets)
+        bridge_seeds=set(offsets)
+        bridge_blocked=set()
+        while True:
+            proposals={}
+            for matrix,position in bridge_positions.items():
+                for other,delta in bridge_graph.get(matrix,()):
+                    if other in bridge_positions or other in bridge_blocked:continue
+                    candidate=(position[0]+delta[0],position[1]+delta[1])
+                    proposals.setdefault(other,set()).add(candidate)
+            additions={matrix:next(iter(values)) for matrix,values in proposals.items()
+                       if len(values)==1}
+            if not additions:break
+            bridge_positions.update(additions)
+            conflicts=set()
+            for matrix,position in additions.items():
+                for other,delta in bridge_graph.get(matrix,()):
+                    if other not in bridge_positions:continue
+                    expected=(position[0]+delta[0],position[1]+delta[1])
+                    if bridge_positions[other]!=expected:
+                        conflicts.add(matrix)
+                        if other not in bridge_seeds:conflicts.add(other)
+            for matrix in conflicts:
+                if matrix in bridge_seeds:continue
+                bridge_positions.pop(matrix,None)
+                bridge_blocked.add(matrix)
+        for matrix,position in bridge_positions.items():
+            if matrix in matrix_zones and matrix not in offsets:
+                offsets[matrix]=position
+
+        # Some outdoor transition maps encode an arrival warp but omit a
+        # reciprocal exit back to the source zone. The source warp's
+        # destination-warp index still identifies a real coordinate in the
+        # destination matrix, so it can provide an exact placement from
+        # either side when every proposal agrees. Ambiguous story instances
+        # (for example, Black City Gate) remain unplaced rather than guessed.
+        while True:
+            proposals={}
+            for matrix,position in offsets.items():
+                for zone in matrix_zones.get(matrix,()):
+                    for warp in zone_warps.get(zone,()):
+                        if warp is None:continue
+                        dest,dest_warp,x,z=warp
+                        if dest not in zone_warps or dest_warp>=len(zone_warps[dest]):continue
+                        landing=zone_warps[dest][dest_warp]
+                        if landing is None:continue
+                        raw_dest_matrix=struct.unpack_from('<H',source.headers,dest*48+4)[0]
+                        dest_matrix=aliases.get(raw_dest_matrix,raw_dest_matrix)
+                        if dest_matrix==matrix or dest_matrix not in matrix_zones or dest_matrix in offsets:continue
+                        dx,dz=x-landing[2],z-landing[3]
+                        if dx%16 or dz%16:continue
+                        proposals.setdefault(dest_matrix,set()).add((position[0]+dx,position[1]+dz))
+            for matrix in matrix_zones.keys()-offsets.keys():
+                for zone in matrix_zones.get(matrix,()):
+                    for warp in zone_warps.get(zone,()):
+                        if warp is None:continue
+                        dest,dest_warp,x,z=warp
+                        if dest not in zone_warps or dest_warp>=len(zone_warps[dest]):continue
+                        landing=zone_warps[dest][dest_warp]
+                        if landing is None:continue
+                        raw_dest_matrix=struct.unpack_from('<H',source.headers,dest*48+4)[0]
+                        dest_matrix=aliases.get(raw_dest_matrix,raw_dest_matrix)
+                        if dest_matrix==matrix or dest_matrix not in offsets:continue
+                        dx,dz=landing[2]-x,landing[3]-z
+                        if dx%16 or dz%16:continue
+                        proposals.setdefault(matrix,set()).add((offsets[dest_matrix][0]+dx,
+                                                                 offsets[dest_matrix][1]+dz))
+            additions={matrix:next(iter(values)) for matrix,values in proposals.items()
+                       if len(values)==1 and matrix in matrix_zones}
+            if not additions:break
+            offsets.update(additions)
+    caches=cached if cached is not None else {}
+    caches[root_matrix]=offsets
+    source._flight_matrix_offsets=caches
+    return offsets
+
+
+def merged_flight_grid(source, offsets, with_masks=False, preferred_matrix=None):
+    """Merge linked matrices into a bounded, coarse atlas for flight visuals."""
+    layouts={}
+    aliases=flight_matrix_aliases(source)
+    min_x=min_z=10**9;max_x=max_z=-10**9
+    for matrix,(ox,oz) in offsets.items():
+        width,depth,ids,zones=flight_matrix_layout(source,matrix,aliases)
+        layouts[matrix]=(width,depth,ids,zones)
+        min_x=min(min_x,math.floor(ox/_MATRIX_SCALE));min_z=min(min_z,math.floor(oz/_MATRIX_SCALE))
+        max_x=max(max_x,math.ceil((ox+width*_MATRIX_SCALE)/_MATRIX_SCALE))
+        max_z=max(max_z,math.ceil((oz+depth*_MATRIX_SCALE)/_MATRIX_SCALE))
+    width,height=max_x-min_x,max_z-min_z
+    if width<1 or height<1 or width*height>4096:
+        raise ValueError('Connected flight region exceeds atlas bounds')
+    cells=[-1]*(width*height)
+    masks={matrix:[False]*(mw*mh) for matrix,(mw,mh,_ids,_zones) in layouts.items()}
+    owners={}
+    for matrix,(ox,oz) in offsets.items():
+        matrix_width,matrix_depth,ids,_zones=layouts[matrix]
+        for mz in range(matrix_depth):
+            for mx in range(matrix_width):
+                if ids[mz*matrix_width+mx]<0:continue
+                left=math.floor((ox+mx*_MATRIX_SCALE)/_MATRIX_SCALE)-min_x
+                right=math.floor((ox+(mx+1)*_MATRIX_SCALE-1e-6)/_MATRIX_SCALE)-min_x
+                top=math.floor((oz+mz*_MATRIX_SCALE)/_MATRIX_SCALE)-min_z
+                bottom=math.floor((oz+(mz+1)*_MATRIX_SCALE-1e-6)/_MATRIX_SCALE)-min_z
+                for gz in range(max(0,top),min(height-1,bottom)+1):
+                    for gx in range(max(0,left),min(width-1,right)+1):
+                        key=gz*width+gx;cells[key]=1
+                        score=_flight_matrix_owner_score(matrix,(ox,oz),
+                            (matrix_width,matrix_depth),gx+min_x,gz+min_z,
+                            preferred_matrix)
+                        previous=owners.get(key)
+                        if previous is None or score<previous[0]:
+                            owners[key]=(score,matrix,mz*matrix_width+mx)
+    for _key,matrix,local_cell in owners.values():masks[matrix][local_cell]=True
+    result=(min_x,min_z,width,height,tuple(cells),layouts)
+    if with_masks:return (*result,{matrix:tuple(mask) for matrix,mask in masks.items()})
+    return result
+
+
+def _cross2(a,b,c):
+    return (b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0])
+
+
+def _convex_hull(points):
+    """Return the deterministic convex hull of map-cell corner points."""
+    points=sorted(set(points))
+    if len(points)<3:return points
+    lower=[]
+    for point in points:
+        while len(lower)>=2 and _cross2(lower[-2],lower[-1],point)<=0:lower.pop()
+        lower.append(point)
+    upper=[]
+    for point in reversed(points):
+        while len(upper)>=2 and _cross2(upper[-2],upper[-1],point)<=0:upper.pop()
+        upper.append(point)
+    return lower[:-1]+upper[:-1]
+
+
+def interior_water_cells(width,depth,cell_ids,edge_margin=.75):
+    """Fill atlas gaps inside the outer map footprint with native sea tiles.
+
+    The hull uses the corners of real matrix cells, so disconnected authored
+    regions share a continuous water backdrop while space beyond their outer
+    footprint remains the distant boundary. The small margin closes diagonal
+    edge cracks without extending the water more than one atlas cell.
+    """
+    occupied=[i for i,value in enumerate(cell_ids) if value>=0]
+    if not occupied:return ()
+    corners=[]
+    for cell in occupied:
+        gx,gz=cell%width,cell//width
+        corners.extend(((gx,gz),(gx+1,gz),(gx+1,gz+1),(gx,gz+1)))
+    hull=_convex_hull(corners)
+    if len(hull)<3:return ()
+    result=[]
+    for cell,value in enumerate(cell_ids):
+        if value>=0:continue
+        gx,gz=cell%width,cell//width;point=(gx+.5,gz+.5)
+        inside=True
+        for index,a in enumerate(hull):
+            b=hull[(index+1)%len(hull)]
+            # Hull points are counter-clockwise; a negative cross-product is
+            # distance outside an edge, normalized by that edge's length.
+            cross=_cross2(a,b,point)
+            if cross < -edge_margin*math.hypot(b[0]-a[0],b[1]-a[1]):
+                inside=False;break
+        if inside:result.append(cell)
+    return tuple(result)
+
+
+def flight_atlas_coverage(width,depth,cell_ids,edge_margin=.75):
+    """Summarize whether real map cells and sea fill form a gap-free atlas.
+
+    Empty cells that remain after the convex-hull sea fill are allowed only
+    when they can reach the atlas edge; they then represent the distant map
+    boundary. A remaining empty cell enclosed by the authored footprint, or
+    touching a real cell even diagonally, would appear as an accidental gap.
+    """
+    if width<1 or depth<1 or len(cell_ids)!=width*depth:
+        raise ValueError('Invalid flight atlas dimensions')
+    land={index for index,value in enumerate(cell_ids) if value>=0}
+    water=set(interior_water_cells(width,depth,cell_ids,edge_margin))
+    covered=land|water
+    empty=set(range(width*depth))-covered
+
+    edge=[index for index in empty
+          if index%width in (0,width-1) or index//width in (0,depth-1)]
+    outside=set(edge);pending=list(edge)
+    while pending:
+        index=pending.pop();x=index%width;z=index//width
+        neighbours=(index-1 if x else -1,index+1 if x+1<width else -1,
+                    index-width if z else -1,index+width if z+1<depth else -1)
+        for neighbour in neighbours:
+            if neighbour in empty and neighbour not in outside:
+                outside.add(neighbour);pending.append(neighbour)
+    enclosed=empty-outside
+
+    edge_gaps=set()
+    for index in empty:
+        x=index%width;z=index//width
+        for nx,nz in ((x-1,z),(x+1,z),(x,z-1),(x,z+1),
+                      (x-1,z-1),(x+1,z-1),(x-1,z+1),(x+1,z+1)):
+            if 0<=nx<width and 0<=nz<depth and nz*width+nx in land:
+                edge_gaps.add(index);break
+
+    remaining=set(covered);components=0
+    while remaining:
+        components+=1
+        pending=[remaining.pop()]
+        while pending:
+            index=pending.pop();x=index%width;z=index//width
+            neighbours=(index-1 if x else -1,index+1 if x+1<width else -1,
+                        index-width if z else -1,index+width if z+1<depth else -1)
+            for neighbour in neighbours:
+                if neighbour in remaining:
+                    remaining.remove(neighbour);pending.append(neighbour)
+    return {
+        'width':width,'depth':depth,'mappedCells':len(land),
+        'seaFillCells':len(water),'coveredCells':len(covered),
+        'outerBoundaryCells':len(outside),'enclosedVoidCells':len(enclosed),
+        'unfilledCellsTouchingMap':len(edge_gaps),
+        'coveredComponents':components,
+    }
+
+
+def make_water_faces(cells,width,origin_x,origin_z,atlas_x,atlas_z,radius,texture_index):
+    """Build textured, renderer-only sea quads for the empty atlas footprint."""
+    faces=[]
+    for cell in cells:
+        gx,gz=cell%width,cell//width
+        left=(gx*512-atlas_x);right=((gx+1)*512-atlas_x)
+        front=(gz*512-atlas_z);back=((gz+1)*512-atlas_z)
+        if math.hypot((left+right)*.5,(front+back)*.5)>radius+363:continue
+        # sea_mizu1 is a 32x32 native BW2 water tile. One texture repeat spans
+        # 16 world units, yielding 32 seamless repeats per 512-unit atlas cell.
+        u0=((origin_x+gx)*32)%32;u1=u0+32
+        v0=((origin_z+gz)*32)%32;v1=v0+32
+        y=-34.
+        vertices=[[left,y,front,u0,v0],[right,y,front,u1,v0],
+                  [right,y,back,u1,v1],[left,y,back,u0,v1]]
+        faces.append([texture_index,vertices])
+    return faces
+
+
+def flight_water_material(source):
+    """Get a native tiled sea texture and palette from the user's ROM.
+
+    Prefer Undella Bay's map pack (named as zone 240 in the Black 2 decomp),
+    then search other ROM packs for the same native material if that map has
+    been changed by a ROM revision.
+    """
+    cached=getattr(source,'_flight_water_material',None)
+    if cached is not None:return cached
+    packs=getattr(source,'packs',())
+    preferred=[]
+    headers=getattr(source,'headers',b'');areas=getattr(source,'areas',b'')
+    if len(headers)>(_WATER_ZONE*48+4) and len(areas)>=2:
+        area=struct.unpack_from('<H',headers,_WATER_ZONE*48+2)[0]
+        if area*10+4<=len(areas):
+            pack_id=struct.unpack_from('<H',areas,area*10+2)[0]
+            if pack_id<len(packs):preferred.append(pack_id)
+    order=preferred+[index for index in range(len(packs)) if index not in preferred]
+    for index in order:
+        try:pack=texture_pack(packs[index])
+        except (ValueError,IndexError,struct.error):continue
+        textures=dict(pack.textures);palettes=dict(pack.palettes)
+        texture_name='sea_mizu1';palette_name='sea_mizu1_pl'
+        texture=textures.get(texture_name);palette=palettes.get(palette_name)
+        if texture is None or palette is None or (texture.width,texture.height)!=(32,32) or not palette.colors:continue
+        cached=(texture,palette);source._flight_water_material=cached
+        return cached
+    return None
 
 
 @lru_cache(maxsize=8)
@@ -170,34 +742,96 @@ def export_scene(source, zone, x, z, y, directory, radius=4096):
     ndspy.color.prepareLUTs()
     if not all(math.isfinite(v) for v in (x,z,y)):raise ValueError('Invalid flight position')
     source_zone=zone
-    source_area,matrix=struct.unpack_from('<HH',source.headers,zone*48+2)
-    width,depth,ids,zones=matrix_cells(source.matrices[matrix])
-    cx,cz=int(x//512),int(z//512)
-    if not 0<=cx<width or not 0<=cz<depth:
-        # Stay with the take-off region's matrix beyond its authored edge;
-        # SoaringScene supplies cloud-sea there and fog hides the hard edge.
-        zone=source_zone
-    elif ids[cz*width+cx]>=0 and zones is not None and zones[cz*width+cx]>=0:
-        zone=zones[cz*width+cx]
-    if not 0<=zone<len(source.headers)//48:raise ValueError('Unsupported neighbouring zone')
-    area,neighbor_matrix=struct.unpack_from('<HH',source.headers,zone*48+2)
+    source_area,raw_matrix=struct.unpack_from('<HH',source.headers,zone*48+2)
+    aliases=flight_matrix_aliases(source)
+    matrix=aliases.get(raw_matrix,raw_matrix)
     if not source.areas[source_area*10+6]:raise ValueError('Take flight outdoors')
+    offsets=flight_matrix_offsets(source,matrix)
+    origin_x,origin_z,width,depth,ids,layouts,layout_masks=merged_flight_grid(source,offsets,with_masks=True)
+    preferred_matrix=None
+    # A few story/rail maps share their coordinate frame with a larger field
+    # and can lose the launch cell to that field's chunks. Let the active map
+    # own overlaps only when its actual takeoff cell would otherwise vanish.
+    preferred_matrix=active_flight_matrix_preference(
+        matrix,x,z,layouts,layout_masks)
+    if preferred_matrix is not None:
+        origin_x,origin_z,width,depth,ids,layouts,layout_masks=merged_flight_grid(
+            source,offsets,with_masks=True,preferred_matrix=preferred_matrix)
+    matrix_zones={}
+    for candidate in range(len(source.headers)//48):
+        area_id,raw_matrix_id=struct.unpack_from('<HH',source.headers,candidate*48+2)
+        matrix_id=aliases.get(raw_matrix_id,raw_matrix_id)
+        if matrix_id in offsets and source.areas[area_id*10+6]:
+            matrix_zones.setdefault(matrix_id,candidate)
+    if matrix not in matrix_zones:matrix_zones[matrix]=source_zone
+    # Keep the visible zone aligned with the matrix whose chunk wins atlas
+    # ownership at this position. The sourceZone remains the take-off map so
+    # the native flight session stays valid.
+    zone=source_zone
+    owner=flight_matrix_owner_at(source,offsets,x,z,layouts,preferred_matrix)
+    if owner is not None:
+        matrix_id,local_cell=owner
+        matrix_map_zones=layouts[matrix_id][3]
+        candidate=(matrix_map_zones[local_cell] if matrix_map_zones is not None
+                   else matrix_zones.get(matrix_id,-1))
+        if not 0<=candidate<len(source.headers)//48:
+            candidate=matrix_zones.get(matrix_id,source_zone)
+        if 0<=candidate<len(source.headers)//48:
+            candidate_area=struct.unpack_from('<H',source.headers,candidate*48+2)[0]
+            if source.areas[candidate_area*10+6]:zone=candidate
     collision_debug=bool(getattr(source,'collision_debug',False))
-    faces,packs,report=source.scene(zone,x,z,y,radius=radius,keep_centre=True,flight=True,layout_matrix=matrix,collision_debug=collision_debug)
+    faces=[];packs={};landings=[];collision_tiles=[];omitted_props=[];chunks=[];closed_backs=0
+    for matrix_id,(offset_x,offset_z) in sorted(offsets.items()):
+        mw,mh,chunk_ids,matrix_map_zones=layouts[matrix_id]
+        left,top=offset_x,offset_z;right=offset_x+mw*_MATRIX_SCALE;bottom=offset_z+mh*_MATRIX_SCALE
+        dx=max(left-x,0,x-right);dz=max(top-z,0,z-bottom)
+        if math.hypot(dx,dz)>radius+_MATRIX_SCALE:continue
+        local_x,local_z=x-offset_x,z-offset_z
+        cx,cz=int(local_x//_MATRIX_SCALE),int(local_z//_MATRIX_SCALE)
+        representative=matrix_zones.get(matrix_id,source_zone)
+        if 0<=cx<mw and 0<=cz<mh and matrix_map_zones is not None:
+            candidate=matrix_map_zones[cz*mw+cx]
+            if 0<=candidate<len(source.headers)//48:
+                candidate_area=struct.unpack_from('<H',source.headers,candidate*48+2)[0]
+                if source.areas[candidate_area*10+6]:representative=candidate
+        try:
+            part_faces,part_packs,report=source.scene(representative,local_x,local_z,y,radius=radius,
+                keep_centre=True,flight=True,layout_matrix=matrix_id,layout_zones=matrix_map_zones,
+                layout_mask=layout_masks[matrix_id],
+                collision_debug=collision_debug)
+        except (ValueError,IndexError,KeyError,struct.error):
+            continue
+        faces.extend(part_faces);packs.update(part_packs)
+        omitted_props.extend(report.get('omittedProps',[]));chunks.extend(report.get('chunks',[]))
+        closed_backs+=report.get('closedBacks',0)
+        tile_x=round(offset_x/16);tile_z=round(offset_z/16)
+        for site in report.get('landings',[]):
+            if len(site)!=4:continue
+            global_x=offset_x+site[1]*16+8;global_z=offset_z+site[2]*16+8
+            # Only the nearby whitelist is needed; flight refreshes the scene
+            # before the rider reaches the edge of this window.
+            if math.hypot(global_x-x,global_z-z)>768:continue
+            landings.append([site[0],site[1],site[2],site[3],global_x,global_z])
+        for tile in report.get('collisionTiles',[]):
+            if len(tile)==4:collision_tiles.append([tile[0]+tile_x,tile[1]+tile_z,tile[2],tile[3]])
     if len(faces)>32000:raise ValueError('This map exceeds the flight scenery budget')
-    # A handful of Redux matrix cells point at alternate or partial chunks
-    # whose texture dictionaries omit names seen in their model. Skip those
-    # faces and let the atlas sea safely cover the gap.
+    # Some Redux cells point at alternate chunks whose texture dictionaries
+    # omit names used by their models. Let the atlas sea cover those gaps.
     faces=[(pair,vertices) for pair,vertices in faces
            if pair[0] in packs and pair[1] in dict(packs[pair[0]].textures)
            and pair[2] in dict(packs[pair[0]].palettes)]
     pairs=sorted({pair for pair,_ in faces})
     atlas_grid=[1 if cid>=0 else 0 for cid in ids]
+    origin_world_x,origin_world_z=origin_x*_MATRIX_SCALE,origin_z*_MATRIX_SCALE
+    atlas_x,atlas_z=x-origin_world_x,z-origin_world_z
     routes=build_flyway_routes(width,depth,tuple(ids))
-    flyway_faces=make_flyway_faces(routes,x,z,radius)
-    region_faces,atlas_biome=make_region_fill_faces(width,depth,ids,x,z,radius)
-    collision_tiles=report.get('collisionTiles',[])
-    if len(faces)+len(flyway_faces)+len(region_faces)+len(collision_tiles)>32000:
+    flyway_faces=make_flyway_faces(routes,atlas_x,atlas_z,radius)
+    region_faces,atlas_biome=make_region_fill_faces(width,depth,ids,atlas_x,atlas_z,radius)
+    water_cells=interior_water_cells(width,depth,ids)
+    water_material=flight_water_material(source)
+    water_faces=(make_water_faces(water_cells,width,origin_x,origin_z,atlas_x,atlas_z,radius,len(pairs))
+                 if water_material is not None else [])
+    if len(faces)+len(water_faces)+len(flyway_faces)+len(region_faces)+len(collision_tiles)>32000:
         raise ValueError('This map exceeds the flight scenery budget')
     directory=Path(directory);directory.mkdir(parents=True)
     textures=[];texture_modes=[]
@@ -215,12 +849,22 @@ def export_scene(source, zone, x, z, y, directory, radius=4096):
         texture_modes.append([bool(getattr(texture,key,True if key.startswith('repeat') else False)) for key in ('repeatS','repeatT','mirrorS','mirrorT')])
     indices={pair:i for i,pair in enumerate(pairs)}
     geometry=[[indices[pair],[[round(v,5) for v in vertex] for vertex in vertices]] for pair,vertices in faces]
-    result={'format':2,'zone':zone,'sourceZone':source_zone,'world':[x,y,z],'textures':textures,'textureModes':texture_modes,'faces':geometry,
-            'omittedProps':report['omittedProps'],'chunks':report['chunks'],
-            'landings':report.get('landings',[]),'closedBacks':report.get('closedBacks',0),'radius':radius,
-            'atlasMatrix':matrix,'atlasSize':[width,depth],'atlasGrid':atlas_grid,
+    if water_material is not None and water_faces:
+        texture,palette=water_material
+        colours=[ndspy.color.pack(*colour) for colour in palette.colors]
+        colours.extend([0]*max(0,256-len(colours)))
+        texture.renderAsImage(SimpleNamespace(colors=colours)).save(directory/f'texture-{len(textures)}.png')
+        textures.append(f'texture-{len(textures)}.png')
+        # The 32x32 ROM tile repeats in both directions for continuous water.
+        texture_modes.append([True,True,False,False])
+        geometry.extend(water_faces)
+    result={'format':3,'zone':zone,'sourceZone':source_zone,'world':[x,y,z],'textures':textures,'textureModes':texture_modes,'faces':geometry,
+            'omittedProps':sorted(set(omitted_props)),'chunks':sorted(set(chunks)),
+            'landings':landings,'closedBacks':closed_backs,'radius':radius,
+            'atlasMatrix':matrix,'atlasSize':[width,depth],'atlasOriginCell':[origin_x,origin_z],'atlasGrid':atlas_grid,
             'atlasBiome':atlas_biome,'flywayRoutes':routes,'flywayFaces':flyway_faces,'regionFaces':region_faces,
-            'collisionDebug':collision_debug,'collisionTiles':collision_tiles,'seaTiles':0}
+            'matrixOffsets':{str(mid):list(offset) for mid,offset in sorted(offsets.items())},
+            'collisionDebug':collision_debug,'collisionTiles':collision_tiles,'seaTiles':len(water_faces)}
     (directory/'scene.json').write_text(json.dumps(result,separators=(',',':')),encoding='utf-8')
     return result
 

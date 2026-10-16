@@ -59,6 +59,183 @@ def display_faces(data, scale):
     return faces
 
 
+def _pivot_rotation(form, signs, a, b):
+    """Decode the compact Nitro rotation used by a BoneMatrix."""
+    if form > 8:
+        raise ValueError('Unsupported pivot rotation form')
+    one = -1.0 if signs & 1 else 1.0
+    c = -b if signs & 2 else b
+    d = -a if signs & 4 else a
+    forms = (
+        ((one, 0, 0), (0, a, b), (0, c, d)),
+        ((0, one, 0), (a, 0, b), (c, 0, d)),
+        ((0, 0, one), (a, b, 0), (c, d, 0)),
+        ((0, a, b), (one, 0, 0), (0, c, d)),
+        ((a, 0, b), (0, one, 0), (c, 0, d)),
+        ((a, b, 0), (0, 0, one), (c, d, 0)),
+        ((0, a, b), (0, c, d), (one, 0, 0)),
+        ((a, 0, b), (c, 0, d), (0, one, 0)),
+        ((a, b, 0), (c, d, 0), (0, 0, one)),
+    )
+    return forms[form]
+
+
+def node_transform(data, offset):
+    """Read one static NSBMD node as a row-major affine transform."""
+    if offset < 0 or offset + 4 > len(data):
+        raise ValueError('Node transform bounds')
+    flags = struct.unpack_from('<H', data, offset)[0]
+    cursor = offset + 4  # flags and the aligned m0/pivot-form word
+    translation = (0.0, 0.0, 0.0)
+    scales = (1.0, 1.0, 1.0)
+    identity = ((1.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.0, 0.0, 1.0))
+    rotation = identity
+    if not flags & 1:
+        translation = tuple(v / 4096.0 for v in struct.unpack_from('<3i', data, cursor))
+        cursor += 12
+    pivot = (flags >> 3) & 1
+    matrix_rotation = (flags >> 1) & 1
+    if pivot:
+        form = (flags >> 4) & 0xF
+        signs = (flags >> 8) & 0x7
+        a, b = (v / 4096.0 for v in struct.unpack_from('<2h', data, cursor))
+        cursor += 4
+        rotation = _pivot_rotation(form, signs, a, b)
+    elif not matrix_rotation:
+        first = struct.unpack_from('<h', data, offset + 2)[0] / 4096.0
+        rest = [v / 4096.0 for v in struct.unpack_from('<8h', data, cursor)]
+        cursor += 16
+        values = [first] + rest
+        rotation = tuple(tuple(values[col * 3 + row] for col in range(3)) for row in range(3))
+    if not flags & 4:
+        scales = tuple(v / 4096.0 for v in struct.unpack_from('<3i', data, cursor))
+    return tuple(tuple(rotation[row][col] * scales[col] for col in range(3)) + (translation[row],)
+                 for row in range(3))
+
+
+def _identity_affine():
+    return ((1.0, 0.0, 0.0, 0.0),
+            (0.0, 1.0, 0.0, 0.0),
+            (0.0, 0.0, 1.0, 0.0))
+
+
+def _multiply_affine(left, right):
+    """Compose two row-major 3x4 affine transforms (left * right)."""
+    return tuple(tuple(
+        sum(left[row][k] * right[k][col] for k in range(3))
+        if col < 3 else
+        sum(left[row][k] * right[k][3] for k in range(3)) + left[row][3]
+        for col in range(4)) for row in range(3))
+
+
+def _transform_face(face, matrix):
+    return [tuple(sum(matrix[row][col] * vertex[col] for col in range(3)) + matrix[row][3]
+                  for row in range(3)) + vertex[3:] for vertex in face]
+
+
+def _crossed_billboard(face, matrix):
+    """Add a second vertical plane for camera-facing field billboards."""
+    origin = tuple(matrix[row][3] for row in range(3))
+    result = []
+    for vertex in face:
+        x, y, z = vertex[:3]
+        result.append((z - origin[2] + origin[0], y,
+                       origin[2] - (x - origin[0])) + vertex[3:])
+    return result
+
+
+def _render_commands(data, nodes, meshes, pairs):
+    """Interpret the static subset of Nitro's model render command stream."""
+    matrix = _identity_affine()
+    stack = [None] * 31
+    material = None
+    active_node = 0
+    visible = True
+    billboard_nodes = set()
+    result = []
+    at = 0
+
+    def take(count, label):
+        nonlocal at
+        if at + count > len(data):
+            raise ValueError(f'Truncated {label}')
+        values = data[at:at + count]
+        at += count
+        return values
+
+    def stack_index(value):
+        if value >= len(stack):
+            raise ValueError('SBC matrix stack index')
+        return value
+
+    while at < len(data):
+        command = take(1, 'SBC')[0]
+        op = command & 31
+        flags = command >> 5
+        if op == 0:
+            continue
+        if op == 1:
+            break
+        if op == 2:
+            active_node, node_visible = take(2, 'SBC node')
+            if active_node >= len(nodes):
+                raise ValueError('SBC node index')
+            visible = bool(node_visible & 1)
+        elif op == 3:
+            slot = stack_index(take(1, 'SBC matrix restore')[0])
+            if stack[slot] is None:
+                raise ValueError('SBC restored an unset matrix')
+            matrix = stack[slot]
+        elif op == 4:
+            material = take(1, 'SBC material')[0]
+        elif op == 5:
+            mesh = take(1, 'SBC mesh')[0]
+            if material is None or material >= len(pairs) or mesh >= len(meshes):
+                raise ValueError('SBC mesh binding')
+            if visible:
+                for face in meshes[mesh]:
+                    transformed = _transform_face(face, matrix)
+                    result.append((tuple(pairs[material]), transformed))
+                    if active_node in billboard_nodes:
+                        result.append((tuple(pairs[material]), _crossed_billboard(transformed, matrix)))
+        elif op == 6:
+            args = take(3, 'SBC node transform')
+            node = args[0]
+            if node >= len(nodes):
+                raise ValueError('SBC transformed node index')
+            store_slot = stack_index(take(1, 'SBC node matrix store')[0]) if flags & 1 else None
+            load_slot = stack_index(take(1, 'SBC node matrix load')[0]) if flags & 2 else None
+            if load_slot is not None:
+                if stack[load_slot] is None:
+                    raise ValueError('SBC loaded an unset node matrix')
+                matrix = stack[load_slot]
+            matrix = _multiply_affine(matrix, nodes[node])
+            if store_slot is not None:
+                stack[store_slot] = matrix
+        elif op in (7, 8):
+            node = take(1, 'SBC billboard')[0]
+            if node >= len(nodes):
+                raise ValueError('SBC billboard node index')
+            store_slot = stack_index(take(1, 'SBC billboard matrix store')[0]) if flags & 1 else None
+            load_slot = stack_index(take(1, 'SBC billboard matrix load')[0]) if flags & 2 else None
+            if load_slot is not None:
+                if stack[load_slot] is None:
+                    raise ValueError('SBC loaded an unset billboard matrix')
+                matrix = stack[load_slot]
+            billboard_nodes.add(node)
+            if store_slot is not None:
+                stack[store_slot] = matrix
+        elif op in (11, 12, 13):
+            # Position scaling is already applied to mesh vertices. Environment
+            # and projection map commands affect texture coordinates only.
+            take(0 if op == 11 else 2, 'SBC mapping')
+        else:
+            raise ValueError(f'Unsupported SBC {op}')
+    if not result:
+        raise ValueError('No field faces')
+    return result
+
+
 @lru_cache(maxsize=256)
 def decode(data):
     if data[:4]!=b'BMD0' or len(data)<24: raise ValueError('Not a model')
@@ -69,21 +246,10 @@ def decode(data):
     size,sbc_off,mat_off,mesh_off,_=struct.unpack_from('<5I',data,model)
     if model+size>len(data): raise ValueError('Model bounds')
     scale=struct.unpack_from('<i',data,model+28)[0]/4096
-    # Field chunks use one static root. Reject animated/hierarchical props.
+    # Field chunks store static local-to-parent node transforms. The SBC stream
+    # supplies the hierarchy and matrix-stack operations needed to place meshes.
     nodes=dictionary(data,model+64)
-    if len(nodes)!=1: raise ValueError('Non-static field skeleton')
-    node=model+64+nodes[0][1]
-    flags=struct.unpack_from('<H',data,node)[0]
-    translation=[0.,0.,0.];root_scale=[1.,1.,1.];rotation=[[float(i==j) for j in range(3)] for i in range(3)]
-    cursor=node+4
-    if not flags&1:
-        translation=[v/4096 for v in struct.unpack_from('<3i',data,cursor)];cursor+=12
-    if not flags&2:
-        if flags&8:raise ValueError('Compact root rotation unsupported')
-        values=[struct.unpack_from('<h',data,node+2)[0]/4096]+[v/4096 for v in struct.unpack_from('<8h',data,cursor)]
-        cursor+=16
-        rotation=[[values[col*3+row] for col in range(3)] for row in range(3)]
-    if not flags&4:root_scale=[v/4096 for v in struct.unpack_from('<3i',data,cursor)]
+    transforms=[node_transform(data,model+64+off) for _,off in nodes]
     base=model+mat_off;materials=dictionary(data,base+4)
     pairs=[['',''] for _ in materials]
     for j,off in enumerate(struct.unpack_from('<HH',data,base)):
@@ -100,37 +266,8 @@ def decode(data):
         _,_,dl,length=struct.unpack_from('<4I',data,at)
         if at+dl+length>len(data):raise ValueError('Mesh bounds')
         meshes.append(display_faces(data[at+dl:at+dl+length],scale))
-    result=[];at=model+sbc_off;material=None;billboard=False
-    while at<model+mat_off:
-        command=data[at];at+=1;op=command&31;flags=command>>5
-        if op==0:continue
-        if op==1:break
-        if op==2:at+=2
-        elif op==3:
-            if data[at]!=0:raise ValueError('Non-root SBC matrix')
-            at+=1
-        elif op==4:material=data[at];at+=1
-        elif op==5:
-            mesh=data[at];at+=1
-            if material is None or material>=len(pairs) or mesh>=len(meshes):raise ValueError('SBC mesh binding')
-            for face in meshes[mesh]:
-                transformed=[tuple(sum(rotation[row][col]*v[col]*root_scale[col] for col in range(3))+translation[row] for row in range(3))+v[3:] for v in face]
-                result.append((tuple(pairs[material]),transformed))
-                if billboard:
-                    # Static crossed planes retain the ROM's tree texture as
-                    # the native battle camera turns; no animation is invented.
-                    crossed=[(v[2]-translation[2]+translation[0],v[1],translation[2]-(v[0]-translation[0]))+v[3:] for v in transformed]
-                    result.append((tuple(pairs[material]),crossed))
-        elif op==6:
-            if data[at]!=0:raise ValueError('Non-root SBC node')
-            at+=3+(1 if flags&1 else 0)+(1 if flags&2 else 0)
-        elif op==11:pass  # Position scaling already applied to decoded vertices.
-        elif op==8:
-            if data[at]!=0:raise ValueError('Non-root billboard node')
-            at+=1+(1 if flags&1 else 0)+(1 if flags&2 else 0);billboard=True
-        else:raise ValueError(f'Unsupported SBC {op}')
-    if not result:raise ValueError('No field faces')
-    return result
+    commands=data[model+sbc_off:model+mat_off]
+    return _render_commands(commands,transforms,meshes,pairs)
 
 
 def crop_face(vertices, radius):

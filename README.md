@@ -1,16 +1,16 @@
 # Unova Together
 
-**Current release: 1.0.31.** Experimental Soaring now hands landings to Black 2's Fly-style map transition, with smoother follower movement and full-frame Mega battle animations: [downloads](https://github.com/WhatWasMissing/Unova-Together/releases/latest). Made by mvq1303 / WhatWasMissing, built on melonDS.
+**Current release: 1.0.32.** Experimental Soaring now reaches every outdoor area in this build, including Black City, and returns you through the game's Fly-style landing transition: [downloads](https://github.com/WhatWasMissing/Unova-Together/releases/latest). Made by mvq1303 / WhatWasMissing, built on melonDS.
 
 Explore Unova with friends in supported English Pokémon Black 2 and Blaze Black 2 Redux. Each player uses their own matching ROM and independent save.
 
 ## Download and play
 
-1. [Download version 1.0.31](https://github.com/WhatWasMissing/Unova-Together/releases/latest). Choose **Unova-Together.exe**, or extract the complete Windows x64 ZIP.
+1. [Download version 1.0.32](https://github.com/WhatWasMissing/Unova-Together/releases/latest). Choose **Unova-Together.exe**, or extract the complete Windows x64 ZIP.
 2. Open the EXE, or run **Start Unova Together.cmd** in the extracted folder. Choose your ROM and select **Play**.
 3. Open launcher **Co-op** to configure your connection and host or join LAN. Follow the [player guide](docs/PLAYER_GUIDE.md).
 
-Version **1.0.31** improves the handoff when experimental Soaring lands, using the game's Fly-style map transition. Turn on **Settings → Experimental features → Soaring flight**, then choose **Unova → Pokémon → Take flight**. Followers keep a HeartGold-style one-tile trail and move smoothly around corners. Mega battle animations use the supplied GIF frames; please check Mega Salamence with Salamencite and **L + R** while choosing a move.
+Version **1.0.32** expands experimental Soaring across all outdoor areas supported by this build, including Black City. Clear landings return through the game's Fly-style transition; if an area has no safe landing spot, return to take-off. Enable **Settings → Experimental features → Soaring flight**, then choose **Unova → Pokémon → Take flight** and check a few destinations in your game.
 
 Update from the launcher or download the latest files above. Players still using launcher 1.0.5 can run [Repair-Launcher.exe](https://github.com/WhatWasMissing/Unova-Together/releases/latest/download/Repair-Launcher.exe) once and select their old launcher. See the [launcher guide](docs/LAUNCHER.md). Update every player before playing together.
 
@@ -29,7 +29,7 @@ See the [complete feature guide](docs/FEATURES.md) for controls, menu paths and 
 
 Companion interactions are in **Settings → Following Pokémon** and enabled by default when no preference has been saved. Explicit off choices are preserved.
 
-The release includes 743 normal/shiny follower variants, supported female/forms, sprite stability fixes, contextual dialogue, reduced motion, co-op compatibility/readiness checks, rematch filters and **₽10 Super Repels**. Practice completion passed a targeted local latency test; broader recovery/network playtesting remains required. Soaring is still experimental; please verify that flights between routes and towns land in the correct place. See [changes, evidence and source reconstruction](docs/DEVELOPMENT_POLISH_2026-10-13.md).
+The release includes 743 normal/shiny follower variants, supported female/forms, sprite stability fixes, contextual dialogue, reduced motion, co-op compatibility/readiness checks, rematch filters and **₽10 Super Repels**. Practice completion passed a targeted local latency test; broader recovery/network playtesting remains required. Soaring is still experimental and needs an in-game flight and landing check. See [Soaring flight](docs/SOARING_FLIGHT.md) and [changes, evidence and source reconstruction](docs/DEVELOPMENT_POLISH_2026-10-13.md).
 
 ## Guides and limits
 

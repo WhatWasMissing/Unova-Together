@@ -2,6 +2,24 @@
   "schema": 1,
   "notes": [
     {
+      "version": "1.0.32",
+      "title": "Soaring across Unova",
+      "file": "RELEASE_NOTES_1.0.32.md",
+      "body": "- Experimental Soaring now reaches all 69 outdoor areas supported by this build, including Black City.\n- Clear landing spots return through the game's Fly-style transition.\n- Places without safe ground keep the option to return to take-off.\n\nTo try it, enable Settings → Experimental features → Soaring flight, then choose Unova → Pokémon → Take flight. Fly between a few routes and towns, land on clear ground, and check that you return to the right map and spot. Soaring remains experimental, so please save before testing."
+    },
+    {
+      "version": "1.0.31",
+      "title": "Smoother followers and landings",
+      "file": "RELEASE_NOTES_1.0.31.md",
+      "body": "- Followers now stay a little farther behind and keep a smooth walking rhythm around turns.\n- Soaring landings now return through Pokémon Black 2's Fly-style transition.\n- Mega Salamence's full battle animation is ready for a live test.\n\nWalk and turn with a follower to check its spacing and movement. To test Mega Salamence, give it Salamencite and hold L + R while choosing a move in battle. To test Soaring, enable Settings → Experimental features → Soaring flight, choose Unova → Pokémon → Take flight, then land on clear ground and check that you return to the right map and spot."
+    },
+    {
+      "version": "1.0.30",
+      "title": "Fly between more areas",
+      "file": "RELEASE_NOTES_1.0.30.md",
+      "body": "- Experimental Soaring flight now reaches more connected outdoor routes and towns.\n- Followers keep a little more room behind you, and their walking steps stay in time around corners.\n- Mega battle animations play the supplied artwork frame by frame.\n\nTry Soaring from Settings → Experimental features → Soaring flight, then Unova → Pokémon → Take flight. Please check that you can cross between areas and land in the right place. To test Mega Salamence, give it Salamencite and press L + R while choosing a move in battle."
+    },
+    {
       "version": "1.0.29",
       "title": "Smoother followers and Mega animations",
       "file": "RELEASE_NOTES_1.0.29.md",
