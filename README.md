@@ -1,8 +1,8 @@
 # Unova Together
 
-**Current release: 2.0.4.** Play Blaze Black 2 Redux with friends, explore with your Pokémon, and discover **49 Mega forms**.
+**Current release: 2.0.5.** Play Blaze Black 2 Redux with friends, explore with your Pokémon, and discover **49 Mega forms**.
 
-[Download Unova Together 2.0.4](https://github.com/WhatWasMissing/Unova-Together/releases/latest)
+[Download Unova Together 2.0.5](https://github.com/WhatWasMissing/Unova-Together/releases/latest)
 
 Unova Together is a free fan project by **mvq1303 / WhatWasMissing**, built on melonDS. It requires an English **Blaze Black 2 Redux Complete v1.4.1** game file. The launcher prepares the Cynthia Route 7 event in a separate copy for this version. No full game patch is currently bundled; if a compatible Unova Together patch is released for another Redux version, use the patch listed for that exact version. Downloads do not include game files, saves, or firmware.
 
@@ -10,7 +10,7 @@ Unova Together is a free fan project by **mvq1303 / WhatWasMissing**, built on m
 
 Give a Pokémon its matching Mega Stone, then hold **L + R** while choosing a move in battle. Mega Evolution lasts until the battle ends. Stones are sold at Pokémon Center Marts for **₽50,000**.
 
-There are 49 Mega forms, including Mega Serperior with Adaptability, Mega Charizard Y with Drought, and Mega Salamence with Intimidate. Forty-six forms have animated battle artwork. See the [Mega Evolution guide](docs/MEGA_EVOLUTION.md) for every stone, ability and stat total.
+There are 49 Mega forms, including Mega Serperior with Adaptability, Mega Charizard Y with Drought, and Mega Salamence with Intimidate. Gym Leaders in the final three gyms and Cynthia’s Route 7 rematch can also Mega Evolve their Pokémon. Forty-six forms have animated battle artwork. See the [Mega Evolution guide](docs/MEGA_EVOLUTION.md) for every stone, ability and stat total.
 
 After defeating Skyla, meet Cynthia near the Route 7 entrance for a Mega Evolution lesson and a free matching stone. Return farther north for her rematch with Mega Garchomp. See the [Cynthia Route 7 guide](docs/CYNTHIA_ROUTE_7.md) for supported game versions.
 

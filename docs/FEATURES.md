@@ -1,6 +1,6 @@
 # Features
 
-Unova Together **2.0.4** brings friends, Pokémon tools, and Mega Evolution to supported English Blaze Black 2 Redux profiles on Windows.
+Unova Together **2.0.5** brings friends, Pokémon tools, and Mega Evolution to supported English Blaze Black 2 Redux profiles on Windows.
 
 ## Play with friends
 
@@ -13,7 +13,7 @@ Both players should use the same release and matching game version. Co-op experi
 
 ## Mega Evolution
 
-There are **49 Mega forms**, each paired with its own Mega Stone. Buy a stone at a Pokémon Center Mart for **₽50,000**. Give it to the matching Pokémon, then hold **L + R together** while choosing a move in battle, including double battles. The form lasts until the battle ends.
+There are **49 Mega forms**, each paired with its own Mega Stone. Buy a stone at a Pokémon Center Mart for **₽50,000**. Give it to the matching Pokémon, then hold **L + R together** while choosing a move in battle, including double battles. The form lasts until the battle ends. Gym Leaders in the final three gyms and Cynthia in her Route 7 rematch also have Mega-capable Pokémon and matching stones.
 
 Examples: Mega Serperior gains **Adaptability**; Mega Charizard Y gains **Drought**; Mega Salamence uses **Intimidate**; Mega Lucario Z gains **Adaptability**. The full roster, abilities, stones, and base-stat totals are in the [Mega Evolution guide](MEGA_EVOLUTION.md).
 

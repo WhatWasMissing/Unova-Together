@@ -2,6 +2,12 @@
   "schema": 1,
   "notes": [
     {
+      "version": "2.0.5",
+      "title": "Mega-capable trainer battles",
+      "file": "RELEASE_NOTES_2.0.5.md",
+      "body": "The Gym Leaders in the final three gyms now bring Mega-capable Pokémon into battle, and Cynthia can Mega Evolve her Garchomp in her Route 7 rematch. Opponents can still Mega Evolve when their Pokémon moves before yours."
+    },
+    {
       "version": "2.0.4",
       "title": "Mega Evolution in double battles",
       "file": "RELEASE_NOTES_2.0.4.md",
