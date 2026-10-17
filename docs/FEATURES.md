@@ -1,6 +1,6 @@
 # Features
 
-Unova Together **2.0.5** brings friends, Pokémon tools, and Mega Evolution to supported English Blaze Black 2 Redux profiles on Windows.
+Unova Together **2.0.9** brings friends, Pokémon tools, and Mega Evolution to supported English Blaze Black 2 Redux profiles on Windows.
 
 ## Play with friends
 
@@ -13,7 +13,7 @@ Both players should use the same release and matching game version. Co-op experi
 
 ## Mega Evolution
 
-There are **49 Mega forms**, each paired with its own Mega Stone. Buy a stone at a Pokémon Center Mart for **₽50,000**. Give it to the matching Pokémon, then hold **L + R together** while choosing a move in battle, including double battles. The form lasts until the battle ends. Gym Leaders in the final three gyms and Cynthia in her Route 7 rematch also have Mega-capable Pokémon and matching stones.
+There are **49 Mega forms**, each paired with its own Mega Stone. Every Poké Mart carries the full selection for **₽50,000** per stone, and both Battle Point counters sell all 49 for **50 BP**. Give the matching stone to a Pokémon, then hold **L + R together** while choosing a move in battle, including double battles. The form lasts until the battle ends. Gym Leaders in the final three gyms and Cynthia in her Route 7 rematch also have Mega-capable Pokémon and matching stones.
 
 Examples: Mega Serperior gains **Adaptability**; Mega Charizard Y gains **Drought**; Mega Salamence uses **Intimidate**; Mega Lucario Z gains **Adaptability**. The full roster, abilities, stones, and base-stat totals are in the [Mega Evolution guide](MEGA_EVOLUTION.md).
 
@@ -30,6 +30,8 @@ Face your follower and press **R + A**, or tap its sprite, to open the companion
 ## Pokémon and field tools
 
 - Check party IVs and EVs.
+- Reset a Pokémon’s EVs for ₽50,000.
+- Keep the standard bag capacity; Mega Stones fit in existing item entries. See [Bag capacity](BAG_CAPACITY.md).
 - Browse ordinary grass, water, and fishing encounters in the loaded game.
 - Relearn eligible level-up moves for the Pokémon’s current form.
 - Use supported field HMs without taking up a battle move slot. The game’s story requirements still apply.
@@ -37,7 +39,7 @@ Face your follower and press **R + A**, or tap its sprite, to open the companion
 
 ## Optional Soaring
 
-Soaring is an unfinished, optional preview that connects 69 outdoor areas. Some locations are approximate, and safe landing spots are limited. Read [Soaring flight](SOARING_FLIGHT.md) before you use it.
+Soaring is an unfinished, optional preview that connects 69 outdoor areas. Some locations are approximate, and safe landing spots are limited. Read the [Soaring preview guide](SOARING_PREVIEW.md) before you use it.
 
 ## Launcher and presentation
 

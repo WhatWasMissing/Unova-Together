@@ -26,7 +26,7 @@ HELPERS = (
 COMMANDS = ('Online Co-op.cmd', 'Install UDP Dependencies.cmd', 'Start LAN Presence Relay.cmd')
 DOCS = ('PLAYER_GUIDE.md', 'KNOWN_ISSUES.md', 'TAILSCALE_COOP.md', 'UDP_SERVER_GUIDE.md',
         'LAUNCHER.md', 'COMPANIONS_AND_SOARING.md', 'SOARING_FLIGHT.md', 'COOP_TOOLS.md', 'FEATURES.md',
-        'ROADMAP.md', 'SOARING_DESIGN.md')
+        'ROADMAP.md', 'SOARING_DESIGN.md', 'BAG_CAPACITY.md', 'SOARING_PREVIEW.md')
 FORBIDDEN = {'.nds', '.gba', '.sav', '.save', '.dsv', '.ramdump', '.ml1', '.ml2', '.ml3', '.ml4', '.ml5', '.ml6', '.ml7', '.ml8', '.pem', '.key', '.pyc'}
 
 def main():

@@ -2,6 +2,30 @@
   "schema": 1,
   "notes": [
     {
+      "version": "2.0.9",
+      "title": "Mega Stones at every shop",
+      "file": "RELEASE_NOTES_2.0.9.md",
+      "body": "Every Poké Mart now sells all 49 Mega Stones for ₽50,000 each. Both Battle Point counters also offer the full selection for 50 BP."
+    },
+    {
+      "version": "2.0.8",
+      "title": "Mega Stone shop fix",
+      "file": "RELEASE_NOTES_2.0.8.md",
+      "body": "Pokémon Center Marts now show their Mega Stone stock correctly instead of displaying blank item entries. All available Mega Stones are distributed across the mart network."
+    },
+    {
+      "version": "2.0.7",
+      "title": "Save-loading fix",
+      "file": "RELEASE_NOTES_2.0.7.md",
+      "body": "Fixes a freeze that could occur when loading a save in versions 2.0.4 and 2.0.5. Update through the launcher before loading your save; your save files are kept."
+    },
+    {
+      "version": "2.0.6",
+      "title": "Stable-build rollback",
+      "file": "RELEASE_NOTES_2.0.6.md",
+      "body": "Returns to the earlier stable game build while a fix is prepared for the save-loading stall introduced in versions 2.0.4 and 2.0.5. A dedicated fix is in progress."
+    },
+    {
       "version": "2.0.5",
       "title": "Mega-capable trainer battles",
       "file": "RELEASE_NOTES_2.0.5.md",
@@ -35,7 +59,7 @@
       "version": "2.0.0",
       "title": "Mega Evolution and a fresh look",
       "file": "RELEASE_NOTES_2.0.0.md",
-      "body": "- Explore with **49 Mega forms**, each with a matching Mega Stone sold at Pokémon Center Marts. Forty-six forms have animated battle artwork.\n- The launcher’s Features page now plays the supplied front and back animations for Mega Mawile.\n- Mega Evolution works in battle, keeps the Mega form through switching and level gains, and returns the Pokémon to normal when the battle ends.\n- The launcher now lets you choose an animated field character from your game. Your choice applies the next time you start the game.\n- After defeating Skyla, meet Cynthia on Route 7 to learn about Mega Evolution and receive a matching Mega Stone. Return for a rematch against her team and Mega Garchomp. For Redux Complete v1.4.1, the launcher prepares a separate event-ready copy.\n- Added in-game mod menus have a Generation 5-inspired design, with menu sounds you can turn off in **Unova → Settings**.\n- The launcher’s old-version cleanup keeps your active game and saves while removing unused copies.\n\nSoaring remains an optional, unfinished preview. Read the [Soaring guide](../docs/SOARING_FLIGHT.md) before using it."
+      "body": "- Explore with **49 Mega forms**, each with a matching Mega Stone sold at Pokémon Center Marts. Forty-six forms have animated battle artwork.\n- The launcher’s Features page now plays the supplied front and back animations for Mega Mawile.\n- Mega Evolution works in battle, keeps the Mega form through switching and level gains, and returns the Pokémon to normal when the battle ends.\n- The launcher now lets you choose an animated field character from your game. Your choice applies the next time you start the game.\n- After defeating Skyla, meet Cynthia on Route 7 to learn about Mega Evolution and receive a matching Mega Stone. Return for a rematch against her team and Mega Garchomp. The launcher prepares a separate event-ready copy for Blaze Black 2 Redux Complete v1.4.1.\n- Added in-game mod menus have a Generation 5-inspired design, with menu sounds you can turn off in **Unova → Settings**.\n- The launcher’s old-version cleanup keeps your active game and saves while removing unused copies.\n\nSoaring remains an optional, unfinished preview. Read the [Soaring guide](../docs/SOARING_FLIGHT.md) before using it."
     },
     {
       "version": "1.0.35",

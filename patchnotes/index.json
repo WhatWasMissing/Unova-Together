@@ -2,6 +2,12 @@
   "schema": 1,
   "notes": [
     {
+      "version": "2.0.9",
+      "title": "Mega Stones at every shop",
+      "file": "RELEASE_NOTES_2.0.9.md",
+      "body": "Every Poké Mart now sells all 49 Mega Stones for ₽50,000 each. Both Battle Point counters also offer the full selection for 50 BP."
+    },
+    {
       "version": "2.0.8",
       "title": "Mega Stone shop fix",
       "file": "RELEASE_NOTES_2.0.8.md",
@@ -333,4 +339,3 @@
     }
   ]
 }
-
