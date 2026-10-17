@@ -1,4 +1,4 @@
-"""Compile the actual read-only companion/flight-preview helpers; no user saves."""
+"""Compile the actual read-only companion interactions; no user saves."""
 from pathlib import Path
 import os,subprocess,tempfile
 ROOT=Path(__file__).resolve().parents[1]

@@ -106,8 +106,8 @@ def defaults(runtime):
         return {'pause':bool(doc.get('PauseLostFocus',False)),
                 'volume':round(instance.get('Audio',{}).get('Volume',256)*100/256),
                 'filter':bool(doc.get('Screen',{}).get('Filter',True)),
-                'companion_interactions':True,'reduced_follower_motion':False,'soaring':False,'soaring_collision_debug':False}
-    except (OSError,ValueError,TypeError,tomlkit.exceptions.ParseError):return {'pause':False,'volume':100,'filter':True,'companion_interactions':True,'reduced_follower_motion':False,'soaring':False,'soaring_collision_debug':False}
+                'companion_interactions':True,'reduced_follower_motion':False}
+    except (OSError,ValueError,TypeError,tomlkit.exceptions.ParseError):return {'pause':False,'volume':100,'filter':True,'companion_interactions':True,'reduced_follower_motion':False}
 
 def atomic(path,text):
     path=Path(path);path.parent.mkdir(parents=True,exist_ok=True)
@@ -153,7 +153,7 @@ def apply(runtime,rom,preferences,selected,profile,home):
         # Re-check at write time: changing the file after UI detection cannot
         # enable a code on an unreviewed ROM.
         current=identify(rom)
-        if not current or not profile or current['digest']!=profile['digest']:raise ValueError('Cheats require a supported Black 2 / Redux ROM.')
+        if not current or not profile or current['digest']!=profile['digest']:raise ValueError('Cheats require a supported Blaze Black 2 Redux game file.')
         directory=Path(home).resolve()/'.launcher-cheats'/current['key']
         path=directory/(rom.stem+'.mch')
         instance=doc.setdefault('Instance0',tomlkit.table())

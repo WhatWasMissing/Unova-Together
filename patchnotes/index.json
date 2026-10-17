@@ -2,22 +2,10 @@
   "schema": 1,
   "notes": [
     {
-      "version": "2.0.12",
-      "title": "Soaring flight preview",
-      "file": "RELEASE_NOTES_2.0.12.md",
-      "body": "Soaring flight is now available in the game when enabled in launcher settings. Restart the game, then open Unova → Pokémon → Take flight (experimental). Some areas and landing spots remain unsupported or approximate."
-    },
-    {
-      "version": "2.0.11",
-      "title": "Filled-in Soaring map",
-      "file": "RELEASE_NOTES_2.0.11.md",
-      "body": "The Soaring map now has a continuous ocean backdrop across open spaces inside its borders. The preview remains unfinished, and some routes, transitions, and landing areas are approximate."
-    },
-    {
-      "version": "2.0.10",
-      "title": "A more connected Soaring map",
-      "file": "RELEASE_NOTES_2.0.10.md",
-      "body": "The optional Soaring preview now connects all 69 outdoor areas with named towns, route links, and regional scenery. Some locations and transitions are approximate, connecting scenery cannot be landed on, and Marine Tube still requires returning to your take-off point."
+      "version": "2.0.13",
+      "title": "Streamlined menus and field tools",
+      "file": "RELEASE_NOTES_2.0.13.md",
+      "body": "Launcher settings and in-game menus have been streamlined. Standard Fly continues to use the game’s usual party menu."
     },
     {
       "version": "2.0.9",
@@ -77,7 +65,7 @@
       "version": "2.0.0",
       "title": "Mega Evolution and a fresh look",
       "file": "RELEASE_NOTES_2.0.0.md",
-      "body": "- Explore with **49 Mega forms**, each with a matching Mega Stone sold at Pokémon Center Marts. Forty-six forms have animated battle artwork.\n- The launcher’s Features page now plays the supplied front and back animations for Mega Mawile.\n- Mega Evolution works in battle, keeps the Mega form through switching and level gains, and returns the Pokémon to normal when the battle ends.\n- The launcher now lets you choose an animated field character from your game. Your choice applies the next time you start the game.\n- After defeating Skyla, meet Cynthia on Route 7 to learn about Mega Evolution and receive a matching Mega Stone. Return for a rematch against her team and Mega Garchomp. The launcher prepares a separate event-ready copy for Blaze Black 2 Redux Complete v1.4.1.\n- Added in-game mod menus have a Generation 5-inspired design, with menu sounds you can turn off in **Unova → Settings**.\n- The launcher’s old-version cleanup keeps your active game and saves while removing unused copies.\n\nSoaring remains an optional, unfinished preview. Read the [Soaring guide](../docs/SOARING_FLIGHT.md) before using it."
+      "body": "- Explore with **49 Mega forms**, each with a matching Mega Stone sold at Pokémon Center Marts. Forty-six forms have animated battle artwork.\n- The launcher’s Features page now plays the supplied front and back animations for Mega Mawile.\n- Mega Evolution works in battle, keeps the Mega form through switching and level gains, and returns the Pokémon to normal when the battle ends.\n- The launcher now lets you choose an animated field character from your game. Your choice applies the next time you start the game.\n- After defeating Skyla, meet Cynthia on Route 7 to learn about Mega Evolution and receive a matching Mega Stone. Return for a rematch against her team and Mega Garchomp. The launcher prepares a separate event-ready copy for Blaze Black 2 Redux Complete v1.4.1.\n- Added in-game mod menus have a Generation 5-inspired design, with menu sounds you can turn off in **Unova → Settings**.\n- The launcher’s old-version cleanup keeps your active game and saves while removing unused copies."
     },
     {
       "version": "1.0.35",
@@ -89,31 +77,25 @@
       "version": "1.0.34",
       "title": "Mega Evolution and steadier follower poses",
       "file": "RELEASE_NOTES_1.0.34.md",
-      "body": "The launcher now features Mega Evolution and a guide to all 49 forms. Pokémon follower poses line up more consistently as they walk. Soaring remains an unfinished optional preview."
+      "body": "The launcher now features Mega Evolution and a guide to all 49 forms. Pokémon follower poses line up more consistently as they walk."
     },
     {
       "version": "1.0.33",
-      "title": "Mega Pokémon and a Soaring preview",
+      "title": "Mega Pokémon and battle animations",
       "file": "RELEASE_NOTES_1.0.33.md",
-      "body": "Use 49 Mega forms with matching stones. Animated battle artwork is available for 46 forms, including Mega Salamence’s 67-frame front and back animations. Soaring remains an unfinished optional preview with approximate routes and limited landing areas."
-    },
-    {
-      "version": "1.0.32",
-      "title": "Soaring across Unova",
-      "file": "RELEASE_NOTES_1.0.32.md",
-      "body": "The optional Soaring preview reaches 69 outdoor areas, including Black City. Land on clear ground or return to your take-off point where a safe landing is unavailable."
+      "body": "Use 49 Mega forms with matching stones. Animated battle artwork is available for 46 forms, including Mega Salamence’s 67-frame front and back animations."
     },
     {
       "version": "1.0.31",
-      "title": "Smoother followers and landings",
+      "title": "Smoother followers",
       "file": "RELEASE_NOTES_1.0.31.md",
-      "body": "Followers keep a smoother walking rhythm around turns. Soaring landings return through the game’s Fly-style transition."
+      "body": "Followers keep a smoother walking rhythm around turns."
     },
     {
       "version": "1.0.30",
-      "title": "Fly between more areas",
+      "title": "Followers and Mega animations",
       "file": "RELEASE_NOTES_1.0.30.md",
-      "body": "The optional Soaring preview reaches more connected outdoor routes and towns. Followers have more room behind you, and Mega battle animations play frame by frame."
+      "body": "Followers have more room behind you, and Mega battle animations play frame by frame."
     },
     {
       "version": "1.0.29",
@@ -218,18 +200,6 @@
       "body": "Updates install beside your current game, so you can finish playing before switching. Your ROMs, saves, and settings stay in place."
     },
     {
-      "version": "1.0.12",
-      "title": "Better Soaring landings",
-      "file": "RELEASE_NOTES_1.0.12.md",
-      "body": "See more ground while flying, return to landing areas more smoothly, and confirm before returning to your take-off point."
-    },
-    {
-      "version": "1.0.11",
-      "title": "A wider view while soaring",
-      "file": "RELEASE_NOTES_1.0.11.md",
-      "body": "Soaring shows more of the surrounding scenery. Turn on the optional preview in Settings → Experimental features, then choose Unova → Pokémon → Take flight."
-    },
-    {
       "version": "1.0.10",
       "title": "Smoother Pokémon followers",
       "file": "RELEASE_NOTES_1.0.10.md",
@@ -297,9 +267,9 @@
     },
     {
       "version": "0.4.0",
-      "title": "Companion interactions and flight",
+      "title": "Companion interactions",
       "file": "RELEASE_NOTES_0.4.0.md",
-      "body": "Talk to, pet, praise, and play with your lead Pokémon. An optional flight preview is also available. Companion interactions are for fun and do not change your save."
+      "body": "Talk to, pet, praise, and play with your lead Pokémon. Companion interactions are for fun and do not change your save."
     },
     {
       "version": "0.3.13",

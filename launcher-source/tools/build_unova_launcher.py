@@ -5,7 +5,7 @@ from importlib import metadata
 from launcher_ui import versioning
 
 ROOT=Path(__file__).resolve().parents[1]
-WORKSPACE=ROOT.parent.parent.parent
+WORKSPACE=ROOT
 assets=ROOT/'tools/launcher_ui'
 parser=argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--output-dir',type=Path,default=WORKSPACE/'builds/release-launcher-1.0.20')

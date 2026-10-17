@@ -256,14 +256,10 @@ class LauncherTests(unittest.TestCase):
         with patch('launcher_ui.preferences.identify',return_value=profile):
             self.app._identify_rom();self.assertTrue(all('disabled' not in c.state() for c in self.app.cheat_buttons.values()))
             self.app.cheat_buttons['repel'].invoke();self.app._preference('volume',35)
-        self.assertFalse(self.app.soaring_collision_debug.get())
-        self.app.soaring_collision_debug_button.invoke()
         data=json.loads(self.app.config_path.read_text())
         self.assertTrue(data['cheats']['test-rom']['repel']);self.assertEqual(data['preferences']['volume'],35)
-        self.assertTrue(data['preferences']['soaring_collision_debug'])
         self.app.destroy();self.app=Launcher(self.home,testing=True);self.app.update()
         self.assertEqual(self.app.volume.get(),35)
-        self.assertTrue(self.app.soaring_collision_debug.get())
         with patch('launcher_ui.preferences.identify',return_value=profile):self.app._identify_rom()
         self.assertTrue(self.app.cheat_vars['repel'].get())
         if OUTPUT:
@@ -284,31 +280,13 @@ class LauncherTests(unittest.TestCase):
             self.assertEqual(spawn.call_args.kwargs['env']['UNOVA_RELAY_ROOM'],'friends')
             self.assertEqual(spawn.call_args.kwargs['env']['UNOVA_COMPANION_INTERACTIONS'],'1')
             self.assertEqual(spawn.call_args.kwargs['env']['UNOVA_EXPERIMENTAL_COMPANION'],'1')
-        self.app.game=None;self.app._preference('soaring',True);self.app._preference('soaring_collision_debug',True)
-        with patch('launcher_ui.preferences.running',return_value=False),patch('launcher_ui.app.subprocess.Popen',return_value=proc) as spawn,patch('soaring_scene_worker.SoaringWorker') as worker:
-            self.app.launch()
-            self.assertEqual(spawn.call_args.kwargs['env']['UNOVA_EXPERIMENTAL_SOARING'],'1')
-            worker.assert_called_once()
-            self.assertTrue(worker.call_args.kwargs['collision_debug'])
-        self.app.game=None;self.app.profile_picker.current(1);self.app._select_profile();self.assertEqual(self.app.volume.get(),75)
-        self.assertIn('play-profiles',self.app.save_dir.get())
 
-    def test_closing_launcher_warns_while_soaring_worker_is_needed(self):
-        proc=MagicMock();proc.poll.return_value=None;self.app.game=proc
-        worker=MagicMock();worker.thread.is_alive.return_value=True;self.app.soaring_worker=worker
-        with patch('launcher_ui.app.prefs.running_in_home',return_value=False),patch('launcher_ui.app.messagebox.askyesno',return_value=False) as ask,patch.object(self.app,'destroy') as destroy:
-            self.app._close()
-            ask.assert_called_once_with('Soaring is active','Keep the launcher open while playing Soaring. Closing it stops the nearby scenery service and flight may stop streaming. Close anyway?',parent=self.app)
-            destroy.assert_not_called()
-        with patch('launcher_ui.app.prefs.running_in_home',return_value=False),patch('launcher_ui.app.messagebox.askyesno',return_value=True),patch.object(self.app,'destroy') as destroy:
-            self.app._close();destroy.assert_called_once_with()
-
-    def test_game_exit_stops_streaming_workers(self):
+    def test_game_exit_stops_scenery_workers(self):
         proc=MagicMock();proc.poll.return_value=0;self.app.game=proc
-        worker=MagicMock();self.app.soaring_worker=worker
+        worker=MagicMock();self.app.surroundings_worker=worker
         self.app._reap_game_workers()
         worker.stop.set.assert_called_once_with();worker.thread.join.assert_called_once_with(timeout=.5)
-        self.assertIsNone(self.app.soaring_worker)
+        self.assertIsNone(self.app.surroundings_worker)
 
     def test_companion_default_and_explicit_off_survive_profile_switch_restart_and_launch(self):
         self.assertTrue(self.app.companion_interactions.get())

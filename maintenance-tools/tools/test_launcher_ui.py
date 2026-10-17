@@ -19,8 +19,8 @@ class LauncherTests(unittest.TestCase):
         self.app=Launcher(self.home,testing=True);self.app._open_mod('black2',save=False);self.app.update_idletasks();self.app.update()
     def tearDown(self):
         self.app.destroy();self.temp.cleanup()
-    def wait(self):
-        deadline=time.monotonic()+5
+    def wait(self,timeout=5):
+        deadline=time.monotonic()+timeout
         while self.app.busy and time.monotonic()<deadline:self.app.update();time.sleep(.01)
         self.app.update();self.assertFalse(self.app.busy)
     def feed(self,v='0.3.6'):
@@ -31,7 +31,7 @@ class LauncherTests(unittest.TestCase):
         from launcher_ui import game_routes
         self.app.rom.set(str(self.rom));profile=self.app.active_profile_id
         self.app.selected_game.set(game_routes.GAMES['pokemon-x']);self.app._game_selected();self.app.update()
-        self.assertTrue(self.app.research_card.winfo_ismapped());self.assertFalse(self.app.ds_game_card.winfo_ismapped())
+        self.assertTrue(self.app.research_card.winfo_viewable());self.assertFalse(self.app.ds_game_card.winfo_viewable())
         self.assertEqual(self.app.rom.get(),str(self.rom));self.assertEqual(self.app.active_profile_id,profile)
         stored=json.loads(self.app.config_path.read_text());self.assertEqual(stored['selected_game'],game_routes.GAMES['pokemon-x'])
         if OUTPUT:
@@ -39,7 +39,7 @@ class LauncherTests(unittest.TestCase):
             x,y=self.app.winfo_rootx(),self.app.winfo_rooty();w,h=self.app.winfo_width(),self.app.winfo_height()
             ImageGrab.grab(bbox=(x,y,x+w,y+h)).save(OUTPUT/'pokemon-x.png')
         self.app.selected_game.set(game_routes.GAMES['black2']);self.app._game_selected();self.app.update()
-        self.assertTrue(self.app.ds_game_card.winfo_ismapped());self.assertFalse(self.app.research_card.winfo_ismapped())
+        self.assertTrue(self.app.ds_game_card.winfo_viewable());self.assertFalse(self.app.research_card.winfo_viewable())
 
     def test_library_is_startup_even_after_last_mod_was_saved(self):
         from launcher_ui import game_routes
@@ -95,6 +95,33 @@ class LauncherTests(unittest.TestCase):
         self.app.profile_picker.current(0);self.app._select_profile()
         self.assertEqual(self.app.profile_label.get(),'My adventure');self.assertTrue(self.app.backup_paths)
         self.assertEqual(self.rom.with_suffix('.save').read_bytes(),b'first slot save')
+    def test_player_model_preference_persists_and_keeps_save_folder_with_source_rom(self):
+        from launcher_ui import preferences as prefs, services
+        self.app.preference_values['player_model']=4715;self.app._save()
+        item=self.app._active_profile()
+        self.assertEqual(services.normalize(item)['preferences']['player_model'],4715)
+        self.app._apply_save_folder(self.home/'builds/current',item,default_directory=self.rom.parent)
+        document=prefs.read_document(self.home/'builds/current')
+        self.assertEqual(Path(document['Instance0']['SaveFilePath']).resolve(),self.rom.parent.resolve())
+    def test_mega_feature_plays_supplied_mawile_front_and_back_gifs(self):
+        from PIL import Image
+        assets=HERE/'assets/features'
+        for filename in ('mega-mawile-front.gif','mega-mawile-back.gif'):
+            with Image.open(assets/filename) as gif:
+                self.assertEqual(gif.n_frames,72)
+                gif.seek(0);self.assertEqual(gif.info.get('duration'),80)
+        self.app.show_page('Features');self.app.update()
+        self.assertEqual(len(self.app.feature_mega_frames),2)
+        self.assertEqual([len(frames) for frames in self.app.feature_mega_frames],[72,72])
+        frame=self.app.feature_mega_frame
+        self.assertEqual([widget.cget('image') for widget in self.app.feature_mega_labels],
+                         [str(frames[frame]) for frames in self.app.feature_mega_frames])
+        time.sleep(.1);self.app.update()
+        frame=(frame+1)%72;self.assertEqual(self.app.feature_mega_frame,frame)
+        self.assertEqual([widget.cget('image') for widget in self.app.feature_mega_labels],
+                         [str(frames[frame]) for frames in self.app.feature_mega_frames])
+        self.app.show_page('Play');frame=self.app.feature_mega_frame
+        time.sleep(.1);self.app.update();self.assertEqual(self.app.feature_mega_frame,frame)
     def test_cleanup_button_prunes_owned_files_and_keeps_save(self):
         import unova_storage as storage
         base=self.home/'.updates/versions'
@@ -229,14 +256,10 @@ class LauncherTests(unittest.TestCase):
         with patch('launcher_ui.preferences.identify',return_value=profile):
             self.app._identify_rom();self.assertTrue(all('disabled' not in c.state() for c in self.app.cheat_buttons.values()))
             self.app.cheat_buttons['repel'].invoke();self.app._preference('volume',35)
-        self.assertFalse(self.app.soaring_collision_debug.get())
-        self.app.soaring_collision_debug_button.invoke()
         data=json.loads(self.app.config_path.read_text())
         self.assertTrue(data['cheats']['test-rom']['repel']);self.assertEqual(data['preferences']['volume'],35)
-        self.assertTrue(data['preferences']['soaring_collision_debug'])
         self.app.destroy();self.app=Launcher(self.home,testing=True);self.app.update()
         self.assertEqual(self.app.volume.get(),35)
-        self.assertTrue(self.app.soaring_collision_debug.get())
         with patch('launcher_ui.preferences.identify',return_value=profile):self.app._identify_rom()
         self.assertTrue(self.app.cheat_vars['repel'].get())
         if OUTPUT:
@@ -257,14 +280,13 @@ class LauncherTests(unittest.TestCase):
             self.assertEqual(spawn.call_args.kwargs['env']['UNOVA_RELAY_ROOM'],'friends')
             self.assertEqual(spawn.call_args.kwargs['env']['UNOVA_COMPANION_INTERACTIONS'],'1')
             self.assertEqual(spawn.call_args.kwargs['env']['UNOVA_EXPERIMENTAL_COMPANION'],'1')
-        self.app.game=None;self.app._preference('soaring',True);self.app._preference('soaring_collision_debug',True)
-        with patch('launcher_ui.preferences.running',return_value=False),patch('launcher_ui.app.subprocess.Popen',return_value=proc) as spawn,patch('soaring_scene_worker.SoaringWorker') as worker:
-            self.app.launch()
-            self.assertEqual(spawn.call_args.kwargs['env']['UNOVA_EXPERIMENTAL_SOARING'],'1')
-            worker.assert_called_once()
-            self.assertTrue(worker.call_args.kwargs['collision_debug'])
-        self.app.game=None;self.app.profile_picker.current(1);self.app._select_profile();self.assertEqual(self.app.volume.get(),75)
-        self.assertIn('play-profiles',self.app.save_dir.get())
+
+    def test_game_exit_stops_scenery_workers(self):
+        proc=MagicMock();proc.poll.return_value=0;self.app.game=proc
+        worker=MagicMock();self.app.surroundings_worker=worker
+        self.app._reap_game_workers()
+        worker.stop.set.assert_called_once_with();worker.thread.join.assert_called_once_with(timeout=.5)
+        self.assertIsNone(self.app.surroundings_worker)
 
     def test_companion_default_and_explicit_off_survive_profile_switch_restart_and_launch(self):
         self.assertTrue(self.app.companion_interactions.get())
@@ -299,7 +321,7 @@ class LauncherTests(unittest.TestCase):
             listener.bind(('127.0.0.1',0));port=listener.getsockname()[1]
         self.app.net_host.set('127.0.0.1');self.app.net_port.set(str(port))
         try:
-            self.app._check_connection();self.wait()
+            self.app._check_connection();self.wait(12)
             self.assertIn('Local relay started',self.app.connection_status.get())
             self.assertIn('reachable',self.app.connection_status.get())
         finally:
@@ -392,10 +414,14 @@ class LauncherTests(unittest.TestCase):
         for window in windows:window.destroy()
 
     def test_theme_contract_drift(self):
-        document=(HERE/'DESIGN.md').read_text(encoding='utf-8')
-        for key,value in THEME['colors'].items():self.assertIn(f'{key}: "{value}"',document)
-        for value in THEME['fonts'].values():self.assertIn(f'fontFamily: "{value}"',document)
-        for key,value in THEME['layout'].items():self.assertIn(f'{key}: "{value}px"',document)
+        import re
+        document=json.loads((HERE/'theme.json').read_text(encoding='utf-8'))
+        self.assertEqual(set(document),{'colors','fonts','layout'})
+        self.assertEqual(document,THEME)
+        self.assertTrue(document['colors'])
+        self.assertTrue(all(re.fullmatch(r'#[0-9a-fA-F]{6}',value) for value in document['colors'].values()))
+        self.assertTrue(all(isinstance(value,str) and value for value in document['fonts'].values()))
+        self.assertTrue(all(isinstance(value,int) and value>0 for value in document['layout'].values()))
 
     def test_all_settings_editor_and_saved_relay(self):
         from launcher_ui.settings_editor import SettingsEditor

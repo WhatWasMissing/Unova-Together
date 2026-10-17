@@ -5,15 +5,16 @@ from unittest.mock import patch
 from launcher_ui import services as s
 import unova_updater as u
 
+
 class ServiceTests(unittest.TestCase):
     def test_companion_preference_preserves_explicit_choices_and_rejects_removed_options(self):
         item=s.profile();self.assertNotIn('companion_interactions',item['preferences'])
-        self.assertNotIn('soaring_preview',item['preferences'])
-        item['preferences']={'companion_interactions':True,'reduced_follower_motion':True,'soaring_collision_debug':True,'soaring_preview':False}
-        self.assertEqual(s.normalize(item)['preferences'],{'companion_interactions':True,'reduced_follower_motion':True,'soaring_collision_debug':True})
+        self.assertNotIn('removed_option',item['preferences'])
+        item['preferences']={'companion_interactions':True,'reduced_follower_motion':True,'removed_option':False}
+        self.assertEqual(s.normalize(item)['preferences'],{'companion_interactions':True,'reduced_follower_motion':True})
         item['preferences']={'companion_interactions':False}
         self.assertEqual(s.normalize(item)['preferences'],{'companion_interactions':False})
-        item['preferences']={'companion_interactions':'true','soaring_preview':1}
+        item['preferences']={'companion_interactions':'true','removed_option':1}
         self.assertEqual(s.normalize(item)['preferences'],{})
 
     def test_lobby_capacity_defaults_and_bounds(self):

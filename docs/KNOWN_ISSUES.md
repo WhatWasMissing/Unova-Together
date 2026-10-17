@@ -15,7 +15,6 @@ For connection steps, see the [player guide](PLAYER_GUIDE.md) and [Tailscale gui
 
 ## Optional features
 
-- **Soaring is unfinished.** Some routes and map positions are approximate. Land only where the game shows clear ground. Marine Tube has no safe landing spot, so return to the take-off point.
 - **Battle scenery is optional.** Some special battles keep their original backgrounds, and scenery may vary between areas. Turn it off in launcher settings if you prefer the original look.
 - **Companion interactions are cosmetic.** They do not change friendship, HP, items, or save data.
 - **Encounter search covers ordinary encounters.** Gifts, scripted legendary Pokémon, and Hidden Grottos are not included.
@@ -23,4 +22,4 @@ For connection steps, see the [player guide](PLAYER_GUIDE.md) and [Tailscale gui
 
 ## Saves and updates
 
-Keep a normal in-game save before installing an update or starting an experimental feature. The launcher keeps your save files when it updates the game. A disconnected battle or interrupted trade may need you to return to the field before you continue.
+Keep a normal in-game save before installing an update. The launcher keeps your save files when it updates the game. A disconnected battle or interrupted trade may need you to return to the field before you continue.

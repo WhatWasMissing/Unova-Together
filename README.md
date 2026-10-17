@@ -1,8 +1,8 @@
 # Unova Together
 
-**Current release: 2.0.12.** Play Blaze Black 2 Redux with friends, explore with your Pokémon, and discover **49 Mega forms**.
+**Current release: 2.0.13.** Play Blaze Black 2 Redux with friends, explore with your Pokémon, and discover **49 Mega forms**.
 
-[Download Unova Together 2.0.12](https://github.com/WhatWasMissing/Unova-Together/releases/latest)
+[Download Unova Together 2.0.13](https://github.com/WhatWasMissing/Unova-Together/releases/latest)
 
 Unova Together is a free fan project by **mvq1303 / WhatWasMissing**, built on melonDS. It requires an English **Blaze Black 2 Redux Complete v1.4.1** game file. The launcher prepares the Cynthia Route 7 event in a separate copy for this version. No full game patch is currently bundled; if a compatible Unova Together patch is released for another Redux version, use the patch listed for that exact version. Downloads do not include game files, saves, or firmware.
 
@@ -32,13 +32,9 @@ Everyone in a co-op session should use the same release and Redux version. The l
 - Adjust the camera, save slots, controls, music and optional battle scenery.
 - Use the updated in-game mod menus, styled after Generation 5, with optional menu sounds.
 
-## Soaring preview
-
-Soaring is unfinished and optional. Named towns, route links, and connecting terrain make the regional map flow between 69 outdoor areas, with an ocean backdrop filling open spaces inside the map. Some positions are approximate, connector scenery is not landable, and safe landing areas are limited. Marine Tube has no safe landing spot; return to your take-off point there. Read the [Soaring preview guide](docs/SOARING_PREVIEW.md) before using it.
-
 ## Guides
 
-[Features](docs/FEATURES.md) · [Player guide](docs/PLAYER_GUIDE.md) · [Mega Evolution](docs/MEGA_EVOLUTION.md) · [Cynthia’s Route 7 challenge](docs/CYNTHIA_ROUTE_7.md) · [Co-op tools](docs/COOP_TOOLS.md) · [Following Pokémon](docs/FOLLOWING_POKEMON.md) · [Known limits](docs/KNOWN_ISSUES.md) · [Bag capacity](docs/BAG_CAPACITY.md) · [Soaring preview](docs/SOARING_PREVIEW.md) · [Release notes](patchnotes/README.md)
+[Features](docs/FEATURES.md) · [Player guide](docs/PLAYER_GUIDE.md) · [Mega Evolution](docs/MEGA_EVOLUTION.md) · [Cynthia’s Route 7 challenge](docs/CYNTHIA_ROUTE_7.md) · [Co-op tools](docs/COOP_TOOLS.md) · [Following Pokémon](docs/FOLLOWING_POKEMON.md) · [Known limits](docs/KNOWN_ISSUES.md) · [Bag capacity](docs/BAG_CAPACITY.md) · [Release notes](patchnotes/README.md)
 
 For play across different networks, see the [Tailscale guide](docs/TAILSCALE_COOP.md). Optional UDP connections need a server provided by your group; the project does not provide a public server.
 

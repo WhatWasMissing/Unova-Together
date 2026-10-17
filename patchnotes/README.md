@@ -2,12 +2,9 @@
 
 Pick a version to read what changed. The newest release is first.
 
-- [Unova Together 2.0.12 — Soaring flight preview](RELEASE_NOTES_2.0.12.md)
-- [Unova Together 2.0.11 — Filled-in Soaring map](RELEASE_NOTES_2.0.11.md)
-- [Unova Together 2.0.10 — A more connected Soaring map](RELEASE_NOTES_2.0.10.md)
+- [Unova Together 2.0.13 — Streamlined menus and field tools](RELEASE_NOTES_2.0.13.md)
 - [Unova Together 2.0.9 — Mega Stones at every shop](RELEASE_NOTES_2.0.9.md)
 - [Unova Together 2.0.8 — Mega Stone shop fix](RELEASE_NOTES_2.0.8.md)
-
 - [Unova Together 2.0.7 — Save-loading fix](RELEASE_NOTES_2.0.7.md)
 - [Unova Together 2.0.6 — Stable-build rollback](RELEASE_NOTES_2.0.6.md)
 - [Unova Together 2.0.5 — Mega-capable trainer battles](RELEASE_NOTES_2.0.5.md)
@@ -18,10 +15,9 @@ Pick a version to read what changed. The newest release is first.
 - [Unova Together 2.0.0 — Mega Evolution and a fresh look](RELEASE_NOTES_2.0.0.md)
 - [Unova Together 1.0.35 — Mega level-ups and menu sounds](RELEASE_NOTES_1.0.35.md)
 - [Unova Together 1.0.34 — Mega Evolution and steadier follower poses](RELEASE_NOTES_1.0.34.md)
-- [Unova Together 1.0.33 — Mega Pokémon and a Soaring preview](RELEASE_NOTES_1.0.33.md)
-- [Unova Together 1.0.32 — Soaring across Unova](RELEASE_NOTES_1.0.32.md)
-- [Unova Together 1.0.31 — Smoother followers and landings](RELEASE_NOTES_1.0.31.md)
-- [Unova Together 1.0.30 — Fly between more areas](RELEASE_NOTES_1.0.30.md)
+- [Unova Together 1.0.33 — Mega Pokémon and battle animations](RELEASE_NOTES_1.0.33.md)
+- [Unova Together 1.0.31 — Smoother followers](RELEASE_NOTES_1.0.31.md)
+- [Unova Together 1.0.30 — Followers and Mega animations](RELEASE_NOTES_1.0.30.md)
 - [Unova Together 1.0.29 — Smoother followers and Mega animations](RELEASE_NOTES_1.0.29.md)
 - [Unova Together 1.0.28 — Mega Pokémon animations](RELEASE_NOTES_1.0.28.md)
 - [Unova Together 1.0.27 — Updated Mega Mewtwo X artwork](RELEASE_NOTES_1.0.27.md)
@@ -39,8 +35,6 @@ Pick a version to read what changed. The newest release is first.
 - [Unova Together 1.0.15 — Mega Serperior arrives](RELEASE_NOTES_1.0.15.md)
 - [Unova Together 1.0.14 — Smoother LAN hosting](RELEASE_NOTES_1.0.14.md)
 - [Unova Together 1.0.13 — Safer game updates](RELEASE_NOTES_1.0.13.md)
-- [Unova Together 1.0.12 — Better Soaring landings](RELEASE_NOTES_1.0.12.md)
-- [Unova Together 1.0.11 — A wider view while soaring](RELEASE_NOTES_1.0.11.md)
 - [Unova Together 1.0.10 — Smoother Pokémon followers](RELEASE_NOTES_1.0.10.md)
 - [Unova Together 1.0.9 — Repair older launcher shortcuts](RELEASE_NOTES_1.0.9.md)
 - [Unova Together 1.0.8 — Smoother launcher updates](RELEASE_NOTES_1.0.8.md)
@@ -52,7 +46,7 @@ Pick a version to read what changed. The newest release is first.
 - [Unova Together 1.0.2 — A boost for solo battles](RELEASE_NOTES_1.0.2.md)
 - [Unova Together 1.0.1 — More reliable co-op](RELEASE_NOTES_1.0.1.md)
 - [Unova Together 1.0.0 — Unova Together is here](RELEASE_NOTES_1.0.0.md)
-- [Unova Together 0.4.0 — Companion interactions and flight](RELEASE_NOTES_0.4.0.md)
+- [Unova Together 0.4.0 — Companion interactions](RELEASE_NOTES_0.4.0.md)
 - [Unova Together 0.3.13 — Quicker menus and reconnects](RELEASE_NOTES_0.3.13.md)
 - [Unova Together 0.3.12 — Easier co-op tools](RELEASE_NOTES_0.3.12.md)
 - [Unova Together 0.3.11 — More Pokémon tools](RELEASE_NOTES_0.3.11.md)
@@ -64,4 +58,3 @@ Pick a version to read what changed. The newest release is first.
 - [Unova Together 0.3.5 — Easy setup and co-op](RELEASE_NOTES_0.3.5.md)
 
 The launcher reads these same notes from `index.json` on GitHub.
-

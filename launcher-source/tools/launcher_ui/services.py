@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 import hashlib, json, os, platform, re, socket, uuid, zipfile, threading, time
 import urllib.request
 
-GUIDES=('PLAYER_GUIDE.md','KNOWN_ISSUES.md','TAILSCALE_COOP.md','UDP_SERVER_GUIDE.md','LAUNCHER.md','COMPANIONS_AND_SOARING.md','COOP_TOOLS.md','RELEASE_CHECKS_1.0.6.md','FEATURES.md','ROADMAP.md')
+GUIDES=('PLAYER_GUIDE.md','KNOWN_ISSUES.md','TAILSCALE_COOP.md','UDP_SERVER_GUIDE.md','LAUNCHER.md','COMPANION_INTERACTIONS.md','COOP_TOOLS.md','RELEASE_CHECKS_1.0.6.md','FEATURES.md','ROADMAP.md')
 
 def refresh_guides(home):
     """Pin a bounded text-only guide set to one official GitHub commit."""
@@ -70,7 +70,7 @@ def normalize(item):
     for key,limit in (('rom',2048),('save_dir',2048),('label',40),('player',32)):
         value=item.get(key,clean[key]);clean[key]=value[:limit] if isinstance(value,str) else clean[key]
     values=item.get('preferences',{})
-    if isinstance(values,dict):clean['preferences']={k:v for k,v in values.items() if (k in ('pause','filter','area_scenery','companion_interactions','reduced_follower_motion','soaring','soaring_collision_debug') and type(v) is bool) or (k=='volume' and type(v) is int and 0<=v<=100) or (k=='player_model' and type(v) is int and 0<=v<=65535)}
+    if isinstance(values,dict):clean['preferences']={k:v for k,v in values.items() if (k in ('pause','filter','area_scenery','companion_interactions','reduced_follower_motion') and type(v) is bool) or (k=='volume' and type(v) is int and 0<=v<=100) or (k=='player_model' and type(v) is int and 0<=v<=65535)}
     try:clean['network']=network(item.get('network',clean['network']))
     except (ValueError,TypeError,AttributeError):pass
     clean['lan_role']=item.get('lan_role') if item.get('lan_role') in ('Host','Join') else ('Host' if clean['network']['host'].lower() in ('localhost','127.0.0.1') else 'Join')

@@ -6,4 +6,3 @@ Choose Talk, Pet, Play, Praise, Tell a story, Ask about today, Sit together, Sho
 
 Interactions do not change HP, friendship, items, or save data. They are unavailable during battles and some menus. Following Pokémon can be turned on or off in **Unova → Settings**. Companion interactions can be managed in launcher settings.
 
-Soaring is a separate unfinished preview. See the [Soaring guide](SOARING_FLIGHT.md) before using it.

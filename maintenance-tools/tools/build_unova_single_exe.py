@@ -36,7 +36,7 @@ def main():
             if path.is_file() and '__pycache__' not in path.parts:bundle.write(path,'tools/launcher_ui/'+path.relative_to(ROOT/'tools/launcher_ui').as_posix())
         for name in ('unova_launcher.py','unova_updater.py','unova_single_exe.py','build_unova_launcher.py','build_unova_single_exe.py','generate_launcher_settings.py','test_launcher_all_settings.py','test_launcher_ui.py','test_launcher_services.py','test_launcher_preferences.py','test_unova_updater.py','test_unova_single_exe.py','verify_launcher_native_lan.py','verify_lan_coop.py','check_battle_presence.cpp','check_field_zone.cpp','check_presence_rendering.cpp','test_presence_server.py','presence_server.py','check_lan_group_pair.cpp','test_gen5_obedience.py','check_obedience_patch.cpp'):
             bundle.write(ROOT/'tools'/name,'tools/'+name)
-        for name in ('test_overworld_companion.py','test_companion_and_soaring.py','check_pokemon_follower.cpp','probe_native_item_menu.py','test_party_stats.py','test_field_tools.py','test_field_hms.py','probe_native_field_hms.py','complete_follower_assets.py','verify_complete_followers.py'):
+        for name in ('test_overworld_companion.py','test_companion_interactions.py','check_pokemon_follower.cpp','probe_native_item_menu.py','test_party_stats.py','test_field_tools.py','test_field_hms.py','probe_native_field_hms.py','complete_follower_assets.py','verify_complete_followers.py'):
             bundle.write(ROOT/'tools'/name,'tools/'+name)
         for name in ('coop_social.py','test_coop_social.py','item_trading_relay.py','pokemon_trading_relay.py'):
             bundle.write(ROOT/'tools'/name,'tools/'+name)

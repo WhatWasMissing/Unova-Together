@@ -1,6 +1,6 @@
 # Features
 
-Unova Together **2.0.12** brings friends, Pokémon tools, and Mega Evolution to supported English Blaze Black 2 Redux profiles on Windows.
+Unova Together **2.0.13** brings friends, Pokémon tools, and Mega Evolution to supported English Blaze Black 2 Redux profiles on Windows.
 
 ## Play with friends
 
@@ -36,10 +36,6 @@ Face your follower and press **R + A**, or tap its sprite, to open the companion
 - Relearn eligible level-up moves for the Pokémon’s current form.
 - Use supported field HMs without taking up a battle move slot. The game’s story requirements still apply.
 - Solo battles earn 1.25× experience on supported profiles. Co-op experience remains off.
-
-## Optional Soaring
-
-Soaring is an unfinished, optional preview that connects 69 outdoor areas. Named regional places, route links, and added transition scenery help the map flow between locations, while an ocean backdrop fills open spaces within its borders. Some positions are approximate, connector scenery is not landable, and safe landing spots are limited. Read the [Soaring preview guide](SOARING_PREVIEW.md) before you use it.
 
 ## Launcher and presentation
 

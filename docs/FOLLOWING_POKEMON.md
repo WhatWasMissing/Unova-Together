@@ -8,4 +8,4 @@ All 649 base species have directional follower artwork. Shiny colors and selecte
 
 To interact with your lead Pokémon, face it and press **R + A**, or tap its sprite. Talk, pet, play, praise, tell a story, and choose other friendly actions. Reactions are cosmetic and do not affect friendship or battle stats.
 
-See [Companion interactions](COMPANIONS_AND_SOARING.md) for the available actions and [art credits](FOLLOWER_ART_CREDITS.md) for artwork acknowledgements.
+See [Companion interactions](COMPANION_INTERACTIONS.md) for the available actions and [art credits](FOLLOWER_ART_CREDITS.md) for artwork acknowledgements.

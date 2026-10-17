@@ -1,3 +1,3 @@
-# Unova Together 1.0.30 — Fly between more areas
+# Unova Together 1.0.30 — Followers and Mega animations
 
-The optional Soaring preview reaches more connected outdoor routes and towns. Followers have more room behind you, and Mega battle animations play frame by frame.
+Followers have more room behind you, and Mega battle animations play frame by frame.

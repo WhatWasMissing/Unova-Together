@@ -5,19 +5,21 @@ from importlib import metadata
 from launcher_ui import versioning
 
 ROOT=Path(__file__).resolve().parents[1]
+WORKSPACE=ROOT
 assets=ROOT/'tools/launcher_ui'
 parser=argparse.ArgumentParser(description=__doc__)
-parser.add_argument('--output-dir',type=Path,default=ROOT/'builds/mod-hub/current')
-parser.add_argument('--work-dir',type=Path,default=ROOT/'test-fixtures/mod-hub-build-20261013')
+parser.add_argument('--output-dir',type=Path,default=WORKSPACE/'builds/release-launcher-1.0.20')
+parser.add_argument('--work-dir',type=Path,default=WORKSPACE/'test-fixtures/release-launcher-1.0.20')
 parser.add_argument('--revision',default='2026101402')
 parser.add_argument('--version',default=versioning.current_version())
 parser.add_argument('--bootstrap',type=Path,help='Built permanent launcher entry / client repair executable')
 args=parser.parse_args()
 output=args.output_dir.resolve();work=args.work_dir.resolve()
-if not output.is_relative_to(ROOT/'builds') or not work.is_relative_to(ROOT/'test-fixtures'):
+if not output.is_relative_to(WORKSPACE/'builds') or not work.is_relative_to(WORKSPACE/'test-fixtures'):
     parser.error('Output and work folders must stay inside builds/ and test-fixtures/.')
 versioning.numbers(args.version)
 work.mkdir(parents=True,exist_ok=True)
+(work/'.disposable-test-output').write_text('Temporary launcher build work.',encoding='utf-8')
 build_info={'schema':1,'product':versioning.PRODUCT,'version':args.version}
 (work/'build-info.json').write_text(json.dumps(build_info),encoding='utf-8')
 versioning.write_windows_version(assets/'windows-version.txt',work/'windows-version.txt',args.version)

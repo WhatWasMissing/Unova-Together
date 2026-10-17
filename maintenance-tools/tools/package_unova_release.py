@@ -17,24 +17,14 @@ HELPERS = (
     'online_udp_bridge.py', 'requirements-online-udp.txt', 'setup_tailscale_firewall.ps1',
     'unova_launcher.py', 'unova_updater.py', 'unova_storage.py', 'build_unova_launcher.py',
     'launcher_migration.py', 'unova_launcher_bootstrap.py', 'build_unova_bootstrap.py',
-    'soaring_scene_worker.py','soaring_geometry.py','soaring_height_tables.py','battle_surroundings_worker.py','build_battle_surroundings.py',
+    'battle_surroundings_worker.py','build_battle_surroundings.py',
     'field_scene_geometry.py','extract_battle_surroundings.py','area_scene_cache.py',
     'build_area_battle_scene.py','build_area_battle_catalog.py',
 )
 COMMANDS = ('Online Co-op.cmd', 'Install UDP Dependencies.cmd', 'Start LAN Presence Relay.cmd')
 DOCS = ('PLAYER_GUIDE.md', 'KNOWN_ISSUES.md', 'TAILSCALE_COOP.md', 'UDP_SERVER_GUIDE.md',
-        'LAUNCHER.md', 'COMPANIONS_AND_SOARING.md', 'SOARING_FLIGHT.md', 'COOP_TOOLS.md', 'FEATURES.md',
-        'ROADMAP.md', 'SOARING_DESIGN.md')
-FORBIDDEN = {'.nds', '.sav', '.dsv', '.ramdump', '.ml1', '.ml2', '.ml3', '.ml4', '.ml8', '.pem', '.key'}
-QT_WINDOWS_PLATFORM_PLUGIN = Path('platforms/qwindows.dll')
-
-def validate_windows_platform_plugin(runtime_root):
-    plugin = runtime_root / QT_WINDOWS_PLATFORM_PLUGIN
-    if not plugin.is_file():
-        raise RuntimeError(
-            f'Missing Qt Windows platform plugin: {plugin}. '
-            'Deploy Qt plugins to the runtime before packaging (windeployqt).'
-        )
+        'LAUNCHER.md', 'COMPANION_INTERACTIONS.md', 'COOP_TOOLS.md', 'FEATURES.md',
+        'ROADMAP.md', 'BAG_CAPACITY.md')
     with plugin.open('rb') as stream:
         if stream.read(2) != b'MZ' or plugin.stat().st_size < 256 * 1024:
             raise RuntimeError(f'Invalid Qt Windows platform plugin: {plugin}')
@@ -116,7 +106,7 @@ def main():
         for path in sorted(launcher.rglob('*')):
             if path.is_file():z.write(path,'Unova-Together/launcher/'+path.relative_to(launcher).as_posix())
         z.writestr('Unova-Together/Start Unova Together.cmd','@echo off\r\ncd /d "%~dp0"\r\nstart "" "launcher\\Pokemon Together.exe" --home "%~dp0."\r\n')
-        for name in (*DOCS, f'RELEASE_CHECKS_{version}.md'):
+        for name in DOCS:
             z.write(repo/'docs'/name, 'Unova-Together/docs/'+name)
         for path in sorted((repo/'patchnotes').glob('RELEASE_NOTES_*.md')):
             z.write(path, 'Unova-Together/patchnotes/'+path.name)
@@ -148,7 +138,7 @@ def main():
         for path in sorted((ROOT/'tools/launcher_ui').rglob('*')):
             if path.is_file() and '__pycache__' not in path.parts:
                 z.write(path,'Unova-Together-Source/tools/launcher_ui/'+path.relative_to(ROOT/'tools/launcher_ui').as_posix())
-        for name in ('test_unova_updater.py','test_unova_single_exe.py','unova_single_exe.py','build_unova_single_exe.py','test_launcher_ui.py','test_launcher_preferences.py','test_launcher_cheat_engine.py','test_launcher_services.py','test_release_input_bounds.py','test_companion_and_soaring.py','test_overworld_companion.py','check_lan_player_list_validation.cpp','check_battle_presence.cpp','check_post_battle_presence.cpp','check_rival_agreement.cpp','test_rival_payload.py','test_coop_boss_payload.py','test_coop_story_return.py','test_coop_field_return.py','verify_coop_runtime.py','audit_native_enemy_setup.py','verify_rival_startups.py'):
+        for name in ('test_unova_updater.py','test_unova_single_exe.py','unova_single_exe.py','build_unova_single_exe.py','test_launcher_ui.py','test_launcher_preferences.py','test_launcher_cheat_engine.py','test_launcher_services.py','test_release_input_bounds.py','test_companion_interactions.py','test_overworld_companion.py','check_lan_player_list_validation.cpp','check_battle_presence.cpp','check_post_battle_presence.cpp','check_rival_agreement.cpp','test_rival_payload.py','test_coop_boss_payload.py','test_coop_story_return.py','test_coop_field_return.py','verify_coop_runtime.py','audit_native_enemy_setup.py','verify_rival_startups.py'):
             z.write(ROOT/'tools'/name,'Unova-Together-Source/tools/'+name)
         for name in COMMANDS:
             z.write(ROOT/name, 'Unova-Together-Source/'+name)
@@ -173,8 +163,6 @@ def main():
         assert packed['Instance0']['Keyboard'] == config['Instance0']['Keyboard']
         assert all(k in {'PauseLostFocus','LimitFPS','TargetFPS','MP','JIT'} or k.startswith('Instance') for k in packed)
         assert not any('/source/' in n for n in z.namelist())
-        assert 'Unova-Together/docs/COMPANIONS_AND_SOARING.md' in z.namelist()
-        assert 'Unova-Together/docs/SOARING_FLIGHT.md' in z.namelist()
         note_files=[name for name in z.namelist() if name.startswith('Unova-Together/patchnotes/RELEASE_NOTES_') and name.endswith('.md')]
         assert len(note_files)==len(patch_index['notes']) and f'Unova-Together/patchnotes/RELEASE_NOTES_{version}.md' in note_files
         assert 'Unova-Together/patchnotes/index.json' in z.namelist()
@@ -185,7 +173,7 @@ def main():
     with zipfile.ZipFile(source) as z:
         assert 'Unova-Together-Source/tools/test_launcher_migration.py' in z.namelist()
         assert 'Unova-Together-Source/tools/test_launcher_versioning.py' in z.namelist()
-        assert 'Unova-Together-Source/tools/test_companion_and_soaring.py' in z.namelist()
+        assert 'Unova-Together-Source/tools/test_companion_interactions.py' in z.namelist()
         assert 'Unova-Together-Source/tools/test_overworld_companion.py' in z.namelist()
     stage_root.mkdir(parents=True)
     with zipfile.ZipFile(runtime) as z:z.extractall(stage_root)

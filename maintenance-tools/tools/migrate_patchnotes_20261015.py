@@ -53,24 +53,16 @@ NOTES = {
     "1.0.6": ("More ways to enjoy your companion", """- Talk to, pet, praise, and play with your lead Pokémon; its reactions reflect its nature and friendship.
 - Interactions are just for fun and do not change HP, friendship, items, or saves.
 - Hold R and press A while facing your follower, or tap it, to open the menu."""),
-    "1.0.7": ("A Soaring preview", """- Search the practice trainer list by name or class before starting a no-reward battle.
-- An optional Fly shortcut opens the game's own party menu and destinations.
-- Free-flying over Unova is not included in this preview."""),
+    "1.0.7": ("Trainer search and Fly shortcut", """- Search the practice trainer list by name or class before starting a no-reward battle.
+- An optional Fly shortcut opens the game's own party menu and destinations."""),
     "1.0.8": ("Launcher updates work more smoothly", """- After an update, the launcher now opens the newly installed version.
-- Older shortcuts can follow the newer launcher without changing your saves or settings.
-- Soaring remains an experimental preview."""),
+- Older shortcuts can follow the newer launcher without changing your saves or settings."""),
     "1.0.9": ("A one-time launcher repair", """- If an older shortcut keeps opening an outdated launcher, run Repair-Launcher.exe once and select the shortcut's original Pokémon Together.exe.
 - Close the launcher if Windows asks; the repair never closes the game for you.
 - Your ROMs, profiles, saves, and backups stay in place. See the launcher migration guide before running the repair."""),
     "1.0.10": ("Smoother followers", """- Fixed follower hitching and made follower movement smoother.
 - A follower stays visible through brief data hiccups and updates correctly when your party or area changes.
 - Shiny followers now follow the odds used by the loaded game."""),
-    "1.0.11": ("A wider Soaring view", """- Soaring now shows more of the surrounding outdoor scenery, with distant areas softened by fog.
-- Enable it under Settings → Experimental features, then choose Unova → Pokémon → Take flight.
-- This is still a preview, not a complete map of Unova. The Town Map is not used."""),
-    "1.0.12": ("Safer Soaring landings", """- You can see more ground and scenery while flying, and the debug view can show landing areas.
-- The game now waits for the landing area to load before giving control back, helping prevent NPC conversations from getting stuck.
-- Returning to take-off asks you to confirm. Flight also stays steadier during speedup."""),
     "1.0.13": ("Safer game updates", """- Updates install alongside your current game, so a running game can finish before you switch.
 - An unrelated melonDS copy no longer blocks Play or repair.
 - Your settings, ROM, and saves stay in place."""),

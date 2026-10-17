@@ -16,11 +16,10 @@ import ndspy.texture
 import ndspy.color
 import ndspy.model
 from PIL import Image
-from extract_battle_surroundings import field_chunk_model, matrix_cells, terrain_model
+from extract_battle_surroundings import matrix_cells, terrain_model
 from field_scene_geometry import decode, crop_face
 from vendor.nsbmd_writer import WriteFile as writer
 from ndspy import _common
-from soaring_geometry import close_building_shell,collision_debug_tiles,landing_tiles
 
 
 def texture_pack(data):
@@ -64,23 +63,6 @@ class FieldSource:
         self.packs=self.arc('a/0/1/4');self.props_cache={}
         self.terrain_cache={};self.texture_cache={};self.matrix_cache={}
 
-    def event_objects(self,zone):
-        """Return authored NPC/event-object tile positions for a zone."""
-        if not 0<=zone<len(self.headers)//48:return []
-        event_id=struct.unpack_from('<H',self.headers,zone*48+22)[0]
-        if event_id==0xffff or event_id>=len(self.events):return []
-        data=self.events[event_id]
-        if len(data)<8:return []
-        count=data[5]
-        if count>64 or 8+count*36>len(data):return []
-        result=[]
-        for index in range(count):
-            offset=8+index*36
-            # BW2 object-event records store local tile X/Z at bytes 28/30.
-            x,z=struct.unpack_from('<HH',data,offset+28)
-            if x<32 and z<32:result.append((x,z))
-        return result
-
     def matrix(self,index):
         if index not in self.matrix_cache:
             self.matrix_cache[index]=matrix_cells(self.matrices[index])
@@ -100,59 +82,40 @@ class FieldSource:
         self.props_cache[area]=(models,pack)
         return models,pack
 
-    def scene(self,zone,x,z,height,radius=176,keep_centre=False,flight=False,layout_matrix=None,layout_zones=None,layout_mask=None,collision_debug=False):
+    def scene(self,zone,x,z,height,radius=176,keep_centre=False):
         if not 0<=zone<len(self.headers)//48 or not all(math.isfinite(v) for v in (x,z,height)):
             raise ValueError('Invalid encounter')
         area,matrix=struct.unpack_from('<HH',self.headers,zone*48+2)
-        if layout_matrix is not None:
-            matrix=layout_matrix
         width,depth,ids,zones=self.matrix(matrix)
-        if layout_zones is not None:
-            if len(layout_zones)!=len(ids):raise ValueError('Invalid flight zone overlay')
-            zones=layout_zones
-        if layout_mask is not None and len(layout_mask)!=len(ids):raise ValueError('Invalid flight matrix mask')
         cx,cz=int(x//512),int(z//512)
-        if (x<0 or z<0 or cx>=width or cz>=depth or ids[cz*width+cx]<0) and not flight:
+        if x<0 or z<0 or cx>=width or cz>=depth or ids[cz*width+cx]<0:
             raise ValueError('Encounter outside occupied matrix')
-        if zones is not None and not flight and zones[cz*width+cx]!=zone:
+        if zones is not None and zones[cz*width+cx]!=zone:
             raise ValueError('Live zone differs from static matrix')
         tid=struct.unpack_from('<H',self.areas,area*10+2)[0]
         pack=texture_pack(self.packs[tid])
-        packs={'terrain':pack};faces=[];omitted=[];sources=[];landings=[];collisions=[];closed_backs=0
+        packs={'terrain':pack};faces=[];omitted=[];sources=[]
         min_mx=max(0,math.floor((x-radius)/512));max_mx=min(width-1,math.floor((x+radius)/512))
         min_mz=max(0,math.floor((z-radius)/512));max_mz=min(depth-1,math.floor((z+radius)/512))
         for mz in range(min_mz,max_mz+1):
             for mx in range(min_mx,max_mx+1):
-                if layout_mask is not None and not layout_mask[mz*width+mx]:continue
                 cid=ids[mz*width+mx]
                 if cid<0:continue
                 neighbor=zones[mz*width+mx] if zones is not None else zone
                 if not 0<=neighbor<len(self.headers)//48:continue
                 neighbor_area,neighbor_matrix=struct.unpack_from('<HH',self.headers,neighbor*48+2)
-                if neighbor_area!=area and not flight:continue
-                if flight and not self.areas[neighbor_area*10+6]:continue
-                terrain_key=f'terrain-{neighbor_area}' if flight else 'terrain'
-                prop_key=f'props-{neighbor_area}' if flight else 'props'
-                if terrain_key not in packs:
-                    neighbor_tid=struct.unpack_from('<H',self.areas,neighbor_area*10+2)[0]
-                    packs[terrain_key]=texture_pack(self.packs[neighbor_tid])
+                if neighbor_area!=area:continue
                 try:
-                    if flight:
-                        model,props,has_terrain=field_chunk_model(self.chunks[cid])
-                    else:
-                        model,props=terrain_model(self.chunks[cid]);has_terrain=True
+                    model,props=terrain_model(self.chunks[cid])
                     terrain_geometry=decode(bytes(model))
                 except ValueError:
-                    if flight:continue
                     raise
                 origin=(mx*512+256-x,0,mz*512+256-z)
                 sources.append(cid)
-                terrain=[];obstacles=[]
                 for pair,vertices in terrain_geometry:
                     transformed=[(v[0]+origin[0],v[1]-height,v[2]+origin[2],v[3],v[4]) for v in vertices]
-                    if flight and has_terrain:terrain.append((pair,transformed))
                     cropped=crop_face(transformed,radius)
-                    if len(cropped)>=3:faces.append(((terrain_key,)+pair,cropped))
+                    if len(cropped)>=3:faces.append((('terrain',)+pair,cropped))
                 count=struct.unpack_from('<I',props)[0] if len(props)>=4 else 0
                 if count>1024 or 4+count*16>len(props):raise ValueError('Placed prop bounds')
                 for i in range(count):
@@ -160,28 +123,19 @@ class FieldSource:
                     px=px/4096+origin[0];py=py/4096-height;pz=origin[2]-pz/4096
                     if abs(px)>radius+64 or abs(pz)>radius+64:continue
                     try:
-                        models,prop_pack=self.properties(neighbor_area);packs[prop_key]=prop_pack
-                        # Texture maps are static; skeleton animation is deliberately unsupported.
+                        models,prop_pack=self.properties(neighbor_area);packs['props']=prop_pack
                         geometry=decode(bytes(models[uid]));angle=rotation*2*math.pi/65536
-                        if flight:
-                            geometry,added=close_building_shell(geometry);closed_backs+=added
                         sine,cosine=math.sin(angle),math.cos(angle)
                         for pair,vertices in geometry:
                             transformed=[(v[0]*cosine+v[2]*sine+px,v[1]+py,-v[0]*sine+v[2]*cosine+pz,v[3],v[4]) for v in vertices]
-                            if flight:obstacles.append((min(v[0] for v in transformed),max(v[0] for v in transformed),min(v[2] for v in transformed),max(v[2] for v in transformed)))
                             cropped=crop_face(transformed,radius)
-                            # Buildings must not swallow the four-battler centre.
                             if len(cropped)>=3 and (keep_centre or min(max(abs(v[0]),abs(v[2])) for v in cropped)>64):
-                                faces.append(((prop_key,)+pair,cropped))
+                                faces.append((('props',)+pair,cropped))
                     except (ValueError,KeyError,IndexError,struct.error) as error:
                         omitted.append(f'prop {uid}: {error}')
-                        if flight:obstacles.append((px-64,px+64,pz-64,pz+64))
-                if flight and has_terrain:
-                    npcs=[(mx*32+nx,mz*32+nz) for nx,nz in self.event_objects(neighbor)]
-                    landings.extend(landing_tiles(self.chunks[cid],terrain,neighbor,mx,mz,origin,height,obstacles,npcs))
-                    if collision_debug:collisions.extend(collision_debug_tiles(self.chunks[cid],terrain,mx,mz,origin,height,obstacles,radius=650))
-        if not faces and not flight:raise ValueError('No supported nearby geometry')
-        return faces,packs,dict(zone=zone,area=area,matrix=matrix,world=[x,height,z],chunks=sources,omittedProps=sorted(set(omitted)),landings=landings,collisionTiles=collisions,closedBacks=closed_backs)
+        if not faces:raise ValueError('No supported nearby geometry')
+        return faces,packs,dict(zone=zone,area=area,matrix=matrix,world=[x,height,z],chunks=sources,omittedProps=sorted(set(omitted)))
+
 
 
 def compress_texture(texture,palette):
