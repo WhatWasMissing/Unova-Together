@@ -1,14 +1,14 @@
 # Unova Together
 
-**Current release: 2.0.7.** Play Blaze Black 2 Redux with friends, explore with your Pokémon, and discover **49 Mega forms**.
+**Current release: 2.0.8.** Play Blaze Black 2 Redux with friends, explore with your Pokémon, and discover **49 Mega forms**.
 
-[Download Unova Together 2.0.7](https://github.com/WhatWasMissing/Unova-Together/releases/latest)
+[Download Unova Together 2.0.8](https://github.com/WhatWasMissing/Unova-Together/releases/latest)
 
 Unova Together is a free fan project by **mvq1303 / WhatWasMissing**, built on melonDS. It requires an English **Blaze Black 2 Redux Complete v1.4.1** game file. The launcher prepares the Cynthia Route 7 event in a separate copy for this version. No full game patch is currently bundled; if a compatible Unova Together patch is released for another Redux version, use the patch listed for that exact version. Downloads do not include game files, saves, or firmware.
 
 ## Mega Evolution
 
-Give a Pokémon its matching Mega Stone, then hold **L + R** while choosing a move in battle. Mega Evolution lasts until the battle ends. Stones are sold at Pokémon Center Marts for **₽50,000**.
+Give a Pokémon its matching Mega Stone, then hold **L + R** while choosing a move in battle. Mega Evolution lasts until the battle ends. Stones are sold at Pokémon Center Marts for **₽50,000**; the available stones are shared across the mart network.
 
 There are 49 Mega forms, including Mega Serperior with Adaptability, Mega Charizard Y with Drought, and Mega Salamence with Intimidate. Gym Leaders in the final three gyms and Cynthia’s Route 7 rematch can also Mega Evolve their Pokémon. Forty-six forms have animated battle artwork. See the [Mega Evolution guide](docs/MEGA_EVOLUTION.md) for every stone, ability and stat total.
 

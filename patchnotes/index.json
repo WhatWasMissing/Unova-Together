@@ -2,6 +2,12 @@
   "schema": 1,
   "notes": [
     {
+      "version": "2.0.8",
+      "title": "Mega Stone shop fix",
+      "file": "RELEASE_NOTES_2.0.8.md",
+      "body": "Pokémon Center Marts now show their Mega Stone stock correctly instead of displaying blank item entries. All available Mega Stones are distributed across the mart network."
+    },
+    {
       "version": "2.0.7",
       "title": "Save-loading fix",
       "file": "RELEASE_NOTES_2.0.7.md",

@@ -2,6 +2,8 @@
 
 Pick a version to read what changed. The newest release is first.
 
+- [Unova Together 2.0.8 — Mega Stone shop fix](RELEASE_NOTES_2.0.8.md)
+
 - [Unova Together 2.0.7 — Save-loading fix](RELEASE_NOTES_2.0.7.md)
 - [Unova Together 2.0.6 — Stable-build rollback](RELEASE_NOTES_2.0.6.md)
 - [Unova Together 2.0.5 — Mega-capable trainer battles](RELEASE_NOTES_2.0.5.md)
