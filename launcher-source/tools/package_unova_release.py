@@ -29,6 +29,16 @@ DOCS = ('PLAYER_GUIDE.md', 'KNOWN_ISSUES.md', 'TAILSCALE_COOP.md', 'UDP_SERVER_G
         'ROADMAP.md', 'SOARING_DESIGN.md', 'BAG_CAPACITY.md', 'SOARING_PREVIEW.md')
 FORBIDDEN = {'.nds', '.gba', '.sav', '.save', '.dsv', '.ramdump', '.ml1', '.ml2', '.ml3', '.ml4', '.ml5', '.ml6', '.ml7', '.ml8', '.pem', '.key', '.pyc'}
 
+def verify_soaring_runtime(executable):
+    executable=Path(executable)
+    if not executable.is_file():
+        raise FileNotFoundError(f'Runtime executable is missing: {executable}')
+    data=executable.read_bytes()
+    required=(b'UNOVA_EXPERIMENTAL_SOARING',b'Take flight (experimental)')
+    missing=[marker.decode('ascii') for marker in required if marker not in data]
+    if missing:
+        raise ValueError('Runtime is missing Soaring support: '+', '.join(missing))
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--version', required=True)
@@ -43,6 +53,7 @@ def main():
     current = args.runtime_root.resolve() if args.runtime_root else WORKSPACE/'builds/current'
     if not current.is_relative_to(WORKSPACE/'builds'):
         raise ValueError('Runtime must be staged within workspace builds')
+    verify_soaring_runtime(current/'melonDS.exe')
     launcher = args.launcher_root.resolve() if args.launcher_root else WORKSPACE/'builds/release-launcher-1.0.20/Pokemon Together'
     if not launcher.is_relative_to(WORKSPACE/'builds'):
         raise ValueError('Launcher must be staged within workspace builds')
@@ -136,6 +147,8 @@ def main():
         for path in sorted((ROOT/'tools/launcher_ui').rglob('*')):
             if path.is_file() and '__pycache__' not in path.parts:
                 z.write(path,'Unova-Together-Source/tools/launcher_ui/'+path.relative_to(ROOT/'tools/launcher_ui').as_posix())
+        z.write(ROOT/'tools/package_unova_release.py','Unova-Together-Source/tools/package_unova_release.py')
+        z.write(ROOT/'tools/test_package_unova_release.py','Unova-Together-Source/tools/test_package_unova_release.py')
         for name in ('test_unova_updater.py','test_unova_single_exe.py','unova_single_exe.py','build_unova_single_exe.py','test_launcher_ui.py','test_launcher_preferences.py','test_launcher_cheat_engine.py','test_launcher_services.py','test_release_input_bounds.py','test_companion_and_soaring.py','test_overworld_companion.py','check_lan_player_list_validation.cpp','check_battle_presence.cpp','check_post_battle_presence.cpp','check_rival_agreement.cpp','test_rival_payload.py','test_coop_boss_payload.py','test_coop_story_return.py','test_coop_field_return.py','verify_coop_runtime.py','audit_native_enemy_setup.py','verify_rival_startups.py','build_soaring_region_data.py','test_soaring_geometry.py','test_soaring_scene_worker.py','test_soaring_real_scene_matrix_set.py','test_field_zone_native.py','audit_soaring_chunk_coverage.py','import_soaring_height_tables.py','check_field_zone.cpp','check_soaring_scene.cpp'):
             z.write(WORKSPACE/'tools'/name,'Unova-Together-Source/tools/'+name)
         z.write(ROOT/'tools/test_patchnotes_feed.py','Unova-Together-Source/tools/test_patchnotes_feed.py')

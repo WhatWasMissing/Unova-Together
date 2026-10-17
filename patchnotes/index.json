@@ -2,6 +2,12 @@
   "schema": 1,
   "notes": [
     {
+      "version": "2.0.12",
+      "title": "Soaring flight preview",
+      "file": "RELEASE_NOTES_2.0.12.md",
+      "body": "Soaring flight is now available in the game when enabled in launcher settings. Restart the game, then open Unova → Pokémon → Take flight (experimental). Some areas and landing spots remain unsupported or approximate."
+    },
+    {
       "version": "2.0.11",
       "title": "Filled-in Soaring map",
       "file": "RELEASE_NOTES_2.0.11.md",

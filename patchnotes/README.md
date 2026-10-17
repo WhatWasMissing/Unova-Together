@@ -2,6 +2,7 @@
 
 Pick a version to read what changed. The newest release is first.
 
+- [Unova Together 2.0.12 — Soaring flight preview](RELEASE_NOTES_2.0.12.md)
 - [Unova Together 2.0.11 — Filled-in Soaring map](RELEASE_NOTES_2.0.11.md)
 - [Unova Together 2.0.10 — A more connected Soaring map](RELEASE_NOTES_2.0.10.md)
 - [Unova Together 2.0.9 — Mega Stones at every shop](RELEASE_NOTES_2.0.9.md)
