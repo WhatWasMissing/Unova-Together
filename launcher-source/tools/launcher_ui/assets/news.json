@@ -2,6 +2,12 @@
   "schema": 1,
   "notes": [
     {
+      "version": "2.0.15",
+      "title": "Mega Evolution in double and co-op battles",
+      "file": "RELEASE_NOTES_2.0.15.md",
+      "body": "Mega Evolution now works reliably in double battles and co-op battles. The selected Pokémon keeps its Mega Evolution after both moves are chosen, and each co-op player can use Mega Evolution once per battle."
+    },
+    {
       "version": "2.0.14",
       "title": "Smoother movement in co-op",
       "file": "RELEASE_NOTES_2.0.14.md",

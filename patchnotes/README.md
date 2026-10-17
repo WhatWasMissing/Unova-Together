@@ -2,6 +2,7 @@
 
 Pick a version to read what changed. The newest release is first.
 
+- [Unova Together 2.0.15 — Mega Evolution in double and co-op battles](RELEASE_NOTES_2.0.15.md)
 - [Unova Together 2.0.14 — Smoother movement in co-op](RELEASE_NOTES_2.0.14.md)
 - [Unova Together 2.0.13 — Streamlined menus and field tools](RELEASE_NOTES_2.0.13.md)
 - [Unova Together 2.0.9 — Mega Stones at every shop](RELEASE_NOTES_2.0.9.md)
