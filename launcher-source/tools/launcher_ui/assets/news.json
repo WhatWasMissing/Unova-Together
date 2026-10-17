@@ -2,6 +2,12 @@
   "schema": 1,
   "notes": [
     {
+      "version": "2.0.14",
+      "title": "Smoother movement in co-op",
+      "file": "RELEASE_NOTES_2.0.14.md",
+      "body": "Fixes brief movement stalls that could happen while hosting or joining a LAN game. Movement should respond more consistently while network traffic is active."
+    },
+    {
       "version": "2.0.13",
       "title": "Streamlined menus and field tools",
       "file": "RELEASE_NOTES_2.0.13.md",
