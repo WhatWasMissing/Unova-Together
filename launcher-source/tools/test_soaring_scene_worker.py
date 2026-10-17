@@ -11,7 +11,8 @@ from soaring_scene_worker import (SoaringWorker,build_flyway_routes,make_flyway_
                                   flight_water_material,_FLIGHT_WORLD_OFFSETS,
                                   _FLIGHT_SUPPLEMENTAL_WORLD_OFFSETS,
                                   _FLIGHT_CONFIRMED_WARP_WORLD_OFFSETS,
-                                  active_flight_matrix_preference)
+                                  active_flight_matrix_preference,atlas_landmarks,
+                                  decomp_region_routes,_nearest_region_biome)
 from soaring_geometry import collision_debug_tiles,landing_tiles
 from types import SimpleNamespace
 from PIL import Image
@@ -404,6 +405,69 @@ class SoaringWorkerTests(unittest.TestCase):
         self.assertTrue(any(face[0] in (2,3,4) for face in faces))
         self.assertEqual(biome[0],0) # unsupported map edge stays open sea
 
+    def test_decomp_named_routes_project_into_the_live_atlas(self):
+        catalog={'connections':[['ZONE_A','ZONE_B'],['ZONE_A','ZONE_C']],
+                 'places':[]}
+        landmarks=[
+            {'zoneKey':'ZONE_A','worldX':2.5*512,'worldZ':3.5*512},
+            {'zoneKey':'ZONE_B','worldX':4.0*512,'worldZ':3.5*512},
+            {'zoneKey':'ZONE_C','worldX':80*512,'worldZ':3.5*512},
+        ]
+        routes=decomp_region_routes(10,8,0,0,landmarks,catalog)
+        self.assertEqual(len(routes),1)
+        self.assertEqual((routes[0]['from'],routes[0]['to']),('ZONE_A','ZONE_B'))
+        self.assertEqual(routes[0]['points'],((2.5,3.5),(4.,3.5)))
+
+    def test_decomp_place_biomes_use_world_cell_units(self):
+        places=[{'worldX':4*512,'worldZ':6*512,'biome':4}]
+        self.assertEqual(_nearest_region_biome(4.2,5.9,places),4)
+        self.assertIsNone(_nearest_region_biome(20,20,places))
+
+    def test_decomp_overworld_and_fly_coordinates_anchor_named_places(self):
+        headers=bytearray(10*48)
+        for zone,matrix in ((7,0),(8,0),(9,1)):
+            struct.pack_into('<HH',headers,zone*48+2,0,matrix)
+        areas=bytearray(10);areas[6]=1
+        matrix0=struct.pack('<IHH4i',1,2,1,10,11,7,-1)
+        matrix1=struct.pack('<IHH2i',0,2,1,12,13)
+        source=SimpleNamespace(headers=headers,areas=areas,matrices=[matrix0,matrix1])
+        catalog={'mainMatrix':0,'townMapToWorldX':[10,2,3],
+                 'townMapToWorldZ':[20,4,5],
+                 'places':[
+                     {'zone':'ZONE_TOWN','zoneId':7,'name':'Mapped Town','type':0,
+                      'map':[2,3],'fly':True,'flyPosition':[100,0,200],
+                      'matrix':0,'biome':'settlement'},
+                     {'zone':'ZONE_ROUTE','zoneId':8,'name':'Mapped Route','type':2,
+                      'map':[0,0],'fly':False,'matrix':0,'biome':'route',
+                      'mainCell':[1.5,.5]},
+                     {'zone':'ZONE_OTHER','zoneId':9,'name':'Other Place','type':2,
+                      'map':[2,3],'fly':False,'matrix':1,'biome':'forest'},
+                 ]}
+        landmarks=atlas_landmarks(source,{0:(100,200),1:(500,600)},catalog=catalog)
+        by_zone={place['zoneKey']:place for place in landmarks}
+        self.assertEqual((by_zone['ZONE_TOWN']['worldX'],by_zone['ZONE_TOWN']['worldZ']),
+                         (1700,3400))
+        self.assertEqual((by_zone['ZONE_ROUTE']['worldX'],by_zone['ZONE_ROUTE']['worldZ']),
+                         (868,456))
+        self.assertEqual((by_zone['ZONE_OTHER']['worldX'],by_zone['ZONE_OTHER']['worldZ']),
+                         (123,243))
+
+    def test_decomp_biome_shapes_authored_gap_without_creating_landing_data(self):
+        grid=[-1]*49
+        for z in range(1,6):
+            for x in range(1,6):
+                if (x,z)!=(3,3):grid[z*7+x]=z*7+x
+        place={'zone':12,'name':'Desert Resort','type':2,'biome':4,
+               'worldX':3.5*512,'worldZ':3.5*512}
+        faces,biome=make_region_fill_faces(
+            7,7,grid,3.5*512,3.5*512,4096,origin=(0,0),
+            region_places=[place])
+        self.assertEqual(biome[3*7+3],4)
+        self.assertTrue(any(face[0]==4 for face in faces))
+        # Generated scenery is returned separately from ROM-derived landing
+        # sites; this helper has no path that can add a landing.
+        self.assertTrue(all(len(face)==2 and len(face[1])==3 for face in faces))
+
     def test_zone_event_positions_are_decoded_for_landing_clearance(self):
         headers=bytearray(48);struct.pack_into('<H',headers,22,0)
         record=struct.pack('<12HIHHI',1,162,0,0,0,7,1,0,0,0,0,0,0,12,19,0)
@@ -500,6 +564,29 @@ class SoaringWorkerTests(unittest.TestCase):
                     ready=root/'cache/ready-test.json';deadline=time.monotonic()+6
                     while not ready.is_file() and time.monotonic()<deadline:time.sleep(.02)
                     self.assertTrue(ready.is_file());self.assertIn('error',json.loads(ready.read_text()));read.assert_not_called()
+                finally:worker.stop.set();worker.thread.join(timeout=3)
+
+    def test_zone_zero_is_accepted_as_a_real_soaring_map(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root=Path(temporary)
+            with patch('soaring_scene_worker.ndspy.rom.NintendoDSRom.fromFile') as read, \
+                 patch('soaring_scene_worker.FieldSource', return_value=SimpleNamespace()), \
+                 patch('soaring_scene_worker.export_with_budget',
+                       return_value={'omittedProps':[]}) as export:
+                worker=SoaringWorker(root/'private.nds',root/'cache')
+                try:
+                    worker.started=0
+                    request=root/'cache/request-zone-zero.json'
+                    request.write_text(json.dumps({'zone':0,'worldX':256,
+                                                   'worldZ':256,'worldY':0}))
+                    ready=root/'cache/ready-zone-zero.json';deadline=time.monotonic()+6
+                    while not ready.is_file() and time.monotonic()<deadline:time.sleep(.02)
+                    self.assertTrue(ready.is_file())
+                    response=json.loads(ready.read_text())
+                    self.assertNotIn('error',response)
+                    self.assertEqual(response['zone'],0)
+                    read.assert_called_once()
+                    self.assertEqual(export.call_args.args[1],0)
                 finally:worker.stop.set();worker.thread.join(timeout=3)
 
 if __name__=='__main__':unittest.main()

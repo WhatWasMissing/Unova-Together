@@ -39,7 +39,7 @@ Face your follower and press **R + A**, or tap its sprite, to open the companion
 
 ## Optional Soaring
 
-Soaring is an unfinished, optional preview that connects 69 outdoor areas. Some locations are approximate, and safe landing spots are limited. Read the [Soaring preview guide](SOARING_PREVIEW.md) before you use it.
+Soaring is an unfinished, optional preview that connects 69 outdoor areas. Named regional places, route links, and added transition scenery help the map flow between locations. Some positions are approximate, connector scenery is not landable, and safe landing spots are limited. Read the [Soaring preview guide](SOARING_PREVIEW.md) before you use it.
 
 ## Launcher and presentation
 

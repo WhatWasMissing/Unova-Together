@@ -1,8 +1,8 @@
 # Unova Together
 
-**Current release: 2.0.9.** Play Blaze Black 2 Redux with friends, explore with your Pokémon, and discover **49 Mega forms**.
+**Current release: 2.0.10.** Play Blaze Black 2 Redux with friends, explore with your Pokémon, and discover **49 Mega forms**.
 
-[Download Unova Together 2.0.9](https://github.com/WhatWasMissing/Unova-Together/releases/latest)
+[Download Unova Together 2.0.10](https://github.com/WhatWasMissing/Unova-Together/releases/latest)
 
 Unova Together is a free fan project by **mvq1303 / WhatWasMissing**, built on melonDS. It requires an English **Blaze Black 2 Redux Complete v1.4.1** game file. The launcher prepares the Cynthia Route 7 event in a separate copy for this version. No full game patch is currently bundled; if a compatible Unova Together patch is released for another Redux version, use the patch listed for that exact version. Downloads do not include game files, saves, or firmware.
 
@@ -34,7 +34,7 @@ Everyone in a co-op session should use the same release and Redux version. The l
 
 ## Soaring preview
 
-Soaring is unfinished and optional. Routes are approximate and safe landing areas are limited. Marine Tube has no safe landing spot; return to your take-off point there. Read the [Soaring preview guide](docs/SOARING_PREVIEW.md) before using it.
+Soaring is unfinished and optional. Named towns, route links, and connecting terrain make the regional map flow between 69 outdoor areas. Some positions are approximate, connector scenery is not landable, and safe landing areas are limited. Marine Tube has no safe landing spot; return to your take-off point there. Read the [Soaring preview guide](docs/SOARING_PREVIEW.md) before using it.
 
 ## Guides
 

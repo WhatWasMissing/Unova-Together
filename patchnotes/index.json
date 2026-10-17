@@ -2,6 +2,12 @@
   "schema": 1,
   "notes": [
     {
+      "version": "2.0.10",
+      "title": "A more connected Soaring map",
+      "file": "RELEASE_NOTES_2.0.10.md",
+      "body": "The optional Soaring preview now connects all 69 outdoor areas with named towns, route links, and regional scenery. Some locations and transitions are approximate, connecting scenery cannot be landed on, and Marine Tube still requires returning to your take-off point."
+    },
+    {
       "version": "2.0.9",
       "title": "Mega Stones at every shop",
       "file": "RELEASE_NOTES_2.0.9.md",

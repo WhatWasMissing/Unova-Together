@@ -13,6 +13,90 @@ from soaring_geometry import collision_debug_tiles
 
 _MATRIX_SCALE=512  # 32 map tiles per matrix cell, at 16 world units per tile.
 _WATER_ZONE=240  # Undella Bay in the user's English Black 2 Redux decomp.
+_REGION_DATA_FILE=Path(__file__).with_name('soaring_region_data.json')
+
+
+@lru_cache(maxsize=1)
+def soaring_region_catalog():
+    """Load compact named-place and route metadata generated from the decomp."""
+    try:
+        catalog=json.loads(_REGION_DATA_FILE.read_text(encoding='utf-8'))
+    except (OSError,ValueError):
+        return {'places':[],'connections':[]}
+    if catalog.get('schema')!=1 or len(catalog.get('places',()))>256:
+        return {'places':[],'connections':[]}
+    return catalog
+
+
+def atlas_landmarks(source,offsets,layouts=None,catalog=None):
+    """Resolve decomp Town Map places into the active ROM's flight atlas.
+
+    Chunk-zone centroids take priority. Town Map coordinates fill in named
+    exterior places that have no zone-labelled cell in their local matrix.
+    The markers guide scenery only; they never become landing candidates.
+    """
+    catalog=catalog if catalog is not None else soaring_region_catalog()
+    if not catalog.get('places') or not hasattr(source,'headers'):
+        return []
+    aliases=flight_matrix_aliases(source)
+    layouts=layouts if layouts is not None else {
+        matrix:flight_matrix_layout(source,matrix,aliases) for matrix in offsets
+    }
+    count=len(source.headers)//48
+    x_coeff=catalog.get('townMapToWorldX',(0,0,0))
+    z_coeff=catalog.get('townMapToWorldZ',(0,0,0))
+    main_offset=offsets.get(catalog.get('mainMatrix',0),(0,0))
+    result=[]
+    for place in catalog['places']:
+        zone=place.get('zoneId',-1)
+        if not isinstance(zone,int) or not 0<=zone<count:
+            continue
+        raw_matrix=struct.unpack_from('<H',source.headers,zone*48+4)[0]
+        matrix=aliases.get(raw_matrix,raw_matrix)
+        if matrix not in offsets:
+            continue
+        layout=layouts.get(matrix)
+        cells=[]
+        if layout is not None:
+            width,depth,_ids,zones=layout
+            if zones is not None:
+                cells=[index for index,value in enumerate(zones) if value==zone]
+        if cells:
+            width=layout[0]
+            local_x=sum(index%width+.5 for index in cells)/len(cells)
+            local_z=sum(index//width+.5 for index in cells)/len(cells)
+            world_x=offsets[matrix][0]+local_x*_MATRIX_SCALE
+            world_z=offsets[matrix][1]+local_z*_MATRIX_SCALE
+            # The decomp stores actual Fly destinations in 16-unit tile
+            # coordinates. On the authored main overworld these give more
+            # precise town anchors than a whole-chunk centroid.
+            fly_position=place.get('flyPosition')
+            if (matrix==catalog.get('mainMatrix') and place.get('fly') and
+                    isinstance(fly_position,(list,tuple)) and len(fly_position)>=3):
+                world_x=main_offset[0]+int(fly_position[0])*16
+                world_z=main_offset[1]+int(fly_position[2])*16
+        else:
+            main_cell=place.get('mainCell')
+            if place.get('matrix')==catalog.get('mainMatrix') and isinstance(main_cell,(list,tuple)) and len(main_cell)==2:
+                world_x=main_offset[0]+float(main_cell[0])*_MATRIX_SCALE
+                world_z=main_offset[1]+float(main_cell[1])*_MATRIX_SCALE
+            else:
+                map_position=place.get('map',(0,0))
+                map_x,map_y=map_position
+                world_x=(x_coeff[0]+x_coeff[1]*map_x+x_coeff[2]*map_y)+main_offset[0]
+                world_z=(z_coeff[0]+z_coeff[1]*map_x+z_coeff[2]*map_y)+main_offset[1]
+        biome={'coast':0,'forest':1,'route':2,'grassland':2,
+               'settlement':2,'mountain':3,'desert':4}.get(place.get('biome'),2)
+        result.append({
+            'zone':zone,'zoneKey':str(place.get('zone',''))[:64],
+            'name':str(place.get('name',''))[:48],
+            'type':int(place.get('type',2)),'biome':biome,
+            'fly':bool(place.get('fly',False)),
+            'worldX':round(world_x,3),'worldZ':round(world_z,3),
+            'mapX':int(place.get('map',[0,0])[0]),
+            'mapY':int(place.get('map',[0,0])[1]),
+        })
+    return result
 
 # Absolute placements in the Black 2 Redux overworld frame. The first group is
 # solved from reciprocal outdoor grid warps. The remaining town-map anchors
@@ -671,12 +755,69 @@ def make_flyway_faces(routes,x,z,radius):
     return faces
 
 
-def make_region_fill_faces(width,depth,cell_ids,x,z,radius):
-    """Cover open regional gaps with a deep-sea underlay and forest islets.
+def _connector_cells(width,depth,routes):
+    """Rasterize separated field-scene links into empty atlas cells."""
+    cells=set()
+    for route in routes:
+        if isinstance(route,dict):route=route.get('points',())
+        for a,b in zip(route,route[1:]):
+            steps=max(1,int(math.ceil(max(abs(b[0]-a[0]),abs(b[1]-a[1]))*3)))
+            for index in range(steps+1):
+                fraction=index/steps
+                cx=math.floor(a[0]+(b[0]-a[0])*fraction)
+                cz=math.floor(a[1]+(b[1]-a[1])*fraction)
+                for ox,oz in ((0,0),(-1,0),(1,0),(0,-1),(0,1)):
+                    nx,nz=cx+ox,cz+oz
+                    if 0<=nx<width and 0<=nz<depth:
+                        cells.add(nz*width+nx)
+    return cells
 
-    Generated faces are renderer-only. They never affect collision or landing
-    eligibility. Forest fills are placed only in empty cells supported by a
-    substantial cluster of authored land, so open-water coastlines stay sea.
+
+def _nearest_region_biome(world_x,world_z,places,max_distance=10):
+    nearest=None;best=max_distance*max_distance
+    for place in places:
+        dx=place['worldX']/_MATRIX_SCALE-world_x
+        dz=place['worldZ']/_MATRIX_SCALE-world_z
+        distance=dx*dx+dz*dz
+        if distance<best:
+            best=distance;nearest=place
+    return nearest.get('biome',2) if nearest is not None else None
+
+
+def decomp_region_routes(width,depth,origin_x,origin_z,landmarks,catalog=None,
+                         max_length=8.):
+    """Project the decomp's named Unova route links into the Soaring atlas.
+
+    These paths only guide generated scenery and map markers. They do not
+    create field collision or landing targets.
+    """
+    catalog=catalog if catalog is not None else soaring_region_catalog()
+    by_key={place.get('zoneKey'):place for place in landmarks
+            if place.get('zoneKey')}
+    routes=[]
+    for link in catalog.get('connections',()):
+        if not isinstance(link,(list,tuple)) or len(link)!=2:continue
+        start,end=(by_key.get(key) for key in link)
+        if start is None or end is None:continue
+        a=(start['worldX']/_MATRIX_SCALE-origin_x,
+           start['worldZ']/_MATRIX_SCALE-origin_z)
+        b=(end['worldX']/_MATRIX_SCALE-origin_x,
+           end['worldZ']/_MATRIX_SCALE-origin_z)
+        if not all(math.isfinite(value) for value in (*a,*b)):continue
+        if not (0<=a[0]<=width and 0<=a[1]<=depth and
+                0<=b[0]<=width and 0<=b[1]<=depth):continue
+        if math.hypot(b[0]-a[0],b[1]-a[1])>max_length:continue
+        routes.append({'from':link[0],'to':link[1],'points':(a,b)})
+    return routes
+
+
+def make_region_fill_faces(width,depth,cell_ids,x,z,radius,origin=(0,0),
+                           link_routes=(),region_places=()):
+    """Build decomp-anchored, non-collision terrain between regional scenes.
+
+    Missing-cell corridors connect separated outdoor matrices. Their nearby
+    Black 2 Town Map anchors choose forest, grassland, mountain, coast and
+    desert details. Landings remain restricted to decoded ROM collision.
     """
     faces=[]
     extent=max(3600.,min(7600.,radius+1200.))
@@ -685,10 +826,12 @@ def make_region_fill_faces(width,depth,cell_ids,x,z,radius):
     faces.extend([[0,[list(corners[0]),list(corners[1]),list(corners[2])]],
                   [0,[list(corners[0]),list(corners[2]),list(corners[3])]]])
     biome=[2 if value>=0 else 0 for value in cell_ids]
+    links=_connector_cells(width,depth,link_routes)
+    water=set(interior_water_cells(width,depth,cell_ids))
     eligible=[]
     for cell,value in enumerate(cell_ids):
-        if value>=0:continue
-        gx, gz=cell%width,cell//width
+        if value>=0 or cell not in water:continue
+        gx,gz=cell%width,cell//width
         center_x=(gx+.5)*512-x;center_z=(gz+.5)*512-z
         if math.hypot(center_x,center_z)>min(2500.,radius+350.):continue
         neighbours=0
@@ -697,45 +840,90 @@ def make_region_fill_faces(width,depth,cell_ids,x,z,radius):
                 nx,nz=gx+dx,gz+dz
                 if 0<=nx<width and 0<=nz<depth and cell_ids[nz*width+nx]>=0:
                     neighbours+=1
-        if neighbours>=8:eligible.append((math.hypot(center_x,center_z),cell,gx,gz))
+        if neighbours<8 and cell not in links:continue
+        world_cell_x=origin[0]+gx+.5;world_cell_z=origin[1]+gz+.5
+        local_biome=_nearest_region_biome(world_cell_x,world_cell_z,region_places)
+        if local_biome is None:local_biome=1 if neighbours>=8 else 2
+        if local_biome==0 and cell not in links:continue
+        if local_biome==0:local_biome=2
+        eligible.append((math.hypot(center_x,center_z),cell,gx,gz,local_biome))
     eligible.sort()
-    for _,cell,gx,gz in eligible:
-        if len(faces)>4700:break
-        biome[cell]=1
+    land_cells={entry[1] for entry in eligible}
+    for _,cell,gx,gz,land_biome in eligible:
+        if len(faces)>5600:break
+        biome[cell]=land_biome
         left=gx*512-x+24;right=(gx+1)*512-x-24
         front=gz*512-z+24;back=(gz+1)*512-z-24
-        floor_y=-20.
-        a=(left,floor_y,front);b=(right,floor_y,front);c=(right,floor_y,back);d=(left,floor_y,back)
-        faces.extend([[1,[list(a),list(b),list(c)]],[1,[list(a),list(c),list(d)]]])
-        # Stable per-cell pseudo-random placement keeps rebuilt scenes still.
+        floor_y=-19. if land_biome==3 else -20.
+        a=(left,floor_y,front);b=(right,floor_y,front)
+        c=(right,floor_y,back);d=(left,floor_y,back)
+        material={1:1,2:2,3:3,4:4}.get(land_biome,2)
+        faces.extend([[material,[list(a),list(b),list(c)]],
+                      [material,[list(a),list(c),list(d)]]])
+        # A shallow shore bank visually joins new terrain to the sea plane.
+        for gx2,gz2,p,q in ((gx,gz-1,a,b),(gx+1,gz,b,c),
+                            (gx,gz+1,c,d),(gx-1,gz,d,a)):
+            if not (0<=gx2<width and 0<=gz2<depth):continue
+            neighbour=gz2*width+gx2
+            if cell_ids[neighbour]>=0 or neighbour in land_cells:continue
+            low_p=(p[0],-34.,p[2]);low_q=(q[0],-34.,q[2])
+            faces.extend([[4,[list(p),list(q),list(low_q)]],
+                          [4,[list(p),list(low_q),list(low_p)]]])
+        # Stable per-cell pseudo-random details keep a rebuilt map identical.
         state=(cell*1103515245+12345)&0x7fffffff
         def rand(limit):
             nonlocal state
             state=(state*1103515245+12345)&0x7fffffff
             return (state%1000000)/1000000*limit
-        for _tree in range(3):
-            if len(faces)>4700:break
-            tx=gx*512-x+75+rand(362);tz=gz*512-z+75+rand(362)
-            radius_tree=18+rand(13);height=34+rand(19);base=floor_y
-            trunk=5+rand(3)
-            ring=[]
-            for side in range(5):
-                angle=side*math.tau/5+rand(.2)
-                ring.append((tx+math.cos(angle)*radius_tree,base+height*.45,tz+math.sin(angle)*radius_tree))
-            top=(tx,base+height,tz);lower=(tx,base+height*.16,tz)
-            colors=(2,3)
-            for side in range(5):
-                faces.append([colors[side%2],[list(ring[side]),list(ring[(side+1)%5]),list(top)]])
-                faces.append([3,[list(ring[side]),list(lower),list(ring[(side+1)%5])]])
-            # A narrow, dark trunk ties the crown to the forest floor.
-            t0=(tx-trunk,base,tz-trunk);t1=(tx+trunk,base,tz-trunk)
-            t2=(tx+trunk,base,tz+trunk);t3=(tx-trunk,base,tz+trunk)
-            u0=(tx-trunk,base+height*.2,tz-trunk);u1=(tx+trunk,base+height*.2,tz-trunk)
-            u2=(tx+trunk,base+height*.2,tz+trunk);u3=(tx-trunk,base+height*.2,tz+trunk)
-            for quad in ((t0,t1,u1,u0),(t1,t2,u2,u1),(t2,t3,u3,u2),(t3,t0,u0,u3)):
-                p,q,r,s=quad
-                faces.extend([[4,[list(p),list(q),list(r)]],[4,[list(p),list(r),list(s)]]])
-    return faces,biome
+        if land_biome==1:
+            for _tree in range(3):
+                if len(faces)>6000:break
+                tx=gx*512-x+75+rand(362);tz=gz*512-z+75+rand(362)
+                tree_radius=18+rand(13);height=34+rand(19);base=floor_y
+                trunk=5+rand(3);ring=[]
+                for side in range(5):
+                    angle=side*math.tau/5+rand(.2)
+                    ring.append((tx+math.cos(angle)*tree_radius,
+                                 base+height*.45,tz+math.sin(angle)*tree_radius))
+                top=(tx,base+height,tz);lower=(tx,base+height*.16,tz)
+                for side in range(5):
+                    faces.append([[1,2][side%2],
+                                  [list(ring[side]),list(ring[(side+1)%5]),list(top)]])
+                    faces.append([2,[list(ring[side]),list(lower),list(ring[(side+1)%5])]])
+                t0=(tx-trunk,base,tz-trunk);t1=(tx+trunk,base,tz-trunk)
+                t2=(tx+trunk,base,tz+trunk);t3=(tx-trunk,base,tz+trunk)
+                u0=(tx-trunk,base+height*.2,tz-trunk);u1=(tx+trunk,base+height*.2,tz-trunk)
+                u2=(tx+trunk,base+height*.2,tz+trunk);u3=(tx-trunk,base+height*.2,tz+trunk)
+                for quad in ((t0,t1,u1,u0),(t1,t2,u2,u1),(t2,t3,u3,u2),(t3,t0,u0,u3)):
+                    p,q,r,s=quad
+                    faces.extend([[4,[list(p),list(q),list(r)]],
+                                  [4,[list(p),list(r),list(s)]]])
+        elif land_biome==3:
+            for peak in range(2 if cell in links else 3):
+                if len(faces)>6000:break
+                tx=gx*512-x+95+rand(322);tz=gz*512-z+95+rand(322)
+                peak_radius=36+rand(28);peak_height=54+rand(88);ring=[]
+                for side in range(5):
+                    angle=side*math.tau/5+rand(.15)
+                    ring.append((tx+math.cos(angle)*peak_radius,
+                                 floor_y+peak_height*.42,tz+math.sin(angle)*peak_radius))
+                top=(tx,floor_y+peak_height,tz);base=(tx,floor_y,tz)
+                for side in range(5):
+                    faces.append([[3,4][side%2],
+                                  [list(ring[side]),list(ring[(side+1)%5]),list(top)]])
+                    faces.append([4,[list(ring[side]),list(base),list(ring[(side+1)%5])]])
+        elif land_biome==4:
+            for _ridge in range(2):
+                if len(faces)>6000:break
+                cx=gx*512-x+70+rand(370);cz=gz*512-z+70+rand(370)
+                half=70+rand(65);height=7+rand(14)
+                p=(cx-half,floor_y+1,cz);q=(cx,floor_y+height,cz+rand(35)-17)
+                r=(cx+half,floor_y+1,cz);s=(cx,floor_y+1,cz+72)
+                faces.extend([[4,[list(p),list(q),list(s)]],
+                              [4,[list(s),list(q),list(r)]]])
+    # Keep the native parser's bounded scenery limit strict even when the
+    # final tree or mountain cell reaches the cap.
+    return faces[:6000],biome
 
 
 def export_scene(source, zone, x, z, y, directory, radius=4096):
@@ -826,7 +1014,16 @@ def export_scene(source, zone, x, z, y, directory, radius=4096):
     atlas_x,atlas_z=x-origin_world_x,z-origin_world_z
     routes=build_flyway_routes(width,depth,tuple(ids))
     flyway_faces=make_flyway_faces(routes,atlas_x,atlas_z,radius)
-    region_faces,atlas_biome=make_region_fill_faces(width,depth,ids,atlas_x,atlas_z,radius)
+    catalog=soaring_region_catalog()
+    landmarks=atlas_landmarks(source,offsets,layouts,catalog)
+    decomp_routes=decomp_region_routes(width,depth,origin_x,origin_z,
+                                       landmarks,catalog)
+    corridor_routes=[link['points'] for link in decomp_routes]
+    region_routes=[*routes,*corridor_routes]
+    region_faces,atlas_biome=make_region_fill_faces(
+        width,depth,ids,atlas_x,atlas_z,radius,
+        origin=(origin_x,origin_z),link_routes=region_routes,
+        region_places=landmarks)
     water_cells=interior_water_cells(width,depth,ids)
     water_material=flight_water_material(source)
     water_faces=(make_water_faces(water_cells,width,origin_x,origin_z,atlas_x,atlas_z,radius,len(pairs))
@@ -858,11 +1055,20 @@ def export_scene(source, zone, x, z, y, directory, radius=4096):
         # The 32x32 ROM tile repeats in both directions for continuous water.
         texture_modes.append([True,True,False,False])
         geometry.extend(water_faces)
+    atlas_markers=[[round(place['worldX']/_MATRIX_SCALE-origin_x,4),
+                    round(place['worldZ']/_MATRIX_SCALE-origin_z,4),
+                    place['name'],place['type'],place['biome'],place['fly'],
+                    place['zone']]
+                   for place in landmarks]
     result={'format':3,'zone':zone,'sourceZone':source_zone,'world':[x,y,z],'textures':textures,'textureModes':texture_modes,'faces':geometry,
             'omittedProps':sorted(set(omitted_props)),'chunks':sorted(set(chunks)),
             'landings':landings,'closedBacks':closed_backs,'radius':radius,
             'atlasMatrix':matrix,'atlasSize':[width,depth],'atlasOriginCell':[origin_x,origin_z],'atlasGrid':atlas_grid,
-            'atlasBiome':atlas_biome,'flywayRoutes':routes,'flywayFaces':flyway_faces,'regionFaces':region_faces,
+            'atlasBiome':atlas_biome,'atlasLandmarks':atlas_markers,
+            'decompRoutes':[link['points'] for link in decomp_routes],
+            'decompRouteNames':[[link['from'],link['to']] for link in decomp_routes],
+            'flywayRoutes':routes,'flywayFaces':flyway_faces,'regionFaces':region_faces,
+            'regionConnectorCount':len(decomp_routes),
             'matrixOffsets':{str(mid):list(offset) for mid,offset in sorted(offsets.items())},
             'collisionDebug':collision_debug,'collisionTiles':collision_tiles,'seaTiles':len(water_faces)}
     (directory/'scene.json').write_text(json.dumps(result,separators=(',',':')),encoding='utf-8')
@@ -896,7 +1102,10 @@ class SoaringWorker:
                     if request.stat().st_mtime<self.started:continue
                     if request.stat().st_size>4096:raise ValueError('Invalid flight request')
                     data=json.loads(request.read_text());zone=data['zone'];x=data['worldX'];z=data['worldZ'];y=data['worldY']
-                    if type(zone) is not int or not 0<zone<4096:raise ValueError('Invalid flight map')
+                    # Zone 0 is a real outdoor Redux map used by matrix 357;
+                    # it is not a sentinel. Keep the ROM index bound while
+                    # accepting every valid unsigned zone ID, including zero.
+                    if type(zone) is not int or not 0<=zone<4096:raise ValueError('Invalid flight map')
                     if not all(type(v) in (int,float) and math.isfinite(v) and -32768<=v<=131072 for v in (x,y,z)):raise ValueError('Invalid flight position')
                     if source is None:
                         source=FieldSource(ndspy.rom.NintendoDSRom.fromFile(str(self.rom)))
