@@ -33,3 +33,9 @@ No pocket capacity or item-ID limit was changed in this pass. Growing pocket arr
 - `include/pml/item.h` and `src/system/pml_item.c`: item-data, icon, and item-message lookups are bounded by `ITEM_LAST`.
 - `src/system/pml_item.c`: `DUMMY_ITEMS` and `UNHOLDABLE_ITEMS` each have 20 32-bit words (640 addressable bits).
 - `src/system/myitem_savedata.c`: `sItemPockets` has `ITEM_LAST + 1` entries and item loops use the same ceiling.
+
+## Mega Stone shop fix verification (17 October 2026)
+
+The rebuilt native Mega Evolution regression passed against the original Blaze Black 2 Redux Complete v1.4.1 ROM. It verified that all 46 Mega Stones appear across the 74 shop lists, every list remains at or below the native 45-entry limit, every one of the 20 Pokémon Center marts has Mega Stone stock, and the existing shop entries remain intact. The game-data regression also checked unique stone entries and valid item names, icons, and prices. The intended behavior is a shared selection across the mart network; individual marts carry a subset because the game's native shop list is fixed at 45 entries.
+
+The release emulator passed an offscreen startup check with Mega Evolution enabled: it rendered a visible frame, read the relocated archive, and exited successfully. The Windows and source archives passed ZIP integrity and private-game-file checks. Launcher bundle tests (6), updater tests (13), and the production wireless-input bounds check passed. The shop data was verified from the ROM; a live in-game shopping walkthrough was not performed for this release.
