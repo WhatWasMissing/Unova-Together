@@ -7,7 +7,8 @@ from build_battle_surroundings import texture_pack
 from soaring_scene_worker import (SoaringWorker,build_flyway_routes,make_flyway_faces,
                                   make_region_fill_faces,flight_matrix_offsets,flight_matrix_aliases,
                                   flight_matrix_layout,merged_flight_grid,export_scene,
-                                  export_with_budget,interior_water_cells,flight_atlas_coverage,make_water_faces,
+                                  export_with_budget,interior_water_cells,atlas_water_cells,
+                                  flight_atlas_coverage,make_water_faces,
                                   flight_water_material,_FLIGHT_WORLD_OFFSETS,
                                   _FLIGHT_SUPPLEMENTAL_WORLD_OFFSETS,
                                   _FLIGHT_CONFIRMED_WARP_WORLD_OFFSETS,
@@ -354,27 +355,48 @@ class SoaringWorkerTests(unittest.TestCase):
         # Geometry only supplies appearance; collision still comes from the ROM.
         self.assertTrue(all(len(face[1])==3 for face in faces))
 
-    def test_authored_region_gaps_get_native_water_to_the_outer_boundary(self):
-        # Two separated authored regions have a continuous logical sea between
-        # them, while cells beyond the outer map footprint remain the boundary.
+    def test_native_water_covers_every_empty_cell_inside_the_atlas(self):
+        # Two separated authored regions retain their convex-hull helper for
+        # shaping terrain, while the rendered sea covers the full map bounds.
         width,depth=10,7;grid=[-1]*(width*depth)
         for z in range(2,5):
             for x in (1,2,6,7):grid[z*width+x]=z*width+x
-        cells=interior_water_cells(width,depth,grid)
-        self.assertIn(3*width+4,cells)
-        self.assertIn(3*width+0,cells) # closes the one-cell diagonal/coast edge
-        self.assertNotIn(3*width+9,cells)
-        self.assertEqual(cells,interior_water_cells(width,depth,grid))
+        hull_cells=interior_water_cells(width,depth,grid)
+        self.assertIn(3*width+4,hull_cells)
+        self.assertIn(3*width+0,hull_cells) # closes the one-cell diagonal/coast edge
+        self.assertNotIn(3*width+9,hull_cells)
+        self.assertEqual(hull_cells,interior_water_cells(width,depth,grid))
+        cells=atlas_water_cells(width,depth,grid)
+        self.assertIn(3*width+9,cells) # map corners receive the tiled sea too
+        self.assertEqual(len(cells),width*depth-sum(value>=0 for value in grid))
         coverage=flight_atlas_coverage(width,depth,grid)
         self.assertEqual(coverage['enclosedVoidCells'],0)
         self.assertEqual(coverage['unfilledCellsTouchingMap'],0)
         self.assertEqual(coverage['coveredComponents'],1)
-        self.assertGreater(coverage['outerBoundaryCells'],0)
+        self.assertEqual(coverage['outerBoundaryCells'],0)
+        self.assertEqual(coverage['coveredCells'],width*depth)
         faces=make_water_faces(cells,width,0,0,4*512,3*512,4096,5)
-        self.assertTrue(faces)
+        self.assertEqual(len(faces),len(cells))
         self.assertTrue(all(face[0]==5 and len(face[1])==4 for face in faces))
         self.assertEqual(faces[0][1][0][1],-34.)
         self.assertEqual(faces[0][1][1][3]-faces[0][1][0][3],32)
+
+    def test_export_places_water_under_atlas_corner_gaps(self):
+        headers=bytearray(8*48);struct.pack_into('<HH',headers,7*48+2,0,0)
+        areas=bytearray(10);areas[6]=1
+        matrix=struct.pack('<IHH4i',0,2,2,1,-1,-1,-1)
+        texture=SimpleNamespace(width=32,height=32,
+            renderAsImage=lambda _:Image.new('RGBA',(32,32),'cyan'))
+        palette=SimpleNamespace(colors=[(0,31,31,31)])
+        def scene(*_args,**_kwargs):
+            return [],{}, {'omittedProps':[],'chunks':[]}
+        source=SimpleNamespace(headers=headers,areas=areas,matrices=[matrix],scene=scene,
+                               _flight_water_material=(texture,palette))
+        with tempfile.TemporaryDirectory() as temporary:
+            result=export_scene(source,7,128,128,0,Path(temporary)/'corner-gaps')
+        self.assertEqual(result['atlasSize'],[2,2])
+        self.assertEqual(result['seaTiles'],3)
+        self.assertTrue(result['textures'])
 
     def test_water_material_uses_the_decomp_identified_undella_pack(self):
         from soaring_scene_worker import _WATER_ZONE

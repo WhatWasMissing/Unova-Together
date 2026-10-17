@@ -1,6 +1,6 @@
 # Soaring preview
 
-Soaring is an optional, unfinished way to explore 69 outdoor areas in Blaze Black 2 Redux. Named towns and routes guide the regional map, with added scenery between separated locations. Some positions and transitions are approximate; connector scenery does not create landing spots.
+Soaring is an optional, unfinished way to explore 69 outdoor areas in Blaze Black 2 Redux. Named towns and routes guide the regional map, added scenery bridges separated locations, and a continuous ocean backdrop fills open spaces inside the map. Some positions and transitions are approximate; connector scenery does not create landing spots.
 
 Enable **Experimental features → Soaring flight** in launcher settings. In the game, open **Unova → Pokémon → Take flight** and follow the on-screen controls. Choose a clear landing spot or use the return option to go back to your take-off point.
 

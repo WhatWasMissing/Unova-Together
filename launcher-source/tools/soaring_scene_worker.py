@@ -563,18 +563,25 @@ def interior_water_cells(width,depth,cell_ids,edge_margin=.75):
     return tuple(result)
 
 
-def flight_atlas_coverage(width,depth,cell_ids,edge_margin=.75):
-    """Summarize whether real map cells and sea fill form a gap-free atlas.
+def atlas_water_cells(width,depth,cell_ids):
+    """Return every empty cell inside the rectangular flight-map bounds.
 
-    Empty cells that remain after the convex-hull sea fill are allowed only
-    when they can reach the atlas edge; they then represent the distant map
-    boundary. A remaining empty cell enclosed by the authored footprint, or
-    touching a real cell even diagonally, would appear as an accidental gap.
+    The convex hull is useful for shaping decorative land between real field
+    maps, but it is too small to serve as the rendered background: its corners
+    leave visible holes inside the map's rectangular atlas. Back every unused
+    atlas cell with the game's tiled sea so all in-map gaps have scenery.
     """
     if width<1 or depth<1 or len(cell_ids)!=width*depth:
         raise ValueError('Invalid flight atlas dimensions')
+    return tuple(index for index,value in enumerate(cell_ids) if value<0)
+
+
+def flight_atlas_coverage(width,depth,cell_ids,edge_margin=.75):
+    """Summarize whether real maps and the sea backdrop cover the full atlas."""
+    if width<1 or depth<1 or len(cell_ids)!=width*depth:
+        raise ValueError('Invalid flight atlas dimensions')
     land={index for index,value in enumerate(cell_ids) if value>=0}
-    water=set(interior_water_cells(width,depth,cell_ids,edge_margin))
+    water=set(atlas_water_cells(width,depth,cell_ids))
     covered=land|water
     empty=set(range(width*depth))-covered
 
@@ -1024,7 +1031,9 @@ def export_scene(source, zone, x, z, y, directory, radius=4096):
         width,depth,ids,atlas_x,atlas_z,radius,
         origin=(origin_x,origin_z),link_routes=region_routes,
         region_places=landmarks)
-    water_cells=interior_water_cells(width,depth,ids)
+    # Cover every unused cell within the atlas rectangle. The convex-hull sea
+    # fill used for terrain placement left the map's outer corners unrendered.
+    water_cells=atlas_water_cells(width,depth,ids)
     water_material=flight_water_material(source)
     water_faces=(make_water_faces(water_cells,width,origin_x,origin_z,atlas_x,atlas_z,radius,len(pairs))
                  if water_material is not None else [])

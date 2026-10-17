@@ -1,6 +1,6 @@
 # Soaring flight preview
 
-Soaring is an **unfinished, optional preview** that lets you fly between 69 outdoor areas in Blaze Black 2 Redux. Named towns and routes guide the regional map, and added terrain helps the scenery flow between separated locations. Some positions and transitions are approximate.
+Soaring is an **unfinished, optional preview** that lets you fly between 69 outdoor areas in Blaze Black 2 Redux. Named towns and routes guide the regional map, added terrain bridges separated locations, and a continuous ocean backdrop fills open spaces inside the map. Some positions and transitions are approximate.
 
 ## Start a flight
 

@@ -2,6 +2,12 @@
   "schema": 1,
   "notes": [
     {
+      "version": "2.0.11",
+      "title": "Filled-in Soaring map",
+      "file": "RELEASE_NOTES_2.0.11.md",
+      "body": "The Soaring map now has a continuous ocean backdrop across open spaces inside its borders. The preview remains unfinished, and some routes, transitions, and landing areas are approximate."
+    },
+    {
       "version": "2.0.10",
       "title": "A more connected Soaring map",
       "file": "RELEASE_NOTES_2.0.10.md",
