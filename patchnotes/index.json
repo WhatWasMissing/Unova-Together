@@ -2,6 +2,12 @@
   "schema": 1,
   "notes": [
     {
+      "version": "2.0.16",
+      "title": "Complete Mega Stone shops and matching version labels",
+      "file": "RELEASE_NOTES_2.0.16.md",
+      "body": "Every Poké Mart includes all 49 Mega Stones, including Mistralton City. The game window and Multiplayer screen now show the same release number as the launcher."
+    },
+    {
       "version": "2.0.15",
       "title": "Mega Evolution in double and co-op battles",
       "file": "RELEASE_NOTES_2.0.15.md",
