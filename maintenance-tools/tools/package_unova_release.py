@@ -25,10 +25,28 @@ COMMANDS = ('Online Co-op.cmd', 'Install UDP Dependencies.cmd', 'Start LAN Prese
 DOCS = ('PLAYER_GUIDE.md', 'KNOWN_ISSUES.md', 'TAILSCALE_COOP.md', 'UDP_SERVER_GUIDE.md',
         'LAUNCHER.md', 'COMPANION_INTERACTIONS.md', 'COOP_TOOLS.md', 'FEATURES.md',
         'ROADMAP.md', 'BAG_CAPACITY.md')
+FORBIDDEN = {'.nds', '.gba', '.sav', '.save', '.dsv', '.ramdump', '.ml1', '.ml2', '.ml3', '.ml4', '.ml5', '.ml6', '.ml7', '.ml8', '.pem', '.key', '.pyc'}
+
+def validate_windows_platform_plugin(current):
+    plugin = current/'platforms/qwindows.dll'
+    if not plugin.is_file():
+        raise RuntimeError(f'Windows Qt platform plugin is missing: {plugin}')
     with plugin.open('rb') as stream:
         if stream.read(2) != b'MZ' or plugin.stat().st_size < 256 * 1024:
             raise RuntimeError(f'Invalid Qt Windows platform plugin: {plugin}')
     return plugin
+
+REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
+
+def require_release_condition(condition, message):
+    if not condition:
+        raise RuntimeError(f'Release package validation failed: {message}')
+
+def check_launcher_ui_mirror():
+    checker = REPOSITORY_ROOT/'launcher-source/tools/check_launcher_tree_parity.py'
+    if not checker.is_file():
+        raise RuntimeError(f'Launcher UI parity checker is missing: {checker}')
+    subprocess.run([sys.executable, str(checker)], check=True, cwd=REPOSITORY_ROOT)
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
@@ -41,6 +59,7 @@ def main():
     version = args.version
     if not version or any(c not in '0123456789.-abcdefghijklmnopqrstuvwxyz' for c in version):
         parser.error('Invalid version')
+    check_launcher_ui_mirror()
     current = args.runtime_root.resolve() if args.runtime_root else ROOT/'builds/current'
     if not current.is_relative_to(ROOT/'builds'):
         raise ValueError('Runtime must be staged within workspace builds')
@@ -83,7 +102,10 @@ def main():
     portable = '\n'.join(controls)
     tailscale = ROOT/'downloads/dependencies/tailscale'
     manifest = json.loads((tailscale/'bundle.json').read_text())
-    assert hashlib.sha256((tailscale/manifest['installer']).read_bytes()).hexdigest() == manifest['sha256']
+    require_release_condition(
+        hashlib.sha256((tailscale/manifest['installer']).read_bytes()).hexdigest() == manifest['sha256'],
+        'Tailscale installer checksum does not match bundle.json',
+    )
     with zipfile.ZipFile(runtime, 'x', zipfile.ZIP_DEFLATED, compresslevel=6) as z:
         z.write(current/'melonDS.exe', 'Unova-Together/builds/current/melonDS.exe')
         z.writestr('Unova-Together/builds/current/VERSION.txt', f'Unova Together {version}\nBy mvq1303 (GitHub: WhatWasMissing).\n')
@@ -102,7 +124,7 @@ def main():
         for name in COMMANDS:
             z.write(ROOT/name, 'Unova-Together/'+name)
         z.writestr('Unova-Together/Start Emulator.cmd', '@echo off\r\ncd /d "%~dp0builds\\current"\r\nstart "" melonDS.exe\r\n')
-        assert (launcher/'Pokemon Together.exe').is_file()
+        require_release_condition((launcher/'Pokemon Together.exe').is_file(), 'Launcher executable is missing')
         for path in sorted(launcher.rglob('*')):
             if path.is_file():z.write(path,'Unova-Together/launcher/'+path.relative_to(launcher).as_posix())
         z.writestr('Unova-Together/Start Unova Together.cmd','@echo off\r\ncd /d "%~dp0"\r\nstart "" "launcher\\Pokemon Together.exe" --home "%~dp0."\r\n')
@@ -138,8 +160,11 @@ def main():
         for path in sorted((ROOT/'tools/launcher_ui').rglob('*')):
             if path.is_file() and '__pycache__' not in path.parts:
                 z.write(path,'Unova-Together-Source/tools/launcher_ui/'+path.relative_to(ROOT/'tools/launcher_ui').as_posix())
-        for name in ('test_unova_updater.py','test_unova_single_exe.py','unova_single_exe.py','build_unova_single_exe.py','test_launcher_ui.py','test_launcher_preferences.py','test_launcher_cheat_engine.py','test_launcher_services.py','test_release_input_bounds.py','test_companion_interactions.py','test_overworld_companion.py','check_lan_player_list_validation.cpp','check_battle_presence.cpp','check_post_battle_presence.cpp','check_rival_agreement.cpp','test_rival_payload.py','test_coop_boss_payload.py','test_coop_story_return.py','test_coop_field_return.py','verify_coop_runtime.py','audit_native_enemy_setup.py','verify_rival_startups.py'):
+        for name in ('test_unova_updater.py','test_unova_single_exe.py','unova_single_exe.py','build_unova_single_exe.py','test_launcher_ui.py','test_launcher_preferences.py','test_launcher_cheat_engine.py','test_launcher_services.py','test_release_input_bounds.py','test_companion_interactions.py','test_companion_interactions_runner.py','test_overworld_companion.py','check_lan_player_list_validation.cpp','check_battle_presence.cpp','check_post_battle_presence.cpp','check_rival_agreement.cpp','test_rival_payload.py','test_coop_boss_payload.py','test_coop_story_return.py','test_coop_field_return.py','verify_coop_runtime.py','audit_native_enemy_setup.py','verify_rival_startups.py'):
             z.write(ROOT/'tools'/name,'Unova-Together-Source/tools/'+name)
+        for name in ('check_launcher_tree_parity.py','test_launcher_tree_parity.py','test_release_validation.py'):
+            z.write(REPOSITORY_ROOT/'launcher-source/tools'/name,'Unova-Together-Source/tools/'+name)
+        z.write(REPOSITORY_ROOT/'docs/DEVELOPER_TESTING.md','Unova-Together-Source/docs/DEVELOPER_TESTING.md')
         for name in COMMANDS:
             z.write(ROOT/name, 'Unova-Together-Source/'+name)
         z.write(source_root/'LICENSE', 'Unova-Together-Source/LICENSE')
@@ -150,31 +175,55 @@ def main():
             'The connection helpers are Python source in tools/. No ROM, save or firmware is included.\n')
     for archive in (runtime, source):
         with zipfile.ZipFile(archive) as z:
-            assert z.testzip() is None
-            assert not any(Path(n).suffix.lower() in FORBIDDEN for n in z.namelist())
-            assert not any('/.git/' in n or '/test-fixtures/' in n or '/diagnostics/' in n for n in z.namelist())
+            require_release_condition(z.testzip() is None, f'Archive is corrupt: {archive.name}')
+            require_release_condition(
+                not any(Path(n).suffix.lower() in FORBIDDEN for n in z.namelist()),
+                f'Archive contains a forbidden private file: {archive.name}',
+            )
+            require_release_condition(
+                not any('/.git/' in n or '/test-fixtures/' in n or '/diagnostics/' in n for n in z.namelist()),
+                f'Archive contains development-only files: {archive.name}',
+            )
     with zipfile.ZipFile(runtime) as z:
         plugin_entry = 'Unova-Together/builds/current/platforms/qwindows.dll'
-        assert plugin_entry in z.namelist(), 'Windows Qt platform plugin was not packaged'
-        assert z.read(plugin_entry) == qt_windows_plugin.read_bytes(), 'Packaged Qt platform plugin differs from staged runtime'
-        assert z.read('Unova-Together/builds/current/melonDS.exe') == (current/'melonDS.exe').read_bytes()
-        assert z.read('Unova-Together/builds/current/VERSION.txt').startswith(f'Unova Together {version}'.encode())
+        require_release_condition(plugin_entry in z.namelist(), 'Windows Qt platform plugin was not packaged')
+        require_release_condition(z.read(plugin_entry) == qt_windows_plugin.read_bytes(), 'Packaged Qt platform plugin differs from staged runtime')
+        require_release_condition(
+            z.read('Unova-Together/builds/current/melonDS.exe') == (current/'melonDS.exe').read_bytes(),
+            'Packaged emulator differs from the staged emulator',
+        )
+        require_release_condition(
+            z.read('Unova-Together/builds/current/VERSION.txt').startswith(f'Unova Together {version}'.encode()),
+            'Packaged runtime version does not match the requested version',
+        )
         packed = tomllib.loads(z.read('Unova-Together/builds/current/melonDS.toml').decode())
-        assert packed['Instance0']['Keyboard'] == config['Instance0']['Keyboard']
-        assert all(k in {'PauseLostFocus','LimitFPS','TargetFPS','MP','JIT'} or k.startswith('Instance') for k in packed)
-        assert not any('/source/' in n for n in z.namelist())
+        require_release_condition(packed['Instance0']['Keyboard'] == config['Instance0']['Keyboard'], 'Packaged keyboard controls differ from the staged configuration')
+        require_release_condition(
+            all(k in {'PauseLostFocus','LimitFPS','TargetFPS','MP','JIT'} or k.startswith('Instance') for k in packed),
+            'Packaged configuration contains an unsupported top-level setting',
+        )
+        require_release_condition(not any('/source/' in n for n in z.namelist()), 'Runtime archive unexpectedly contains source files')
         note_files=[name for name in z.namelist() if name.startswith('Unova-Together/patchnotes/RELEASE_NOTES_') and name.endswith('.md')]
-        assert len(note_files)==len(patch_index['notes']) and f'Unova-Together/patchnotes/RELEASE_NOTES_{version}.md' in note_files
-        assert 'Unova-Together/patchnotes/index.json' in z.namelist()
+        require_release_condition(
+            len(note_files)==len(patch_index['notes']) and f'Unova-Together/patchnotes/RELEASE_NOTES_{version}.md' in note_files,
+            'Packaged patch notes do not match the release index/version',
+        )
+        require_release_condition('Unova-Together/patchnotes/index.json' in z.namelist(), 'Packaged patch-notes index is missing')
         launcher_info=json.loads(z.read('Unova-Together/launcher/BUILD_INFO.json'))
-        assert launcher_info['product']=='pokemon-together' and launcher_info['version']==version
-        assert json.loads(z.read('Unova-Together/launcher/_internal/launcher_ui/build-info.json'))==launcher_info
-        assert z.read('Unova-Together/launcher/VERSION.txt').decode().strip()=='Pokemon Together Launcher '+version
+        require_release_condition(launcher_info['product']=='pokemon-together' and launcher_info['version']==version, 'Launcher build metadata does not match the release')
+        require_release_condition(json.loads(z.read('Unova-Together/launcher/_internal/launcher_ui/build-info.json'))==launcher_info, 'Frozen launcher metadata differs from its build metadata')
+        require_release_condition(z.read('Unova-Together/launcher/VERSION.txt').decode().strip()=='Pokemon Together Launcher '+version, 'Launcher VERSION.txt does not match the release')
     with zipfile.ZipFile(source) as z:
-        assert 'Unova-Together-Source/tools/test_launcher_migration.py' in z.namelist()
-        assert 'Unova-Together-Source/tools/test_launcher_versioning.py' in z.namelist()
-        assert 'Unova-Together-Source/tools/test_companion_interactions.py' in z.namelist()
-        assert 'Unova-Together-Source/tools/test_overworld_companion.py' in z.namelist()
+        names = set(z.namelist())
+        require_release_condition('Unova-Together-Source/tools/test_launcher_migration.py' in names, 'Source archive is missing launcher migration coverage')
+        require_release_condition('Unova-Together-Source/tools/test_launcher_versioning.py' in names, 'Source archive is missing launcher version coverage')
+        require_release_condition('Unova-Together-Source/tools/test_companion_interactions.py' in names, 'Source archive is missing companion interaction coverage')
+        require_release_condition('Unova-Together-Source/tools/test_overworld_companion.py' in names, 'Source archive is missing overworld companion coverage')
+        require_release_condition('Unova-Together-Source/tools/test_companion_interactions_runner.py' in names, 'Source archive is missing companion test provenance checks')
+        require_release_condition('Unova-Together-Source/tools/check_launcher_tree_parity.py' in names, 'Source archive is missing the launcher mirror checker')
+        require_release_condition('Unova-Together-Source/tools/test_launcher_tree_parity.py' in names, 'Source archive is missing launcher mirror coverage')
+        require_release_condition('Unova-Together-Source/tools/test_release_validation.py' in names, 'Source archive is missing optimized release-guard coverage')
+        require_release_condition('Unova-Together-Source/docs/DEVELOPER_TESTING.md' in names, 'Source archive is missing test reproduction instructions')
     stage_root.mkdir(parents=True)
     with zipfile.ZipFile(runtime) as z:z.extractall(stage_root)
     subprocess.run([sys.executable,str(ROOT/'tools/build_unova_single_exe.py'),

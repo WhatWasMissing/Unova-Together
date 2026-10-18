@@ -2,6 +2,24 @@
   "schema": 1,
   "notes": [
     {
+      "version": "2.0.16",
+      "title": "Complete Mega Stone shops and matching version labels",
+      "file": "RELEASE_NOTES_2.0.16.md",
+      "body": "Every Poké Mart includes all 49 Mega Stones, including Mistralton City. The game window and Multiplayer screen now show the same release number as the launcher."
+    },
+    {
+      "version": "2.0.15",
+      "title": "Mega Evolution in double and co-op battles",
+      "file": "RELEASE_NOTES_2.0.15.md",
+      "body": "Mega Evolution now works reliably in double battles and co-op battles. The selected Pokémon keeps its Mega Evolution after both moves are chosen, and each co-op player can use Mega Evolution once per battle."
+    },
+    {
+      "version": "2.0.14",
+      "title": "Smoother movement in co-op",
+      "file": "RELEASE_NOTES_2.0.14.md",
+      "body": "Fixes brief movement stalls that could happen while hosting or joining a LAN game. Movement should respond more consistently while network traffic is active."
+    },
+    {
       "version": "2.0.13",
       "title": "Streamlined menus and field tools",
       "file": "RELEASE_NOTES_2.0.13.md",
