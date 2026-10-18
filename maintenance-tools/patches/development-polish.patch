@@ -1302,7 +1302,7 @@
      }
      const auto companionSuppressed=companionChordHeld?((1<<0)|(buttons&(1<<8))):0;
 -    inputMask=(menuInputBlocked.load() || waitForNeutralInput.load())?0xfff:(rawMask|companionSuppressed);
-+    constexpr int megaChord=Gen5MegaBattle::MegaActivationChord;
++    constexpr unsigned megaChord=Gen5MegaBattle::MegaActivationChord;
 +    const bool inputBlocked=menuInputBlocked.load() || waitForNeutralInput.load();
 +    const bool megaChordDown=(buttons&megaChord)==megaChord;
 +    if(Gen5MegaBattle::megaActivationPressed(buttons,previousButtons,inputBlocked))

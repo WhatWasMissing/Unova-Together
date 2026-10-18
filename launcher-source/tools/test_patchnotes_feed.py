@@ -72,6 +72,15 @@ class PatchNotesFeedTests(unittest.TestCase):
         self.assertEqual(len(feed['news']), len(self.index['notes']))
         self.assertTrue(all('/blob/main/patchnotes/' in note['url'] for note in feed['news']))
 
+    def test_launcher_build_metadata_matches_current_release(self):
+        for relative in (
+            'launcher-source/tools/launcher_ui/build-info.json',
+            'maintenance-tools/tools/launcher_ui/build-info.json',
+        ):
+            with self.subTest(path=relative):
+                info = json.loads((self.root / relative).read_text(encoding='utf-8'))
+                self.assertEqual(info['version'], self.latest_version)
+
     def test_unavailable_index_falls_back_to_release_notes(self):
         version = self.latest_version
         name = f'Unova-Together-{version}-Windows-x64.zip'

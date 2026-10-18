@@ -1,9 +1,12 @@
 """Exercise production polling methods with a deliberately stalled core."""
 from pathlib import Path
 import os, shlex, subprocess, tempfile
+import unittest
 
 ROOT=Path(__file__).resolve().parents[1]
-SOURCE=ROOT/'melonDS-source-1.1' if (ROOT/'melonDS-source-1.1').is_dir() else ROOT/'source/melonDS'
+source_override=os.environ.get('UNOVA_MELONDS_SOURCE')
+SOURCE=Path(source_override).expanduser().resolve() if source_override else ROOT/'source/melonDS'
+if not SOURCE.is_dir():raise unittest.SkipTest('Set UNOVA_MELONDS_SOURCE to a local melonDS source checkout to run this check.')
 source=(SOURCE/'src/frontend/qt_sdl/EmuThread.cpp').read_text(encoding='utf-8')
 start=source.index('QVariantMap EmuThread::sampleOverworldPresence(')
 end=source.index('QVariantMap EmuThread::loadOverworldTrainerSprites()',start)

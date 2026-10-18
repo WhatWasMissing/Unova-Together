@@ -1,15 +1,21 @@
 """Compile production follower-facing and A-button interception code; no saves."""
 from pathlib import Path
 import os,subprocess,tempfile
+import unittest
 ROOT=Path(__file__).resolve().parents[1]
-source=ROOT/'melonDS-source-1.1'
-if not source.is_dir():source=ROOT/'source/melonDS'
+patch=(ROOT/'patches/development-polish.patch').read_text(encoding='utf-8')
+if '+    constexpr unsigned megaChord=Gen5MegaBattle::MegaActivationChord;' not in patch:
+    raise AssertionError('The mega activation chord in the emulator patch must use the unsigned input-mask type.')
+source_override=os.environ.get('UNOVA_MELONDS_SOURCE')
+source=Path(source_override).expanduser().resolve() if source_override else ROOT/'source/melonDS'
+if not source.is_dir():raise unittest.SkipTest('Set UNOVA_MELONDS_SOURCE to a local melonDS source checkout to run this check.')
 front=source/'src/frontend/qt_sdl'
 s=(front/'MultiplayerPanel.cpp').read_text(encoding='utf-8',errors='replace');a=s.index('bool MultiplayerPanel::companionActive() const');b=s.index('void MultiplayerPanel::interactWithCompanion',a);active=s[a:b]
 a=s.index('bool MultiplayerPanel::facingCompanion() const');b=s.index('void MultiplayerPanel::openCompanionDialogue',a);facing=s[a:b]
 s=(front/'EmuInstanceInput.cpp').read_text(encoding='utf-8',errors='replace');a=s.index('    if(!(buttons&1)) companionChordHeld=false;');b=s.index('\n\n    joyHotkeyMask',a);gate=s[a:b].replace('SDL_GetTicks64()','now')
 cpp=r'''#include "FollowerInteraction.h"
 #include "PokemonFollower.h"
+#include "Gen5MegaBattle.h"
 #include <QMap>
 #include <atomic>
 #include <cassert>
@@ -27,7 +33,7 @@ struct MultiplayerPanel {
 struct Input {
  std::atomic<bool> menuInputBlocked{false},waitForNeutralInput{false},companionInteractionPress{false};
  std::atomic<unsigned long long> companionInteractionUntil{0};std::atomic<unsigned> menuButtonPress{0};
- std::atomic<unsigned> menuButtons{0};bool companionChordHeld=false;unsigned inputMask=0;unsigned joyHotkeyMask=0;
+ std::atomic<unsigned> menuButtons{0};std::atomic<bool> megaEvolutionPress{false};bool companionChordHeld=false;unsigned inputMask=0;unsigned joyHotkeyMask=0;
  void sample(unsigned buttons,unsigned previousButtons,unsigned long long now) {unsigned rawMask=0xfff&~buttons;
 '''+gate+r'''
  }
@@ -54,6 +60,10 @@ int main() {
  i.sample(chord,0,201);assert(!(i.inputMask&1) && !i.companionInteractionPress); // Expired chord reaches game.
  i.companionInteractionUntil=300;i.sample(chord|16,0,220);assert(!(i.inputMask&1) && !i.companionInteractionPress);
  i.menuInputBlocked=true;i.sample(1,0,221);assert(i.inputMask==0xfff && !i.companionInteractionPress);
+ i.menuInputBlocked=false;i.sample((1<<8)|(1<<9),0,230);
+ assert(i.megaEvolutionPress.exchange(false));assert((i.inputMask&Gen5MegaBattle::MegaActivationChord)==Gen5MegaBattle::MegaActivationChord);
+ i.sample((1<<8)|(1<<9),(1<<8)|(1<<9),231);assert(!i.megaEvolutionPress.exchange(false));
+ i.sample(0,(1<<8)|(1<<9),232);
  std::cout<<"Production facing gates and A interception: idle, menus, battles, opt-in, expiry, held buttons, D-pad and ordinary game input passed.\n";
 }
 '''

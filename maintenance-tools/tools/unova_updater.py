@@ -15,6 +15,7 @@ import uuid
 
 REPO = 'WhatWasMissing/Unova-Together'
 API = f'https://api.github.com/repos/{REPO}/releases?per_page=30'
+PATCHNOTES_URL = f'https://raw.githubusercontent.com/{REPO}/main/patchnotes/index.json'
 MAX_ARCHIVE = 768 * 1024 * 1024
 MAX_EXPANDED = 1536 * 1024 * 1024
 
@@ -101,9 +102,73 @@ def release_news(releases: list) -> list[dict]:
     return sorted(news, key=lambda n: version(n['version']), reverse=True)[:12]
 
 
+def patch_note_news(items: list) -> list[dict]:
+    """Validate the repository's versioned patch-note index for the launcher."""
+    if not isinstance(items, list) or len(items) > 100:
+        raise ValueError('Invalid patch notes index')
+    news, seen = [], set()
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        try:
+            numbers = version(item['version'])
+        except (KeyError, TypeError, ValueError):
+            continue
+        label = '.'.join(map(str, numbers))
+        filename = f'RELEASE_NOTES_{label}.md'
+        if item.get('file') != filename or label in seen:
+            continue
+        title = ''.join(c for c in str(item.get('title') or 'What changed')
+                        if c in '\n\t' or ord(c) >= 32)[:120].strip()
+        body = ''.join(c for c in str(item.get('body') or '')
+                       if c in '\n\t' or ord(c) >= 32)[:12000].strip()
+        if not body:
+            continue
+        seen.add(label)
+        news.append({'version': label, 'title': title or 'What changed', 'file': filename, 'body': body,
+                     'date': '', 'url': f'https://github.com/{REPO}/blob/main/patchnotes/{filename}'})
+    if not news:
+        raise ValueError('No valid patch notes found')
+    return sorted(news, key=lambda n: version(n['version']), reverse=True)
+
+
+def fetch_patch_notes(opener=_open) -> list[dict]:
+    request_url = PATCHNOTES_URL
+    with opener(request_url) as response:
+        final = urllib.parse.urlsplit(response.geturl()) if hasattr(response, 'geturl') else urllib.parse.urlsplit(request_url)
+        if final.scheme != 'https' or final.hostname != 'raw.githubusercontent.com' or \
+                final.path != f'/{REPO}/main/patchnotes/index.json':
+            raise ValueError('Unexpected patch notes location')
+        raw = response.read(512 * 1024 + 1)
+    if len(raw) > 512 * 1024:
+        raise ValueError('Patch notes index is too large')
+    index = json.loads(raw)
+    if not isinstance(index, dict) or type(index.get('schema')) is not int or index['schema'] != 1:
+        raise ValueError('Unsupported patch notes index')
+    return patch_note_news(index.get('notes'))
+
+
 def launcher_feed(opener=_open) -> dict:
-    releases = fetch_releases(opener)
-    return {'release': select_latest(releases), 'news': release_news(releases)}
+    # Patch notes live in the repository now, separately from GitHub Releases.
+    # Fetch them even when the Releases API has been trimmed, rate-limited, or
+    # temporarily unavailable so older notes remain readable on their own.
+    try:
+        releases = fetch_releases(opener)
+    except (OSError, ValueError):
+        releases = []
+    try:
+        news = fetch_patch_notes(opener)
+        news_source = 'patchnotes'
+    except (OSError, ValueError, json.JSONDecodeError):
+        news = release_news(releases)
+        news_source = 'releases-fallback'
+    try:
+        release = select_latest(releases)
+    except ValueError:
+        release = None
+    if release is None and not news:
+        raise ValueError('Could not load update information or patch notes')
+    return {'release': release, 'news': news, 'newsSource': news_source}
 
 def active_root(home: Path, allow_missing=False) -> Path:
     home = home.resolve()

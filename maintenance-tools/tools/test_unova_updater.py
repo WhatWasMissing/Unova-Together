@@ -27,16 +27,22 @@ class UpdaterTests(unittest.TestCase):
         self.assertEqual(news[0]['title'],'Title')
         self.assertEqual(news[0]['url'],f'https://github.com/{u.REPO}/releases/tag/v0.3.5')
 
-    def test_shared_feed_makes_one_request(self):
+    def test_shared_feed_reads_release_and_patchnotes_indexes(self):
         label='0.3.5';base=f'https://github.com/{u.REPO}/releases/download/v{label}/'
         names=[f'Unova-Together-{label}-Windows-x64.zip',f'SHA256SUMS-Unova-Together-{label}.txt']
         calls=[]
         raw=[{'tag_name':'v'+label,'published_at':'2026-10-08','body':'Real release notes',
               'assets':[{'name':n,'size':10,'browser_download_url':base+n} for n in names]}]
-        def open_feed(url):calls.append(url);return io.BytesIO(json.dumps(raw).encode())
+        index={'schema':1,'notes':[{'version':label,'title':'Update','file':f'RELEASE_NOTES_{label}.md','body':'Player-facing notes.'}]}
+        def open_feed(url):
+            calls.append(url)
+            if url==u.API:return io.BytesIO(json.dumps(raw).encode())
+            if url==u.PATCHNOTES_URL:return io.BytesIO(json.dumps(index).encode())
+            raise AssertionError(f'Unexpected feed URL: {url}')
         feed=u.launcher_feed(open_feed)
-        self.assertEqual(calls,[u.API]);self.assertEqual(feed['release']['version'],label)
-        self.assertEqual(feed['news'][0]['body'],'Real release notes')
+        self.assertEqual(calls,[u.API,u.PATCHNOTES_URL]);self.assertEqual(feed['release']['version'],label)
+        self.assertEqual(feed['newsSource'],'patchnotes')
+        self.assertEqual(feed['news'][0]['body'],'Player-facing notes.')
     def bundle(self, names=None):
         out=io.BytesIO()
         with zipfile.ZipFile(out,'w') as z:
