@@ -30,7 +30,9 @@ def check_report(
         return failures
 
     frames = data.get("npcFixtureFrames")
-    if not isinstance(frames, int) or frames <= 0:
+    # bool is an int subclass in Python; accepting `true` would let a malformed
+    # observer report satisfy the positive-frame requirement.
+    if type(frames) is not int or frames <= 0:
         failures.append("observer did not record any fixture frames")
     position = data.get("npcFixturePosition")
     if not isinstance(position, dict):

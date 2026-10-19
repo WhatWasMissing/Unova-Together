@@ -28,6 +28,15 @@ class RuntimeProbeReportTests(unittest.TestCase):
         failures = PROBE.check_report(report, 460, "", True, 1)
         self.assertTrue(any("expected map" in failure for failure in failures))
 
+    def test_boolean_frame_count_fails(self):
+        report = {
+            "npcFixtureFrames": True,
+            "npcFixturePosition": {"map": 460},
+            "npcFixtureInputBlocked": False,
+        }
+        failures = PROBE.check_report(report, 460, "", True, 1)
+        self.assertTrue(any("fixture frames" in failure for failure in failures))
+
     def test_assertion_log_fails(self):
         report = {"npcFixtureFrames": 40, "npcFixturePosition": {"map": 460}}
         failures = PROBE.check_report(report, 460, "GFL_DebugAssertFail", True, 1)
