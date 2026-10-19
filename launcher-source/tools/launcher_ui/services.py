@@ -6,9 +6,16 @@ import urllib.request
 
 GUIDES=('PLAYER_GUIDE.md','KNOWN_ISSUES.md','TAILSCALE_COOP.md','UDP_SERVER_GUIDE.md','LAUNCHER.md','COMPANION_INTERACTIONS.md','COOP_TOOLS.md','RELEASE_CHECKS_1.0.6.md','FEATURES.md','ROADMAP.md')
 
+def _safe_guide_path(path,home):
+    import unova_storage as storage
+    try:return storage.safe_managed_path(path,home)
+    except (OSError,RuntimeError):return False
+
 def refresh_guides(home):
     """Pin a bounded text-only guide set to one official GitHub commit."""
     from unova_updater import REPO
+    home=Path(home).resolve();directory=home/'.updates/guides'
+    if not _safe_guide_path(directory,home):raise ValueError('Unsafe guide cache path.')
     def fetch(url,host,limit):
         request=urllib.request.Request(url,headers={'User-Agent':'Unova-Together-guides'})
         with urllib.request.urlopen(request,timeout=8) as response:
@@ -22,27 +29,36 @@ def refresh_guides(home):
     if reference.get('object',{}).get('type')!='commit':raise ValueError('Invalid guide branch reference')
     commit=reference['object']['sha']
     if not isinstance(commit,str) or not re.fullmatch('[0-9a-f]{40}',commit):raise ValueError('Invalid guide revision')
-    directory=Path(home)/'.updates/guides';directory.mkdir(parents=True,exist_ok=True)
+    directory.mkdir(parents=True,exist_ok=True)
+    if not _safe_guide_path(directory,home):raise ValueError('Unsafe guide cache path.')
     target=directory/(commit+'.json')
+    if not _safe_guide_path(target,home):raise ValueError('Unsafe guide cache path.')
     if not target.is_file():
         docs={name:fetch('https://raw.githubusercontent.com/'+REPO+'/'+commit+'/docs/'+name,'raw.githubusercontent.com',131072) for name in GUIDES}
         if any(not text.strip() or '\x00' in text for text in docs.values()):raise ValueError('Invalid guide text')
+        if not _safe_guide_path(target,home):raise ValueError('Unsafe guide cache path.')
         prefs.atomic_write(target,lambda stream:stream.write(json.dumps(docs).encode('utf-8')))
     marker=directory/'active.json'
+    if not _safe_guide_path(marker,home):raise ValueError('Unsafe guide cache path.')
     prefs.atomic_write(marker,lambda stream:stream.write(json.dumps({'commit':commit}).encode('utf-8')))
     return commit
 
 def cached_guide(home,name):
     if name not in GUIDES:raise ValueError('Unknown setup guide')
-    directory=Path(home)/'.updates/guides'
+    home=Path(home).resolve();directory=home/'.updates/guides'
     try:
-        commit=json.loads((directory/'active.json').read_text())['commit']
+        if not _safe_guide_path(directory,home):return None
+        marker=directory/'active.json'
+        if not _safe_guide_path(marker,home):return None
+        commit=json.loads(marker.read_text())['commit']
         if not re.fullmatch('[0-9a-f]{40}',commit):return None
         target=directory/(commit+'.json')
+        if not _safe_guide_path(target,home):return None
         if target.stat().st_size>1000000:return None
         text=json.loads(target.read_text(encoding='utf-8'))[name]
         if not isinstance(text,str) or len(text.encode('utf-8'))>131072 or '\x00' in text:return None
         guide=directory/name
+        if not _safe_guide_path(guide,home):return None
         prefs.atomic_write(guide,lambda stream:stream.write(text.encode('utf-8')))
         return guide
     except (OSError,ValueError,KeyError,TypeError):return None

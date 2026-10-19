@@ -54,6 +54,30 @@ class ServiceTests(unittest.TestCase):
         with patch.object(s.urllib.request,'urlopen',return_value=Response('https://example.com/evil',b'{}')):
             with self.assertRaises(ValueError):s.refresh_guides(self.home)
 
+    def test_guides_reject_linked_cache_directory(self):
+        outside=self.home/'outside-guides';outside.mkdir();sentinel=outside/'active.json';sentinel.write_bytes(b'preserve')
+        guide_dir=self.home/'.updates/guides';guide_dir.parent.mkdir(parents=True)
+        try:guide_dir.symlink_to(outside,target_is_directory=True)
+        except (OSError,NotImplementedError) as exc:self.skipTest(f'directory symlinks unavailable: {exc}')
+        class Response:
+            def __init__(self,url,data):self.url=url;self.data=data
+            def __enter__(self):return self
+            def __exit__(self,*args):pass
+            def geturl(self):return self.url
+            def read(self,n):return self.data[:n]
+        commit='b'*40
+        def response(request,timeout):
+            data=json.dumps({'object':{'type':'commit','sha':commit}}).encode() if 'api.github.com' in request.full_url else b'# Guide\n'
+            return Response(request.full_url,data)
+        with patch.object(s.urllib.request,'urlopen',side_effect=response) as fetch:
+            with self.assertRaisesRegex(ValueError,'Unsafe guide cache'):
+                s.refresh_guides(self.home)
+            fetch.assert_not_called()
+        self.assertEqual(sentinel.read_bytes(),b'preserve')
+        self.assertFalse((outside/(commit+'.json')).exists())
+        self.assertIsNone(s.cached_guide(self.home,'PLAYER_GUIDE.md'))
+        self.assertFalse((outside/'PLAYER_GUIDE.md').exists())
+
     def test_check_relay_hosts_only_refused_loopback_and_verifies_protocol(self):
         start=unittest.mock.Mock()
         with patch.object(s,'probe',side_effect=[ValueError('No presence relay is listening'), 'Presence relay reachable']):
