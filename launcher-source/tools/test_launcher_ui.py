@@ -136,6 +136,16 @@ class LauncherTests(unittest.TestCase):
             self.app.cleanup_button.invoke();self.wait()
         self.assertIn('Cleaned 1 old build',self.app.preflight_text.get('1.0','end'))
         self.assertEqual((old/'Redux.save').read_bytes(),b'private save');self.assertFalse((old/'builds/current/melonDS.exe').exists())
+
+    def test_corrupt_backup_shows_recoverable_error(self):
+        item=self.app._active_profile();folder=self.home/'save-backups'/item['id'];folder.mkdir(parents=True)
+        archive=folder/'malformed.zip'
+        with zipfile.ZipFile(archive,'w') as bundle:
+            bundle.writestr('fixture.sav',b'not restored');bundle.writestr('manifest.json','[]')
+        self.app.backup_paths=[archive];self.app.backup_picker['values']=['Malformed backup'];self.app.backup_picker.current(0)
+        with patch('launcher_ui.app.prefs.any_running',return_value=False):self.app._restore_backup()
+        self.assertEqual(self.app.status.get(),'Invalid backup manifest.')
+
     def test_pages_keyboard_and_small_window(self):
         self.assertTrue(self.app.news);self.assertGreaterEqual(len(self.app.images),4)
         for size in ('1040x760','860x660'):

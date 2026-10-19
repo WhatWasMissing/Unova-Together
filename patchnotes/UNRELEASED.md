@@ -2,3 +2,4 @@
 
 - Fixed a crash that could occur when entering a Pokémon Center.
 - Improved update checks so incomplete release information does not interrupt the launcher; available release notes remain visible.
+- Corrupted save backups now show a clear error without interrupting the launcher or changing the current save.

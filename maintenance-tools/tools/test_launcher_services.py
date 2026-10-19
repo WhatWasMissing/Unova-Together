@@ -103,6 +103,19 @@ class ServiceTests(unittest.TestCase):
         with zipfile.ZipFile(archive,'w') as z:z.writestr('Black2.sav',b'evil');z.writestr('manifest.json',json.dumps(manifest))
         with self.assertRaises(ValueError):s.restore(self.home,self.item,archive)
         self.assertEqual(self.save.read_bytes(),b'original save')
+    def test_restore_rejects_malformed_manifests_without_touching_save(self):
+        folder=self.home/'save-backups'/self.item['id'];folder.mkdir(parents=True,exist_ok=True)
+        manifests=('[]',json.dumps({'profile':self.item['id'],'files':{}}),
+                   json.dumps({'profile':self.item['id'],'files':[None]}),
+                   json.dumps({'profile':self.item['id'],'files':[{'name':[],'size':7,'sha256':'0'*64}]}),
+                   json.dumps({'profile':self.item['id'],'files':[{'name':'Black2.sav','size':'7','sha256':'0'*64}]}))
+        for index,manifest in enumerate(manifests):
+            archive=folder/f'malformed-{index}.zip'
+            with zipfile.ZipFile(archive,'w') as bundle:
+                bundle.writestr('Black2.sav',b'evil');bundle.writestr('manifest.json',manifest)
+            with self.subTest(index=index),self.assertRaisesRegex(ValueError,'manifest'):
+                s.restore(self.home,self.item,archive)
+            self.assertEqual(self.save.read_bytes(),b'original save')
     def test_restore_does_not_follow_preexisting_hardlinked_staging_path(self):
         archive=s.backup(self.home,self.item)
         self.save.write_bytes(b'current save')

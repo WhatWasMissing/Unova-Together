@@ -1,7 +1,7 @@
 """Player-facing launcher tools by mvq1303 / WhatWasMissing."""
 from pathlib import Path
 from datetime import datetime, timezone
-import hashlib, json, os, platform, re, socket, uuid, zipfile, threading, time
+import hashlib, json, os, platform, re, socket, uuid, zipfile, threading, time, zlib
 import urllib.request
 
 GUIDES=('PLAYER_GUIDE.md','KNOWN_ISSUES.md','TAILSCALE_COOP.md','UDP_SERVER_GUIDE.md','LAUNCHER.md','COMPANION_INTERACTIONS.md','COOP_TOOLS.md','RELEASE_CHECKS_1.0.6.md','FEATURES.md','ROADMAP.md')
@@ -125,16 +125,40 @@ def restore(home,item,archive):
     directory=Path(item.get('save_dir') or Path(item['rom']).parent).resolve()
     payload=[]
     with zipfile.ZipFile(archive) as bundle:
-        if len(bundle.infolist())>33 or sum(i.file_size for i in bundle.infolist())>64*1024*1024:raise ValueError('Backup exceeds size limits.')
-        if len({i.filename for i in bundle.infolist()})!=len(bundle.infolist()):raise ValueError('Backup contains duplicate files.')
-        if bundle.getinfo('manifest.json').file_size>16384:raise ValueError('Invalid backup manifest.')
-        manifest=json.loads(bundle.read('manifest.json'))
+        entries=bundle.infolist()
+        if len(entries)>33 or sum(entry.file_size for entry in entries)>64*1024*1024:raise ValueError('Backup exceeds size limits.')
+        if len({entry.filename for entry in entries})!=len(entries):raise ValueError('Backup contains duplicate files.')
+        members={entry.filename:entry for entry in entries}
+        manifest_info=members.get('manifest.json')
+        if manifest_info is None or manifest_info.is_dir() or manifest_info.file_size>16384:raise ValueError('Invalid backup manifest.')
+        def read_member(info):
+            if info.flag_bits&1 or info.compress_type not in (zipfile.ZIP_STORED,zipfile.ZIP_DEFLATED):
+                raise ValueError('Backup contains an unsupported file.')
+            try:return bundle.read(info)
+            except (zipfile.BadZipFile,RuntimeError,NotImplementedError,EOFError,zlib.error) as exc:
+                raise ValueError('Backup is damaged or cannot be read.') from exc
+        try:manifest=json.loads(read_member(manifest_info))
+        except (UnicodeError,json.JSONDecodeError) as exc:raise ValueError('Invalid backup manifest.') from exc
+        if not isinstance(manifest,dict):raise ValueError('Invalid backup manifest.')
         if manifest.get('profile')!=item['id']:raise ValueError('Backup belongs to a different profile.')
-        for entry in manifest['files']:
-            name=entry['name'];pattern=re.escape(Path(item['rom']).stem)+r'(?:\.\d+)?\.(?:sav|save|dsv)'
+        files=manifest.get('files')
+        if not isinstance(files,list) or not 1<=len(files)<=32:raise ValueError('Invalid backup manifest.')
+        pattern=re.escape(Path(item['rom']).stem)+r'(?:\.\d+)?\.(?:sav|save|dsv)'
+        validated=[];seen=set()
+        for entry in files:
+            if not isinstance(entry,dict):raise ValueError('Invalid backup manifest.')
+            name=entry.get('name');size=entry.get('size');checksum=entry.get('sha256')
+            if (not isinstance(name,str) or type(size) is not int or not 0<=size<=16*1024*1024 or
+                    not isinstance(checksum,str) or not re.fullmatch(r'[0-9a-f]{64}',checksum) or name in seen):
+                raise ValueError('Invalid backup manifest.')
             if not re.fullmatch(pattern,name,re.I):raise ValueError('Backup contains an unexpected file.')
-            data=bundle.read(name)
-            if len(data)!=entry['size'] or hashlib.sha256(data).hexdigest()!=entry['sha256']:raise ValueError('Backup checksum mismatch.')
+            info=members.get(name)
+            if info is None or info.is_dir() or info.file_size!=size:raise ValueError('Backup save file is missing or has the wrong size.')
+            seen.add(name);validated.append((name,size,checksum,info))
+        if set(members)!=(seen|{'manifest.json'}):raise ValueError('Backup contains unexpected files.')
+        for name,size,checksum,info in validated:
+            data=read_member(info)
+            if len(data)!=size or hashlib.sha256(data).hexdigest()!=checksum:raise ValueError('Backup checksum mismatch.')
             target=directory/name
             if target.is_symlink() or not target.resolve().is_relative_to(directory):raise ValueError('Unsafe save destination.')
             payload.append((target,data))
