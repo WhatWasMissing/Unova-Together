@@ -196,13 +196,22 @@ def active_root(home: Path, allow_missing=False) -> Path:
     marker = home / '.updates/active.json'
     if not marker.exists():
         return home
-    if marker.stat().st_size > 4096:
-        raise ValueError('Invalid update state')
-    item = json.loads(marker.read_text(encoding='utf-8'))
-    label = '.'.join(map(str, version(item['version'])))
-    slot=item.get('slot',label)
-    if not isinstance(slot,str) or not re.fullmatch(re.escape(label)+r'(?:-repair-[a-f0-9]{12})?',slot):
-        raise ValueError('Invalid update installation slot')
+    try:
+        if marker.stat().st_size > 4096:
+            raise ValueError('Invalid update state')
+        item = json.loads(marker.read_text(encoding='utf-8'))
+        if not isinstance(item, dict):
+            raise ValueError('Invalid update state')
+        label = '.'.join(map(str, version(item['version'])))
+        slot=item.get('slot',label)
+        if not isinstance(slot,str) or not re.fullmatch(re.escape(label)+r'(?:-repair-[a-f0-9]{12})?',slot):
+            raise ValueError('Invalid update installation slot')
+    except (OSError, UnicodeError, ValueError, TypeError, KeyError, AttributeError) as exc:
+        if allow_missing:
+            return home
+        if isinstance(exc, ValueError):
+            raise
+        raise ValueError('Invalid update state') from exc
     root = home / '.updates/versions' / slot / 'Unova-Together'
     if not root.resolve().is_relative_to(home) or (not allow_missing and not (root / 'builds/current/melonDS.exe').is_file()):
         raise ValueError('Installed update is unavailable')
@@ -215,10 +224,16 @@ def local_version(root: Path) -> tuple[int, int, int]:
 
 def installed_version(home: Path):
     root=active_root(home,allow_missing=True)
-    try:return local_version(root)
-    except OSError:
+    try:
+        return local_version(root)
+    except (OSError, UnicodeError, ValueError, TypeError):
         marker=Path(home)/'.updates/active.json'
-        if marker.exists():return version(json.loads(marker.read_text())['version'])
+        try:
+            if marker.stat().st_size <= 4096:
+                item=json.loads(marker.read_text(encoding='utf-8'))
+                if isinstance(item,dict):return version(item.get('version'))
+        except (OSError, UnicodeError, ValueError, TypeError, AttributeError):
+            pass
         return (0,0,0)
 
 def checksum(raw: bytes, name: str) -> str:

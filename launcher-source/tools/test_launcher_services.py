@@ -205,4 +205,13 @@ class ServiceTests(unittest.TestCase):
         directory=self.home/'.updates';directory.mkdir();(directory/'active.json').write_text('{"version":"0.3.5","slot":"../../escape"}')
         with self.assertRaises(ValueError):u.active_root(self.home)
 
+    def test_corrupt_update_marker_allows_repairable_launcher_startup(self):
+        directory=self.home/'.updates';directory.mkdir();marker=directory/'active.json'
+        for raw in ('{', '[]', '{"slot":"0.3.5"}', '{"version":null}', 'x'*(4097)):
+            marker.write_text(raw,encoding='utf-8')
+            with self.subTest(marker=raw[:24]):
+                self.assertEqual(u.active_root(self.home,allow_missing=True),self.home)
+                self.assertEqual(u.installed_version(self.home),(0,3,5))
+                with self.assertRaises(ValueError):u.active_root(self.home)
+
 if __name__=='__main__':unittest.main()
