@@ -1,6 +1,6 @@
 """Bounded installation storage; mvq1303 / WhatWasMissing. Never prune user data."""
 from contextlib import contextmanager
-import hashlib, json, os, re, subprocess, sys
+import hashlib, json, os, re, shutil, subprocess, sys
 from pathlib import Path, PurePosixPath
 import stat
 import uuid
@@ -61,6 +61,27 @@ def atomic(path,value):
             stream.write(json.dumps(value,indent=2).encode('utf-8'))
         if linked(path) or hardlinked(path) or linked(pending) or hardlinked(pending):
             raise ValueError('Unsafe installation record.')
+        os.replace(pending,path)
+    finally:
+        try:pending.unlink()
+        except FileNotFoundError:pass
+
+def atomic_copy(source,path,base):
+    """Copy a managed regular file without following links at the destination."""
+    source,path,base=Path(source),Path(path),Path(base).resolve()
+    if not safe(source,base) or not source.is_file() or not safe_managed_path(path,base):
+        raise ValueError('Unsafe managed file.')
+    pending=path.with_name(path.name+'.'+uuid.uuid4().hex+'.pending')
+    flags=os.O_WRONLY|os.O_CREAT|os.O_EXCL
+    if hasattr(os,'O_BINARY'):flags|=os.O_BINARY
+    descriptor=os.open(pending,flags,0o600)
+    try:
+        with os.fdopen(descriptor,'wb') as destination:
+            with source.open('rb') as original:
+                shutil.copyfileobj(original,destination,1024*1024)
+        shutil.copystat(source,pending)
+        if not safe(source,base) or not safe_managed_path(path,base) or not safe_managed_path(pending,base):
+            raise ValueError('Unsafe managed file.')
         os.replace(pending,path)
     finally:
         try:pending.unlink()

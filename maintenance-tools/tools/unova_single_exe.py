@@ -55,8 +55,8 @@ def install_bundle(home,payload,metadata):
             if extracted_revision!=bundled_revision:raise ValueError('Bundled launcher revision does not match metadata.')
             updates.record_integrity(extracted)
             config=current/'builds/current/melonDS.toml'
-            if activate and config.is_file():shutil.copy2(config,extracted/'builds/current/melonDS.toml')
             import unova_storage as storage
+            if activate and config.is_file():storage.atomic_copy(config,extracted/'builds/current/melonDS.toml',home)
             storage.share_binaries(extracted,current);storage.record_package(extracted)
             for path in (updates_dir,versions,target,marker,state,marker_pending,state_pending):
                 _assert_safe_bundle_path(path,home)
@@ -66,7 +66,7 @@ def install_bundle(home,payload,metadata):
         import unova_storage as storage
         storage.remember_previous(home,current,slot)
         config=current/'builds/current/melonDS.toml'
-        if current!=root and config.is_file():shutil.copy2(config,root/'builds/current/melonDS.toml')
+        if current!=root and config.is_file():storage.atomic_copy(config,root/'builds/current/melonDS.toml',home)
         for path in (updates_dir,marker,marker_pending):_assert_safe_bundle_path(path,home)
         storage.atomic(marker,{'version':version,'slot':slot})
     _assert_safe_bundle_path(state_pending,home)

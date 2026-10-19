@@ -92,6 +92,23 @@ class StorageTests(unittest.TestCase):
         self.assertEqual(outside.read_bytes(),b'preserve this file')
         self.assertEqual(json.loads(target.read_text(encoding='utf-8')),{"schema":1})
         self.assertTrue(legacy_pending.exists())
+    def test_atomic_copy_rejects_link_created_after_validation(self):
+        source=self.home/'source.toml';source.write_text('# new controls')
+        target=self.home/'.updates/config.toml';outside=self.home/'keep-copy-sentinel.bin';outside.write_bytes(b'preserve this file')
+        original=s.safe_managed_path;injected=False
+        def inject(path,base):
+            nonlocal injected
+            result=original(path,base)
+            if Path(path)==target and not injected:
+                os.link(outside,target);injected=True
+            return result
+        with patch.object(s,'safe_managed_path',side_effect=inject):
+            with self.assertRaisesRegex(ValueError,'Unsafe'):
+                s.atomic_copy(source,target,self.home)
+        self.assertTrue(injected)
+        self.assertEqual(outside.read_bytes(),b'preserve this file')
+        self.assertTrue(target.samefile(outside))
+        self.assertFalse(list(self.home.rglob('*.pending')))
     def test_junction_outside_installation_is_never_followed(self):
         old=self.slot('1.0.1');self.slot('1.0.2');self.slot('1.0.3');self.active('1.0.3');outside=self.home/'outside';outside.mkdir();victim=outside/'victim.dll';victim.write_bytes(b'external')
         link=old/'linked'

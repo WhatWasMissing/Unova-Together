@@ -81,6 +81,20 @@ class BundleTests(unittest.TestCase):
         state=json.loads((self.home/'.standalone.json').read_text())
         self.assertEqual(state,{'version':'0.3.5','slot':root.parent.name})
         self.assertTrue(state_pending.exists())
+
+    def test_reused_bundle_does_not_write_through_linked_config(self):
+        import unova_storage as storage
+        old=install_bundle(self.home,self.archive,self.metadata)
+        (old/'builds/current/melonDS.toml').write_text('# player controls')
+        middle=install_bundle(self.home,self.archive,self.bundle('0.3.6'))
+        install_bundle(self.home,self.archive,self.bundle('0.3.7'))
+        storage.atomic(self.home/'.updates/active.json',{'version':'0.3.5','slot':old.parent.name})
+        outside=self.base/'external-controls.toml';outside.write_text('keep these controls')
+        linked_config=middle/'builds/current/melonDS.toml';linked_config.unlink();linked_config.hardlink_to(outside)
+        with self.assertRaisesRegex(ValueError,'Unsafe'):
+            install_bundle(self.home,self.archive,self.bundle('0.3.6'))
+        self.assertEqual(outside.read_text(),'keep these controls')
+        self.assertTrue(linked_config.samefile(outside))
     def test_install_bundle_rejects_linked_update_directories_before_external_writes(self):
         for link_updates in (True,False):
             with self.subTest(link_updates=link_updates),tempfile.TemporaryDirectory() as temp:
