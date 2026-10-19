@@ -108,5 +108,12 @@ class MigrationTests(unittest.TestCase):
         with patch.object(m.subprocess,'Popen') as spawn:m.schedule(self.home,self.root,default_entry=True)
         self.assertIn(str(self.home/'launcher/Pokemon Together.exe'),spawn.call_args.args[0])
 
+    def test_repair_rejects_corrupt_build_info_as_validation_error(self):
+        info=self.root/'launcher/BUILD_INFO.json'
+        for raw in ('[]','{','{"schema":1,"product":"pokemon-together","version":null}','x'*4097):
+            info.write_text(raw,encoding='utf-8')
+            with self.subTest(info=raw[:24]),self.assertRaisesRegex(ValueError,'metadata'):
+                m.active_launcher(self.home)
+
 
 if __name__=='__main__':unittest.main()

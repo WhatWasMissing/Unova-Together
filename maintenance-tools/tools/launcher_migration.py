@@ -43,8 +43,16 @@ def digest(path):
 def active_launcher(home):
     home = Path(home).resolve();root = updates.active_root(home)
     launcher = root/'launcher/Pokemon Together.exe'
-    info = json.loads((launcher.parent/'BUILD_INFO.json').read_text(encoding='utf-8'))
-    if info.get('product') != PRODUCT or updates.version(info.get('version','')) < (1,0,8):
+    info_path=launcher.parent/'BUILD_INFO.json'
+    try:
+        if info_path.stat().st_size>4096:raise ValueError('Updated shared launcher metadata is invalid.')
+        info=json.loads(info_path.read_text(encoding='utf-8'))
+    except (OSError,UnicodeError,ValueError) as exc:raise ValueError('Updated shared launcher metadata is invalid.') from exc
+    if not isinstance(info,dict) or type(info.get('schema')) is not int or info['schema']!=1 or info.get('product')!=PRODUCT:
+        raise ValueError('Updated shared launcher metadata is invalid.')
+    try:version=updates.version(info.get('version',''))
+    except (TypeError,ValueError) as exc:raise ValueError('Updated shared launcher metadata is invalid.') from exc
+    if version < (1,0,8):
         raise ValueError('Install release 1.0.8 or newer through Updates before repairing the old launcher.')
     if not launcher.is_file():raise ValueError('The updated shared launcher is missing.')
     return root,launcher
