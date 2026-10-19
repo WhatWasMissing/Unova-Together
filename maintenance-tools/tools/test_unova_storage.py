@@ -73,6 +73,22 @@ class StorageTests(unittest.TestCase):
         u.record_integrity(root)
         self.assertEqual(outside.read_bytes(),b'preserve this file');self.assertTrue(pending.exists())
         self.assertTrue((root/'.launcher-integrity.json').is_file())
+    def test_atomic_does_not_write_through_link_created_after_validation(self):
+        target=self.home/'.updates/metadata.json';legacy_pending=target.with_name(target.name+'.pending')
+        outside=self.home/'keep-atomic-sentinel.bin';outside.write_bytes(b'preserve this file')
+        hardlinked=s.hardlinked;injected=False
+        def inject_after_check(path):
+            nonlocal injected
+            result=hardlinked(path)
+            if Path(path)==legacy_pending and not injected:
+                os.link(outside,legacy_pending);injected=True
+            return result
+        with patch.object(s,'hardlinked',side_effect=inject_after_check):
+            s.atomic(target,{'schema':1})
+        self.assertTrue(injected)
+        self.assertEqual(outside.read_bytes(),b'preserve this file')
+        self.assertEqual(json.loads(target.read_text(encoding='utf-8')),{"schema":1})
+        self.assertTrue(legacy_pending.exists())
     def test_installation_lock_rejects_hardlinked_lock_file(self):
         outside=self.home/'external-lock';outside.write_bytes(b'')
         os.link(outside,self.home/'.updates/install.lock')

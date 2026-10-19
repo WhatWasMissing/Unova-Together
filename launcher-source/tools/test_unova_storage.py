@@ -76,6 +76,22 @@ class StorageTests(unittest.TestCase):
         u.record_integrity(root)
         self.assertEqual(outside.read_bytes(),b'preserve this file');self.assertTrue(pending.exists())
         self.assertTrue((root/'.launcher-integrity.json').is_file())
+    def test_atomic_does_not_write_through_link_created_after_validation(self):
+        target=self.home/'.updates/metadata.json';legacy_pending=target.with_name(target.name+'.pending')
+        outside=self.home/'keep-atomic-sentinel.bin';outside.write_bytes(b'preserve this file')
+        hardlinked=s.hardlinked;injected=False
+        def inject_after_check(path):
+            nonlocal injected
+            result=hardlinked(path)
+            if Path(path)==legacy_pending and not injected:
+                os.link(outside,legacy_pending);injected=True
+            return result
+        with patch.object(s,'hardlinked',side_effect=inject_after_check):
+            s.atomic(target,{'schema':1})
+        self.assertTrue(injected)
+        self.assertEqual(outside.read_bytes(),b'preserve this file')
+        self.assertEqual(json.loads(target.read_text(encoding='utf-8')),{"schema":1})
+        self.assertTrue(legacy_pending.exists())
     def test_junction_outside_installation_is_never_followed(self):
         old=self.slot('1.0.1');self.slot('1.0.2');self.slot('1.0.3');self.active('1.0.3');outside=self.home/'outside';outside.mkdir();victim=outside/'victim.dll';victim.write_bytes(b'external')
         link=old/'linked'

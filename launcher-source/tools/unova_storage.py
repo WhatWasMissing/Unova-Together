@@ -3,6 +3,7 @@ from contextlib import contextmanager
 import hashlib, json, os, re, subprocess, sys
 from pathlib import Path, PurePosixPath
 import stat
+import uuid
 
 SLOT=re.compile(r'\d{1,4}\.\d{1,4}\.\d{1,4}(?:-repair-[a-f0-9]{12})?')
 RECEIPT='.installed-files.json'
@@ -47,10 +48,23 @@ def read(path,limit=4*1024*1024):
     return json.loads(path.read_text(encoding='utf-8'))
 
 def atomic(path,value):
-    pending=path.with_name(path.name+'.pending')
-    if linked(path) or linked(pending) or hardlinked(path) or hardlinked(pending):
+    path=Path(path)
+    legacy_pending=path.with_name(path.name+'.pending')
+    if linked(path) or linked(legacy_pending) or hardlinked(path) or hardlinked(legacy_pending):
         raise ValueError('Unsafe installation record.')
-    pending.write_text(json.dumps(value,indent=2),encoding='utf-8');os.replace(pending,path)
+    pending=path.with_name(path.name+'.'+uuid.uuid4().hex+'.pending')
+    flags=os.O_WRONLY|os.O_CREAT|os.O_EXCL
+    if hasattr(os,'O_BINARY'):flags|=os.O_BINARY
+    descriptor=os.open(pending,flags,0o600)
+    try:
+        with os.fdopen(descriptor,'wb') as stream:
+            stream.write(json.dumps(value,indent=2).encode('utf-8'))
+        if linked(path) or hardlinked(path) or linked(pending) or hardlinked(pending):
+            raise ValueError('Unsafe installation record.')
+        os.replace(pending,path)
+    finally:
+        try:pending.unlink()
+        except FileNotFoundError:pass
 
 def record_package(root):
     root=Path(root).resolve()
