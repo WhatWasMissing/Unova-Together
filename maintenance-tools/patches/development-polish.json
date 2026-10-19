@@ -9,7 +9,9 @@
     "res/menu_sounds.qrc",
     "src/ARM.cpp",
     "src/ARM.h",
+    "src/frontend/qt_sdl/AboutDialog.cpp",
     "src/frontend/qt_sdl/CheckpointStorage.h",
+    "src/frontend/qt_sdl/CMakeLists.txt",
     "src/frontend/qt_sdl/ConnectionFeedback.h",
     "src/frontend/qt_sdl/EmuInstance.h",
     "src/frontend/qt_sdl/EmuInstanceAudio.cpp",
@@ -50,11 +52,13 @@
     "src/frontend/qt_sdl/PokemonTrading.cpp",
     "src/frontend/qt_sdl/PokemonTrading.h",
     "src/frontend/qt_sdl/PokemonTrainerMoney.h",
+    "src/frontend/qt_sdl/PokePlayIntro.h",
     "src/frontend/qt_sdl/PresenceOverlay.cpp",
     "src/frontend/qt_sdl/PresenceOverlay.h",
     "src/frontend/qt_sdl/ProjectCredits.h",
     "src/frontend/qt_sdl/Screen.cpp",
     "src/frontend/qt_sdl/TrainerSprites.cpp",
+    "src/frontend/qt_sdl/Window.cpp",
     "src/Gen5GymLeaderMegaTeams.h",
     "src/Gen5MegaEvolution.h",
     "src/Gen5MegaItemCompatibility.h",
@@ -87,7 +91,7 @@
     "src/net/LAN.h",
     "src/PresenceOcclusion.h"
   ],
-  "patchSha256": "7b660f8cebdbdc37918805ba9d61ec2547f7ca4313af032a96bb0b55ba08908e",
+  "patchSha256": "205590113c3faa330506e54eba2595865fa9c11d2ff185e0e391777e8ca47f97",
   "spriteVariants": 743,
   "build": "1.0.7-dev"
 }
