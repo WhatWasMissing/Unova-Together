@@ -18,10 +18,14 @@ def document(runtime):
     doc=prefs.read_document(runtime)
     for path,item in SCHEMA.items():
         parts=path.split('.');value=doc
-        for part in parts:
-            if not isinstance(value,Mapping) or part not in value:
+        for index,part in enumerate(parts):
+            if not isinstance(value,Mapping):
+                raise ValueError('Invalid emulator settings table: '+'.'.join(parts[:index]))
+            if part not in value:
                 put(doc,path,item['default']);break
             value=value[part]
+            if index<len(parts)-1 and not isinstance(value,Mapping):
+                raise ValueError('Invalid emulator settings table: '+'.'.join(parts[:index+1]))
     return doc
 
 def rows(doc,prefix=''):

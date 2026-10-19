@@ -11,3 +11,4 @@
 - Emulator and Multiplayer windows now show the same release version as the packaged game.
 - Save backups now reject linked folders and outside archives, keeping backup files within the selected launcher profile.
 - Cheat settings now stop safely when their profile storage folder points outside launcher-managed storage.
+- The advanced emulator-settings editor now reports malformed settings sections clearly instead of crashing.
