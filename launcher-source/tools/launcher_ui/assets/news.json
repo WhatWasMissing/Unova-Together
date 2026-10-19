@@ -2,10 +2,16 @@
   "schema": 1,
   "notes": [
     {
+      "version": "2.0.17",
+      "title": "Save-loading fix",
+      "file": "RELEASE_NOTES_2.0.17.md",
+      "body": "Fixed a black screen that could appear after choosing Continue. Your existing save remains intact and loads into the game as expected.\n\nCynthia's Route 7 Mega Evolution lesson now appears after defeating Skyla, gives a Mega Stone suited to an eligible Pokémon, and unlocks her later rematch."
+    },
+    {
       "version": "2.0.16",
       "title": "Complete Mega Stone shops and matching version labels",
       "file": "RELEASE_NOTES_2.0.16.md",
-      "body": "Every Poké Mart includes all 49 Mega Stones, including Mistralton City. The game window and Multiplayer screen now show the same release number as the launcher."
+      "body": "The current download includes the full 49-stone selection in every Poké Mart, including Mistralton City. Scroll through the stock to Latiosite, the final stone before Cancel. Each Mega Stone costs ₽50,000.\n\nThe game window and Multiplayer screen now show the same release number as the launcher, making it easier to confirm that friends are using matching versions.\n\nIf you used an older emulator save state, load your normal in-game save after updating so the expanded shop menu can appear."
     },
     {
       "version": "2.0.15",
@@ -35,7 +41,7 @@
       "version": "2.0.8",
       "title": "Mega Stone shop fix",
       "file": "RELEASE_NOTES_2.0.8.md",
-      "body": "Pokémon Center Marts now show their Mega Stone stock correctly instead of displaying blank item entries. All available Mega Stones are distributed across the mart network."
+      "body": "Pokémon Center Marts now show Mega Stones with their names and prices instead of blank item entries. The full Mega Stone selection is available across the mart network."
     },
     {
       "version": "2.0.7",
@@ -47,35 +53,35 @@
       "version": "2.0.6",
       "title": "Stable-build rollback",
       "file": "RELEASE_NOTES_2.0.6.md",
-      "body": "Returns to the earlier stable game build while a fix is prepared for the save-loading stall introduced in versions 2.0.4 and 2.0.5. A dedicated fix is in progress."
+      "body": "This release returns to the earlier stable game build while we prepare a fix for the save-loading stall introduced in versions 2.0.4 and 2.0.5. A dedicated fix is in progress.\n\nUse the launcher to install the update. Your saves are kept."
     },
     {
       "version": "2.0.5",
       "title": "Mega-capable trainer battles",
       "file": "RELEASE_NOTES_2.0.5.md",
-      "body": "The Gym Leaders in the final three gyms now bring Mega-capable Pokémon into battle, and Cynthia can Mega Evolve her Garchomp in her Route 7 rematch. Opponents can still Mega Evolve when their Pokémon moves before yours."
+      "body": "The Gym Leaders in the final three gyms now bring Mega-capable Pokémon into battle, and Cynthia can Mega Evolve her Garchomp in her Route 7 rematch. Opponents can still Mega Evolve when their Pokémon moves before yours.\n\nUse the launcher to install the update. Your saves are kept."
     },
     {
       "version": "2.0.4",
       "title": "Mega Evolution in double battles",
       "file": "RELEASE_NOTES_2.0.4.md",
-      "body": "Mega Evolution now works reliably in double battles, even when the other Pokémon on your side chooses its move afterward. The launcher also makes old-version cleanup easier to follow and lets you choose a supported player character before starting the game."
+      "body": "Mega Evolution now works reliably in double battles, even when the other Pokémon on your side chooses its move afterward.\n\nThis update also makes the launcher’s old-version cleanup easier to follow with a progress indicator, estimated time, and the locations of files being removed. In-game menus show clearer section labels and selection highlights, and you can choose a supported player character before starting the game.\n\nUse the launcher to install the update. Your saves are kept."
     },
     {
       "version": "2.0.3",
-      "title": "Steadier follower Pokémon",
+      "title": "What changed",
       "file": "RELEASE_NOTES_2.0.3.md",
-      "body": "Follower Pokémon now stay planted while idle and walking, preventing a small vertical hop while preserving their walking poses and reactions."
+      "body": "Follower Pokémon now stay planted while idle and during regular walking. This removes the small vertical hop while preserving their walking poses and reaction animations."
     },
     {
       "version": "2.0.2",
-      "title": "Route 7 movement fix",
+      "title": "What changed",
       "file": "RELEASE_NOTES_2.0.2.md",
-      "body": "Fixes a Route 7 issue that could stop movement after loading a save. Cynthia’s introduction and rematch now appear at the right points in the story. Update the launcher before continuing your save so it can prepare the corrected game copy."
+      "body": "- Fixes a Route 7 issue that could stop movement after loading a save.\n- Cynthia’s introduction and rematch now appear at the right points in the story.\n- Update the launcher before continuing your save so it can prepare the corrected game copy."
     },
     {
       "version": "2.0.1",
-      "title": "Clearer in-game menus",
+      "title": "What changed",
       "file": "RELEASE_NOTES_2.0.1.md",
       "body": "- In-game menu text, button hints and dialogue now fit inside their windows. Long labels end cleanly.\n- Cynthia’s rematch team is closer to Skyla’s Redux level, and her Garchomp can Mega Evolve."
     },
@@ -83,7 +89,7 @@
       "version": "2.0.0",
       "title": "Mega Evolution and a fresh look",
       "file": "RELEASE_NOTES_2.0.0.md",
-      "body": "- Explore with **49 Mega forms**, each with a matching Mega Stone sold at Pokémon Center Marts. Forty-six forms have animated battle artwork.\n- The launcher’s Features page now plays the supplied front and back animations for Mega Mawile.\n- Mega Evolution works in battle, keeps the Mega form through switching and level gains, and returns the Pokémon to normal when the battle ends.\n- The launcher now lets you choose an animated field character from your game. Your choice applies the next time you start the game.\n- After defeating Skyla, meet Cynthia on Route 7 to learn about Mega Evolution and receive a matching Mega Stone. Return for a rematch against her team and Mega Garchomp. The launcher prepares a separate event-ready copy for Blaze Black 2 Redux Complete v1.4.1.\n- Added in-game mod menus have a Generation 5-inspired design, with menu sounds you can turn off in **Unova → Settings**.\n- The launcher’s old-version cleanup keeps your active game and saves while removing unused copies."
+      "body": "- Explore with **49 Mega forms**, each with a matching Mega Stone sold at Pokémon Center Marts. Forty-six forms have animated battle artwork.\n- The launcher’s Features page now plays the supplied front and back animations for Mega Mawile.\n- Mega Evolution works in battle, keeps the Mega form through switching and level gains, and returns the Pokémon to normal when the battle ends.\n- The launcher now lets you choose an animated field character from your game. Your choice applies the next time you start the game.\n- After defeating Skyla, meet Cynthia on Route 7 to learn about Mega Evolution and receive a matching Mega Stone. Return for a rematch against her team and Mega Garchomp. The launcher makes a separate event-ready copy of supported Redux games.\n- Added in-game mod menus have a Generation 5-inspired design, with menu sounds you can turn off in **Unova → Settings**.\n- The launcher’s old-version cleanup keeps your active game and saves while removing unused copies."
     },
     {
       "version": "1.0.35",

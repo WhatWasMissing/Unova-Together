@@ -160,7 +160,7 @@ def main():
         for path in sorted((ROOT/'tools/launcher_ui').rglob('*')):
             if path.is_file() and '__pycache__' not in path.parts:
                 z.write(path,'Unova-Together-Source/tools/launcher_ui/'+path.relative_to(ROOT/'tools/launcher_ui').as_posix())
-        for name in ('test_unova_updater.py','test_unova_single_exe.py','unova_single_exe.py','build_unova_single_exe.py','test_launcher_ui.py','test_launcher_preferences.py','test_launcher_cheat_engine.py','test_launcher_services.py','test_release_input_bounds.py','test_companion_interactions.py','test_companion_interactions_runner.py','test_overworld_companion.py','check_lan_player_list_validation.cpp','check_battle_presence.cpp','check_post_battle_presence.cpp','check_rival_agreement.cpp','test_rival_payload.py','test_coop_boss_payload.py','test_coop_story_return.py','test_coop_field_return.py','verify_coop_runtime.py','audit_native_enemy_setup.py','verify_rival_startups.py'):
+        for name in ('test_unova_updater.py','test_unova_single_exe.py','unova_single_exe.py','build_unova_single_exe.py','test_launcher_ui.py','test_launcher_preferences.py','test_launcher_cheat_engine.py','test_launcher_services.py','test_release_input_bounds.py','test_companion_interactions.py','test_companion_interactions_runner.py','test_overworld_companion.py','check_lan_player_list_validation.cpp','check_battle_presence.cpp','check_post_battle_presence.cpp','check_rival_agreement.cpp','test_rival_payload.py','test_coop_boss_payload.py','test_coop_story_return.py','test_coop_field_return.py','verify_coop_runtime.py','audit_native_enemy_setup.py','verify_rival_startups.py','build_gen5_shop_overlay_patch.py','test_gen5_shop_overlay_patch.py','package_development_polish.py'):
             z.write(ROOT/'tools'/name,'Unova-Together-Source/tools/'+name)
         for name in ('check_launcher_tree_parity.py','test_launcher_tree_parity.py','test_release_validation.py'):
             z.write(REPOSITORY_ROOT/'launcher-source/tools'/name,'Unova-Together-Source/tools/'+name)
@@ -203,12 +203,14 @@ def main():
             'Packaged configuration contains an unsupported top-level setting',
         )
         require_release_condition(not any('/source/' in n for n in z.namelist()), 'Runtime archive unexpectedly contains source files')
+        patch_index_path='Unova-Together/patchnotes/index.json'
+        require_release_condition(patch_index_path in z.namelist(), 'Packaged patch-notes index is missing')
+        patch_index=json.loads(z.read(patch_index_path))
         note_files=[name for name in z.namelist() if name.startswith('Unova-Together/patchnotes/RELEASE_NOTES_') and name.endswith('.md')]
         require_release_condition(
             len(note_files)==len(patch_index['notes']) and f'Unova-Together/patchnotes/RELEASE_NOTES_{version}.md' in note_files,
             'Packaged patch notes do not match the release index/version',
         )
-        require_release_condition('Unova-Together/patchnotes/index.json' in z.namelist(), 'Packaged patch-notes index is missing')
         launcher_info=json.loads(z.read('Unova-Together/launcher/BUILD_INFO.json'))
         require_release_condition(launcher_info['product']=='pokemon-together' and launcher_info['version']==version, 'Launcher build metadata does not match the release')
         require_release_condition(json.loads(z.read('Unova-Together/launcher/_internal/launcher_ui/build-info.json'))==launcher_info, 'Frozen launcher metadata differs from its build metadata')
@@ -223,11 +225,15 @@ def main():
         require_release_condition('Unova-Together-Source/tools/check_launcher_tree_parity.py' in names, 'Source archive is missing the launcher mirror checker')
         require_release_condition('Unova-Together-Source/tools/test_launcher_tree_parity.py' in names, 'Source archive is missing launcher mirror coverage')
         require_release_condition('Unova-Together-Source/tools/test_release_validation.py' in names, 'Source archive is missing optimized release-guard coverage')
+        require_release_condition('Unova-Together-Source/tools/build_gen5_shop_overlay_patch.py' in names, 'Source archive is missing the Mega shop overlay patch generator')
+        require_release_condition('Unova-Together-Source/tools/test_gen5_shop_overlay_patch.py' in names, 'Source archive is missing Mega shop overlay regression coverage')
+        require_release_condition('Unova-Together-Source/tools/package_development_polish.py' in names, 'Source archive is missing the development patch packager')
         require_release_condition('Unova-Together-Source/docs/DEVELOPER_TESTING.md' in names, 'Source archive is missing test reproduction instructions')
     stage_root.mkdir(parents=True)
     with zipfile.ZipFile(runtime) as z:z.extractall(stage_root)
     subprocess.run([sys.executable,str(ROOT/'tools/build_unova_single_exe.py'),
         '--runtime-root',str(stage),'--work-dir',str(work_root),'--output-dir',str(standalone_dir),
+        '--corresponding-source',str(source),
         *(['--pyinstaller-python',str(args.pyinstaller_python.resolve())] if args.pyinstaller_python else [])],check=True,cwd=ROOT)
     shutil.copy2(standalone_dir/'Unova Together.exe',standalone)
     shutil.copy2(launcher/'Pokemon Together Bootstrap.exe',repair)

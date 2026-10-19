@@ -1,25 +1,14 @@
 """Build one EXE with reviewed runtime and corresponding source. mvq1303."""
 from pathlib import Path
 from importlib import metadata as package_metadata
-import argparse, hashlib, json, os, subprocess, sys, zipfile
+import argparse, hashlib, json, os, shutil, subprocess, sys, zipfile
 import unova_updater as updates
 from launcher_ui import versioning
 
 ROOT=Path(__file__).resolve().parents[1]
 PRIVATE={'.nds','.gba','.sav','.save','.dsv','.ramdump','.ml1','.ml2','.ml3','.ml4','.ml5','.ml6','.ml7','.ml8','.pem','.key','.pyc'}
 
-def main():
-    parser=argparse.ArgumentParser();parser.add_argument('--runtime-root',type=Path);parser.add_argument('--work-dir',type=Path);parser.add_argument('--output-dir',type=Path);parser.add_argument('--pyinstaller-python',type=Path)
-    parser.add_argument('--launcher-source',type=Path,help='Matching source archive for a retained frozen launcher')
-    args=parser.parse_args()
-    installed=args.runtime_root.resolve() if args.runtime_root else ROOT/'builds/unova-together-0.3.5/Unova-Together'
-    if not installed.is_relative_to(ROOT/'builds'):raise ValueError('Runtime must be staged under builds')
-    work=(args.work_dir.resolve() if args.work_dir else ROOT/'test-fixtures/single-exe-build-20261009')
-    if not work.is_relative_to(ROOT/'test-fixtures'):raise ValueError('Single-EXE work directory must stay within test-fixtures')
-    if args.work_dir and work.exists() and any(work.iterdir()):raise FileExistsError('Single-EXE work directory must be fresh')
-    work.mkdir(parents=True,exist_ok=True)
-    assets=work/'single-exe';assets.mkdir(exist_ok=True)
-    source=work/'Corresponding-Source.zip'
+def build_legacy_source_archive(source):
     with zipfile.ZipFile(source,'w',zipfile.ZIP_DEFLATED,compresslevel=6) as bundle:
         for name in ('launcher_migration.py','unova_launcher_bootstrap.py','build_unova_bootstrap.py','test_launcher_migration.py'):
             bundle.write(ROOT/'tools'/name,'tools/'+name)
@@ -73,6 +62,39 @@ def main():
             elif str(entry).endswith('/LICENSE'):
                 bundle.write(dependency.locate_file(entry),'dependencies/ndspy-LICENSE')
         bundle.writestr('README.md','Unova Together by mvq1303 / WhatWasMissing. Corresponding modified melonDS source is in source/melonDS; use its BUILD.md/CMake files. Launcher/bootstrap source is in tools. Keep GPL/upstream notices. Runtime helpers are also distributed as Python source in the installed tools folder. No game ROMs, firmware or user saves are included.\n')
+
+def main():
+    parser=argparse.ArgumentParser();parser.add_argument('--runtime-root',type=Path);parser.add_argument('--work-dir',type=Path);parser.add_argument('--output-dir',type=Path);parser.add_argument('--pyinstaller-python',type=Path)
+    parser.add_argument('--launcher-source',type=Path,help='Matching source archive for a retained frozen launcher')
+    parser.add_argument('--corresponding-source',type=Path,help='Prebuilt matching source archive to embed in the standalone download')
+    args=parser.parse_args()
+    installed=args.runtime_root.resolve() if args.runtime_root else ROOT/'builds/unova-together-0.3.5/Unova-Together'
+    if not installed.is_relative_to(ROOT/'builds'):raise ValueError('Runtime must be staged under builds')
+    work=(args.work_dir.resolve() if args.work_dir else ROOT/'test-fixtures/single-exe-build-20261009')
+    if not work.is_relative_to(ROOT/'test-fixtures'):raise ValueError('Single-EXE work directory must stay within test-fixtures')
+    if args.work_dir and work.exists() and any(work.iterdir()):raise FileExistsError('Single-EXE work directory must be fresh')
+    work.mkdir(parents=True,exist_ok=True)
+    assets=work/'single-exe';assets.mkdir(exist_ok=True)
+    source=work/'Corresponding-Source.zip'
+    if args.corresponding_source:
+        matching_source=args.corresponding_source.resolve()
+        if not matching_source.is_file():raise FileNotFoundError('Corresponding source archive does not exist')
+        with zipfile.ZipFile(matching_source) as bundle:
+            if bundle.testzip() is not None:raise ValueError('Corresponding source archive failed ZIP integrity check')
+            required={'Unova-Together-Source/README.md','Unova-Together-Source/LICENSE',
+                      'Unova-Together-Source/source/melonDS/LICENSE',
+                      'Unova-Together-Source/tools/launcher_ui/build-info.json'}
+            if not required.issubset(bundle.namelist()):
+                raise ValueError('Corresponding source archive is missing its release, license, emulator, or launcher source')
+            if any(Path(name).suffix.lower() in PRIVATE for name in bundle.namelist()):
+                raise ValueError('Corresponding source archive contains a private game or user file')
+            expected_version='.'.join(map(str,updates.local_version(installed)))
+            source_readme=bundle.read('Unova-Together-Source/README.md').decode('utf-8')
+            if f'for Unova Together {expected_version}.' not in source_readme:
+                raise ValueError('Corresponding source archive version does not match the staged runtime')
+        shutil.copy2(matching_source,source)
+    else:
+        build_legacy_source_archive(source)
     if args.launcher_source:
         # Keep the retained frozen launcher and its corresponding source aligned.
         revised=source.with_suffix('.reviewed.zip')
@@ -108,6 +130,10 @@ def main():
         if bundle.testzip() is not None:raise ValueError('Bundle failed ZIP integrity check.')
         assert not any(Path(n).suffix.lower() in PRIVATE for n in bundle.namelist())
         assert not any('/.updates/' in n or '/diagnostics/' in n or '/save-backups/' in n for n in bundle.namelist())
+        if args.corresponding_source:
+            embedded_source=bundle.read('Unova-Together/source/Corresponding-Source.zip')
+            if embedded_source!=args.corresponding_source.read_bytes():
+                raise ValueError('Standalone download does not embed the matching release source archive')
     metadata={'version':'.'.join(map(str,updates.local_version(installed))),'sha256':hashlib.sha256(archive.read_bytes()).hexdigest(),'launcher_revision':int((installed/'launcher/BUILD_REVISION.txt').read_text().strip())}
     (assets/'bundle.json').write_text(json.dumps(metadata))
     versioning.write_windows_version(ROOT/'tools/launcher_ui/windows-version.txt',work/'windows-version.txt',metadata['version'])

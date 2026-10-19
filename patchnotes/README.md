@@ -2,6 +2,7 @@
 
 Pick a version to read what changed. The newest release is first.
 
+- [Unova Together 2.0.17 — Save-loading fix](RELEASE_NOTES_2.0.17.md)
 - [Unova Together 2.0.16 — Complete Mega Stone shops and matching version labels](RELEASE_NOTES_2.0.16.md)
 - [Unova Together 2.0.15 — Mega Evolution in double and co-op battles](RELEASE_NOTES_2.0.15.md)
 - [Unova Together 2.0.14 — Smoother movement in co-op](RELEASE_NOTES_2.0.14.md)
@@ -12,9 +13,9 @@ Pick a version to read what changed. The newest release is first.
 - [Unova Together 2.0.6 — Stable-build rollback](RELEASE_NOTES_2.0.6.md)
 - [Unova Together 2.0.5 — Mega-capable trainer battles](RELEASE_NOTES_2.0.5.md)
 - [Unova Together 2.0.4 — Mega Evolution in double battles](RELEASE_NOTES_2.0.4.md)
-- [Unova Together 2.0.3 — Steadier follower Pokémon](RELEASE_NOTES_2.0.3.md)
-- [Unova Together 2.0.2 — Route 7 movement fix](RELEASE_NOTES_2.0.2.md)
-- [Unova Together 2.0.1 — Clearer in-game menus](RELEASE_NOTES_2.0.1.md)
+- [Unova Together 2.0.3 — What changed](RELEASE_NOTES_2.0.3.md)
+- [Unova Together 2.0.2 — What changed](RELEASE_NOTES_2.0.2.md)
+- [Unova Together 2.0.1 — What changed](RELEASE_NOTES_2.0.1.md)
 - [Unova Together 2.0.0 — Mega Evolution and a fresh look](RELEASE_NOTES_2.0.0.md)
 - [Unova Together 1.0.35 — Mega level-ups and menu sounds](RELEASE_NOTES_1.0.35.md)
 - [Unova Together 1.0.34 — Mega Evolution and steadier follower poses](RELEASE_NOTES_1.0.34.md)
