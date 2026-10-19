@@ -152,6 +152,184 @@ def species_ids(decomp: Path) -> dict[str, int]:
     return {name: names[name] for name in MEGA_STONES}
 
 
+def _stack_cmp(operator: int, left: int, right: int) -> bool:
+    """Evaluate BW2 VMStackCmp operators used by Cynthia's event."""
+    return {
+        0: left < right,   # CMP_LT
+        1: left == right,  # CMP_EQ
+        5: left != right,  # CMP_NE
+    }[operator]
+
+
+def _find_script_pattern(instructions, start: int, end: int, pattern: list[tuple[str, list[int | None]]]):
+    matches = []
+    for pc in sorted(offset for offset in instructions if start <= offset < end):
+        cursor = pc
+        sequence = []
+        for name, expected_args in pattern:
+            entry = instructions.get(cursor)
+            if entry is None:
+                break
+            command, args, next_pc = entry
+            if command.name != name or len(args) != len(expected_args):
+                break
+            if any(expected is not None and actual != expected
+                   for actual, expected in zip(args, expected_args, strict=True)):
+                break
+            sequence.append(entry)
+            cursor = next_pc
+        else:
+            matches.append(sequence)
+    return matches
+
+
+def validate_route7_script(compiled: bytes, decomp: Path, species: dict[str, int]) -> dict:
+    """Verify the compiled event's branch polarity against the BW2 script VM.
+
+    The decomp's VM handler (src/ov012/scrcmd_vm.c:s001F_VMJumpIf) jumps for
+    CMP_STACK when the popped value is not 1. A nearby party-scanning script
+    confirms the intended pattern: a true in-range comparison falls through,
+    while a false comparison branches out of the loop.
+    """
+    from tools.data.gen_constants import load as load_constants
+    from tools.script.field_script import ScriptFile, load_commands, script_header
+
+    header = script_header(compiled)
+    if header is None or len(header[0]) != 9:
+        raise ValueError("Compiled Route 7 script has an unexpected script table")
+    commands, _, _, _ = load_commands()
+    traced = ScriptFile(compiled, commands, None)
+    if not traced.trace(header[0]) or traced.errors:
+        raise ValueError(f"Compiled Route 7 script failed decomp trace: {traced.errors}")
+
+    offsets = header[0]
+    ranges = []
+    for start in offsets:
+        greater = [offset for offset in offsets if offset > start]
+        ranges.append((start, min(greater) if greater else len(compiled)))
+
+    def only_pattern(script_index: int, pattern: list[tuple[str, list[int | None]]], description: str):
+        found = _find_script_pattern(traced.instructions, *ranges[script_index], pattern)
+        if len(found) != 1:
+            raise ValueError(f"Cynthia script has {len(found)} instances of {description}; expected one")
+        return found[0]
+
+    def branch_target(sequence) -> int:
+        target = sequence[-1][1][1]
+        if target not in traced.instructions:
+            raise ValueError("Cynthia script branch target is not a decoded instruction")
+        return target
+
+    def expect_target(sequence, command_name: str, args_prefix: list[int], description: str) -> None:
+        target = branch_target(sequence)
+        command, args, _ = traced.instructions[target]
+        if command.name != command_name or args[:len(args_prefix)] != args_prefix:
+            raise ValueError(f"Cynthia {description} branch lands on the wrong command")
+
+    def assert_flag_branch(sequence, description: str) -> None:
+        # This is the actual CMP_STACK behavior in s001F_VMJumpIf, not the
+        # opposite wording in the header comment.
+        for flag_value in (0, 1):
+            cmp_true = _stack_cmp(eq, 0, flag_value)
+            jumps = not cmp_true
+            should_jump = flag_value == 1
+            if jumps != should_jump:
+                raise ValueError(f"Cynthia {description} has inverted CMP_STACK behavior")
+
+    cmp_stack = 0xFF
+    eq = 1
+    ne = 5
+    lt = 0
+    flag_ids = load_constants("flags")
+    flag_pattern = lambda flag: [
+        ("VMStackPushFlag", [flag]),
+        ("VMStackPushConst", [0]),
+        ("VMStackCmp", [eq]),
+        ("VMJumpIf", [cmp_stack, None]),
+    ]
+
+    gift_check = only_pattern(6, flag_pattern(0x09A1), "first-time gift check")
+    expect_target(gift_check, "ParentActorMsg", [0x400, 12], "first-time gift")
+    skyla_check = only_pattern(7, flag_pattern(flag_ids[SKYLA_FLAG]), "Skyla progression gate")
+    expect_target(skyla_check, "VMStackPushFlag", [0x09A1], "Skyla progression")
+    reward_check = only_pattern(7, flag_pattern(0x09A1), "gift progression gate")
+    expect_target(reward_check, "FlagSet", [TUTORIAL_HIDE_FLAG], "gift progression")
+    challenge_check = only_pattern(7, flag_pattern(0x09A2), "rematch-completion gate")
+    expect_target(challenge_check, "FlagSet", [CHALLENGE_HIDE_FLAG], "rematch completion")
+    rematch_check = only_pattern(8, flag_pattern(0x09A2), "rematch retry gate")
+    expect_target(rematch_check, "ParentActorMsg", [0x400, 14], "rematch retry")
+    for label, sequence in (("gift", gift_check), ("Skyla", skyla_check),
+                            ("gift progression", reward_check), ("rematch completion", challenge_check),
+                            ("rematch retry", rematch_check)):
+        assert_flag_branch(sequence, label)
+
+    party_loop = only_pattern(6, [
+        ("VMStackPush", [0x8021]),
+        ("VMStackPush", [0x8020]),
+        ("VMStackCmp", [lt]),
+        ("VMJumpIf", [cmp_stack, None]),
+    ], "party bounds check")
+    expect_target(party_loop, "WorkSetConst", [0x8023, STONE_FALLBACK], "empty-party fallback")
+    # In-range (0 < 1) continues scanning; exhausted (1 < 1 is false) exits.
+    for index, count, should_exit in ((0, 1, False), (1, 1, True)):
+        cmp_true = _stack_cmp(lt, index, count)
+        if (not cmp_true) != should_exit:
+            raise ValueError("Cynthia party bounds check can skip a valid party member")
+
+    for name, item_id in MEGA_STONES.items():
+        species_check = only_pattern(6, [
+            ("VMStackPush", [0x8022]),
+            ("VMStackPushConst", [species[name]]),
+            ("VMStackCmp", [ne]),
+            ("VMJumpIf", [cmp_stack, None]),
+        ], f"{name} species match")
+        expect_target(species_check, "WorkSetConst", [0x8023, item_id], f"{name} Mega Stone")
+        for candidate, should_match in ((species[name], True), (species[name] + 1, False)):
+            cmp_true = _stack_cmp(ne, candidate, species[name])
+            if (not cmp_true) != should_match:
+                raise ValueError(f"Cynthia's {name} branch matches the wrong species")
+
+    matching_check = only_pattern(6, [
+        ("VMStackPush", [0x8024]),
+        ("VMStackPushConst", [0]),
+        ("VMStackCmp", [eq]),
+        ("VMJumpIf", [cmp_stack, None]),
+    ], "matching-stone dialogue check")
+    expect_target(matching_check, "WordSetItemName", [], "matching-stone dialogue")
+    for matched in (0, 1):
+        if (not _stack_cmp(eq, matched, 0)) != bool(matched):
+            raise ValueError("Cynthia's matching-stone dialogue branch is inverted")
+
+    bag_check = only_pattern(6, [
+        ("VMStackPush", [0x8025]),
+        ("VMStackPushConst", [1]),
+        ("VMStackCmp", [eq]),
+        ("VMJumpIf", [cmp_stack, None]),
+    ], "Bag capacity check")
+    expect_target(bag_check, "ParentActorMsg", [0x400, 11], "full-Bag retry")
+    victory_check = only_pattern(8, [
+        ("VMStackPush", [0x8010]),
+        ("VMStackPushConst", [1]),
+        ("VMStackCmp", [eq]),
+        ("VMJumpIf", [cmp_stack, None]),
+    ], "battle result check")
+    expect_target(victory_check, "CallTrainerLose", [], "battle-loss")
+    for has_space, should_full in ((0, True), (1, False)):
+        if (not _stack_cmp(eq, has_space, 1)) != should_full:
+            raise ValueError("Cynthia's full-Bag branch is inverted")
+    for won, should_lose in ((0, True), (1, False)):
+        if (not _stack_cmp(eq, won, 1)) != should_lose:
+            raise ValueError("Cynthia's rematch result branch is inverted")
+
+    return {
+        "party_species_branches": len(MEGA_STONES),
+        "flag_progression_gates": 5,
+        "party_loop_empty_and_nonempty_cases": "passed",
+        "bag_and_rematch_outcomes": "passed",
+        "cmp_stack_semantics": "passed against BW2 VM handler",
+    }
+
+
 def script_source(decomp: Path, messages_path: Path, header_path: Path, species: dict[str, int]) -> str:
     from tools.text.text_ids import header as make_text_header
 
@@ -169,7 +347,7 @@ def script_source(decomp: Path, messages_path: Path, header_path: Path, species:
         source_ids.append(
             f"    VMStackPush 0x8022\n"
             f"    VMStackPushConst {species_id}\n"
-            f"    VMStackCmp CMP_EQ\n"
+            f"    VMStackCmp CMP_NE\n"
             f"    VMJumpIf CMP_STACK, {label}\n"
         )
     reward_labels = []
@@ -181,6 +359,14 @@ def script_source(decomp: Path, messages_path: Path, header_path: Path, species:
             f"    VMJump L_STONE_SELECTED\n"
         )
 
+    def jump_if_flag_set(flag: int, label: str) -> str:
+        return (
+            f"    VMStackPushFlag {flag}\n"
+            f"    VMStackPushConst 0\n"
+            f"    VMStackCmp CMP_EQ\n"
+            f"    VMJumpIf CMP_STACK, {label}\n"
+        )
+
     source = source.replace(
         "    .balign 4, 0",
         "\n" + f"""
@@ -188,8 +374,7 @@ Script_7:
     ActorsPauseAll
     SEPlay SEQ_SE_MESSAGE
     ActorSetEyeToEye
-    VMStackPushFlag {REWARD_FLAG}
-    VMJumpIf CMP_STACK, L_CYNTHIA_ALREADY_GIFTED
+{jump_if_flag_set(REWARD_FLAG, 'L_CYNTHIA_ALREADY_GIFTED').rstrip()}
     ParentActorMsg MSGFILE_SCRIPT, Route7_Text_CynthiaIntro, 0, 0
     LastKeyWait
     ActorMsgClose
@@ -202,7 +387,7 @@ Script_7:
 L_CYNTHIA_SCAN_PARTY:
     VMStackPush 0x8021
     VMStackPush 0x8020
-    VMStackCmp CMP_GE
+    VMStackCmp CMP_LT
     VMJumpIf CMP_STACK, L_CYNTHIA_NO_MATCH
     PokePartyGetSpecies 0x8022, 0x8021
 {''.join(source_ids)}    WorkAdd 0x8021, 1
@@ -216,7 +401,7 @@ L_CYNTHIA_NO_MATCH:
 {''.join(reward_labels)}
 L_STONE_SELECTED:
     VMStackPush 0x8024
-    VMStackPushConst 1
+    VMStackPushConst 0
     VMStackCmp CMP_EQ
     VMJumpIf CMP_STACK, L_CYNTHIA_MATCHING_STONE
     WordSetItemName 0, 0x8023
@@ -262,23 +447,20 @@ L_CYNTHIA_DONE:
 
 Script_8:
     // This runs before map actors spawn. Set their spawn flags from saved progress.
-    VMStackPushFlag {SKYLA_FLAG}
-    VMJumpIf CMP_STACK, L_CYNTHIA_SKYLA_DEFEATED
+{jump_if_flag_set(SKYLA_FLAG, 'L_CYNTHIA_SKYLA_DEFEATED').rstrip()}
     FlagSet {TUTORIAL_HIDE_FLAG}
     FlagSet {CHALLENGE_HIDE_FLAG}
     VMJump L_CYNTHIA_INIT_DONE
 
 L_CYNTHIA_SKYLA_DEFEATED:
-    VMStackPushFlag {REWARD_FLAG}
-    VMJumpIf CMP_STACK, L_CYNTHIA_GIFT_RECEIVED
+{jump_if_flag_set(REWARD_FLAG, 'L_CYNTHIA_GIFT_RECEIVED').rstrip()}
     FlagReset {TUTORIAL_HIDE_FLAG}
     FlagSet {CHALLENGE_HIDE_FLAG}
     VMJump L_CYNTHIA_INIT_DONE
 
 L_CYNTHIA_GIFT_RECEIVED:
     FlagSet {TUTORIAL_HIDE_FLAG}
-    VMStackPushFlag {CHALLENGE_FLAG}
-    VMJumpIf CMP_STACK, L_CYNTHIA_CHALLENGE_COMPLETE
+{jump_if_flag_set(CHALLENGE_FLAG, 'L_CYNTHIA_CHALLENGE_COMPLETE').rstrip()}
     FlagReset {CHALLENGE_HIDE_FLAG}
     VMJump L_CYNTHIA_INIT_DONE
 
@@ -293,8 +475,7 @@ Script_9:
     ActorsPauseAll
     SEPlay SEQ_SE_MESSAGE
     ActorSetEyeToEye
-    VMStackPushFlag {CHALLENGE_FLAG}
-    VMJumpIf CMP_STACK, L_CYNTHIA_REMATCH_COMPLETE
+{jump_if_flag_set(CHALLENGE_FLAG, 'L_CYNTHIA_REMATCH_COMPLETE').rstrip()}
     TrainerBGMPlayPush {REMATCH_TRAINER_ID}
     ParentActorMsg MSGFILE_SCRIPT, Route7_Text_CynthiaRematchIntro, 0, 0
     LastKeyWait
@@ -604,6 +785,7 @@ def build(args: argparse.Namespace) -> dict:
     traced = ScriptFile(compiled, base_commands, None)
     if not traced.trace(entries[0]) or traced.errors:
         raise ValueError(f"Compiled Route 7 script failed decomp trace: {traced.errors}")
+    script_logic = validate_route7_script(compiled, decomp, species)
 
     # The decomp's event order is also the zone-event archive order in the target ROM.
     event_archive = ndspy.narc.NARC(rom.getFileByName("a/1/2/6"))
@@ -763,6 +945,7 @@ def build(args: argparse.Namespace) -> dict:
         "cynthia_texture_resource": ACTOR_RESOURCE_INDEX,
         "cynthia_actor_config_row": ACTOR_CONFIG_INDEX,
         "party_species_branches": len(MEGA_STONES),
+        "script_logic": script_logic,
         "fallback_stone_item_id": STONE_FALLBACK,
         "one_time_gift_flag": REWARD_FLAG,
         "npc_position": {"x": 125, "z": 277, "y": 0},

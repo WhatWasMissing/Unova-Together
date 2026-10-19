@@ -10,6 +10,7 @@ from pathlib import Path
 
 import ndspy.narc
 import ndspy.rom
+from build_cynthia_route7 import species_ids, validate_route7_script
 
 
 TRAINER_ID = 891
@@ -108,6 +109,9 @@ def verify(rom_path: Path, decomp: Path) -> dict:
         raise ValueError("Cynthia's Route 7 actors are missing their spawn flags")
     if not any(init["type"] == 2 and init.get("script") == 8 for init in events["init_scripts"]):
         raise ValueError("Route 7 is missing the pre-spawn progress initializer")
+    script_index = ordered_names("field_scripts").index("SCRIPTS_ROUTE_7")
+    route_scripts = ndspy.narc.NARC(rom.getFileByName("a/0/5/6"))
+    script_logic = validate_route7_script(route_scripts.files[script_index], decomp, species_ids(decomp))
     for init in events["init_scripts"]:
         if init["type"] != 1:
             continue
@@ -132,6 +136,7 @@ def verify(rom_path: Path, decomp: Path) -> dict:
         "redux_skyla_levels": skyla_levels,
         "garchomp_held_item": "Garchompite",
         "route7_rematch_position": REMATCH_POSITION,
+        "route7_script_logic": script_logic,
         "catalog_checks": "passed",
     }
 
