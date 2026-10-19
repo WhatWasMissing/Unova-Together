@@ -283,3 +283,9 @@ The standalone bootstrap re-read active-update JSON after resolving the current 
 Launcher migration assumed `BUILD_INFO.json` was an object; a non-object JSON value raised `AttributeError` before the repair path could present a useful validation message. The reader now bounds the file size and checks its schema, product, and version before continuing.
 
 **PASS — SOURCE/UNIT VERIFIED:** The migration test exercises truncated JSON, a list, a null version, and an oversized metadata file. Each is rejected as `ValueError` by the production repair entrypoint. Final full discovery passed with `py -3.12 -B -m unittest discover -s launcher-source/tools -p 'test_*.py'` (**141 tests**) and `py -3.12 -B -m unittest discover -s maintenance-tools/tools -p 'test_*.py'` (**186 run, six optional skips**). `py -3.12 -B check_launcher_tree_parity.py` passed for all **48 UI files**.
+
+### Diagnostics Authorization-header redaction — 2026-10-19
+
+The diagnostics exporter redacted the `Authorization` header name and scheme but could leave the credential following `Bearer` or `Basic` in raw HTTP header lines. It now redacts the entire value of raw `Authorization` and `Proxy-Authorization` lines before applying the existing key/value, path, and IPv4 redactions.
+
+**PASS — SOURCE/UNIT VERIFIED:** The production diagnostics-export test failed before the fix with both bearer and basic credential values present in the generated ZIP, then passed after the fix in both mirrored launcher trees. The focused test passed in each tree, and `py -3.12 -B check_launcher_tree_parity.py` passed for all **48 UI files**. Launcher discovery initially had one unrelated UI navigation assertion fail; the test passed alone and the full rerun passed (**141/141**). Maintenance-tools discovery passed (**186 run, six optional skips**). No external logs or credentials were used.

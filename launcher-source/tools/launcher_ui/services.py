@@ -259,6 +259,7 @@ def diagnostics(root,destination,home=None):
             for path in sorted(directory.rglob('*.log')):
                 if path.is_file() and not path.is_symlink() and (path.resolve().is_relative_to(root) or path.resolve().is_relative_to(home)):files.append(path)
     def redact(text):
+        text=re.sub(r'(?im)(\b(?:proxy-)?authorization\s*[:=]\s*)[^\r\n]+',r'\1[REDACTED]',text)
         text=re.sub(r'''(?i)(["']?(?:access[_ -]?key|api[_ -]?key|token|password|secret|authorization|cookie)["']?\s*[:=]\s*)(?:"[^"]*"|'[^']*'|[^\s,;}]+)''',r'\1[REDACTED]',text)
         text=re.sub(r'(?:[A-Za-z]:[\\/]|/Users/|/home/)\S+', '[LOCAL PATH]',text)
         return re.sub(r'\b(?:\d{1,3}\.){3}\d{1,3}\b','[IP]',text)
