@@ -624,12 +624,28 @@ class Launcher(tk.Tk):
         if second:self._worker('tool-result',lambda:gen5_tools.compare_saves(first,second))
 
     def _refresh_backups(self):
-        item=self._active_profile();self.backup_paths=services.backups(self.home,item);self.backup_picker['values']=[services.backup_label(p) for p in self.backup_paths]
-        if self.backup_paths:self.backup_picker.current(0)
-        else:self.backup_picker.set('No backups yet — select Back up now')
-        count=len(services.save_files(item));self.save_summary.set(f'{count} save file(s) found · {len(self.backup_paths)} backup(s). Save in-game before backing up.' if count else 'No save yet. Play, save in-game, then return here to back it up.')
+        item=self._active_profile();self.backup_paths=[];self.backup_picker['values']=[]
+        self.backup_picker.set('Checking backups…');self.restore_button.configure(state='disabled')
         self.profile_game.set('Game: '+(Path(item['rom']).name if item['rom'] else 'Choose a ROM on Play to get started.'));self.active_slot.set('Save slot: '+item['label'])
-        set_enabled(self.restore_button,bool(self.backup_paths))
+        backup_error=save_error=None;count=None
+        try:backup_paths=services.backups(self.home,item)
+        except OSError as exc:backup_paths=[];backup_error=exc
+        try:count=len(services.save_files(item))
+        except OSError as exc:save_error=exc
+        self.backup_paths=backup_paths;self.backup_picker['values']=[services.backup_label(p) for p in backup_paths]
+        if backup_paths:self.backup_picker.current(0)
+        elif backup_error:self.backup_picker.set('Backups unavailable')
+        else:self.backup_picker.set('No backups yet — select Back up now')
+        if backup_error or save_error:
+            self.save_summary.set(('Could not read this profile’s save folder. Check folder access.' if save_error else
+                f'{count} save file(s) found. Could not list backups; check folder access.'))
+            errors=[]
+            if backup_error:errors.append('backups: '+str(backup_error))
+            if save_error:errors.append('saves: '+str(save_error))
+            self.status.set('Could not inspect this profile’s files ('+'; '.join(errors)+').')
+            return False
+        self.save_summary.set(f'{count} save file(s) found · {len(backup_paths)} backup(s). Save in-game before backing up.' if count else 'No save yet. Play, save in-game, then return here to back it up.')
+        set_enabled(self.restore_button,bool(backup_paths));return True
 
     def _backup_now(self):
         try:

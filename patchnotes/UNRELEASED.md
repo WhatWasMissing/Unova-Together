@@ -15,3 +15,4 @@
 - If an update cannot write its final activation record, the downloaded version is cleaned up so the update can be retried without affecting the current game.
 - Opening the save-backups folder now reports a clear error if the folder cannot be created or opened.
 - The problem-report window now shows an error in the launcher if its report folder cannot be opened.
+- The Games & saves page now handles inaccessible save or backup folders without interrupting the launcher or keeping a previous profile’s backup selected.

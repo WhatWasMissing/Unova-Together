@@ -102,6 +102,20 @@ class LauncherTests(unittest.TestCase):
         self.assertIn('Could not open backups folder',self.app.status.get())
         self.assertIn('read-only folder',self.app.status.get())
 
+    def test_profiles_handle_save_and_backup_listing_permission_errors(self):
+        for function,error in (('backups','cannot list backup folder'),('save_files','cannot list save folder')):
+            with self.subTest(function=function):
+                self.app.backup_paths=[self.home/'previous-profile.zip']
+                self.app.backup_picker['values']=['Previous profile backup']
+                self.app.backup_picker.current(0)
+                self.app.restore_button.configure(state='normal')
+                with patch(f'launcher_ui.app.services.{function}',side_effect=PermissionError(error)):
+                    self.app._refresh_backups()
+                self.assertEqual(self.app.backup_paths,[])
+                self.assertEqual(tuple(self.app.backup_picker['values']),())
+                self.assertEqual(self.app.restore_button['state'],'disabled')
+                self.assertIn(error,self.app.status.get())
+
     def test_player_model_preference_persists_and_keeps_save_folder_with_source_rom(self):
         from launcher_ui import preferences as prefs, services
         self.app.preference_values['player_model']=4715;self.app._save()
