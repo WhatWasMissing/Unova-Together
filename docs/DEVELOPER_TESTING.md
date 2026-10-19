@@ -104,3 +104,23 @@ The regenerated Redux patch targets ROM SHA-256 `c34498dc807a83e3d5a5c85a341464c
 ### Frost Generation 5 editor parser/export check
 
 On 2026-10-19, the isolated FrostFalcon/FrostsGen5Editor 5.0.1 release was used with `maintenance-tools/tools/run_frost_roundtrip.ps1` against a disposable Cynthia-patched Redux ROM copy (SHA-256 `c34498dc807a83e3d5a5c85a341464c24f56a1ed515db6cfc7ef4e2a71dc3df7`). The editor executable SHA-256 was `30601dceb0ca0a414a690b955bb082c3725352a4ed3c707e536bd3ada5626111`; the setup script pins the official release archive from [FrostFalcon/FrostsGen5Editor 5.0.1](https://github.com/FrostFalcon/FrostsGen5Editor/releases/download/5.0.1/FrostsGen5Editor.zip) and verifies its SHA-256 before extraction. **PASS:** Frost identified the image as Pokémon Black 2, parsed the ROM resources, and exported a ROM image; the source hash was unchanged. The generated output remains in a local, untracked disposable-test directory because the filesystem policy blocked its cleanup. **NOT RUN:** opening the map editor, validating NPC placement, or launching the export in an emulator. This round-trip proves parser/exporter operation for the identified local fixture only; it does not establish the fixture's upstream provenance or gameplay compatibility.
+
+### Mega Evolution focused regression suite
+
+On 2026-10-19, the focused native tests were built from the published 2.0.16 source archive (SHA-256 `6d29cbbcc05376f4e53027e27d8acaf97ccbf52a6904128113ccc84f5f7aad76`) in `temp-npc-catalog-probe/verified-release-source/Unova-Together-Source/source/melonDS/tools`. The tested Redux ROM fixture was `temp-npc-catalog-probe/runtime-repro/app/FullSizeRoute7Test214.nds` (SHA-256 `332d07576e2077b4ef91e394603d144108098b7624c6a918b175f90530c0036a`). This is evidence about that source archive and test fixture, not a fresh build of the current `main` source.
+
+The isolated Windows build used MSYS2 UCRT64 GCC 16.2.0, CMake, and ENet 1.3.18 from `C:\msys64\ucrt64`. The process-local `PATH` needed the UCRT64 `bin` directory so `cc1plus.exe` could load its runtime DLLs; no system-wide environment or dependency installation was changed. After configuring the optional ENet tests against `C:/msys64/ucrt64/include` and `C:/msys64/ucrt64/lib/libenet.dll.a`, the targeted build and test were:
+
+```powershell
+$env:PATH = 'C:\msys64\ucrt64\bin;' + $env:PATH
+cmake -S 'temp-npc-catalog-probe/verified-release-source/Unova-Together-Source/source/melonDS/tools' `
+  -B 'temp-npc-catalog-probe/build-mega-tests-v216-filtered' `
+  -DUNOVA_ENET_INCLUDE_DIR:PATH='C:/msys64/ucrt64/include' `
+  -DUNOVA_ENET_LIBRARY:FILEPATH='C:/msys64/ucrt64/lib/libenet.dll.a'
+cmake --build 'temp-npc-catalog-probe/build-mega-tests-v216-filtered' --target coop_mega_lan
+ctest --test-dir 'temp-npc-catalog-probe/build-mega-tests-v216-filtered' --output-on-failure -R 'mega_|gym_leaders'
+```
+
+**PASS:** 14/14 selected tests passed: `native_mega_evolution_sound_asset`, `mega_rules_and_assets`, `mega_native_selection`, `mega_party_ability_restore`, `mega_stone_preview_centering`, `mega_native_call_transaction`, `mega_coop_packet`, `mega_release_roster`, `mega_full_gif_sprite_stream`, `mega_item_mail_and_pocket_compatibility`, `gym_leaders_6_to_8_mega_teams`, `mega_coop_lan_transport`, `mega_redux_cartridge`, and `mega_ate_hook_signatures`. The ENet test used a synthetic RAM/CPU fixture to exercise a host and guest loopback, message validation, remote form application, and session teardown. The tests also cover simulated double-battle selection and configured Cynthia/Gym Mega teams. These checks do **not** prove actual emulator clients, trainer AI activation in a live battle, high-latency behavior, or gameplay in the released executable.
+
+**ROM ARTIFACT CHECK:** On the same supported-ROM fixture, ARM9 overlay 142 has RAM base `0x021998C0`; bytes at `0x0219E4DC` match the expected selected-item preview function signature `F0 B5 85 B0 0E 1C 6B 21`. The 47 imported Mega Stone icon arrays have opaque pixel bounds and nonzero-pixel centroids centered on the 32×32 canvas. This supports the conclusion that the selected-item preview offset is caused by the renderer actor's native coordinates, not transparent padding in the icon files. It does not verify the Bag, mart, or battle screen visually; those still need an in-game check.
