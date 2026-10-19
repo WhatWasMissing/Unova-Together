@@ -48,6 +48,12 @@ class StorageTests(unittest.TestCase):
     def test_unrecognised_build_is_not_deleted(self):
         old=self.slot('1.0.1');(old/s.RECEIPT).unlink();(old/'.launcher-integrity.json').unlink();self.slot('1.0.2');self.slot('1.0.3');self.active('1.0.3')
         self.assertTrue(s.cleanup(self.home,processes=[])['skipped']);self.assertTrue((old/'builds/current/melonDS.exe').exists())
+    def test_cleanup_skips_non_object_installation_receipt(self):
+        old=self.slot('1.0.1');previous=self.slot('1.0.2');self.slot('1.0.3');self.active('1.0.3');s.remember_previous(self.home,previous,'1.0.3')
+        (old/s.RECEIPT).write_text('[]',encoding='utf-8')
+        report=s.cleanup(self.home,processes=[])
+        self.assertIn('1.0.1: no valid installation record',report['skipped'])
+        self.assertTrue((old/'builds/current/melonDS.exe').exists())
     def test_process_check_failure_prevents_all_cleanup(self):
         old=self.slot('1.0.1');self.slot('1.0.2');self.slot('1.0.3');self.active('1.0.3')
         with patch.object(s,'running_paths',side_effect=OSError('cannot inspect')):

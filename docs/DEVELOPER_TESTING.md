@@ -261,3 +261,13 @@ The restore service assumed the backup manifest decoded to a JSON object. A vali
 The launcher resolves the active version slot during startup. A truncated or structurally invalid `.updates/active.json` could therefore raise a JSON, type, or key error before the repair UI opened. Startup now falls back to the installation root when active metadata is invalid, while strict runtime resolution still rejects it. Version reporting tolerates invalid marker and `VERSION.txt` data and falls back to a valid marker version or `0.0.0`.
 
 **PASS — SOURCE/UNIT VERIFIED:** A production-path test covers truncated JSON, a JSON list, a missing version, a null version, and an oversized marker. Repairable startup resolves to the install root and version lookup uses that root's `VERSION.txt`; strict resolution raises `ValueError`. Existing valid slot, missing runtime, and traversal rejection tests also pass. Full discovery passed with `py -3.12 -B -m unittest discover -s launcher-source/tools -p 'test_*.py'` (**137 tests**) and `py -3.12 -B -m unittest discover -s maintenance-tools/tools -p 'test_*.py'` (**182 run, six optional skips**). `py -3.12 -B check_launcher_tree_parity.py` passed for all **48 UI files**.
+
+### Malformed installation receipt recovery — 2026-10-19
+
+Old-install cleanup could crash when an installation receipt contained valid JSON with a non-object top level, such as `[]`. The shared storage-record reader now rejects non-object records as invalid. Cleanup reports the affected installation as skipped and preserves its files.
+
+**PASS — SOURCE/UNIT VERIFIED:** A production cleanup test reproduces a malformed receipt on a disposable three-version install, confirms cleanup completes with a skip report, and confirms the old runtime remains. The same test passes in both launcher trees. Final full discovery passed with `py -3.12 -B -m unittest discover -s launcher-source/tools -p 'test_*.py'` (**138 tests**) and `py -3.12 -B -m unittest discover -s maintenance-tools/tools -p 'test_*.py'` (**183 run, six optional skips**). `py -3.12 -B check_launcher_tree_parity.py` passed for all **48 UI files**.
+
+### Deterministic reused-bundle safety test — 2026-10-19
+
+The hard-link safety test rebuilt a ZIP fixture when asking the installer to reuse the previously installed bundle. ZIP timestamps can change the archive digest, making the test intermittently exercise a new slot instead of the reused one. It now restores and reuses the exact previously installed archive bytes and checksum in both test trees. The test-only change does not modify installer behavior.

@@ -45,7 +45,9 @@ def digest(path):
 
 def read(path,limit=4*1024*1024):
     if linked(path) or path.stat().st_size>limit:raise ValueError('Invalid installation record.')
-    return json.loads(path.read_text(encoding='utf-8'))
+    value=json.loads(path.read_text(encoding='utf-8'))
+    if not isinstance(value,dict):raise ValueError('Invalid installation record.')
+    return value
 
 def atomic(path,value):
     path=Path(path)

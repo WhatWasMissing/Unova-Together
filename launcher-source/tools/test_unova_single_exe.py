@@ -86,14 +86,16 @@ class BundleTests(unittest.TestCase):
         import unova_storage as storage
         old=install_bundle(self.home,self.archive,self.metadata)
         (old/'builds/current/melonDS.toml').write_text('# player controls')
-        middle=install_bundle(self.home,self.archive,self.bundle('0.3.6'))
+        middle_metadata=self.bundle('0.3.6');middle_payload=self.archive.read_bytes()
+        middle=install_bundle(self.home,self.archive,middle_metadata)
         install_bundle(self.home,self.archive,self.bundle('0.3.7'))
         storage.atomic(self.home/'.updates/active.json',{'version':'0.3.5','slot':old.parent.name})
         outside=self.base/'external-controls.toml';outside.write_text('keep these controls')
         linked_config=middle/'builds/current/melonDS.toml';linked_config.unlink();linked_config.hardlink_to(outside)
         rejected=False
         try:
-            install_bundle(self.home,self.archive,self.bundle('0.3.6'))
+            self.archive.write_bytes(middle_payload)
+            install_bundle(self.home,self.archive,middle_metadata)
         except ValueError as exc:
             rejected='Unsafe' in str(exc)
         self.assertEqual(outside.read_text(),'keep these controls')
