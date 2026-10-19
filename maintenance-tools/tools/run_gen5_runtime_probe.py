@@ -17,6 +17,24 @@ import subprocess
 import time
 
 
+def validate_disposable_fixture(runtime: Path, rom: Path, prefix: Path) -> None:
+    """Require every writable emulator input/output to live in a marked fixture."""
+    fixture_root = prefix.parent.resolve(strict=True)
+    if not (fixture_root / ".disposable-test-output").is_file():
+        raise ValueError("probe output folder must contain .disposable-test-output")
+
+    save = rom.with_suffix(".sav")
+    if not save.is_file():
+        raise ValueError("ROM is missing its matching .sav sidecar")
+
+    for label, path in (("runtime", runtime), ("ROM", rom), ("save", save)):
+        resolved = path.resolve(strict=True)
+        try:
+            resolved.relative_to(fixture_root)
+        except ValueError as error:
+            raise ValueError(f"{label} must be inside the marked disposable folder") from error
+
+
 def check_report(
     data: dict[str, object] | None,
     expected_map: int,
@@ -73,6 +91,10 @@ def main() -> int:
         parser.error("runtime, ROM, and script must be files")
     if args.seconds <= 0:
         parser.error("--seconds must be positive")
+    try:
+        validate_disposable_fixture(runtime, rom, prefix)
+    except (OSError, ValueError) as error:
+        parser.error(str(error))
 
     outputs = [Path(f"{prefix}{suffix}") for suffix in (
         ".npc.json", ".npc.ramdump", ".stdout", ".stderr",
