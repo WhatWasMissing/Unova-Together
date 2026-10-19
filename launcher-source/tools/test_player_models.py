@@ -1,6 +1,8 @@
 """Regression checks for the ROM-backed animated player model selector."""
 import json
+import os
 import struct
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -98,6 +100,63 @@ class PlayerModelTests(unittest.TestCase):
             self.assertTrue(pending.exists())
             self.assertTrue(pending_manifest.exists())
             self.assertEqual(json.loads(manifest.read_text(encoding='utf-8'))['model_id'], model_id)
+
+    def test_model_cache_junction_outside_home_is_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            home = base / 'launcher-home'
+            home.mkdir()
+            outside = base / 'outside-cache'
+            outside.mkdir()
+            source = home / 'reviewed.nds'
+            source_bytes = b'reviewed ROM fixture'
+            source.write_bytes(source_bytes)
+            cache = home / '.launcher-player-models'
+            if os.name == 'nt':
+                def quote(value):
+                    return "'" + str(value).replace("'", "''") + "'"
+                result = subprocess.run(
+                    ['powershell.exe', '-NoProfile', '-Command',
+                     f'New-Item -ItemType Junction -Path {quote(cache)} -Target {quote(outside)} | Out-Null'],
+                    capture_output=True,
+                )
+                if result.returncode:
+                    self.skipTest('directory junctions unavailable')
+            else:
+                cache.symlink_to(outside, target_is_directory=True)
+
+            with self.assertRaisesRegex(ValueError, 'cache folder is unsafe'):
+                player_models.prepare_variant(source, home, 4715)
+
+            self.assertEqual(source.read_bytes(), source_bytes)
+            self.assertEqual(list(outside.iterdir()), [])
+
+    def test_model_cache_rejects_hardlinked_output_and_manifest(self):
+        with tempfile.TemporaryDirectory() as directory:
+            home = Path(directory)
+            source = home / 'reviewed.nds'
+            source_bytes = b'reviewed ROM fixture'
+            source.write_bytes(source_bytes)
+            cache = home / '.launcher-player-models'
+            cache.mkdir()
+            outside = home / 'keep-model-sentinel.bin'
+            outside.write_bytes(b'preserve this file')
+
+            for name in (source.name, source.name + '.player-model.json'):
+                linked = cache / name
+                try:
+                    linked.hardlink_to(outside)
+                except (NotImplementedError, OSError) as exc:
+                    self.skipTest(f'hard links unavailable: {exc}')
+                try:
+                    with self.subTest(name=name), self.assertRaisesRegex(ValueError, 'cache file is unsafe'):
+                        player_models.prepare_variant(source, home, 4715)
+                    self.assertEqual(outside.read_bytes(), b'preserve this file')
+                    self.assertTrue(linked.samefile(outside))
+                finally:
+                    linked.unlink(missing_ok=True)
+
+            self.assertEqual(source.read_bytes(), source_bytes)
 
 
 if __name__ == '__main__':

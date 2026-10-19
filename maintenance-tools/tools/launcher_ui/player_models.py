@@ -14,6 +14,7 @@ import ndspy.code
 import ndspy.narc
 import ndspy.rom
 
+import unova_storage as storage
 from . import preferences as prefs
 
 
@@ -164,15 +165,18 @@ def prepare_variant(source, home, model_id):
     source_stat = source.stat()
     source_signature = (source_stat.st_size, source_stat.st_mtime_ns)
     source_digest = _sha256(source)
-    cache = Path(home).resolve() / '.launcher-player-models'
-    if cache.exists() and cache.is_symlink():
-        raise ValueError('The player-model cache folder cannot be a symbolic link.')
+    root = Path(home).resolve()
+    cache = root / '.launcher-player-models'
+    if not storage.safe_managed_path(cache, root):
+        raise ValueError('The player-model cache folder is unsafe; remove linked or externally linked paths before continuing.')
     cache.mkdir(parents=True, exist_ok=True)
+    if not storage.safe_managed_path(cache, root):
+        raise ValueError('The player-model cache folder is unsafe; remove linked or externally linked paths before continuing.')
     cache = cache.resolve()
     target = cache / source.name
     manifest = cache / (source.name + '.player-model.json')
-    if target.is_symlink() or manifest.is_symlink():
-        raise ValueError('A player-model cache file is a symbolic link; remove it before continuing.')
+    if not storage.safe_managed_path(target, root) or not storage.safe_managed_path(manifest, root):
+        raise ValueError('A player-model cache file is unsafe; remove linked or externally linked paths before continuing.')
     if target.exists() and manifest.is_file():
         try:
             saved = json.loads(manifest.read_text(encoding='utf-8'))
