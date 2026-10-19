@@ -132,6 +132,11 @@ def atomic_write(path,writer):
 def atomic(path,text):
     return atomic_write(path,lambda stream:stream.write(text.encode('utf-8')))
 
+def _safe_cheat_path(path,home):
+    import unova_storage as storage
+    try:return storage.safe_managed_path(path,home)
+    except (OSError,RuntimeError):return False
+
 def managed_codes(existing,selected):
     # Replace only our category. Existing ROOT-level codes and nested user
     # categories remain byte-for-byte. Our generated category has no children.
@@ -169,9 +174,16 @@ def apply(runtime,rom,preferences,selected,profile,home):
         # enable a code on an unreviewed ROM.
         current=identify(rom)
         if not current or not profile or current['digest']!=profile['digest']:raise ValueError('Cheats require a supported Blaze Black 2 Redux game file.')
-        directory=Path(home).resolve()/'.launcher-cheats'/current['key']
+        home=Path(home).resolve()
+        directory=home/'.launcher-cheats'/current['key']
+        if not _safe_cheat_path(directory,home):raise ValueError('Unsafe cheat storage path.')
+        directory.mkdir(parents=True,exist_ok=True)
+        if not _safe_cheat_path(directory,home):raise ValueError('Unsafe cheat storage path.')
         path=directory/(rom.stem+'.mch')
         instance=doc.setdefault('Instance0',tomlkit.table())
+        state_path=directory/'original-switches.json'
+        if (not _safe_cheat_path(path,home) or not _safe_cheat_path(state_path,home)):
+            raise ValueError('Unsafe cheat storage path.')
         source=path
         if not source.exists():
             old=Path(instance.get('CheatFilePath','') or rom.parent)
@@ -181,14 +193,17 @@ def apply(runtime,rom,preferences,selected,profile,home):
         if source.exists() and source.stat().st_size>2*1024*1024:raise ValueError('Cheat file is too large.')
         original=source.read_text(encoding='utf-8-sig') if source.exists() else ''
         text=managed_codes(original,selected)
-        state_path=directory/'original-switches.json'
         if state_path.exists():
             if state_path.stat().st_size>16384:raise ValueError('Cheat switch backup is too large.')
             switches=json.loads(state_path.read_text(encoding='utf-8'))
             if not isinstance(switches,dict):raise ValueError('Cheat switch backup is invalid.')
         else:
             switches={key:bool(doc.get(key,{}).get('EnableCheats',False)) for key in instances}
+            if not _safe_cheat_path(state_path,home):raise ValueError('Unsafe cheat storage path.')
             atomic(state_path,json.dumps(switches))
+        if (not _safe_cheat_path(directory,home) or not _safe_cheat_path(path,home) or
+                not _safe_cheat_path(state_path,home)):
+            raise ValueError('Unsafe cheat storage path.')
         atomic(path,text)
         for key in instances:
             instance=doc.setdefault(key,tomlkit.table())

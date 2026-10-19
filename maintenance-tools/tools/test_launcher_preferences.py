@@ -1,6 +1,6 @@
 """Disposable settings/code checks. Never modifies user ROMs or saves."""
 from pathlib import Path
-import tempfile, unittest
+import os, subprocess, tempfile, unittest
 from unittest.mock import patch
 import tomlkit
 from launcher_ui import preferences as p
@@ -19,6 +19,12 @@ class PreferencesTests(unittest.TestCase):
     def apply(self,settings=None,codes=None):
         with patch.object(p,'identify',return_value=self.profile):
             p.apply(self.runtime,self.rom,settings or {},codes or {},self.profile,self.home)
+    def make_junction(self,link,target):
+        if os.name=='nt':
+            quote=lambda value:"'"+str(value).replace("'","''")+"'"
+            result=subprocess.run(['powershell.exe','-NoProfile','-Command',f'New-Item -ItemType Junction -Path {quote(link)} -Target {quote(target)} | Out-Null'],capture_output=True)
+            if result.returncode:raise OSError(result.stderr.decode(errors='replace'))
+        else:link.symlink_to(target,target_is_directory=True)
     def test_settings_preserve_controls_comments_and_backup(self):
         self.apply({'volume':50,'pause':False,'filter':False})
         text=self.config.read_text();doc=tomlkit.parse(text)
@@ -42,6 +48,19 @@ class PreferencesTests(unittest.TestCase):
             p.apply(self.runtime,self.rom,{}, {'money':True},self.profile,self.home)
         self.assertEqual(self.config.read_text(),self.original)
         with patch.object(p,'running',return_value=True),self.assertRaises(ValueError):self.apply({'pause':True})
+        self.assertEqual(self.config.read_text(),self.original)
+    def test_cheat_generation_rejects_linked_profile_directory(self):
+        outside=self.home/'outside-cheats';outside.mkdir()
+        sentinel=outside/'keep.bin';sentinel.write_bytes(b'untouched')
+        directory=self.home/'.launcher-cheats/fixture';directory.parent.mkdir()
+        try:self.make_junction(directory,outside)
+        except (OSError,NotImplementedError) as exc:self.skipTest(f'directory junction unavailable: {exc}')
+
+        with self.assertRaisesRegex(ValueError,'cheat'):
+            self.apply(codes={'money':True})
+
+        self.assertEqual(sentinel.read_bytes(),b'untouched')
+        self.assertEqual(list(outside.iterdir()),[sentinel])
         self.assertEqual(self.config.read_text(),self.original)
     def test_invalid_toml_and_bad_volume_fail_without_writes(self):
         self.config.write_text('not valid TOML')

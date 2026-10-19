@@ -10,3 +10,4 @@
 - Save backups now enforce the same file-count and size limits as restore, preventing the launcher from creating backups it cannot restore.
 - Emulator and Multiplayer windows now show the same release version as the packaged game.
 - Save backups now reject linked folders and outside archives, keeping backup files within the selected launcher profile.
+- Cheat settings now stop safely when their profile storage folder points outside launcher-managed storage.
