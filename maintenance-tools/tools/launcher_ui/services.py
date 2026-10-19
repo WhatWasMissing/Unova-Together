@@ -107,18 +107,33 @@ def save_files(item):
     pattern=re.compile(re.escape(rom.stem)+r'(?:\.\d+)?\.(?:sav|save|dsv)$',re.I)
     return sorted(p for p in directory.iterdir() if pattern.fullmatch(p.name) and p.is_file() and not p.is_symlink())
 
+def _safe_backup_path(path,home):
+    import unova_storage as storage
+    try:return storage.safe_managed_path(path,home)
+    except (OSError,RuntimeError):return False
+
+def _save_backup_directory(home,item):
+    identifier=str(item.get('id','')) if isinstance(item,dict) else ''
+    if not re.fullmatch(r'[a-f0-9]{32}',identifier):raise ValueError('Invalid profile identifier.')
+    home=Path(home).resolve();folder=home/'save-backups'/identifier
+    if not _safe_backup_path(folder,home):raise ValueError('Unsafe save backup path.')
+    return home,folder
+
 def backup(home,item,reason='manual'):
-    if not re.fullmatch(r'[a-f0-9]{32}',str(item.get('id',''))):raise ValueError('Invalid profile identifier.')
+    home,folder=_save_backup_directory(home,item)
     files=save_files(item)
     if not files:return None
     if len(files)>MAX_BACKUP_FILES:raise ValueError(f'Too many save files to back up (maximum {MAX_BACKUP_FILES}).')
-    folder=Path(home)/'save-backups'/item['id'];folder.mkdir(parents=True,exist_ok=True)
+    folder.mkdir(parents=True,exist_ok=True)
+    if not _safe_backup_path(folder,home):raise ValueError('Unsafe save backup path.')
     stamp=datetime.now(timezone.utc).strftime('%Y%m%d-%H%M%S')
     target=folder/(stamp+'-'+reason+'-'+uuid.uuid4().hex[:6]+'.zip')
     manifest={'profile':item['id'],'created':datetime.now(timezone.utc).isoformat(),'reason':reason,'files':[]}
     total_size=0
     pending=target.with_suffix('.pending')
     try:
+        if not _safe_backup_path(folder,home) or not _safe_backup_path(pending,home) or not _safe_backup_path(target,home):
+            raise ValueError('Unsafe save backup path.')
         with zipfile.ZipFile(pending,'x',zipfile.ZIP_DEFLATED) as bundle:
             for path in files:
                 if path.stat().st_size>MAX_BACKUP_FILE_SIZE:raise ValueError('Save exceeds backup size limit: '+path.name)
@@ -133,13 +148,18 @@ def backup(home,item,reason='manual'):
             if len(manifest_data)>MAX_BACKUP_MANIFEST_SIZE:raise ValueError('Backup manifest exceeds size limit.')
             if total_size+len(manifest_data)>MAX_BACKUP_ARCHIVE_SIZE:raise ValueError('Combined saves exceed backup size limit.')
             bundle.writestr('manifest.json',manifest_data)
+        if not _safe_backup_path(folder,home) or not _safe_backup_path(pending,home) or not _safe_backup_path(target,home):
+            raise ValueError('Unsafe save backup path.')
         os.replace(pending,target)
     finally:
         if pending.exists():pending.unlink()
     return target
 
 def backups(home,item):
-    return sorted((Path(home)/'save-backups'/item['id']).glob('*.zip'),reverse=True)
+    try:home,folder=_save_backup_directory(home,item)
+    except (ValueError,TypeError):return []
+    if not folder.is_dir():return []
+    return sorted((path for path in folder.glob('*.zip') if _safe_backup_path(path,home)),reverse=True)
 
 def backup_label(path):
     match=re.fullmatch(r'(\d{8}-\d{6})-(.+)-[a-f0-9]{6}',Path(path).stem)
@@ -150,8 +170,11 @@ def backup_label(path):
     return stamp+' · '+reason
 
 def restore(home,item,archive):
-    allowed=(Path(home)/'save-backups'/item['id']).resolve();archive=Path(archive).resolve()
-    if archive.parent!=allowed or archive.suffix!='.zip':raise ValueError('Select a backup for this profile.')
+    home,allowed=_save_backup_directory(home,item)
+    archive=Path(os.path.abspath(archive))
+    if (archive.parent!=allowed or archive.suffix.lower()!='.zip' or
+            not _safe_backup_path(allowed,home) or not _safe_backup_path(archive,home) or not archive.is_file()):
+        raise ValueError('Select a safe backup for this profile.')
     directory=Path(item.get('save_dir') or Path(item['rom']).parent).resolve()
     payload=[]
     with zipfile.ZipFile(archive) as bundle:

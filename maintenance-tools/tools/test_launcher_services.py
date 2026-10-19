@@ -1,6 +1,6 @@
 """Disposable profile saves, connectivity, repair and diagnostic checks."""
 from pathlib import Path
-import hashlib, io, json, tempfile, threading, unittest, zipfile
+import hashlib, io, json, os, subprocess, tempfile, threading, unittest, zipfile
 from unittest.mock import patch
 from launcher_ui import services as s
 import unova_updater as u
@@ -104,9 +104,34 @@ class ServiceTests(unittest.TestCase):
         self.assertEqual(len(others),1)
         with zipfile.ZipFile(others[0]) as z:self.assertEqual(z.read('Black2.sav'),b'new save')
         with zipfile.ZipFile(archive) as z:self.assertNotIn('Black2.ml8',z.namelist())
+    def test_backup_listing_and_restore_reject_linked_backup_directory(self):
+        folder=self.home/'save-backups'/self.item['id'];folder.parent.mkdir(parents=True)
+        outside=self.home/'outside-backups';outside.mkdir()
+        archive=outside/'20261019-120000-manual-abcdef.zip'
+        payload=b'outside archive must not be trusted'
+        manifest={'profile':self.item['id'],'created':'2026-10-19T12:00:00+00:00','reason':'manual','files':[{'name':'Black2.sav','size':len(payload),'sha256':hashlib.sha256(payload).hexdigest()}]}
+        with zipfile.ZipFile(archive,'w') as bundle:
+            bundle.writestr('Black2.sav',payload);bundle.writestr('manifest.json',json.dumps(manifest))
+        if os.name=='nt':
+            quote=lambda value:"'"+str(value).replace("'","''")+"'"
+            result=subprocess.run(['powershell.exe','-NoProfile','-Command',f'New-Item -ItemType Junction -Path {quote(folder)} -Target {quote(outside)} | Out-Null'],capture_output=True)
+            if result.returncode:self.skipTest('Windows junction creation is unavailable: '+result.stderr.decode(errors='replace'))
+        else:
+            try:folder.symlink_to(outside,target_is_directory=True)
+            except (OSError,NotImplementedError) as exc:self.skipTest(f'directory symlinks unavailable: {exc}')
+
+        self.assertEqual(s.backups(self.home,self.item),[])
+        before=set(outside.iterdir())
+        with self.assertRaisesRegex(ValueError,'backup'):
+            s.backup(self.home,self.item)
+        with self.assertRaisesRegex(ValueError,'backup'):
+            s.restore(self.home,self.item,folder/archive.name)
+        self.assertEqual(set(outside.iterdir()),before)
+        self.assertEqual(self.save.read_bytes(),b'original save')
     def test_profile_separation_and_missing_save(self):
         other=s.profile(str(self.rom),str(self.home/'separate'))
         self.assertIsNone(s.backup(self.home,other));self.assertFalse(s.backups(self.home,other))
+        self.assertFalse((self.home/'save-backups'/other['id']).exists())
         self.assertTrue(s.backup(self.home,self.item));self.assertFalse(s.backups(self.home,other))
     def test_backup_refuses_more_save_files_than_restore_accepts(self):
         for index in range(1,33):
