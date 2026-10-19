@@ -26,9 +26,15 @@ def version(value: str) -> tuple[int, int, int]:
     return tuple(map(int, match.groups()))
 
 def asset_url(value: str) -> str:
-    parsed = urllib.parse.urlsplit(value)
+    if not isinstance(value, str):
+        raise ValueError('Update is not an official GitHub release asset')
+    try:
+        parsed = urllib.parse.urlsplit(value)
+        port = parsed.port
+    except (TypeError, ValueError) as exc:
+        raise ValueError('Update is not an official GitHub release asset') from exc
     if (parsed.scheme != 'https' or parsed.hostname != 'github.com' or
-            parsed.username or parsed.password or parsed.port or
+            parsed.username or parsed.password or port or
             not parsed.path.lower().startswith('/' + REPO.lower() + '/releases/download/') or
             parsed.query or parsed.fragment):
         raise ValueError('Update is not an official GitHub release asset')
@@ -66,16 +72,31 @@ def select_latest(releases: list) -> dict:
         label = '.'.join(map(str, numbers))
         wanted = f'Unova-Together-{label}-Windows-x64.zip'
         sums = f'SHA256SUMS-Unova-Together-{label}.txt'
-        assets = {a.get('name'): a for a in item.get('assets', []) if isinstance(a, dict)}
-        if wanted not in assets or sums not in assets:
+        raw_assets = item.get('assets')
+        if not isinstance(raw_assets, list):
             continue
-        size = assets[wanted].get('size')
+        assets: dict[str, list[dict]] = {}
+        for asset in raw_assets:
+            if not isinstance(asset, dict):
+                continue
+            name = asset.get('name')
+            if isinstance(name, str):
+                assets.setdefault(name, []).append(asset)
+        if len(assets.get(wanted, [])) != 1 or len(assets.get(sums, [])) != 1:
+            continue
+        archive_asset = assets[wanted][0]
+        checksum_asset = assets[sums][0]
+        size = archive_asset.get('size')
         if type(size) is not int or not 0 < size <= MAX_ARCHIVE:
+            continue
+        try:
+            archive_url = asset_url(archive_asset.get('browser_download_url'))
+            checksum_url = asset_url(checksum_asset.get('browser_download_url'))
+        except ValueError:
             continue
         candidates.append({'version': label, 'numbers': numbers, 'name': wanted, 'size': size,
                            'prerelease': bool(item.get('prerelease')),
-                           'url': asset_url(assets[wanted]['browser_download_url']),
-                           'sums': asset_url(assets[sums]['browser_download_url'])})
+                           'url': archive_url, 'sums': checksum_url})
     if not candidates:
         raise ValueError('No compatible Windows release is available')
     stable = [r for r in candidates if not r['prerelease']]

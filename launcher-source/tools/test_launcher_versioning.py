@@ -1,5 +1,6 @@
 """Regression checks for launcher build identity and update handoff. mvq1303."""
 from pathlib import Path
+import io
 import json
 import tempfile
 import unittest
@@ -7,6 +8,7 @@ from unittest.mock import patch
 from launcher_ui import versioning as v
 from launcher_ui.app import Launcher
 import unova_launcher
+import unova_updater as updates
 
 
 class VersioningTests(unittest.TestCase):
@@ -99,6 +101,45 @@ class VersioningTests(unittest.TestCase):
     def test_portable_home_is_its_own_installation(self):
         self.assertEqual(unova_launcher.installation_home(self.hub),self.root)
         self.assertEqual(unova_launcher.installation_home(self.hub,self.home),self.home)
+
+    def test_malformed_release_metadata_is_skipped_before_selecting_valid_release(self):
+        base=f'https://github.com/{updates.REPO}/releases/download/v1.0.9/'
+        wanted='Unova-Together-1.0.9-Windows-x64.zip'
+        sums='SHA256SUMS-Unova-Together-1.0.9.txt'
+        valid={'tag_name':'v1.0.9','published_at':'2026-10-19','assets':[
+            {'name':wanted,'size':100,'browser_download_url':base+wanted},
+            {'name':sums,'size':64,'browser_download_url':base+sums}]}
+        malformed=[
+            {'tag_name':'v1.1.0','published_at':'2026-10-19','assets':[{'name':[]}]},
+            {'tag_name':'v1.1.0','published_at':'2026-10-19','assets':None},
+            {'tag_name':'v1.1.0','published_at':'2026-10-19','assets':[
+                {'name':'Unova-Together-1.1.0-Windows-x64.zip','size':100},
+                {'name':'SHA256SUMS-Unova-Together-1.1.0.txt','size':64,
+                 'browser_download_url':base+sums}]},
+            {'tag_name':'v1.1.0','published_at':'2026-10-19','assets':[
+                {'name':'Unova-Together-1.1.0-Windows-x64.zip','size':100,'browser_download_url':None},
+                {'name':'SHA256SUMS-Unova-Together-1.1.0.txt','size':64,
+                 'browser_download_url':base+sums}]},
+            {'tag_name':'v1.1.0','published_at':'2026-10-19','assets':[
+                {'name':'Unova-Together-1.1.0-Windows-x64.zip','size':100,'browser_download_url':base+'first.zip'},
+                {'name':'Unova-Together-1.1.0-Windows-x64.zip','size':100,'browser_download_url':base+'second.zip'},
+                {'name':'SHA256SUMS-Unova-Together-1.1.0.txt','size':64,
+                 'browser_download_url':base+sums}]},
+        ]
+        for release in malformed:
+            with self.subTest(release=release):
+                self.assertEqual(updates.select_latest([release,valid])['version'],'1.0.9')
+
+    def test_malformed_only_release_keeps_release_notes_fallback(self):
+        malformed={'tag_name':'v1.1.0','published_at':'2026-10-19','assets':[{'name':[]}]}
+        def opener(url):
+            if url==updates.API:
+                return io.BytesIO(json.dumps([malformed]).encode())
+            return io.BytesIO(b'{"schema":1,"notes":[]}')
+        feed=updates.launcher_feed(opener)
+        self.assertIsNone(feed['release'])
+        self.assertEqual(feed['newsSource'],'releases-fallback')
+        self.assertEqual(feed['news'][0]['version'],'1.1.0')
 
 
 if __name__=='__main__':unittest.main()
