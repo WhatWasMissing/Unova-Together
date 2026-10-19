@@ -152,7 +152,7 @@ def main():
         for name in (manifest['installer'], 'bundle.json', 'LICENSE.txt', 'README.txt'):
             z.write(tailscale/name, 'Unova-Together/setup/Tailscale/'+name)
     with zipfile.ZipFile(source, 'x', zipfile.ZIP_DEFLATED, compresslevel=6) as z:
-        for name in ('check_follower_appearance.cpp','check_pokemon_follower.cpp','check_presence_rendering.cpp','test_presence_polling.py','test_party_stats.py','test_unova_storage.py'):
+        for name in ('check_follower_appearance.cpp','check_pokemon_follower.cpp','check_presence_rendering.cpp','test_presence_polling.py','test_party_stats.py','test_unova_storage.py','test_native_options_menu.py'):
             z.write(ROOT/'tools'/name,'Unova-Together-Source/tools/'+name)
         z.write(ROOT/'tools/test_launcher_migration.py','Unova-Together-Source/tools/test_launcher_migration.py')
         z.write(ROOT/'tools/test_launcher_versioning.py','Unova-Together-Source/tools/test_launcher_versioning.py')

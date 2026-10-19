@@ -32,7 +32,7 @@ There is no public Unova Together server. Everyone should use the same release a
 
 ## In-game co-op
 
-Open the game’s pause menu and choose **Unova**. **Players** is for teammate information and trades, **Pokémon** has party tools, **Co-op** contains battle options, and **Settings** controls presentation and followers. Use L/R or touch the tabs to move between pages.
+Open the game’s pause menu and choose **Unova**. Item trades are under **Players → Give item**; Pokémon trades are under **Players → Pokémon trade**. **Pokémon** has party tools, **Co-op** contains battle options, and **Settings** controls presentation and followers. The game’s normal **Options** entry remains available from its pause menu. Use L/R or touch the tabs to move between Unova pages.
 
 Trades require both players to confirm. Keep both games open until the trade finishes, then save in each game. Co-op trainer battles are supported for selected encounters; each player keeps their own story progress and save.
 

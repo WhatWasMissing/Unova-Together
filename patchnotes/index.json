@@ -2,6 +2,12 @@
   "schema": 1,
   "notes": [
     {
+      "version": "2.0.22",
+      "title": "Trade items from the Unova menu",
+      "file": "RELEASE_NOTES_2.0.22.md",
+      "body": "Item trades are now available from **Unova → Players → Give item**. Pokémon trades remain in the Players menu, and the game’s original **Options** entry is available again from the pause menu."
+    },
+    {
       "version": "2.0.21",
       "title": "Safer co-op testing and EV resets",
       "file": "RELEASE_NOTES_2.0.21.md",

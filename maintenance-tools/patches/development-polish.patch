@@ -773,8 +773,8 @@
  1 VERSIONINFO
 -FILEVERSION 1,0,2,0
 -PRODUCTVERSION 1,0,2,0
-+FILEVERSION 2,0,21,0
-+PRODUCTVERSION 2,0,21,0
++FILEVERSION 2,0,22,0
++PRODUCTVERSION 2,0,22,0
  FILETYPE VFT_APP
  {
    BLOCK "StringFileInfo"
@@ -783,7 +783,7 @@
  		{
  			VALUE "CompanyName", "Melon Factory of Kuribo64"
 -			VALUE "FileVersion", "1.0.2"
-+			VALUE "FileVersion", "2.0.21"
++			VALUE "FileVersion", "2.0.22"
  			VALUE "FileDescription", "Unova Together - modified melonDS 1.1"
  			VALUE "InternalName", "SDnolem"
  			VALUE "LegalCopyright", "2016-2025 melonDS team; 2026 mvq1303 (Unova Together contributions)"
@@ -791,7 +791,7 @@
  			VALUE "OriginalFilename", "melonDS.exe"
  			VALUE "ProductName", "Unova Together"
 -			VALUE "ProductVersion", "1.0.2"
-+			VALUE "ProductVersion", "2.0.21"
++			VALUE "ProductVersion", "2.0.22"
 +			VALUE "UnovaShopOverlaySourceSHA256", "${UNOVA_SHOP_OVERLAY_SOURCE_SHA256}"
  		}
  	}
@@ -1058,6 +1058,53 @@
  }
  
  // Field-only HM availability. No save edits, taught moves, injected game code,
+@@ -222,8 +452,7 @@
+         if(!valid(work,0xfc)) return false;
+         cpu.DataRead32(work+0xf8,&selected);if(!valid(selected,28)) return false;
+         cpu.DataRead32(selected+8,&id);cpu.DataRead16(selected+22,&marker);
+-        if(id==6 && marker==0x504b) {nds.NativeItemTradeRequested=true;nds.NativeItemTradeRequestFrame=nds.NumFrames;}
+-        else if(id==4 && marker==0x504c) {nds.NativeCoopMenuRequested=true;nds.NativeCoopMenuRequestFrame=nds.NumFrames;}
++        if(id==4 && marker==0x504c) {nds.NativeCoopMenuRequested=true;nds.NativeCoopMenuRequestFrame=nds.NumFrames;}
+         else return false;
+         // The stock dispatcher also returns the field controller to its idle
+         // presentation state when cancel is signalled.
+@@ -245,8 +474,7 @@
+         cpu.DataRead32(controller+32,&work);if(!valid(work,0xfc)) return false;
+         cpu.DataRead32(work+0xf8,&selected);if(!valid(selected,28)) return false;
+         cpu.DataRead32(selected+8,&id);cpu.DataRead16(selected+22,&marker);
+-        if(id==6 && marker==0x504b) {nds.NativeItemTradeRequested=true;nds.NativeItemTradeRequestFrame=nds.NumFrames;}
+-        else if(id==4 && marker==0x504c) {nds.NativeCoopMenuRequested=true;nds.NativeCoopMenuRequestFrame=nds.NumFrames;}
++        if(id==4 && marker==0x504c) {nds.NativeCoopMenuRequested=true;nds.NativeCoopMenuRequestFrame=nds.NumFrames;}
+         else return false;
+         cpu.DataWrite32(args+20,3);
+         return false;
+@@ -265,21 +493,20 @@
+         const u32 x=position&0xff,y=(position>>8)&0xff;
+         if(x<256 && y<192 && x && y) nds.NativeOriginalMenuPosition=x|(y<<8);
+     }
+-    if(id!=6 && id!=4) return false;
++    if(id!=4) return false;
+     cpu.DataWrite16(cpu.R[1]+22,0);
+-    // Holding L while selecting Trade retains access to original Options.
++    // Leave the stock Options entry untouched; only add the Unova shortcut.
+     if(nds.NativeOriginalMenu || !(nds.KeyInput&(1u<<9))) return false;
+     u32 text=0,capacity=0,length=0,magic=0;
+     cpu.DataRead32(cpu.R[2]+12,&text);
+     if(!valid(text,24)) return false;
+     cpu.DataRead16(text,&capacity);cpu.DataRead16(text+2,&length);cpu.DataRead32(text+4,&magic);
+-    if(magic!=0xb6f8d2ec || capacity<(id==6?6:8) || capacity>64 || length>32 || (id==6 && length!=7)) return false;
+-    const char original[]="OPTIONS";const char* label=id==6?"TRADE":"UNOVA";
+-    if(id==6) for(unsigned i=0;i<7;++i) {u32 ch=0;cpu.DataRead16(text+8+i*2,&ch);if(ch!=original[i]) return false;}
++    if(magic!=0xb6f8d2ec || capacity<8 || capacity>64 || length>32) return false;
++    const char* label="UNOVA";
+     const unsigned labelLength=5;
+     cpu.DataWrite16(text+2,labelLength);
+     for(unsigned i=0;i<labelLength;++i) cpu.DataWrite16(text+8+i*2,label[i]);
+-    cpu.DataWrite16(text+8+labelLength*2,0xffff);cpu.DataWrite16(cpu.R[1]+22,id==6?0x504b:0x504c);
++    cpu.DataWrite16(text+8+labelLength*2,0xffff);cpu.DataWrite16(cpu.R[1]+22,0x504c);
+     return false;
+ }
+ 
 @@ -454,6 +684,8 @@
  {
      BeforeInstruction = nullptr;
@@ -8712,7 +8759,7 @@
 -    "<a href=\"https://github.com/WhatWasMissing/Unova-Together\">GitHub: WhatWasMissing</a>"
 -    "<br>Playtesters: maxback221 · randomitem19";
 +// Keep the multiplayer build identifier aligned with each packaged release.
-+inline constexpr char Version[] = "2.0.21";
++inline constexpr char Version[] = "2.0.22";
 +
 +inline QString ReleaseVersion()
 +{
