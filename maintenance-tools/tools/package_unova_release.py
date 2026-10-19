@@ -171,7 +171,7 @@ def main():
         for path in sorted((ROOT/'tools/launcher_ui').rglob('*')):
             if path.is_file() and '__pycache__' not in path.parts:
                 z.write(path,'Unova-Together-Source/tools/launcher_ui/'+path.relative_to(ROOT/'tools/launcher_ui').as_posix())
-        for name in ('test_unova_updater.py','test_unova_single_exe.py','unova_single_exe.py','build_unova_single_exe.py','test_launcher_ui.py','test_launcher_preferences.py','test_launcher_cheat_engine.py','test_launcher_services.py','test_release_input_bounds.py','test_companion_interactions.py','test_companion_interactions_runner.py','test_overworld_companion.py','check_lan_player_list_validation.cpp','check_battle_presence.cpp','check_post_battle_presence.cpp','check_rival_agreement.cpp','test_rival_payload.py','test_coop_boss_payload.py','test_coop_story_return.py','test_coop_field_return.py','verify_coop_runtime.py','audit_native_enemy_setup.py','verify_rival_startups.py','build_gen5_shop_overlay_patch.py','test_gen5_shop_overlay_patch.py','package_development_polish.py'):
+        for name in ('test_unova_updater.py','test_unova_single_exe.py','unova_single_exe.py','build_unova_single_exe.py','test_launcher_ui.py','test_launcher_preferences.py','test_launcher_cheat_engine.py','test_launcher_services.py','test_release_input_bounds.py','test_companion_interactions.py','test_companion_interactions_runner.py','test_overworld_companion.py','check_lan_player_list_validation.cpp','check_battle_presence.cpp','check_post_battle_presence.cpp','check_rival_agreement.cpp','test_rival_payload.py','test_coop_boss_payload.py','test_coop_story_return.py','test_coop_field_return.py','test_coop_experience_flow.py','test_coop_reward_policy.py','test_coop_reward_policy.cpp','verify_coop_runtime.py','audit_native_enemy_setup.py','verify_rival_startups.py','build_gen5_shop_overlay_patch.py','test_gen5_shop_overlay_patch.py','package_development_polish.py'):
             z.write(ROOT/'tools'/name,'Unova-Together-Source/tools/'+name)
         for name in ('check_launcher_tree_parity.py','test_launcher_tree_parity.py','test_release_validation.py'):
             z.write(REPOSITORY_ROOT/'launcher-source/tools'/name,'Unova-Together-Source/tools/'+name)
@@ -238,6 +238,9 @@ def main():
         require_release_condition('Unova-Together-Source/tools/test_release_validation.py' in names, 'Source archive is missing optimized release-guard coverage')
         require_release_condition('Unova-Together-Source/tools/build_gen5_shop_overlay_patch.py' in names, 'Source archive is missing the Mega shop overlay patch generator')
         require_release_condition('Unova-Together-Source/tools/test_gen5_shop_overlay_patch.py' in names, 'Source archive is missing Mega shop overlay regression coverage')
+        require_release_condition('Unova-Together-Source/tools/test_coop_experience_flow.py' in names, 'Source archive is missing co-op reward-flow coverage')
+        require_release_condition('Unova-Together-Source/tools/test_coop_reward_policy.py' in names, 'Source archive is missing the co-op reward-policy runner')
+        require_release_condition('Unova-Together-Source/tools/test_coop_reward_policy.cpp' in names, 'Source archive is missing the co-op reward-policy test')
         require_release_condition('Unova-Together-Source/tools/package_development_polish.py' in names, 'Source archive is missing the development patch packager')
         require_release_condition('Unova-Together-Source/docs/DEVELOPER_TESTING.md' in names, 'Source archive is missing test reproduction instructions')
     stage_root.mkdir(parents=True)

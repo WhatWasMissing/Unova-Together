@@ -6,7 +6,7 @@ Unova Together adds many features to Blaze Black 2 Redux, and some optional mode
 
 - Use the same Unova Together release and matching game version on every computer.
 - Turn fast-forward off before connecting and during shared battles.
-- Co-op experience is disabled. Each player keeps their own story progress and save.
+- Co-op experience and level-up handling are experimental. The game uses its normal reward flow by default; **Suppress EXP in co-op battles** in launcher Settings can be enabled to compare behavior. Use the same setting on both computers. Story progress and saves remain separate.
 - If a connection drops during a battle, the fight may not resume. Return to the field and start a new session before continuing.
 - Some VPNs, firewalls, and restricted networks can block connections. The optional UDP connection needs a server supplied by your group; Unova Together does not provide a public server.
 - A Pokémon normally used for a one-on-one trainer battle may be duplicated for the second player.

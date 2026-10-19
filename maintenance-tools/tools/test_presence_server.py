@@ -60,6 +60,12 @@ class RelayTests(unittest.IsolatedAsyncioTestCase):
         for value in (True,-1,650,1.5,'25'):
             with self.assertRaises(ValueError): validate_state(state(followerSpecies=value),0)
         with self.assertRaises(ValueError): validate_state(state(followerForm=32),0)
+
+    async def test_field_zone_is_forwarded_for_teleport(self):
+        a,wa,aid,b,wb,bid=await self.active_pair()
+        await self.send(wa,state(2,fieldZone=0))
+        players=await self.snapshot(b,lambda ps:any(p['id']==aid and p['state'].get('fieldZone')==0 for p in ps))
+        self.assertEqual(next(p['state'] for p in players if p['id']==aid)['fieldZone'],0)
     async def test_menu_flag_is_typed_and_retained(self):
         self.assertTrue(validate_state(state(inMenu=True, moving=False),0)['inMenu'])
         self.assertFalse(validate_state(state(inMenu=False),0)['inMenu'])
@@ -90,6 +96,7 @@ class RelayTests(unittest.IsolatedAsyncioTestCase):
         await writer.drain()
         welcome = json.loads(await asyncio.wait_for(reader.readline(),1))
         self.assertEqual(welcome['type'],'welcome')
+        self.assertTrue(welcome.get('fieldZonePresence'))
         return reader,writer,welcome['id']
 
     async def snapshot(self, reader, predicate):
@@ -286,5 +293,14 @@ class StateTests(unittest.TestCase):
             with self.assertRaises(ValueError):validate_state(state(**changes),0)
         self.assertEqual(validate_state({'sequence':2,'active':False,'extra':'ignored'},1),
                          {'sequence':2,'active':False})
+
+    def test_field_zone_is_optional_bounded_and_sentinel_is_omitted(self):
+        self.assertEqual(validate_state(state(fieldZone=0),0)['fieldZone'],0)
+        self.assertEqual(validate_state(state(fieldZone=65534),0)['fieldZone'],65534)
+        self.assertNotIn('fieldZone',validate_state(state(fieldZone=-1),0))
+        self.assertNotIn('fieldZone',validate_state(state(fieldZone=65535),0))
+        for value in (True,-2,65536,1.5,'4'):
+            with self.subTest(value=value),self.assertRaises(ValueError):
+                validate_state(state(fieldZone=value),0)
 
 if __name__=='__main__':unittest.main()

@@ -62,6 +62,15 @@ def validate_state(message, previous_sequence):
         result['nativeLANReady'] = message['nativeLANReady']
     if not result['active']:
         return result
+    # Field zones are required alongside map IDs for safe in-game warps. The
+    # emulator reports -1 or 0xffff when it cannot resolve a live zone; omit
+    # those sentinels so clients can reject a teleport to an unknown zone.
+    if 'fieldZone' in message:
+        value=message['fieldZone']
+        if type(value) is not int or value < -1 or value > 65535:
+            raise ValueError('Invalid field zone')
+        if 0 <= value < 65535:
+            result['fieldZone']=value
     for key, limit in [('followerSpecies',649), ('followerForm',31), ('followerGender',2)]:
         if key in message:
             if not integer(message[key],0,limit):
@@ -327,7 +336,7 @@ class PresenceRelay:
                 if any(p.item_client==token for p in self.peers.values()): raise ValueError('Duplicate item client identity')
                 peer.item_client=token
             self.peers[peer.id] = peer
-            writer.write((json.dumps({'type': 'welcome', 'version': 1, 'id': peer.id, 'interactions': True, 'battlePresence': True, 'checkpoints': True, 'itemTrading': True, 'itemRecovery': True, 'pokemonTrading': True, 'overworldBattles': True, 'coopSocial': True}) + '\n').encode())
+            writer.write((json.dumps({'type': 'welcome', 'version': 1, 'id': peer.id, 'interactions': True, 'battlePresence': True, 'checkpoints': True, 'fieldZonePresence': True, 'itemTrading': True, 'itemRecovery': True, 'pokemonTrading': True, 'overworldBattles': True, 'coopSocial': True}) + '\n').encode())
             await writer.drain()
             self.item_trades.resume(peer)
             self.pokemon_trades.resume(peer)

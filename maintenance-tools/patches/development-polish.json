@@ -13,6 +13,8 @@
     "src/frontend/qt_sdl/CheckpointStorage.h",
     "src/frontend/qt_sdl/CMakeLists.txt",
     "src/frontend/qt_sdl/ConnectionFeedback.h",
+    "src/frontend/qt_sdl/CoopExperienceGuard.h",
+    "src/frontend/qt_sdl/CoopRewardPolicy.h",
     "src/frontend/qt_sdl/EmuInstance.h",
     "src/frontend/qt_sdl/EmuInstanceAudio.cpp",
     "src/frontend/qt_sdl/EmuInstanceInput.cpp",
@@ -91,7 +93,7 @@
     "src/net/LAN.h",
     "src/PresenceOcclusion.h"
   ],
-  "patchSha256": "f01ce7a3d4e6977b7dfc16bcc71f4a3511c82365e6dd4d30bbd0ef06a415e110",
+  "patchSha256": "32e9e17b5d2760a381ae1151b0ae2cb04ed8bef45022adf7c14a1b0675c16dfd",
   "spriteVariants": 743,
-  "build": "2.0.18"
+  "build": "2.0.19"
 }

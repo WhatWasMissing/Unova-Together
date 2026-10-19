@@ -475,3 +475,40 @@ The release checks caught two previously committed fixes missing from the extrac
 **PASS — SOURCE/UNIT/BUILD VERIFIED:** Full discovery passed **168/168** canonical launcher tests and **221** maintenance tests with **six optional skips**. The emulator, launcher and permanent bootstrap built on Windows 10 build 19045 with Python 3.12.8, PyInstaller 6.22.3, CMake 4.4.1, MSYS2 GCC 16.2.0 and Qt 6.11.2. Release artifact verification is recorded in `docs/RELEASE_CHECKS_2.0.18.md`.
 
 **PASS — GAMEPLAY VERIFIED FOR CENTER ENTRY:** The final rebuilt emulator SHA-256 is `3134719eda6aa2a421bffd4142c6f4de05fb69dcfd4730f4bed4964fad9db30c`. The same exact-save Center-entry script ran for **75 seconds / 4,440 observer frames**, reached map 460 at tile `(7, 19)`, and reported input unblocked. Both captured screens were inspected visually and showed the normal Pokémon Center and C-Gear, with no fatal screen. Only disposable ROM/save copies were used. This verifies this Center-entry scenario; it does not replace the separately documented battle and two-client coverage limits.
+
+### Mega Stone merchant list crash — 2026-10-19
+
+**SOURCE FINDING:** The Black 2 decomp's `ShopUIWork` stores shop rows in fixed `entries[45]` and `tutorMoveIndices[45]` arrays (`src/ov036/scrcmd_shop.c`, pinned upstream source revision `81eea95ee66e9ab41dedf5ead08ff1d3222cbef5`). The old runtime patch put all 49 Mega Stones in every Poké Mart and installed a custom overlay that expanded the list storage. Opening a merchant's buy list exercised this patched path; the sell menu did not.
+
+**LOCAL FIX:** Removed installation of the custom shop overlay and capped every Poké Mart at the decomp's native 45 rows. The 49 Mega Stones are divided between alternating marts (25/24); all 74 mart lists, including Pokémon Center marts, retain the complete roster across the region. Normal stock is preserved, and the standard mart stock used by Redux stays within the native limit after adding the Super Repel row. The source patch and metadata were regenerated from the verified 1.0.6 baseline.
+
+**PASS — BUILD AND CARTRIDGE INTEGRATION:** The Release `gen5_mega_assets` regression executable compiled with MSVC and passed against the already patched Cynthia Route 7 ROM, read-only. Its checks replayed the asset patch in memory, verified the grouped roster in all marts, confirmed no stone duplicates or missing entries, checked the native 45-row bound, and confirmed the shop overlay table is untouched. The focused Python source-packaging suite passed **7/7**. The live merchant UI was not exercised, so this is source and ROM integration evidence rather than a live gameplay confirmation.
+
+### Co-op battle EXP and level-up flow — 2026-10-19
+
+**SOURCE FINDING:** In the BW2 decomp, `ServerControl_GiveExp` walks the six reward entries, queues the normal EXP/stat commands, and calls `BattleMon_AddExp`, which drives level-ups. The co-op emulator hook had been zeroing all six reward entries before this code ran in co-op story and Practice battles. That prevented EXP and level-ups entirely. The co-op runtime already waits for both battle outcomes to agree before returning and grants the partner up to 1,800 frames (30 seconds) to finish local EXP, level-up, and move-learning screens.
+
+**LOCAL FIX:** Removed the reward-builder and setter suppression hooks, allowing each game instance to use the native EXP and level-up flow. Retained the two-player outcome agreement and the longer wait for a peer completing post-battle prompts. Added a small policy regression covering which co-op modes may earn EXP and the post-battle wait window.
+
+**PASS — BUILD AND POLICY TEST:** The complete Windows MinGW runtime built successfully with the OpenGL renderer enabled; this also compiled the updated `NativeCoopRuntime.cpp`. The dedicated co-op reward policy, packet, and role tests passed **3/3**, and the tracked co-op source-patch check passed **1/1**. No live two-client battle was performed, so EXP, level-up, and desync behavior still need an in-game paired-session check.
+
+### Teleport relay capability — 2026-10-19
+
+**SOURCE FINDING:** The game client sends `fieldZone` with each active position and requires the relay's `welcome.fieldZonePresence` capability before enabling Teleport. The relay previously omitted the capability and silently discarded `fieldZone` during state validation, so every client reported that both game and relay needed updating.
+
+**LOCAL FIX AND VERIFICATION:** Both packaged relay copies now advertise field-zone support and retain valid zone IDs in peer state. Unknown-zone sentinels are omitted, and malformed or out-of-range values are rejected. `py -B -m unittest test_presence_server -v` passed **18/18**, including the real-socket capability and zone-forwarding checks. Teleport was not exercised in a live emulator session; the host must restart its relay using the updated `presence_server.py` before testing.
+
+### Co-op EXP suppression test switch — 2026-10-19
+
+The launcher now stores **Suppress EXP in co-op battles (testing)** per game profile and passes it to melonDS at launch. It defaults off, preserving the native EXP reward flow. When enabled, a ROM-signature-checked hook clears only the six reward records' XP amounts during co-op story/test battle phases; EV and flag bytes remain unchanged. The setting does not alter direct player battles.
+
+**PASS — TESTS:** The launcher UI suite passed **37/37**, the preferences suite **11/11**, and launcher parity matched **48 files**. Tests verify default-off behavior, profile persistence, restart restoration, and both environment values passed to melonDS. The C++ reward-policy/guard executable passed its opt-in phase checks, exact ROM fingerprints, XP-only clearing, EV/flag preservation, and invalid-address rejection. The complete MinGW/OpenGL emulator target built successfully. The updated development patch was regenerated from the verified 1.0.6 source archive; live two-client EXP comparison remains untested.
+
+The co-op EXP checks are included in the source download and accept a caller-supplied melonDS source directory:
+
+```powershell
+py -3.12 -B maintenance-tools/tools/test_coop_experience_flow.py --source-root maintenance-tools/melonDS-source-1.1
+py -3.12 -B maintenance-tools/tools/test_coop_reward_policy.py --source-root maintenance-tools/melonDS-source-1.1 --compiler C:\msys64\ucrt64\bin\g++.exe
+```
+
+The first check structurally inspects the production runtime call site. The second compiles the actual `CoopRewardPolicy.h` and `CoopExperienceGuard.h` with the regression fixture; it checks both valid suppression and invalid signatures/addresses. Neither runs the emulator or establishes two-client gameplay behavior. The source tree was extracted from the 1.0.6 source archive (SHA-256 `c3833116062ed40811a252ae1945a23a7043694c1984d3c8ae3cc0ac6212dd25`) and has local changes; treat this as **UNVERIFIED SOURCE** for the released emulator. The archive digest identifies the baseline bytes, not the modified tree's authenticity.

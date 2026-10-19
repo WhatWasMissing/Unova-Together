@@ -124,6 +124,27 @@ class LauncherTests(unittest.TestCase):
         self.app._apply_save_folder(self.home/'builds/current',item,default_directory=self.rom.parent)
         document=prefs.read_document(self.home/'builds/current')
         self.assertEqual(Path(document['Instance0']['SaveFilePath']).resolve(),self.rom.parent.resolve())
+
+    def test_coop_experience_suppression_is_opt_in_and_profile_scoped(self):
+        from launcher_ui import services
+        self.assertFalse(self.app.coop_exp_suppression.get())
+        self.app._preference('coop_exp_suppression',True)
+        first=self.app.active_profile_id
+        item=self.app._active_profile()
+        self.assertTrue(services.normalize(item)['preferences']['coop_exp_suppression'])
+        self.app._new_profile()
+        self.assertFalse(self.app.coop_exp_suppression.get())
+        self.app.profile_picker.current(0);self.app._select_profile()
+        self.assertEqual(self.app.active_profile_id,first)
+        self.assertTrue(self.app.coop_exp_suppression.get())
+        self.app.destroy();self.app=Launcher(self.home,testing=True);self.app._open_mod('black2',save=False);self.app.update()
+        self.assertTrue(self.app.coop_exp_suppression.get())
+        self.app.rom.set(str(self.rom));self.app.player.set('Tester')
+        proc=MagicMock();proc.poll.return_value=None
+        with patch('launcher_ui.preferences.running',return_value=False),patch('launcher_ui.app.subprocess.Popen',return_value=proc) as spawn:
+            self.app.launch()
+            self.assertEqual(spawn.call_args.kwargs['env']['UNOVA_COOP_EXP_SUPPRESSION'],'1')
+        self.app.game=None
     def test_mega_feature_plays_supplied_mawile_front_and_back_gifs(self):
         from PIL import Image
         assets=HERE/'assets/features'
@@ -320,6 +341,7 @@ class LauncherTests(unittest.TestCase):
             self.assertEqual(spawn.call_args.kwargs['env']['UNOVA_RELAY_ROOM'],'friends')
             self.assertEqual(spawn.call_args.kwargs['env']['UNOVA_COMPANION_INTERACTIONS'],'1')
             self.assertEqual(spawn.call_args.kwargs['env']['UNOVA_EXPERIMENTAL_COMPANION'],'1')
+            self.assertEqual(spawn.call_args.kwargs['env']['UNOVA_COOP_EXP_SUPPRESSION'],'0')
 
     def test_game_exit_stops_scenery_workers(self):
         proc=MagicMock();proc.poll.return_value=0;self.app.game=proc

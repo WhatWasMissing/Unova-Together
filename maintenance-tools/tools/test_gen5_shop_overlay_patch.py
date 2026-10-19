@@ -48,6 +48,14 @@ def packaged_shop_header() -> str:
 def added_source(path: str) -> str:
     patch = PATCH_PATH.read_text(encoding="utf-8")
     relative = re.escape(path)
+    addition = re.search(
+        rf"(?ms)^--- /dev/null\n\+\+\+ b/{relative}\n@@ -0,0 \+\d+,\d+ @@\n(.*?)(?=^--- |\Z)",
+        patch,
+    )
+    if addition:
+        return "\n".join(
+            line[1:] for line in addition.group(1).splitlines() if line.startswith("+")
+        )
     match = re.search(
         rf"(?ms)^--- a/{relative}\n\+\+\+ b/{relative}\n(.*?)(?=^--- |\Z)", patch
     )
@@ -57,6 +65,15 @@ def added_source(path: str) -> str:
 
 
 class ShopOverlayPatchTests(unittest.TestCase):
+    def test_shop_lists_fit_native_storage_without_installing_overlay(self):
+        policy = added_source("source/melonDS/src/Gen5ShopPolicy.h")
+        mega = added_source("source/melonDS/src/Gen5MegaEvolution.h")
+        self.assertRegex(policy, r"MaxShopUIEntries\s*=\s*45\s*;")
+        self.assertRegex(policy, r"MegaStoneShopGroupCount\s*=\s*2\s*;")
+        self.assertIn("member % MegaStoneShopGroupCount", policy)
+        self.assertIn("stoneIndex < firstStone || stoneIndex >= endStone", policy)
+        self.assertNotIn("appendHeapBackedShopOverlay(combined, rom)", mega)
+
     def test_packager_keeps_no_final_newline_diffs_separate(self):
         lines = packager.unified_diff_lines(
             "before", "after", "a/sample.cpp", "b/sample.cpp"

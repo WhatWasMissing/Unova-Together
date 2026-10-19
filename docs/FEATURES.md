@@ -1,6 +1,6 @@
 # Features
 
-Unova Together **2.0.18** brings friends, Pokémon tools, and Mega Evolution to supported English Blaze Black 2 Redux profiles on Windows.
+Unova Together **2.0.19** brings friends, Pokémon tools, and Mega Evolution to supported English Blaze Black 2 Redux profiles on Windows.
 
 ## Play with friends
 
@@ -9,11 +9,11 @@ Unova Together **2.0.18** brings friends, Pokémon tools, and Mega Evolution to 
 - Invite a friend to supported co-op trainer battles or choose a friendly player battle.
 - Find practice trainers for battles that do not change story progress.
 
-Both players should use the same release and matching game version. Co-op experience is disabled. For setup and connection choices, see [Playing with friends](PLAYER_GUIDE.md). Some slow or restricted networks may interrupt a session; the [known limits](KNOWN_ISSUES.md) page has tips.
+Both players should use the same release and matching game version. Co-op battles use the normal experience reward flow by default. For testing, you can turn on **Suppress EXP in co-op battles** in launcher Settings; use the same choice on both computers. Each player keeps a separate save. For setup and connection choices, see [Playing with friends](PLAYER_GUIDE.md). Some slow or restricted networks may interrupt a session; the [known limits](KNOWN_ISSUES.md) page has tips.
 
 ## Mega Evolution
 
-There are **49 Mega forms**, each paired with its own Mega Stone. Every Poké Mart carries the full selection for **₽50,000** per stone, and both Battle Point counters sell all 49 for **50 BP**. Give the matching stone to a Pokémon, then hold **L + R together** while choosing a move in battle, including double battles. The form lasts until the battle ends. The final three Gym Leaders and Cynthia’s Route 7 rematch have Pokémon holding Mega Stones.
+There are **49 Mega forms**, each paired with its own Mega Stone. Poké Marts alternate between two Mega Stone selections, making all 49 available around Unova for **₽50,000** per stone; both Battle Point counters sell all 49 for **50 BP**. Give the matching stone to a Pokémon, then hold **L + R together** while choosing a move in battle, including double battles. The form lasts until the battle ends. The final three Gym Leaders and Cynthia’s Route 7 rematch have Pokémon holding Mega Stones.
 
 Examples: Mega Serperior gains **Adaptability**; Mega Charizard Y gains **Drought**; Mega Salamence uses **Intimidate**; Mega Lucario Z gains **Adaptability**. The full roster, abilities, stones, and base-stat totals are in the [Mega Evolution guide](MEGA_EVOLUTION.md).
 
@@ -35,7 +35,7 @@ Face your follower and press **R + A**, or tap its sprite, to open the companion
 - Browse ordinary grass, water, and fishing encounters in the loaded game.
 - Relearn eligible level-up moves for the Pokémon’s current form.
 - Use supported field HMs without taking up a battle move slot. The game’s story requirements still apply.
-- Solo battles earn 1.25× experience on supported profiles. Co-op experience remains off.
+- Solo battles earn 1.25× experience on supported profiles. Co-op battles use the game’s normal reward flow unless EXP suppression is enabled for testing in launcher Settings.
 
 ## Launcher and presentation
 

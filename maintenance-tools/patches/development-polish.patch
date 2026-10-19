@@ -773,8 +773,8 @@
  1 VERSIONINFO
 -FILEVERSION 1,0,2,0
 -PRODUCTVERSION 1,0,2,0
-+FILEVERSION 2,0,18,0
-+PRODUCTVERSION 2,0,18,0
++FILEVERSION 2,0,19,0
++PRODUCTVERSION 2,0,19,0
  FILETYPE VFT_APP
  {
    BLOCK "StringFileInfo"
@@ -783,7 +783,7 @@
  		{
  			VALUE "CompanyName", "Melon Factory of Kuribo64"
 -			VALUE "FileVersion", "1.0.2"
-+			VALUE "FileVersion", "2.0.18"
++			VALUE "FileVersion", "2.0.19"
  			VALUE "FileDescription", "Unova Together - modified melonDS 1.1"
  			VALUE "InternalName", "SDnolem"
  			VALUE "LegalCopyright", "2016-2025 melonDS team; 2026 mvq1303 (Unova Together contributions)"
@@ -791,7 +791,7 @@
  			VALUE "OriginalFilename", "melonDS.exe"
  			VALUE "ProductName", "Unova Together"
 -			VALUE "ProductVersion", "1.0.2"
-+			VALUE "ProductVersion", "2.0.18"
++			VALUE "ProductVersion", "2.0.19"
 +			VALUE "UnovaShopOverlaySourceSHA256", "${UNOVA_SHOP_OVERLAY_SOURCE_SHA256}"
  		}
  	}
@@ -1188,6 +1188,66 @@
 +    if(localRom.isEmpty() || rom.isEmpty()) return "Same map; waiting for ROM compatibility information.";
 +    if(version.isEmpty() || version=="1.0.7-dev") return "Same map and matching ROM; partner version is not reported reliably.";
 +    return "Same map and matching ROM; partner should be visible.";
++}
+--- a/source/melonDS/src/frontend/qt_sdl/CoopExperienceGuard.h
++++ b/source/melonDS/src/frontend/qt_sdl/CoopExperienceGuard.h
+@@ -1,8 +1,14 @@
++/*
++ * Unova Together-specific contributions: Copyright (C) 2026 mvq1303.
++ * GitHub: WhatWasMissing — https://github.com/WhatWasMissing/Unova-Together
++ * GPL-3.0-or-later. Preserve all upstream notices.
++ */
+ #pragma once
+ #include <cstring>
+ namespace CoopExperienceGuard {
+ // Reviewed Black 2 overlay 167 reward builder and its native caller.
+ // Six 12-byte reward entries are initialized before any EXP/EV application.
++// Clear only each entry's XP amount, leaving its EV and flag bytes unchanged.
+ inline bool suppress(unsigned char* ram,unsigned pc,unsigned lr,unsigned output) {
+     static constexpr unsigned char entry[]={0xf0,0xb5,0x8d,0xb0,0x00,0x90,0x40,0x68,0x01,0x91,0x02,0x92,0x1d,0x1c,0xef,0xf7};
+     static constexpr unsigned char caller[]={0x14,0x4b,0x28,0x1c,0x39,0x1c,0x22,0x1c,0xeb,0x18,0x05,0xf0,0xf7,0xff};
+@@ -10,7 +16,8 @@
+        output<0x02000000 || output>0x023fffb8 || (output&3) ||
+        std::memcmp(ram+0x1aee0c,entry,sizeof(entry)) ||
+        std::memcmp(ram+0x1a8e10,caller,sizeof(caller))) return false;
+-    std::memset(ram+output-0x02000000,0,72);
++    auto* rewards=ram+output-0x02000000;
++    for(unsigned i=0;i<6;++i) std::memset(rewards+i*12,0,4);
+     return true;
+ }
+ }
+--- /dev/null
++++ b/source/melonDS/src/frontend/qt_sdl/CoopRewardPolicy.h
+@@ -0,0 +1,30 @@
++/*
++ * Unova Together-specific contributions: Copyright (C) 2026 mvq1303.
++ * GitHub: WhatWasMissing — https://github.com/WhatWasMissing/Unova-Together
++ * GPL-3.0-or-later. Preserve all upstream notices.
++ */
++#pragma once
++
++namespace CoopRewardPolicy {
++constexpr bool suppressionActive(bool suppressionEnabled, bool manualTest,
++                                 bool playerBattle, bool battleCompleted,
++                                 bool awaitingBattle)
++{
++    return suppressionEnabled && manualTest && !playerBattle &&
++           !battleCompleted && awaitingBattle;
++}
++
++constexpr bool nativeExperienceAllowed(bool suppressionEnabled, bool manualTest,
++                                       bool playerBattle, bool battleCompleted,
++                                       bool awaitingBattle)
++{
++    return !suppressionActive(suppressionEnabled, manualTest, playerBattle,
++                              battleCompleted, awaitingBattle);
++}
++
++constexpr unsigned peerLossGraceFrames(bool playerBattle)
++{
++    // Thirty seconds for local EXP, level-up and move-learning prompts.
++    return playerBattle ? 180u : 1800u;
++}
 +}
 --- a/source/melonDS/src/frontend/qt_sdl/EmuInstance.h
 +++ b/source/melonDS/src/frontend/qt_sdl/EmuInstance.h
@@ -5083,7 +5143,7 @@
      {0x20169a8, {0x10,0xb5,0x04,0x1c,0x00,0xf0,0x6c,0xf8}},
 --- a/source/melonDS/src/frontend/qt_sdl/NativeCoopRuntime.cpp
 +++ b/source/melonDS/src/frontend/qt_sdl/NativeCoopRuntime.cpp
-@@ -11,6 +11,7 @@
+@@ -11,12 +11,14 @@
  #include "NDS.h"
  #include "NDSCart.h"
  #include "Savestate.h"
@@ -5091,7 +5151,87 @@
  #include "EmuInstance.h"
  #include "LAN.h"
  #include "Gen5Menu.h"
-@@ -408,6 +409,10 @@
+ #include "RivalAgreement.h"
+ #include "StoryBattleHook.h"
+ #include "CoopExperienceGuard.h"
++#include "CoopRewardPolicy.h"
+ #include <QtEndian>
+ #include <QFile>
+ #include <QJsonDocument>
+@@ -41,28 +43,25 @@
+ thread_local QVariantMap preparationFault;
+ thread_local QStringList preparationTrace;
+ thread_local QVariantMap setupInspection;
+-constexpr bool suppressCoopExperience(bool manualTest,bool playerBattle,bool battleCompleted,bool awaitingBattle) {
+-    return manualTest && !playerBattle && !battleCompleted && awaitingBattle;
+-}
+-constexpr bool isExperienceSetterCall(unsigned address,unsigned parameter) {
+-    return parameter==0x8 && (address==0x0201cd56 || address==0x0201cd7a);
+-}
+-static_assert(suppressCoopExperience(true,false,false,true));
+-static_assert(!suppressCoopExperience(false,false,false,true));
+-static_assert(!suppressCoopExperience(true,true,false,true));
+-static_assert(!suppressCoopExperience(true,false,true,true));
+-static_assert(!suppressCoopExperience(true,false,false,false));
+-static_assert(isExperienceSetterCall(0x0201cd56,0x8));
+-static_assert(isExperienceSetterCall(0x0201cd7a,0x8));
+-static_assert(!isExperienceSetterCall(0x0201cd48,0x8));
+-static_assert(!isExperienceSetterCall(0x0201cd6c,0x8));
+-static_assert(!isExperienceSetterCall(0x0201cd7a,0x7));
+ constexpr bool waitForBattleSceneRestore(bool fieldDone,bool sceneCallbackActive,bool sceneCallbackDone) {
+     return fieldDone && sceneCallbackActive && !sceneCallbackDone;
+ }
+ static_assert(waitForBattleSceneRestore(true,true,false));
+ static_assert(!waitForBattleSceneRestore(false,true,false));
+ static_assert(!waitForBattleSceneRestore(true,false,false));
++bool suppressCoopExperience(bool manualTest,bool playerBattle,bool battleCompleted,bool awaitingBattle) {
++    static const bool enabled=qEnvironmentVariableIntValue("UNOVA_COOP_EXP_SUPPRESSION")==1;
++    return CoopRewardPolicy::suppressionActive(enabled,manualTest,playerBattle,
++                                               battleCompleted,awaitingBattle);
++}
++static_assert(!CoopRewardPolicy::suppressionActive(false,true,false,false,true));
++static_assert(CoopRewardPolicy::suppressionActive(true,true,false,false,true));
++static_assert(!CoopRewardPolicy::suppressionActive(true,false,false,false,true));
++static_assert(!CoopRewardPolicy::suppressionActive(true,true,true,false,true));
++static_assert(!CoopRewardPolicy::suppressionActive(true,true,false,true,true));
++static_assert(!CoopRewardPolicy::suppressionActive(true,true,false,false,false));
++static_assert(CoopRewardPolicy::peerLossGraceFrames(false)==1800u);
++static_assert(CoopRewardPolicy::peerLossGraceFrames(true)==180u);
+ static_assert(!waitForBattleSceneRestore(true,true,true));
+ bool valid(unsigned p,unsigned n=4) {
+     return p>=0x02000000 && !(p&3) && n<=0x400000 && p-0x02000000<=0x400000-n;
+@@ -314,8 +313,8 @@
+     }
+     // Passive observation does not run native-call or battle instrumentation.
+     if(self.npcObserving && !self.automaticStory) return;
+-    // Stop reward construction before the battle controller can queue EXP,
+-    // level-up or move-learning UI. Setter-only suppression is too late.
++    // Testing-only option: suppress rewards before the native battle
++    // controller can queue EXP, level-up or move-learning UI.
+     if(self.core && (cpu.CPSR&0x20) &&
+        suppressCoopExperience(self.manualTest,self.playerBattle,self.battleCompleted,
+                              self.phase==Phase::AwaitBattle || self.phase==Phase::AwaitStory) &&
+@@ -334,17 +333,13 @@
+     if(self.core && suppressCoopExperience(self.manualTest,self.playerBattle,self.battleCompleted,
+                                             self.phase==Phase::AwaitBattle || self.phase==Phase::AwaitStory) &&
+        (cpu.CPSR&0x20)) {
+-        const bool pkmSetter=isExperienceSetterCall(pc,cpu.R[1]) &&
+-            pc==0x0201cd7a &&
++        const bool pkmSetter=cpu.R[1]==0x8 && pc==0x0201cd7a &&
+             std::memcmp(self.core->MainRAM+0x1cd7a,pokemonExperienceSetterCallFingerprint.data(),
+                         pokemonExperienceSetterCallFingerprint.size())==0;
+-        const bool partySetter=isExperienceSetterCall(pc,cpu.R[1]) &&
+-            pc==0x0201cd56 &&
++        const bool partySetter=cpu.R[1]==0x8 && pc==0x0201cd56 &&
+             std::memcmp(self.core->MainRAM+0x1cd56,partyExperienceSetterCallFingerprint.data(),
+                         partyExperienceSetterCallFingerprint.size())==0;
+         if(pkmSetter || partySetter) {
+-            // These are the actual guarded write calls. Skipping the earlier
+-            // getter call leaves the experience setter free to update the save.
+             ++self.experienceWritesSuppressed;
+             cpu.JumpTo((pc+4)|1);
+         }
+@@ -408,6 +403,10 @@
      return CanRequestManualTest() && (!nds.ARM9.BeforeInstruction ||
          (nds.ARM9.BeforeInstruction==&Instruction && nds.ARM9.InstructionHookData==this));
  }
@@ -5102,7 +5242,7 @@
  void NativeCoopRuntime::RequestCancel() {
      if(CanCancel()) cancelRequested=true;
  }
-@@ -510,10 +515,13 @@
+@@ -510,10 +509,13 @@
  }
  QVariantMap NativeCoopRuntime::Snapshot() const {
      unsigned nativeLANPlayers=0;
@@ -5117,7 +5257,7 @@
          nativeLANReady=lan.GetSessionRole()!=0 && nativeLANPlayers>=2;
      }
      QVariantMap pairingDetails;
-@@ -569,6 +577,8 @@
+@@ -569,6 +571,8 @@
      return {{"fixtureFrames",reportFrames},{"fixtureElapsedMs",qulonglong(fixtureStartMs?melonDS::Platform::GetMSCount()-fixtureStartMs:0)},
              {"nativeCoopPairingDetails",pairingDetails},{"nativeCoopInvitation",invitation},{"nativeCoopInvitationSerial",invitationSerial},{"nativeCoopInvitationName",invitationName},{"nativeCoopInvitationReason",invitationReason},
              {"nativeCoopNpcAutomatic",automaticStory},{"nativeCoopNpcWatching",npcObserving},
@@ -5126,7 +5266,7 @@
              {"nativeCoopNpcDialogueHeld",npcDialogueDetected&&!npcDialogueReleased},
              {"nativeCoopNpcDialogueMatched",npcDialogueReleased},
              {"nativeCoopNpcDialogueTrainer",npcDialogue.trainer},
-@@ -578,7 +588,7 @@
+@@ -578,12 +582,14 @@
                  {"eventRangeHits",npcTraceEventRangeHits},{"fetchHits",npcTraceFetchHits},
                  {"constructorReturnHits",npcTraceConstructorHits},{"last",npcTrace},
                  {"fetchHistory",npcTraceFetchHistory}}},
@@ -5135,7 +5275,15 @@
              {"nativeCoopBossTrainer",bossTrainer},{"nativeCoopBossSecondaryTrainer",bossSecondaryTrainer},{"nativeCoopBossName",bossName},{"nativeCoopBossTeamSize",bossCount},{"nativeCoopAttempt",attemptNumber},{"nativeCoopCanStart",CanRequestManualTest()},{"nativeCoopCanCancel",CanCancel()},
              {"nativeCoopLANReady",nativeLANReady},{"nativeCoopLANPlayers",nativeLANPlayers},
              {"nativeCoopRecovered",recovered},{"nativeCoopRecoveryFieldIdle",recoveryFieldIdle},{"nativeCoopBattleCompleted",battleCompleted},
-@@ -821,11 +831,10 @@
+-            {"nativeCoopExperienceSuppressionActive",suppressCoopExperience(manualTest,playerBattle,
++            {"nativeCoopExperienceAllowed",!suppressCoopExperience(manualTest,playerBattle,
+                 battleCompleted,phase==Phase::AwaitBattle || phase==Phase::AwaitStory)},
++            {"nativeCoopExperienceSuppressionActive",suppressCoopExperience(manualTest,
++                playerBattle,battleCompleted,phase==Phase::AwaitBattle || phase==Phase::AwaitStory)},
+             {"nativeCoopExperienceWritesSuppressed",experienceWritesSuppressed},
+             {"nativeCoopExperienceRewardsSuppressed",experienceRewardsSuppressed},
+             {"nativeCoopSceneCallbackActive",trackedContext && core->MainRAM[contextAddress-0x02000000+0x7d6]!=0},
+@@ -821,11 +827,10 @@
      const bool button=!(nds.KeyInput&1);
      const bool walking=(nds.KeyInput&0xf0)!=0xf0;
      if(npcCheckpoint.isEmpty() || (button && !npcButtonDown) || (walking && ++npcIdleFrames>=60)) {
@@ -5151,7 +5299,7 @@
          npcIdleFrames=0;
      }
      npcButtonDown=button;core=&nds;npcObserving=true;
-@@ -1056,7 +1065,7 @@
+@@ -1056,7 +1061,7 @@
      }
      if(phase==Phase::AwaitUnregister) {
          if(!word(nds,0x021418b0)) {
@@ -5160,7 +5308,16 @@
                 melonDS::MPInterface::GetType()==melonDS::MPInterface_LAN)
                  static_cast<melonDS::LAN&>(melonDS::MPInterface::Get()).SetCoopStoryCleanupDone();
              adapterAddress=0;unregisterVerified=true;phase=Phase::ReleaseContext;
-@@ -1182,7 +1191,9 @@
+@@ -1092,7 +1097,7 @@
+         }
+         if(storyAttached && ready) {
+             nds.ARM9.DataWrite32(contextAddress+0x7bc,1);storyReleased=true;
+-            phase=Phase::AwaitBattle;waitingFrames=0;status="Shared story encounter running; co-op EXP gain disabled";
++            phase=Phase::AwaitBattle;waitingFrames=0;status="Shared story encounter running";
+         } else {
+             status=storyAttached?"Waiting for partner to speak to "+bossName:"Ready: speak to "+bossName+" in your own story";
+             if(++storyFrames>18000) Recover("Story encounter invitation expired");
+@@ -1182,7 +1187,9 @@
              return;
          }
          sceneCleanupWaitFrames=0;
@@ -5171,7 +5328,7 @@
              const auto outcome=word(nds,contextAddress+0x7b4);
              int agreed=0;
              if(enabled && qEnvironmentVariableIsSet("POKEPLAY_COOP_PAIR_CHECK")) {
-@@ -1192,14 +1203,17 @@
+@@ -1192,22 +1199,26 @@
              } else if(melonDS::MPInterface::GetType()==melonDS::MPInterface_LAN) {
                  auto& lan=static_cast<melonDS::LAN&>(melonDS::MPInterface::Get());
                  lan.SetCoopStoryResult(outcome);agreed=lan.CoopStoryResultStatus();
@@ -5194,7 +5351,28 @@
          }
          if(partnerDisconnected && !fieldDone) ++missingPeerFrames; else missingPeerFrames=0;
          // Co-op Practice can enter a local level-up / move-learning sequence
-@@ -1237,12 +1251,12 @@
+         // for one player's Pokemon while the other core is still in battle.
+         // Do not roll the shared scene back on the ordinary three-second
+         // disconnect timer while that player completes the game-owned prompt.
+-        const unsigned peerLossGraceFrames=playerBattle?180u:1800u;
+-        if(missingPeerFrames>=peerLossGraceFrames) {Recover("Native wireless partner disconnected");return;}
++        if(missingPeerFrames>=CoopRewardPolicy::peerLossGraceFrames(playerBattle)) {
++            Recover("Native wireless partner disconnected");return;
++        }
+         const auto setup=word(nds,contextAddress+0x7d0);
+         if(valid(setup,0x140)) {
+             for(unsigned i=0;i<4;++i) {
+@@ -1228,8 +1239,7 @@
+            nds.MainRAM[network-0x02000000+10]==1 && valid(scene,16) &&
+            word(nds,scene+4)==167 && word(nds,scene+8)==2) {
+             RestorePairingWaitBudget();
+-            status=playerBattle?"Native opening exchange complete; battle scene running":
+-                "Native opening exchange complete; battle scene running; co-op EXP gain disabled";
++            status="Native opening exchange complete; battle scene running";
+         }
+ 
+         unsigned liveSystem=0,liveData=0;
+@@ -1237,12 +1247,12 @@
             LiveOwner(nds,liveSystem,liveData) && liveSystem==system && liveData==data) {
              // Keep the parent radio alive until the guest driver has actually
              // unregistered. Dialogue duration is not a safe teardown timer.
@@ -5209,14 +5387,26 @@
                  }
              }
              battleCompleted=true;if(storyBattle) storyResult=word(nds,contextAddress+0x7b4);
-@@ -1540,6 +1554,7 @@
+@@ -1540,7 +1550,8 @@
                  break;
              }
              phase=Phase::LaunchBattle;
+-            status=playerBattle?"Queuing native player battle event":"Queuing co-op battle event; co-op EXP gain disabled";
 +            nds.ARM9.DataWrite8(contextAddress+0x7d9,playerBattle?0:1);
-             status=playerBattle?"Queuing native player battle event":"Queuing co-op battle event; co-op EXP gain disabled";
++            status=playerBattle?"Queuing native player battle event":"Queuing co-op battle event";
              Queue(codeAddress+CoopNativePayload::PokePlayLaunchCoopBattleOffset+1,
                  {contextAddress,system,codeAddress+CoopNativePayload::PokePlayCoopFieldEventOffset+1,
+                  codeAddress+CoopNativePayload::PokePlayCoopSceneEventOffset+1});
+@@ -1577,8 +1588,7 @@
+             phase=Phase::UnregisterContext;Queue(0x02042861,{0,0,0,0});
+         } else {
+             battleEventAddress=result;phase=Phase::AwaitBattle;waitingFrames=0;
+-            status=playerBattle?"Waiting for native battle opening and partner party exchange":
+-                "Waiting for native battle opening and partner party exchange; co-op EXP gain disabled";
++            status="Waiting for native battle opening and partner party exchange";
+         }
+         break;
+     }
 --- a/source/melonDS/src/frontend/qt_sdl/NativeCoopRuntime.h
 +++ b/source/melonDS/src/frontend/qt_sdl/NativeCoopRuntime.h
 @@ -10,6 +10,7 @@
@@ -5247,9 +5437,16 @@
      const void* npcCart=nullptr;
      unsigned npcOwner=0,npcIdleFrames=0,npcHoldFrames=0;
      QVariantList npcCatalog;
-@@ -97,6 +104,7 @@
+@@ -91,12 +98,13 @@
+     bool setupVerified=false;
+     unsigned groupFrames=0, localIndex=0, nativePeers=0, pairingRole=0;
+     unsigned battleEventAddress=0, missingPeerFrames=0, missingEventFrames=0;
+-    unsigned experienceWritesSuppressed=0, experienceRewardsSuppressed=0;
+     unsigned sceneCleanupWaitFrames=0;
+     bool groupVerified=false;
      bool battleEventQueued=false;
      bool bridgeVerified=false, contextVerified=false;
++    unsigned experienceWritesSuppressed=0, experienceRewardsSuppressed=0;
      bool cancelRequested=false, recovered=false, recoveryFieldIdle=false, battleCompleted=false;
 +    bool completionResultAgreed=false;
      QByteArray recoveryState;
@@ -8515,7 +8712,7 @@
 -    "<a href=\"https://github.com/WhatWasMissing/Unova-Together\">GitHub: WhatWasMissing</a>"
 -    "<br>Playtesters: maxback221 · randomitem19";
 +// Keep the multiplayer build identifier aligned with each packaged release.
-+inline constexpr char Version[] = "2.0.18";
++inline constexpr char Version[] = "2.0.19";
 +
 +inline QString ReleaseVersion()
 +{
@@ -8841,7 +9038,7 @@
 +}
 --- /dev/null
 +++ b/source/melonDS/src/Gen5MegaEvolution.h
-@@ -0,0 +1,1274 @@
+@@ -0,0 +1,1273 @@
 +/*
 + * Unova Together-specific contributions: Copyright (C) 2026 mvq1303.
 + * GitHub: WhatWasMissing — https://github.com/WhatWasMissing/Unova-Together
@@ -9971,8 +10168,8 @@
 +                std::find_if(SupportedProfiles.begin(), SupportedProfiles.end(),
 +                    [profile](const MegaProfile& candidate) { return &candidate == profile; })));
 +    }
-+    // Keep a conservative non-Mega fallback. The full Mega shop stock is only
-+    // exposed when its matching heap-backed native shop overlay is installed.
++    // Keep a conservative non-Mega fallback. Mega stock is split across marts
++    // and kept within the decompiled shop's native 45-row capacity.
 +    auto result = Gen5ShopPolicy::patches(data, length);
 +    try
 +    {
@@ -9992,8 +10189,7 @@
 +        auto learnsets = parseMegaLevelUpLearnsetArchive(learnsetsSource.bytes);
 +        if (!appendMegaLevelUpLearnsets(learnsets)) return result;
 +        auto combined = Gen5ShopPolicy::patches(data, length, megaStoneIds);
-+        if (combined.empty() || !appendHeapBackedShopOverlay(combined, rom))
-+            return result;
++        if (combined.empty()) return result;
 +
 +        const auto spritesSource = Gen5ShopPolicy::file(rom, {"a", "0", "0", "4"});
 +        auto sprites = Gen5ShopPolicy::parse(spritesSource.bytes);
@@ -89008,7 +89204,7 @@
 +}
 --- /dev/null
 +++ b/source/melonDS/src/Gen5ShopPolicy.h
-@@ -0,0 +1,206 @@
+@@ -0,0 +1,210 @@
 +// Unova Together: Copyright (C) 2026 mvq1303. GPL-3.0-or-later.
 +// Shop policy maintenance with OpenAI Codex (2026). Original ROM/save untouched.
 +#pragma once
@@ -89024,14 +89220,13 @@
 +// (shop ID + 6). Badge marts and the special marts use different members.
 +inline constexpr unsigned FirstPokemonCenterMartMember=6;
 +inline constexpr unsigned PokemonCenterMartCount=20;
-+// The Unova Together ov036 shop overlay allocates the entries on the game heap
-+// while retaining the original ShopUIWork layout. The list API uses an 8-bit
-+// index and reserves one value for Cancel, so 127 purchasable rows is the safe
-+// ceiling. Native shops contain at most 45 entries before Mega Stones are added.
-+inline constexpr unsigned MaxShopUIEntries=127;
++// The decompiled ShopUIWork contains fixed entries[45] and tutorMoveIndices[45]
++// arrays. Keep every patched mart at or below this native capacity.
++inline constexpr unsigned MaxShopUIEntries=45;
 +// ShopUI_LoadPokeMartItems can address badge marts 0..5, regular marts 6..25,
 +// and the eight six-stage special marts 26..73 (BW2 ov036/scrcmd_shop.c).
 +inline constexpr unsigned AllPokeMartListCount=74;
++inline constexpr unsigned MegaStoneShopGroupCount=2;
 +// BW2's ShopUI_LoadPokeMartItems selects TM formatting for the entire list
 +// when the first item is a TM/HM. These IDs mirror PML_ItemIsTMHM in the decomp
 +// (ITEM_TM01..ITEM_HM06 and ITEM_TM93..ITEM_TM95).
@@ -89106,7 +89301,7 @@
 +    word(result,8,uint32_t(result.size()));return result;
 +}
 +template<std::size_t StoneCount>
-+inline bool appendMegaStonesToEveryPokeMart(
++inline bool appendMegaStonesAcrossPokeMarts(
 +    Narc& shops, Narc& counts, const std::array<uint16_t, StoneCount>& stones,
 +    unsigned* addedRows = nullptr)
 +{
@@ -89127,6 +89322,9 @@
 +        const unsigned count = stockCounts[member];
 +        const auto& stock = shops.files[member];
 +        if (count > MaxShopUIEntries || count * 2 > stock.size()) return false;
++        const auto group = member % MegaStoneShopGroupCount;
++        const auto firstStone = stones.size() * group / MegaStoneShopGroupCount;
++        const auto endStone = stones.size() * (group + 1) / MegaStoneShopGroupCount;
 +        Bytes current{stock.data(), stock.size()};
 +        auto& normalized = normalizedStock[member];
 +        normalized.reserve(stock.size());
@@ -89138,16 +89336,18 @@
 +            if (stone != stones.end())
 +            {
 +                const auto stoneIndex = std::size_t(std::distance(stones.begin(), stone));
++                if (stoneIndex < firstStone || stoneIndex >= endStone) continue;
 +                if (retained[member][stoneIndex]) continue;
 +                retained[member][stoneIndex] = true;
 +            }
 +            normalized.push_back(uint8_t(item));
 +            normalized.push_back(uint8_t(item >> 8));
 +        }
-+        // Keep each merchant's normal assortment and add every supported
-+        // stone. The matching heap-backed overlay can display up to 127 rows.
++        // Split the roster across alternating marts so the full collection is
++        // available throughout Unova without exceeding ShopUIWork::entries[45].
 +        for (std::size_t stoneIndex = 0; stoneIndex < stones.size(); ++stoneIndex)
 +        {
++            if (stoneIndex < firstStone || stoneIndex >= endStone) continue;
 +            if (retained[member][stoneIndex]) continue;
 +            if (normalized.size() / 2 >= MaxShopUIEntries) return false;
 +            normalized.push_back(uint8_t(stones[stoneIndex]));
@@ -89191,7 +89391,7 @@
 +        }
 +        if (!megaStones.empty()) {
 +            unsigned insertedRows = 0;
-+            if (!appendMegaStonesToEveryPokeMart(shops, numbers, megaStones, &insertedRows)) return {};
++            if (!appendMegaStonesAcrossPokeMarts(shops, numbers, megaStones, &insertedRows)) return {};
 +            changes += insertedRows;
 +        }
 +        if(!changes) return result;
