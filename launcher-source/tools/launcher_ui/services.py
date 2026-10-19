@@ -1,7 +1,7 @@
 """Player-facing launcher tools by mvq1303 / WhatWasMissing."""
 from pathlib import Path
 from datetime import datetime, timezone
-import hashlib, json, os, platform, re, socket, uuid, zipfile, threading, time, zlib
+import hashlib, ipaddress, json, os, platform, re, socket, uuid, zipfile, threading, time, zlib
 import urllib.request
 
 GUIDES=('PLAYER_GUIDE.md','KNOWN_ISSUES.md','TAILSCALE_COOP.md','UDP_SERVER_GUIDE.md','LAUNCHER.md','COMPANION_INTERACTIONS.md','COOP_TOOLS.md','RELEASE_CHECKS_1.0.6.md','FEATURES.md','ROADMAP.md')
@@ -262,6 +262,12 @@ def diagnostics(root,destination,home=None):
         text=re.sub(r'(?im)(\b(?:proxy-)?authorization\s*[:=]\s*)[^\r\n]+',r'\1[REDACTED]',text)
         text=re.sub(r'''(?i)(["']?(?:access[_ -]?key|api[_ -]?key|token|password|secret|authorization|cookie)["']?\s*[:=]\s*)(?:"[^"]*"|'[^']*'|[^\s,;}]+)''',r'\1[REDACTED]',text)
         text=re.sub(r'(?:[A-Za-z]:[\\/]|/Users/|/home/)\S+', '[LOCAL PATH]',text)
+        def redact_ip(match):
+            value=match.group(0);candidate=value.strip('[]').split('%',1)[0]
+            try:ipaddress.ip_address(candidate)
+            except ValueError:return value
+            return '[IP]'
+        text=re.sub(r'(?<![\w.])\[?[0-9A-Fa-f:.]+(?:%[0-9A-Za-z_.-]+)?\]?(?![\w.])',redact_ip,text)
         return re.sub(r'\b(?:\d{1,3}\.){3}\d{1,3}\b','[IP]',text)
     def write_report(stream):
         with zipfile.ZipFile(stream,'w',zipfile.ZIP_DEFLATED) as bundle:
