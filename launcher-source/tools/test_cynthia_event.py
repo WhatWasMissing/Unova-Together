@@ -4,8 +4,10 @@ from __future__ import annotations
 import hashlib
 import json
 import mmap
+import os
 from pathlib import Path
 import struct
+import subprocess
 import tempfile
 import unittest
 import zlib
@@ -88,6 +90,47 @@ class CynthiaEventTests(unittest.TestCase):
                 cynthia_event.prepare_variant(source, root)
             self.assertEqual(hashlib.sha256(source.read_bytes()).hexdigest(), before)
             self.assertFalse((root / ".launcher-cynthia-route7").exists())
+
+    def test_cynthia_cache_junction_outside_home_is_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            root = base / "launcher-home"
+            root.mkdir()
+            outside = base / "outside-cache"
+            outside.mkdir()
+            source = root / "reviewed.nds"
+            source_bytes = b"reviewed source rom"
+            expected = b"patched source rom"
+            source.write_bytes(source_bytes)
+            patch_path = root / "event.bps"
+            patch_path.write_bytes(_finish_patch(
+                _test_patch(source_bytes, [(1, len(expected), expected)]),
+                source_bytes,
+                expected,
+            ))
+
+            cache = root / ".launcher-cynthia-route7"
+            if os.name == "nt":
+                def quote(value):
+                    return "'" + str(value).replace("'", "''") + "'"
+                result = subprocess.run(
+                    ["powershell.exe", "-NoProfile", "-Command",
+                     f"New-Item -ItemType Junction -Path {quote(cache)} -Target {quote(outside)} | Out-Null"],
+                    capture_output=True,
+                )
+                if result.returncode:
+                    self.skipTest("directory junctions unavailable")
+            else:
+                cache.symlink_to(outside, target_is_directory=True)
+
+            source_hash = hashlib.sha256(source_bytes).hexdigest()
+            descriptor = (patch_path.name, hashlib.sha256(expected).hexdigest(), len(expected))
+            with patch.dict(cynthia_event._PATCHES, {source_hash: descriptor}):
+                with self.assertRaisesRegex(ValueError, "cache folder is unsafe"):
+                    cynthia_event.prepare_variant(source, root, patch_root=patch_path)
+
+            self.assertEqual(source.read_bytes(), source_bytes)
+            self.assertEqual(list(outside.iterdir()), [])
 
     def test_event_copy_preserves_preexisting_pending_hardlinks(self):
         with tempfile.TemporaryDirectory() as directory:

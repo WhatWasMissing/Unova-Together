@@ -9,6 +9,7 @@ from pathlib import Path
 import struct
 import zlib
 
+import unova_storage as storage
 from . import preferences as prefs
 
 
@@ -154,14 +155,16 @@ def prepare_variant(source_path, home, patch_root=None) -> Path:
 
     root = Path(home).expanduser().resolve()
     cache = root / ".launcher-cynthia-route7"
-    if cache.exists() and cache.is_symlink():
-        raise ValueError("The Cynthia event cache folder cannot be a symbolic link.")
+    if not storage.safe_managed_path(cache, root):
+        raise ValueError("The Cynthia event cache folder is unsafe; remove linked or externally linked paths before continuing.")
     cache.mkdir(parents=True, exist_ok=True)
+    if not storage.safe_managed_path(cache, root):
+        raise ValueError("The Cynthia event cache folder is unsafe; remove linked or externally linked paths before continuing.")
     cache = cache.resolve()
     target = cache / (source.stem + " - Cynthia Route 7.nds")
     manifest = target.with_suffix(".json")
-    if target.is_symlink() or manifest.is_symlink():
-        raise ValueError("A Cynthia event cache file is a symbolic link; remove it before continuing.")
+    if not storage.safe_managed_path(target, root) or not storage.safe_managed_path(manifest, root):
+        raise ValueError("A Cynthia event cache file is unsafe; remove linked or externally linked paths before continuing.")
     patch_hash = _sha256(patch)
     expected_manifest = {
         "source_sha256": source_hash,
