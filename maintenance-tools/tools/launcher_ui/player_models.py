@@ -14,6 +14,8 @@ import ndspy.code
 import ndspy.narc
 import ndspy.rom
 
+from . import preferences as prefs
+
 
 PLAYER_MAP = (
     (0xE7, 0), (0xE8, 1), (0xE9, 2), (0xE9, 3), (0xEA, 4),
@@ -180,9 +182,7 @@ def prepare_variant(source, home, model_id):
         except (OSError, ValueError, TypeError):
             pass
 
-    pending = target.with_name(target.name + '.pending')
-    pending_manifest = manifest.with_name(manifest.name + '.pending')
-    try:
+    with prefs.staged_path(target) as pending:
         rom = _load_rom(source)
         _patch_rom(rom, model_id)
         rom.saveToFile(str(pending))
@@ -200,14 +200,9 @@ def prepare_variant(source, home, model_id):
         if (current_stat.st_size, current_stat.st_mtime_ns) != source_signature:
             raise ValueError('The source ROM changed while the character model was being prepared.')
         os.replace(pending, target)
-        pending_manifest.write_text(json.dumps({
+        prefs.atomic(manifest, json.dumps({
             'source_sha256': source_digest,
             'model_id': model_id,
             'output_size': target.stat().st_size,
-        }), encoding='utf-8')
-        os.replace(pending_manifest, manifest)
-        return target
-    finally:
-        for path in (pending, pending_manifest):
-            if path.exists():
-                path.unlink()
+        }))
+    return target

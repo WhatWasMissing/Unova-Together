@@ -9,6 +9,8 @@ from pathlib import Path
 import struct
 import zlib
 
+from . import preferences as prefs
+
 
 _PATCHES = {
     # Clean Redux Complete 1.4.1 and the matching Unova Together base used by
@@ -175,9 +177,7 @@ def prepare_variant(source_path, home, patch_root=None) -> Path:
         except (OSError, ValueError, TypeError):
             pass
 
-    pending = target.with_name(target.name + ".pending")
-    pending_manifest = manifest.with_name(manifest.name + ".pending")
-    try:
+    with prefs.staged_path(target) as pending:
         with source.open("rb") as source_file, patch.open("rb") as patch_file:
             source_map = mmap.mmap(source_file.fileno(), 0, access=mmap.ACCESS_READ)
             patch_map = mmap.mmap(patch_file.fileno(), 0, access=mmap.ACCESS_READ)
@@ -198,10 +198,5 @@ def prepare_variant(source_path, home, patch_root=None) -> Path:
         if (current_stat.st_size, current_stat.st_mtime_ns) != (original_stat.st_size, original_stat.st_mtime_ns):
             raise ValueError("The selected ROM changed while the event copy was being checked.")
         os.replace(pending, target)
-        pending_manifest.write_text(json.dumps(expected_manifest, sort_keys=True), encoding="utf-8")
-        os.replace(pending_manifest, manifest)
-        return target
-    finally:
-        for path in (pending, pending_manifest):
-            if path.exists():
-                path.unlink()
+        prefs.atomic(manifest, json.dumps(expected_manifest, sort_keys=True))
+    return target

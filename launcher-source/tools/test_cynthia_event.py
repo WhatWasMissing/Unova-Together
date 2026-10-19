@@ -2,12 +2,14 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import mmap
 from pathlib import Path
 import struct
 import tempfile
 import unittest
 import zlib
+from unittest.mock import patch
 
 from launcher_ui import cynthia_event
 from build_bps_patch import _number
@@ -86,6 +88,50 @@ class CynthiaEventTests(unittest.TestCase):
                 cynthia_event.prepare_variant(source, root)
             self.assertEqual(hashlib.sha256(source.read_bytes()).hexdigest(), before)
             self.assertFalse((root / ".launcher-cynthia-route7").exists())
+
+    def test_event_copy_preserves_preexisting_pending_hardlinks(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "reviewed.nds"
+            source_bytes = b"reviewed source rom"
+            expected = b"patched source rom"
+            source.write_bytes(source_bytes)
+            patch_path = root / "event.bps"
+            patch_path.write_bytes(_finish_patch(
+                _test_patch(source_bytes, [(1, len(expected), expected)]),
+                source_bytes,
+                expected,
+            ))
+
+            cache = root / ".launcher-cynthia-route7"
+            cache.mkdir()
+            target = cache / "reviewed - Cynthia Route 7.nds"
+            manifest = target.with_suffix(".json")
+            pending = target.with_name(target.name + ".pending")
+            pending_manifest = manifest.with_name(manifest.name + ".pending")
+            rom_sentinel = root / "keep-rom-sentinel.bin"
+            manifest_sentinel = root / "keep-manifest-sentinel.bin"
+            rom_sentinel.write_bytes(b"do not overwrite ROM sentinel")
+            manifest_sentinel.write_bytes(b"do not overwrite manifest sentinel")
+            try:
+                pending.hardlink_to(rom_sentinel)
+                pending_manifest.hardlink_to(manifest_sentinel)
+            except (NotImplementedError, OSError) as exc:
+                self.skipTest(f"hard links unavailable: {exc}")
+
+            source_hash = hashlib.sha256(source_bytes).hexdigest()
+            target_hash = hashlib.sha256(expected).hexdigest()
+            descriptor = (patch_path.name, target_hash, len(expected))
+            with patch.dict(cynthia_event._PATCHES, {source_hash: descriptor}):
+                result = cynthia_event.prepare_variant(source, root, patch_root=patch_path)
+
+            self.assertEqual(result.read_bytes(), expected)
+            self.assertEqual(source.read_bytes(), source_bytes)
+            self.assertEqual(rom_sentinel.read_bytes(), b"do not overwrite ROM sentinel")
+            self.assertEqual(manifest_sentinel.read_bytes(), b"do not overwrite manifest sentinel")
+            self.assertTrue(pending.exists())
+            self.assertTrue(pending_manifest.exists())
+            self.assertEqual(json.loads(manifest.read_text(encoding="utf-8"))["output_sha256"], target_hash)
 
 
 if __name__ == "__main__":

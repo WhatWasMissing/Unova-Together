@@ -1,6 +1,11 @@
 """Regression checks for the ROM-backed animated player model selector."""
+import json
 import struct
+import tempfile
 import unittest
+from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import patch
 
 from launcher_ui import player_models, services
 
@@ -51,6 +56,48 @@ class PlayerModelTests(unittest.TestCase):
         self.assertEqual(normalized['preferences'], {'player_model': 4715, 'volume': 60})
         profile['preferences']['player_model'] = -1
         self.assertNotIn('player_model', services.normalize(profile)['preferences'])
+
+    def test_model_copy_preserves_preexisting_pending_hardlinks(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / 'reviewed.nds'
+            source.write_bytes(b'reviewed ROM fixture')
+            target = root / '.launcher-player-models' / source.name
+            manifest = target.with_name(source.name + '.player-model.json')
+            pending = target.with_name(target.name + '.pending')
+            pending_manifest = manifest.with_name(manifest.name + '.pending')
+            rom_sentinel = root / 'keep-rom-sentinel.bin'
+            manifest_sentinel = root / 'keep-manifest-sentinel.bin'
+            rom_sentinel.write_bytes(b'do not overwrite ROM sentinel')
+            manifest_sentinel.write_bytes(b'do not overwrite manifest sentinel')
+            try:
+                pending.parent.mkdir(parents=True)
+                pending.hardlink_to(rom_sentinel)
+                pending_manifest.hardlink_to(manifest_sentinel)
+            except (NotImplementedError, OSError) as exc:
+                self.skipTest(f'hard links unavailable: {exc}')
+
+            model_id = 4715
+            patched_rom = b'prepared ROM fixture'
+            overlay_data = bytearray(42)
+            struct.pack_into('<H', overlay_data, 0, model_id)
+            struct.pack_into('<H', overlay_data, 40, model_id)
+            overlay = SimpleNamespace(data=overlay_data)
+            source_rom = SimpleNamespace(saveToFile=lambda path: Path(path).write_bytes(patched_rom))
+            checked_rom = SimpleNamespace(arm9OverlayTable=object(), files={})
+            with patch.object(player_models, '_load_rom', side_effect=[source_rom, checked_rom]), \
+                 patch.object(player_models, '_patch_rom'), \
+                 patch.object(player_models.ndspy.code, 'loadOverlayTable', return_value={player_models.OVERLAY_ID: overlay}), \
+                 patch.object(player_models, '_player_map_offset', return_value=0):
+                result = player_models.prepare_variant(source, root, model_id)
+
+            self.assertEqual(result.read_bytes(), patched_rom)
+            self.assertEqual(source.read_bytes(), b'reviewed ROM fixture')
+            self.assertEqual(rom_sentinel.read_bytes(), b'do not overwrite ROM sentinel')
+            self.assertEqual(manifest_sentinel.read_bytes(), b'do not overwrite manifest sentinel')
+            self.assertTrue(pending.exists())
+            self.assertTrue(pending_manifest.exists())
+            self.assertEqual(json.loads(manifest.read_text(encoding='utf-8'))['model_id'], model_id)
 
 
 if __name__ == '__main__':

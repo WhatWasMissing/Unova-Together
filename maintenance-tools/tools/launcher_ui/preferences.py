@@ -3,6 +3,7 @@
 ROMs and saves are read-only here; native melonDS executes activated codes.
 """
 from pathlib import Path
+from contextlib import contextmanager
 import hashlib, json, os, re, struct, subprocess, uuid
 from collections.abc import Mapping
 import tomlkit
@@ -109,16 +110,23 @@ def defaults(runtime):
                 'companion_interactions':True,'reduced_follower_motion':False}
     except (OSError,ValueError,TypeError,tomlkit.exceptions.ParseError):return {'pause':False,'volume':100,'filter':True,'companion_interactions':True,'reduced_follower_motion':False}
 
-def atomic_write(path,writer):
+@contextmanager
+def staged_path(path):
     path=Path(path);path.parent.mkdir(parents=True,exist_ok=True)
     pending=path.with_name(path.name+'.'+uuid.uuid4().hex+'.launcher-pending')
-    stream=pending.open('xb')
+    with pending.open('xb'):
+        pass
     try:
-        with stream:writer(stream)
-        os.replace(pending,path)
+        yield pending
     finally:
         try:pending.unlink()
         except FileNotFoundError:pass
+
+def atomic_write(path,writer):
+    path=Path(path)
+    with staged_path(path) as pending:
+        with pending.open('wb') as stream:writer(stream)
+        os.replace(pending,path)
     return path
 
 def atomic(path,text):
