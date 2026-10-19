@@ -37,10 +37,12 @@ def check_report(
     position = data.get("npcFixturePosition")
     if not isinstance(position, dict):
         failures.append("observer report has no fixture position")
-    elif position.get("map") != expected_map:
-        failures.append(
-            f"expected map {expected_map}, observer reported {position.get('map')!r}"
-        )
+    else:
+        observed_map = position.get("map")
+        if type(observed_map) is not int:
+            failures.append("observer did not report a valid map ID")
+        elif observed_map != expected_map:
+            failures.append(f"expected map {expected_map}, observer reported {observed_map!r}")
     input_blocked = data.get("npcFixtureInputBlocked")
     if type(input_blocked) is not bool:
         failures.append("observer did not report input state")
