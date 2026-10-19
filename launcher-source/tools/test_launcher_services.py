@@ -221,6 +221,11 @@ class ServiceTests(unittest.TestCase):
         u.record_integrity(self.home);self.assertIn('Verified',s.integrity(self.home))
         (self.runtime/'melonDS.exe').write_bytes(b'changed');self.assertIn('changed files',s.integrity(self.home))
         (self.runtime/'melonDS.exe').unlink();self.assertIn('melonDS.exe',s.integrity(self.home))
+    def test_integrity_rejects_malformed_records(self):
+        manifest=self.home/'.launcher-integrity.json'
+        for raw in ('[]','{}','{"files":[]}','{"files":{"builds/current/melonDS.exe":7}}','not-json'):
+            manifest.write_text(raw,encoding='utf-8')
+            with self.subTest(raw=raw),self.assertRaises(ValueError):s.integrity(self.home)
 
     def test_missing_active_runtime_still_allows_launcher_repair(self):
         directory=self.home/'.updates';directory.mkdir();(directory/'active.json').write_text('{"version":"0.3.5"}')

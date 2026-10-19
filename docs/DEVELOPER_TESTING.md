@@ -294,6 +294,12 @@ The same export test also reproduced that IPv6 addresses (`2001:db8::1`, `::1`, 
 
 The diagnostics test now also covers a JSON `Proxy-Authorization` field. The existing key/value matcher already removed that credential, so this was test hardening only; the focused test passed in both launcher trees and the **48-file** parity check passed.
 
+### Integrity verifier handles malformed checksum records — 2026-10-19
+
+The installed-file verifier indexed the parsed checksum JSON before validating its shape. A list or a missing `files` key raised `TypeError`/`KeyError`; a non-string checksum reached `re.fullmatch` and raised `TypeError`. It now validates the JSON object and entry types first and returns a clear `ValueError` for malformed records, while preserving normal missing/changed-file reports.
+
+**PASS — SOURCE/UNIT VERIFIED:** The production integrity check reproduced malformed top-level JSON, a missing or non-dictionary `files` value, a non-string checksum, and invalid JSON. The focused cases and existing changed/missing-file checks passed in both launcher trees. Full discovery passed with `py -3.12 -B -m unittest discover -s launcher-source/tools -p 'test_*.py'` (**143/143**) and `py -3.12 -B -m unittest discover -s maintenance-tools/tools -p 'test_*.py'` (**188 run, six optional skips**). `py -3.12 -B check_launcher_tree_parity.py` passed for all **48 UI files**.
+
 ### Guide cache rejects linked paths — 2026-10-19
 
 Guide refresh and offline-cache writes did not validate the `.updates/guides` directory against symlinks or junctions. A linked cache could redirect guide writes outside the launcher home, including replacing an existing `active.json`. The guide service now checks the cache directory and each marker, document bundle, and cached guide path against the install's managed-path policy before network access or file operations; offline reads fall back safely when the cache path is linked.

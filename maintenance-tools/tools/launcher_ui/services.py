@@ -252,12 +252,16 @@ def integrity(root):
     root=Path(root).resolve();manifest=root/'.launcher-integrity.json'
     if not manifest.exists():return 'No installation checksum record. Repair creates one from the verified download.'
     if manifest.stat().st_size>1024*1024:raise ValueError('Installation checksum record is too large.')
-    files=json.loads(manifest.read_text())['files']
+    try:record=json.loads(manifest.read_text(encoding='utf-8'))
+    except (UnicodeError,json.JSONDecodeError) as exc:raise ValueError('Invalid installation checksum record.') from exc
+    if not isinstance(record,dict):raise ValueError('Invalid installation checksum record.')
+    files=record.get('files')
     if not isinstance(files,dict) or not 0<len(files)<=4096:raise ValueError('Invalid installation checksum record.')
     changed=[]
     for name,expected in files.items():
+        if not isinstance(name,str) or not isinstance(expected,str) or not re.fullmatch('[a-f0-9]{64}',expected):raise ValueError('Invalid installation checksum entry.')
         path=root/name
-        if not path.resolve().is_relative_to(root) or path.suffix.lower() not in {'.exe','.dll'} or not re.fullmatch('[a-f0-9]{64}',expected):raise ValueError('Invalid installation checksum entry.')
+        if not path.resolve().is_relative_to(root) or path.suffix.lower() not in {'.exe','.dll'}:raise ValueError('Invalid installation checksum entry.')
         if not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest()!=expected:changed.append(name)
     return ('Verified '+str(len(files))+' game files against the installation record.' if not changed else
             'Missing or changed files: '+', '.join(changed[:10])+'. Use Repair game files.')
