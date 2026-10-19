@@ -20,11 +20,21 @@ The existing Nuvema Town script also reads Hall of Fame flag `0x0960` (field-scr
 
 ## Placement and implementation status
 
-The Nuvema map renderer shows an unoccupied candidate at grid `(778, 744)` on the upper path, and the current event table has no NPC at that coordinate. The model-0 render and parser round-trip do not establish the game's collision behavior or prove an actor will spawn correctly on that tile. The available Frost check parsed and exported the ROM but did not open its map editor. **No NPC, event script, text, or ROM patch has been added.**
+The proposed Nuvema position is stored as world grid `(778, 744)`, which resolves to map-matrix cell `(24, 23)` and local tile `(10, 8)` in `MAP_MODEL_OVERWORLD_2_MAP24_23`. The supported test ROM identifies Nuvema as zone ID `389` and event archive member `566`; `389` is the zone ID, not the event member. The local map renderer shows the candidate on the upper path, and the event table contains no NPC on that exact tile.
 
-Before implementation, the candidate must be checked in a compatible map editor or exercised in the game so its collision, visual alignment, map-entry visibility, and interaction from an adjacent tile are confirmed. The post-League gate and repeatable dialogue also need artifact and gameplay checks, with the original ROM and save preserved.
+The new read-only audit checks the actual model terrain at that position. On the Cynthia-patched Redux test ROM, it finds one valid terrain plane with tile type `0x00800000` (class `0x0000`, flags `0x0080`). BW2's `MapTile_BlocksCollision` returns blocked for invalid tiles or when tile flags bit 0 is set, so this terrain cell does not block walking. The world-to-map conversion and collision predicate were cross-checked against the upstream BW2 decomp at commit [`81eea95`](https://github.com/fuddlesworth/pokebw2/tree/81eea95ee66e9ab41dedf5ead08ff1d3222cbef5). [`InitActorZoneNPCGridPositon`](https://github.com/fuddlesworth/pokebw2/blob/81eea95ee66e9ab41dedf5ead08ff1d3222cbef5/src/ov012/fldmmdl.c#L399-L430) shows how event coordinates become world positions, [`GetChunkCoordOfWorld`](https://github.com/fuddlesworth/pokebw2/blob/81eea95ee66e9ab41dedf5ead08ff1d3222cbef5/src/ov012/map_matrix.c#L118-L120) resolves the 32-tile matrix cell, and [`MapTile_BlocksCollision`](https://github.com/fuddlesworth/pokebw2/blob/81eea95ee66e9ab41dedf5ead08ff1d3222cbef5/src/ov036/map_attr.c#L29-L51) checks the terrain flags. This is static terrain evidence only: it does not verify prop collision, live map alignment, map-entry visibility, or that a new actor can be interacted with in-game.
+
+Frost 5.0.1 parsed and exported the ROM without changing the input, but its map editor did not open in the inspection attempt. The map-editor and gameplay checks remain **BLOCKED / NOT RUN**. **No NPC, event script, text, or ROM patch has been added.** Implementation remains deferred until a compatible map-editor view or live-game test confirms the position and interaction path. The post-League gate and repeatable dialogue will also need artifact and gameplay checks, with the original ROM and save preserved.
 
 ## Reproduce the audit
+
+Run the production terrain-decoding tests with:
+
+```powershell
+python maintenance-tools/tools/test_legendary_researcher.py -v
+```
+
+All five map-position, collision-flag, invalid-tile, and bounds tests passed on the development PC.
 
 Run this against a legally held disposable copy; it reads the ROM and only prints JSON:
 
@@ -34,4 +44,4 @@ python maintenance-tools/tools/audit_legendary_researcher.py `
   --decomp 'F:\gen5decomps\pokebw2-main'
 ```
 
-The audit passed on two isolated ROM copies: the clean Redux input (SHA-256 `332d07576e2077b4ef91e394603d144108098b7624c6a918b175f90530c0036a`) and its Cynthia-patched target (SHA-256 `c34498dc807a83e3d5a5c85a341464c24f56a1ed515db6cfc7ef4e2a71dc3df7`). The encounter and unlock evidence matched between them. A negative-control Unova Together variant with a different SHA-256 was rejected. The audit output is ROM- and decomp-revision-specific; it does not establish behavior in the emulator.
+The audit passed on two isolated ROM copies: the clean Redux input (SHA-256 `332d07576e2077b4ef91e394603d144108098b7624c6a918b175f90530c0036a`) and its Cynthia-patched target (SHA-256 `c34498dc807a83e3d5a5c85a341464c24f56a1ed515db6cfc7ef4e2a71dc3df7`). Encounter, unlock, and candidate terrain evidence matched between them. A negative-control Unova Together variant with a different SHA-256 was rejected. The audit output is ROM- and decomp-revision-specific; it does not establish behavior in the emulator.

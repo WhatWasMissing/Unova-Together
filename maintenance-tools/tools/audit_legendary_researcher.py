@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Audit the Lake Trio encounter hints against a supported English B2 Redux ROM.
 
-This is a read-only ROM inspection tool. It reports raw-script and event-table
-evidence; it does not patch a ROM or claim that an in-game researcher exists.
+This is a read-only ROM inspection tool. It reports raw-script, event-table,
+and static map-terrain evidence; it does not patch a ROM or claim that an
+in-game researcher exists.
 
 Example:
   python maintenance-tools/tools/audit_legendary_researcher.py \
@@ -14,6 +15,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import struct
 import sys
 from pathlib import Path
 
@@ -49,6 +51,86 @@ def event_flag(value: int | str) -> int:
     if value.startswith("EVENT_FLAG_0x"):
         return int(value.rsplit("x", 1)[1], 16)
     raise ValueError(f"Expected a raw event flag, got {value!r}")
+
+
+def world_to_matrix_cell(x: int, z: int) -> tuple[int, int, int, int]:
+    """Return map-matrix cell and within-chunk tile for BW2's 32-tile chunks."""
+    return x // 32, z // 32, x % 32, z % 32
+
+
+def terrain_tile(chunk: bytes, x: int, z: int) -> dict:
+    """Read one tile's type from a BW2 map-model terrain layer."""
+    from tools.data.map_terrain_data import terrain_ranges
+
+    layers = []
+    width = height = None
+    for layer, (start, _end) in enumerate(terrain_ranges(chunk)):
+        width, height = struct.unpack_from("<HH", chunk, start)
+        if not (0 <= x < width and 0 <= z < height):
+            raise ValueError(f"Map tile ({x}, {z}) is outside terrain layer {layer} ({width}x{height})")
+        index = z * width + x
+        if chunk[:2] == b"RD":
+            values = struct.unpack_from("<6h2iI", chunk, start + 4 + 24 * index)
+            encoded_type = values[-1]
+        elif chunk[:2] in (b"WB", b"GC"):
+            _, _, encoded_type = struct.unpack_from("<HHI", chunk, start + 4 + 8 * index)
+        else:
+            raise ValueError(f"Map chunk {chunk[:2]!r} does not contain terrain")
+
+        tile_type = encoded_type & 0x7FFFFFFF
+        tile_class = tile_type & 0xFFFF
+        tile_flags = tile_type >> 16
+        valid = tile_type != 0xFFFFFFFF and tile_class != 0xFF
+        layers.append({
+            "layer": layer,
+            "width": width,
+            "height": height,
+            "tileType": f"0x{tile_type:08X}",
+            "tileClass": f"0x{tile_class:04X}",
+            "tileFlags": f"0x{tile_flags:04X}",
+            "valid": valid,
+            "blocksCollision": not valid or bool(tile_flags & 1),
+        })
+    return {"width": width, "height": height, "layers": layers}
+
+
+def candidate_map_evidence(rom: ndspy.rom.NintendoDSRom, zone_id: int) -> dict:
+    """Resolve the candidate's model and static terrain collision from ROM archives."""
+    from tools.data.gen_constants import load as load_constants
+    from tools.data.map_matrix_data import matrix_json
+    from tools.data.zone_data import HEADER as ZONE_HEADER
+
+    world_x, world_z = RESEARCHER_CANDIDATE
+    chunk_x, chunk_z, local_x, local_z = world_to_matrix_cell(world_x, world_z)
+    zone_header = ndspy.narc.NARC(rom.getFileByName("a/0/1/2")).files[0]
+    header = ZONE_HEADER.unpack_from(zone_header, zone_id * ZONE_HEADER.size)
+    matrix_id = header[3]
+    matrices = ndspy.narc.NARC(rom.getFileByName("a/0/0/9")).files
+    matrix = matrix_json(matrices[matrix_id])
+    matrix_height, matrix_width = len(matrix["maps"]), len(matrix["maps"][0])
+    if not (0 <= chunk_x < matrix_width and 0 <= chunk_z < matrix_height):
+        raise ValueError("The candidate position is outside Nuvema's map matrix")
+    model_name = matrix["maps"][chunk_z][chunk_x]
+    if model_name is None:
+        raise ValueError("The candidate position resolves to an empty map-matrix cell")
+    model_id = load_constants("map_models")[model_name]
+    model = ndspy.narc.NARC(rom.getFileByName("a/0/0/8")).files[model_id]
+    terrain = terrain_tile(model, local_x, local_z)
+    layers = terrain["layers"]
+    # A single valid, non-blocking terrain plane is enough for static ground evidence.
+    # Multiple planes require the live actor height and are therefore left unresolved.
+    static_walkable = (len(layers) == 1 and layers[0]["valid"]
+                       and not layers[0]["blocksCollision"])
+    terrain.update({
+        "worldPosition": {"x": world_x, "z": world_z},
+        "matrixId": matrix_id,
+        "matrixCell": {"x": chunk_x, "z": chunk_z},
+        "model": model_name,
+        "modelId": model_id,
+        "localTile": {"x": local_x, "z": local_z},
+        "singleLayerStaticWalkable": static_walkable,
+    })
+    return terrain
 
 
 def audit(rom_path: Path, decomp: Path) -> dict:
@@ -156,9 +238,10 @@ def audit(rom_path: Path, decomp: Path) -> dict:
         raise ValueError("Nuvema's existing postgame script no longer checks Hall of Fame flag 0x0960")
     nuvema_event_index = event_order.index("ZONE_NUVEMA_TOWN")
     nuvema_events = events_json(event_files[nuvema_event_index])
-    occupied = [actor["grid"] for actor in nuvema_events["npcs"]]
+    occupied = [actor["grid"] for actor in nuvema_events["npcs"] if "grid" in actor]
     if any((point["x"], point["z"]) == RESEARCHER_CANDIDATE for point in occupied):
         raise ValueError("The candidate Nuvema tile has acquired an NPC")
+    placement = candidate_map_evidence(rom, nuvema_index)
 
     return {
         "rom": str(rom_path.resolve()),
@@ -188,7 +271,10 @@ def audit(rom_path: Path, decomp: Path) -> dict:
             "nuvemaEventMember": nuvema_event_index,
             "candidateNpcGrid": {"x": RESEARCHER_CANDIDATE[0], "z": RESEARCHER_CANDIDATE[1]},
             "candidateTileUnoccupied": True,
+            "candidateGroundTile": placement,
+            "candidateGroundTileStaticWalkable": placement["singleLayerStaticWalkable"],
             "candidateTileCollisionVerified": False,
+            "placementGameplayOrCompatibleEditorCheck": "NOT RUN",
         },
         "encounters": results,
         "scope": "Read-only source/artifact evidence; no NPC patch generated and no gameplay claim.",
