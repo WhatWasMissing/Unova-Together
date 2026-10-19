@@ -153,4 +153,16 @@ The shared storage helper now rejects reparse points and multiply-linked managed
 
 **PASS:** Before the correction, the new updater, storage, and standalone-junction tests failed because the unsafe operations were allowed or rejected only after writes. After the fix, `python -B -m unittest -v test_unova_updater test_unova_storage test_unova_single_exe test_launcher_migration` passed **47 tests**. Coverage includes junctions, hard-linked locks and pending records, checksum/cancellation paths, standalone updates, migration and cleanup preservation. `git diff --check` passed. All filesystem fixtures were temporary; no user installation, ROM, save, or release asset was touched.
 
-**NOT RUN:** Full maintenance discovery attempted 92 tests and skipped four optional checks, but the suite exited with import errors in six launcher modules because `tomlkit` and Pillow are absent from the local Python 3.14 environment. Those modules failed before their tests ran. The focused suites above exercise the production updater, storage, standalone installer, and migration modules.
+The first full-discovery attempt used Python 3.14, where `tomlkit` and Pillow were absent, so six modules failed during import before their tests ran. On 2026-10-19, the full maintenance suite was rerun with the installed Python 3.12 environment, which includes those dependencies:
+
+```powershell
+py -3.12 -B -m unittest discover -v
+```
+
+**PASS:** 166 tests ran; all passed, with six optional ROM/RAM or external-runtime checks skipped. This includes the updater, storage, standalone installer, migration, launcher services, GUI, and Legendary Researcher static checks. The skips do not count as runtime/gameplay verification.
+
+### Launcher atomic staging-write safety
+
+A disposable regression test found that save restore used a predictable staging filename and opened it in truncating mode. A pre-existing hard link at that path therefore caused the restored save bytes to overwrite the other linked file. The shared launcher atomic-write helper now creates a UUID-named staging file with exclusive creation before replacing its destination. Save restore, launcher settings, news and guide caches, and diagnostic ZIP exports use this path. Existing predictable pending files are left untouched. The hard-link regressions verify this for restore, settings, cached guides, and diagnostic archives; before the correction, the restore test failed with the linked outside file changed.
+
+**PASS:** The canonical launcher suite passed **122 tests**. The full maintenance suite passed **166 tests**, with six optional ROM/RAM or external-runtime checks skipped. The launcher UI mirror check passed for 48 files, and its focused parity tests passed 3/3. The services module passed **18 tests in each launcher tree**. The combined focused source suite passed 61 tests; the maintenance suite covering preferences, services, UI, updater, storage, standalone installer, and migration passed 108 tests. All save and hard-link fixtures were isolated in `TemporaryDirectory`; no real save or installation was accessed.

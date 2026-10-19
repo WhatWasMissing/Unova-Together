@@ -27,9 +27,9 @@ def refresh_guides(home):
     if not target.is_file():
         docs={name:fetch('https://raw.githubusercontent.com/'+REPO+'/'+commit+'/docs/'+name,'raw.githubusercontent.com',131072) for name in GUIDES}
         if any(not text.strip() or '\x00' in text for text in docs.values()):raise ValueError('Invalid guide text')
-        pending=target.with_suffix('.pending');pending.write_text(json.dumps(docs),encoding='utf-8');os.replace(pending,target)
-    marker=directory/'active.json';pending=marker.with_suffix('.pending')
-    pending.write_text(json.dumps({'commit':commit}),encoding='utf-8');os.replace(pending,marker)
+        prefs.atomic_write(target,lambda stream:stream.write(json.dumps(docs).encode('utf-8')))
+    marker=directory/'active.json'
+    prefs.atomic_write(marker,lambda stream:stream.write(json.dumps({'commit':commit}).encode('utf-8')))
     return commit
 
 def cached_guide(home,name):
@@ -42,7 +42,8 @@ def cached_guide(home,name):
         if target.stat().st_size>1000000:return None
         text=json.loads(target.read_text(encoding='utf-8'))[name]
         if not isinstance(text,str) or len(text.encode('utf-8'))>131072 or '\x00' in text:return None
-        guide=directory/name;pending=guide.with_suffix('.pending');pending.write_text(text,encoding='utf-8');os.replace(pending,guide)
+        guide=directory/name
+        prefs.atomic_write(guide,lambda stream:stream.write(text.encode('utf-8')))
         return guide
     except (OSError,ValueError,KeyError,TypeError):return None
 
@@ -139,7 +140,7 @@ def restore(home,item,archive):
             payload.append((target,data))
     backup(home,item,'before-restore');directory.mkdir(parents=True,exist_ok=True)
     for path,data in payload:
-        pending=path.with_name(path.name+'.restore-pending');pending.write_bytes(data);os.replace(pending,path)
+        prefs.atomic_write(path,lambda stream:stream.write(data))
     return len(payload)
 
 def network(values):
@@ -237,15 +238,11 @@ def diagnostics(root,destination,home=None):
         text=re.sub(r'''(?i)(["']?(?:access[_ -]?key|api[_ -]?key|token|password|secret|authorization|cookie)["']?\s*[:=]\s*)(?:"[^"]*"|'[^']*'|[^\s,;}]+)''',r'\1[REDACTED]',text)
         text=re.sub(r'(?:[A-Za-z]:[\\/]|/Users/|/home/)\S+', '[LOCAL PATH]',text)
         return re.sub(r'\b(?:\d{1,3}\.){3}\d{1,3}\b','[IP]',text)
-    pending=destination.with_name(destination.name+'.pending')
-    try:
-        with zipfile.ZipFile(pending,'w',zipfile.ZIP_DEFLATED) as bundle:
+    def write_report(stream):
+        with zipfile.ZipFile(stream,'w',zipfile.ZIP_DEFLATED) as bundle:
             bundle.writestr('summary.json',json.dumps(reports,indent=2))
             for index,path in enumerate(files[:20]):
                 with path.open('rb') as handle:handle.seek(max(0,path.stat().st_size-65536));data=handle.read(65536)
                 bundle.writestr('logs/'+str(index+1)+'.log',redact(data.decode('utf-8',errors='replace')))
             bundle.writestr('README.txt','Text logs are automatically redacted; review before sharing. No ROMs, saves, RAM dumps, launcher profiles or credentials are included.')
-        os.replace(pending,destination)
-    finally:
-        if pending.exists():pending.unlink()
-    return destination
+    return prefs.atomic_write(destination,write_report)

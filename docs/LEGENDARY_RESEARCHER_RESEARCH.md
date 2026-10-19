@@ -26,6 +26,12 @@ The new read-only audit checks the actual model terrain at that position. On the
 
 Frost 5.0.1 parsed and exported the ROM without changing the input, but its map editor did not open in the inspection attempt. The map-editor and gameplay checks remain **BLOCKED / NOT RUN**. **No NPC, event script, text, or ROM patch has been added.** Implementation remains deferred until a compatible map-editor view or live-game test confirms the position and interaction path. The post-League gate and repeatable dialogue will also need artifact and gameplay checks, with the original ROM and save preserved.
 
+### Additional map-editor evaluation
+
+The official [SwissArmyKnife repository](https://github.com/PlatinumMaster/SwissArmyKnife) advertises B2W2 map-container, script/text, and zone-entity editing, including NPCs. Its README limits full support to retail Black 2/White 2, so Redux compatibility was not assumed. I checked out SwissArmyKnife `08c997485826f8fcd1e0dffbcafb205d1b32726b`, BeaterLibrary `a2a5267898361ae1e654edfe0cd82b1355ea1c0a`, Hotswap `70aacacc856dd5f1e383a0a7afb781f94c1802d4`, and NitroSharp `e1596712480970da755f9dbad7ba37b3c4cb5da5` from their official GitHub repositories. The local .NET 10.0.400 SDK restored dependencies, but the editor build stopped with 21 compile errors: the application expects `BeaterLibrary.GameInfo` and related types that are absent from the checked-out BeaterLibrary tree. No editor binary or map view was produced. The tool source stayed in a disposable local investigation folder and was not copied into this repository.
+
+This second editor path therefore does not clear the placement gate. The candidate coordinate is still supported by ROM event-table and terrain/collision inspection only; prop collision, live map alignment, NPC interaction, and in-game post-League visibility remain unverified. No event patch should be created from the current evidence.
+
 ## Reproduce the audit
 
 Run the production terrain-decoding tests with:

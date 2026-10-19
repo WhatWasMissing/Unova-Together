@@ -876,8 +876,7 @@ class Launcher(tk.Tk):
         if self.play_profiles:
             item=self._active_profile();item['rom']=self.rom.get();item['preferences']=dict(self.preference_values)
         try:
-            self.config_path.parent.mkdir(parents=True,exist_ok=True);pending=self.config_path.with_suffix('.pending')
-            pending.write_text(json.dumps({'selected_game':self.selected_game.get(),'research_root':self.research_root.get(),'research_mode':self.research_mode.get(),'research_address':self.research_address.get(),'rom':self.rom.get(),'check':self.auto.get(),'music':self.music.get(),'preferences':self.preference_values,'cheats':self.cheat_choices,'profiles':self.play_profiles,'active_profile':self.active_profile_id}),encoding='utf-8');os.replace(pending,self.config_path)
+            prefs.atomic(self.config_path,json.dumps({'selected_game':self.selected_game.get(),'research_root':self.research_root.get(),'research_mode':self.research_mode.get(),'research_address':self.research_address.get(),'rom':self.rom.get(),'check':self.auto.get(),'music':self.music.get(),'preferences':self.preference_values,'cheats':self.cheat_choices,'profiles':self.play_profiles,'active_profile':self.active_profile_id}))
         except OSError as exc:self.status.set('Could not save settings: '+str(exc))
 
     def _sync(self):
@@ -1121,8 +1120,8 @@ class Launcher(tk.Tk):
                     self.news=value['news'];self._render_news()
                     self.news_status.set('Up to date · patch notes from GitHub' if value.get('newsSource')=='patchnotes' else 'Using release notes while patch notes are unavailable')
                     try:
-                        cache=self.home/'.updates/news-cache.json';cache.parent.mkdir(exist_ok=True);pending=cache.with_suffix('.pending')
-                        pending.write_text(json.dumps(self.news),encoding='utf-8');os.replace(pending,cache)
+                        cache=self.home/'.updates/news-cache.json'
+                        prefs.atomic(cache,json.dumps(self.news))
                     except OSError:self.news_status.set('News refreshed · offline cache could not be saved')
                     latest=value.get('release')
                     if latest is None:

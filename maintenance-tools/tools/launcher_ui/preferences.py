@@ -3,7 +3,7 @@
 ROMs and saves are read-only here; native melonDS executes activated codes.
 """
 from pathlib import Path
-import hashlib, json, os, re, struct, subprocess
+import hashlib, json, os, re, struct, subprocess, uuid
 from collections.abc import Mapping
 import tomlkit
 
@@ -109,13 +109,20 @@ def defaults(runtime):
                 'companion_interactions':True,'reduced_follower_motion':False}
     except (OSError,ValueError,TypeError,tomlkit.exceptions.ParseError):return {'pause':False,'volume':100,'filter':True,'companion_interactions':True,'reduced_follower_motion':False}
 
-def atomic(path,text):
+def atomic_write(path,writer):
     path=Path(path);path.parent.mkdir(parents=True,exist_ok=True)
-    pending=path.with_name(path.name+'.launcher-pending')
+    pending=path.with_name(path.name+'.'+uuid.uuid4().hex+'.launcher-pending')
+    stream=pending.open('xb')
     try:
-        pending.write_text(text,encoding='utf-8');os.replace(pending,path)
+        with stream:writer(stream)
+        os.replace(pending,path)
     finally:
-        if pending.exists():pending.unlink()
+        try:pending.unlink()
+        except FileNotFoundError:pass
+    return path
+
+def atomic(path,text):
+    return atomic_write(path,lambda stream:stream.write(text.encode('utf-8')))
 
 def managed_codes(existing,selected):
     # Replace only our category. Existing ROOT-level codes and nested user

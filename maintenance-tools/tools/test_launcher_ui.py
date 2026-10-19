@@ -267,6 +267,15 @@ class LauncherTests(unittest.TestCase):
             box=(self.app.winfo_rootx(),self.app.winfo_rooty(),self.app.winfo_rootx()+self.app.winfo_width(),self.app.winfo_rooty()+self.app.winfo_height())
             ImageGrab.grab(bbox=box).save(OUTPUT/'settings.png')
 
+    def test_settings_save_preserves_preexisting_pending_hardlink(self):
+        outside=self.home/'keep-this-file.bin';outside.write_bytes(b'outside data')
+        pending=self.app.config_path.with_suffix('.pending');pending.hardlink_to(outside)
+
+        self.app._save()
+
+        self.assertEqual(outside.read_bytes(),b'outside data');self.assertTrue(pending.exists())
+        self.assertTrue(json.loads(self.app.config_path.read_text()))
+
     def test_profiles_and_connection_save_launch_environment(self):
         self.app.rom.set(str(self.rom));self.app.player.set('Tester');self.app._save_profile()
         first=self.app.active_profile_id;self.app._preference('volume',25)

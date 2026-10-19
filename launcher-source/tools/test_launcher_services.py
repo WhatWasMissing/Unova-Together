@@ -30,6 +30,9 @@ class ServiceTests(unittest.TestCase):
             def geturl(self):return self.url
             def read(self,n):return self.data[:n]
         commit='a'*40
+        guide_dir=self.home/'.updates/guides';guide_dir.mkdir(parents=True)
+        outside=self.home/'keep-guide-data.bin';outside.write_bytes(b'keep this data')
+        marker_pending=guide_dir/'active.pending';marker_pending.hardlink_to(outside)
         def response(request,timeout):
             if 'api.github.com' in request.full_url:
                 self.assertTrue(request.full_url.endswith('/git/ref/heads/main'))
@@ -39,7 +42,10 @@ class ServiceTests(unittest.TestCase):
         with patch.object(s.urllib.request,'urlopen',side_effect=response) as fetch:
             self.assertEqual(s.refresh_guides(self.home),commit);self.assertEqual(fetch.call_count,1+len(s.GUIDES))
             s.refresh_guides(self.home);self.assertEqual(fetch.call_count,2+len(s.GUIDES))
+        self.assertEqual(outside.read_bytes(),b'keep this data');self.assertTrue(marker_pending.exists())
+        guide_pending=guide_dir/'PLAYER_GUIDE.pending';guide_pending.hardlink_to(outside)
         self.assertEqual(s.cached_guide(self.home,'PLAYER_GUIDE.md').read_text(),'# Updated guide\n')
+        self.assertEqual(outside.read_bytes(),b'keep this data');self.assertTrue(guide_pending.exists())
         marker=(self.home/'.updates/guides/active.json').read_bytes()
         with patch.object(s.urllib.request,'urlopen',side_effect=OSError('offline')):
             with self.assertRaises(OSError):s.refresh_guides(self.home)
@@ -97,6 +103,30 @@ class ServiceTests(unittest.TestCase):
         with zipfile.ZipFile(archive,'w') as z:z.writestr('Black2.sav',b'evil');z.writestr('manifest.json',json.dumps(manifest))
         with self.assertRaises(ValueError):s.restore(self.home,self.item,archive)
         self.assertEqual(self.save.read_bytes(),b'original save')
+    def test_restore_does_not_follow_preexisting_hardlinked_staging_path(self):
+        archive=s.backup(self.home,self.item)
+        self.save.write_bytes(b'current save')
+        outside=self.home/'keep-this-file.bin';outside.write_bytes(b'outside data')
+        staging=self.save.with_name(self.save.name+'.restore-pending')
+        try:staging.hardlink_to(outside)
+        except (NotImplementedError,OSError) as exc:self.skipTest(f'hard links unavailable: {exc}')
+
+        self.assertEqual(s.restore(self.home,self.item,archive),1)
+
+        self.assertEqual(outside.read_bytes(),b'outside data')
+        self.assertEqual(self.save.read_bytes(),b'original save')
+        self.assertEqual(staging.read_bytes(),b'outside data')
+    def test_restore_keeps_unowned_hardlinked_unique_staging_collision(self):
+        archive=s.backup(self.home,self.item)
+        outside=self.home/'keep-this-file.bin';outside.write_bytes(b'outside data')
+        token='a'*32
+        staging=self.save.with_name(self.save.name+'.'+token+'.launcher-pending')
+        try:staging.hardlink_to(outside)
+        except (NotImplementedError,OSError) as exc:self.skipTest(f'hard links unavailable: {exc}')
+        with patch.object(s.prefs.uuid,'uuid4',return_value=type('Token',(),{'hex':token})()):
+            with self.assertRaises(FileExistsError):s.restore(self.home,self.item,archive)
+        self.assertEqual(outside.read_bytes(),b'outside data')
+        self.assertTrue(staging.exists())
     def test_launch_checks_real_limitations(self):
         messages=s.checks(self.home,self.item)
         self.assertTrue(any('Frame limit' in m for m in messages));self.assertTrue(any('C-Gear' in m and 'cannot' in m for m in messages))
@@ -124,6 +154,15 @@ class ServiceTests(unittest.TestCase):
             contents=''.join(z.read(i).decode() for i in z.namelist())
             self.assertNotIn('private-token',contents);self.assertNotIn('secret-key',contents);self.assertNotIn('127.0.0.1',contents);self.assertNotIn('Private',contents)
             self.assertTrue(all(Path(n).suffix not in ('.sav','.nds','.ramdump') for n in z.namelist()))
+    def test_diagnostic_export_preserves_preexisting_pending_file(self):
+        separate=self.home/'installed';separate.mkdir()
+        output=self.home/'diagnostics.zip';outside=self.home/'keep-this-file.bin';outside.write_bytes(b'outside data')
+        pending=output.with_name(output.name+'.pending');pending.hardlink_to(outside)
+
+        self.assertEqual(s.diagnostics(separate,output,self.home),output)
+
+        self.assertEqual(outside.read_bytes(),b'outside data');self.assertTrue(pending.exists())
+        with zipfile.ZipFile(output) as bundle:self.assertIn('summary.json',bundle.namelist())
     def test_same_version_repair_is_verified_and_keeps_old_runtime(self):
         current_launcher=self.home/'launcher';current_launcher.mkdir();(current_launcher/'local.txt').write_text('current launcher')
         data=io.BytesIO()

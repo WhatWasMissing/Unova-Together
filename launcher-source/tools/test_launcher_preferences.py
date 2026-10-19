@@ -52,6 +52,17 @@ class PreferencesTests(unittest.TestCase):
         self.assertEqual(self.config.read_text(),self.original)
     def test_incomplete_managed_category_rejected(self):
         with self.assertRaises(ValueError):p.managed_codes('CAT 0 '+p.MARKER+'\nCODE 1 Edited\n',{})
+    def test_atomic_settings_write_preserves_preexisting_pending_hardlink(self):
+        target=self.home/'settings.json';outside=self.home/'keep-this-file.bin';outside.write_bytes(b'outside data')
+        pending=target.with_name(target.name+'.launcher-pending')
+        try:pending.hardlink_to(outside)
+        except (NotImplementedError,OSError) as exc:self.skipTest(f'hard links unavailable: {exc}')
+
+        p.atomic(target,'{"ok":true}')
+
+        self.assertEqual(outside.read_bytes(),b'outside data')
+        self.assertEqual(target.read_text(encoding='utf-8'),'{"ok":true}')
+        self.assertTrue(pending.exists())
     def test_unknown_rom_not_accepted_by_filename(self):
         self.assertIsNone(p.identify(self.rom));self.assertIsNone(p.identify(self.home/'missing.nds'))
     def test_cheat_profiles_are_limited_to_redux_games(self):
