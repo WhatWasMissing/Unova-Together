@@ -335,7 +335,8 @@ def _install_unlocked(home: Path, release: dict, cancel: threading.Event, progre
         record_integrity(root)
         old_config = current / 'builds/current/melonDS.toml'
         if old_config.exists():
-            shutil.copy2(old_config, root / 'builds/current/melonDS.toml')
+            import unova_storage as storage
+            storage.atomic_copy(old_config, root / 'builds/current/melonDS.toml', home)
         launcher=current/'launcher' if (current/'launcher').is_dir() else home/'launcher'
         if repairing and launcher.is_dir():
             # Repair game files without downgrading the launcher running it.
