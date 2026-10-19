@@ -127,9 +127,13 @@ def running_paths():
     command="Get-CimInstance Win32_Process -Filter \"Name = 'melonDS.exe' OR Name = 'Unova Together.exe' OR Name = 'Pokemon Together.exe' OR Name = 'Pokemon Together Bootstrap.exe' OR Name = 'Repair-Launcher.exe'\" | Select-Object Name,ExecutablePath | ConvertTo-Json -Compress"
     result=subprocess.run(['powershell.exe','-NoProfile','-Command',command],capture_output=True,text=True,timeout=12,creationflags=subprocess.CREATE_NO_WINDOW)
     if result.returncode or result.stderr.strip():raise OSError('Could not check running installations; cleanup was skipped.')
-    rows=json.loads(result.stdout) if result.stdout.strip() else []
+    try:rows=json.loads(result.stdout) if result.stdout.strip() else []
+    except (TypeError,ValueError) as exc:raise OSError('A running installation could not be identified; cleanup was skipped.') from exc
     if isinstance(rows,dict):rows=[rows]
-    if any(not row.get('ExecutablePath') for row in rows):raise OSError('A running installation could not be identified; cleanup was skipped.')
+    if (not isinstance(rows,list) or any(not isinstance(row,dict) or
+            not isinstance(row.get('ExecutablePath'),str) or not Path(row['ExecutablePath']).is_absolute()
+            for row in rows)):
+        raise OSError('A running installation could not be identified; cleanup was skipped.')
     paths.extend(Path(row['ExecutablePath']).resolve() for row in rows)
     return paths
 

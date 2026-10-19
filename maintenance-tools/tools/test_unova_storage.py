@@ -18,6 +18,14 @@ class StorageTests(unittest.TestCase):
         command=run.call_args.args[0][-1]
         for name in ('Pokemon Together.exe','Pokemon Together Bootstrap.exe','Repair-Launcher.exe'):
             self.assertIn(name,command)
+    def test_cleanup_rejects_malformed_process_enumeration_before_deleting(self):
+        old=self.slot('1.0.1');self.slot('1.0.2');self.slot('1.0.3');self.active('1.0.3')
+        for stdout in ('null','["not a process"]'):
+            response=subprocess.CompletedProcess([],0,stdout,'')
+            with self.subTest(stdout=stdout),patch.object(s.os,'name','nt'),patch.object(s.subprocess,'run',return_value=response):
+                with self.assertRaisesRegex(OSError,'cleanup was skipped'):
+                    s.cleanup(self.home)
+                self.assertTrue((old/'builds/current/melonDS.exe').exists())
     def slot(self,name,receipt=True):
         root=self.base/name/'Unova-Together';(root/'builds/current').mkdir(parents=True);(root/'launcher').mkdir()
         for name,data in {'builds/current/melonDS.exe':b'game','builds/current/shared.dll':b'identical library','builds/current/VERSION.txt':name.split('-')[0].encode(),'builds/current/melonDS.toml':b'# user config','launcher/Unova Together.exe':b'launcher sentinel','launcher/python.dll':b'identical Python','README.md':b'packaged readme'}.items():(root/name).write_bytes(data)
