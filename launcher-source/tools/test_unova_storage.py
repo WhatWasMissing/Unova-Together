@@ -66,6 +66,16 @@ class StorageTests(unittest.TestCase):
         old=self.slot('1.0.1');self.slot('1.0.2');self.slot('1.0.3');self.active('1.0.3');outside=self.home/'outside.dll';outside.write_bytes(b'external')
         s.atomic(old/s.RECEIPT,{'schema':1,'files':{'../../../outside.dll':s.digest(outside),str(outside):s.digest(outside)}})
         s.cleanup(self.home,processes=[]);self.assertEqual(outside.read_bytes(),b'external')
+    def test_integrity_record_rejects_hardlinked_pending_path(self):
+        root=self.home/'integrity-test';runtime=root/'builds/current';runtime.mkdir(parents=True)
+        (runtime/'melonDS.exe').write_bytes(b'launcher runtime')
+        outside=self.home/'keep-integrity-sentinel.bin';outside.write_bytes(b'preserve this file')
+        pending=root/'.launcher-integrity.pending'
+        try:pending.hardlink_to(outside)
+        except (NotImplementedError,OSError) as exc:self.skipTest(f'hard links unavailable: {exc}')
+        u.record_integrity(root)
+        self.assertEqual(outside.read_bytes(),b'preserve this file');self.assertTrue(pending.exists())
+        self.assertTrue((root/'.launcher-integrity.json').is_file())
     def test_junction_outside_installation_is_never_followed(self):
         old=self.slot('1.0.1');self.slot('1.0.2');self.slot('1.0.3');self.active('1.0.3');outside=self.home/'outside';outside.mkdir();victim=outside/'victim.dll';victim.write_bytes(b'external')
         link=old/'linked'

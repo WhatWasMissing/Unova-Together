@@ -365,6 +365,5 @@ def record_integrity(root: Path):
     for path in sorted(runtime.rglob('*')):
         if path.is_file() and not path.is_symlink() and path.suffix.lower() in {'.exe','.dll'}:
             files[path.relative_to(root).as_posix()]=hashlib.sha256(path.read_bytes()).hexdigest()
-    pending=root/'.launcher-integrity.pending'
-    pending.write_text(json.dumps({'files':files},indent=2),encoding='utf-8')
-    os.replace(pending,root/'.launcher-integrity.json')
+    import unova_storage as storage
+    storage.atomic(root/'.launcher-integrity.json',{'files':files})

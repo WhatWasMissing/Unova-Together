@@ -63,6 +63,16 @@ class StorageTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'Unsafe installation record'):
             s.atomic(target,{'schema':1})
         self.assertEqual(outside.read_bytes(),b'')
+    def test_integrity_record_rejects_hardlinked_pending_path(self):
+        root=self.home/'integrity-test';runtime=root/'builds/current';runtime.mkdir(parents=True)
+        (runtime/'melonDS.exe').write_bytes(b'launcher runtime')
+        outside=self.home/'keep-integrity-sentinel.bin';outside.write_bytes(b'preserve this file')
+        pending=root/'.launcher-integrity.pending'
+        try:pending.hardlink_to(outside)
+        except (NotImplementedError,OSError) as exc:self.skipTest(f'hard links unavailable: {exc}')
+        u.record_integrity(root)
+        self.assertEqual(outside.read_bytes(),b'preserve this file');self.assertTrue(pending.exists())
+        self.assertTrue((root/'.launcher-integrity.json').is_file())
     def test_installation_lock_rejects_hardlinked_lock_file(self):
         outside=self.home/'external-lock';outside.write_bytes(b'')
         os.link(outside,self.home/'.updates/install.lock')
