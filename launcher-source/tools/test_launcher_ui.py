@@ -95,6 +95,13 @@ class LauncherTests(unittest.TestCase):
         self.app.profile_picker.current(0);self.app._select_profile()
         self.assertEqual(self.app.profile_label.get(),'My adventure');self.assertTrue(self.app.backup_paths)
         self.assertEqual(self.rom.with_suffix('.save').read_bytes(),b'first slot save')
+
+    def test_open_backups_reports_folder_creation_failure(self):
+        with patch('launcher_ui.app.Path.mkdir',side_effect=PermissionError('read-only folder')):
+            self.app._open_backups()
+        self.assertIn('Could not open backups folder',self.app.status.get())
+        self.assertIn('read-only folder',self.app.status.get())
+
     def test_player_model_preference_persists_and_keeps_save_folder_with_source_rom(self):
         from launcher_ui import preferences as prefs, services
         self.app.preference_values['player_model']=4715;self.app._save()

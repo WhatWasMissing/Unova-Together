@@ -645,9 +645,11 @@ class Launcher(tk.Tk):
         except (OSError,ValueError,KeyError,zipfile.BadZipFile) as exc:self.status.set(str(exc))
 
     def _open_backups(self):
-        path=self.home/'save-backups';path.mkdir(exist_ok=True)
-        try:os.startfile(str(path))
-        except OSError as exc:self.status.set(str(exc))
+        path=self.home/'save-backups'
+        try:
+            path.mkdir(exist_ok=True)
+            os.startfile(str(path))
+        except OSError as exc:self.status.set('Could not open backups folder: '+str(exc))
 
     def _run_checks(self):
         try:lines=services.checks(self.root,self._active_profile())
