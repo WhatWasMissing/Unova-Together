@@ -16,4 +16,4 @@
 - Opening the save-backups folder now reports a clear error if the folder cannot be created or opened.
 - The problem-report window now shows an error in the launcher if its report folder cannot be opened.
 - The Games & saves page now handles inaccessible save or backup folders without interrupting the launcher or keeping a previous profile’s backup selected.
-- The launcher now checks the prepared player-model ROM’s contents before reusing it, rebuilding damaged cached copies from the selected game file.
+- The launcher verifies prepared player-model ROMs before reuse and prevents a cached variant from being overwritten when it is selected as a new source.

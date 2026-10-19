@@ -188,8 +188,15 @@ def prepare_variant(source, home, model_id):
             }
             if saved == expected:
                 return target
+            if (source == target and isinstance(saved, dict)
+                    and saved.get('model_id') == model_id
+                    and saved.get('output_size') == expected['output_size']
+                    and saved.get('output_sha256') == expected['output_sha256']):
+                return target
         except (OSError, ValueError, TypeError):
             pass
+    if source == target:
+        raise ValueError('Choose the original game ROM instead of a cached player-model copy.')
 
     with prefs.staged_path(target) as pending:
         rom = _load_rom(source)

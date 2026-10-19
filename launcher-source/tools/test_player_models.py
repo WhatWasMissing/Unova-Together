@@ -74,9 +74,12 @@ class PlayerModelTests(unittest.TestCase):
             overlay = SimpleNamespace(data=overlay_data)
             source_rom = SimpleNamespace(saveToFile=lambda path: Path(path).write_bytes(prepared))
             checked_rom = SimpleNamespace(arm9OverlayTable=object(), files={})
+            def apply_model(_rom, selected_model):
+                struct.pack_into('<H', overlay_data, 0, selected_model)
+                struct.pack_into('<H', overlay_data, 40, selected_model)
 
             with patch.object(player_models, '_load_rom', side_effect=[source_rom, checked_rom, source_rom, checked_rom]), \
-                 patch.object(player_models, '_patch_rom') as patch_rom, \
+                 patch.object(player_models, '_patch_rom', side_effect=apply_model) as patch_rom, \
                  patch.object(player_models.ndspy.code, 'loadOverlayTable', return_value={player_models.OVERLAY_ID: overlay}), \
                  patch.object(player_models, '_player_map_offset', return_value=0):
                 target = player_models.prepare_variant(source, root, model_id)
@@ -89,6 +92,40 @@ class PlayerModelTests(unittest.TestCase):
             self.assertEqual(patch_rom.call_count, 2)
             manifest = json.loads(rebuilt.with_name(rebuilt.name + '.player-model.json').read_text(encoding='utf-8'))
             self.assertEqual(manifest['output_sha256'], hashlib.sha256(prepared).hexdigest())
+            self.assertEqual(source.read_bytes(), original)
+
+    def test_cached_model_rom_is_not_overwritten_as_a_different_source_variant(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / 'reviewed.nds'
+            original = b'reviewed ROM fixture'
+            source.write_bytes(original)
+            model_id = 4715
+            overlay_data = bytearray(42)
+            struct.pack_into('<H', overlay_data, 0, model_id)
+            struct.pack_into('<H', overlay_data, 40, model_id)
+            overlay = SimpleNamespace(data=overlay_data)
+            selected_model = [model_id]
+            source_rom = SimpleNamespace(saveToFile=lambda path: Path(path).write_bytes(
+                b'prepared ROM ' + str(selected_model[0]).encode('ascii')))
+            checked_rom = SimpleNamespace(arm9OverlayTable=object(), files={})
+            def apply_model(_rom, selected_model_id):
+                selected_model[0] = selected_model_id
+                struct.pack_into('<H', overlay_data, 0, selected_model_id)
+                struct.pack_into('<H', overlay_data, 40, selected_model_id)
+
+            with patch.object(player_models, '_load_rom', side_effect=[source_rom, checked_rom, source_rom, checked_rom]), \
+                 patch.object(player_models, '_patch_rom', side_effect=apply_model) as patch_rom, \
+                 patch.object(player_models.ndspy.code, 'loadOverlayTable', return_value={player_models.OVERLAY_ID: overlay}), \
+                 patch.object(player_models, '_player_map_offset', return_value=0):
+                cached = player_models.prepare_variant(source, root, model_id)
+                self.assertEqual(player_models.prepare_variant(cached, root, model_id), cached)
+                cached_bytes = cached.read_bytes()
+                with self.assertRaisesRegex(ValueError, 'original game ROM'):
+                    player_models.prepare_variant(cached, root, model_id + 1)
+
+            self.assertEqual(patch_rom.call_count, 1)
+            self.assertEqual(cached.read_bytes(), cached_bytes)
             self.assertEqual(source.read_bytes(), original)
 
     def test_model_copy_preserves_preexisting_pending_hardlinks(self):
