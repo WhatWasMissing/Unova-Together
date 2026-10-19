@@ -41,7 +41,10 @@ def check_report(
         failures.append(
             f"expected map {expected_map}, observer reported {position.get('map')!r}"
         )
-    if data.get("npcFixtureInputBlocked") is True:
+    input_blocked = data.get("npcFixtureInputBlocked")
+    if type(input_blocked) is not bool:
+        failures.append("observer did not report input state")
+    elif input_blocked:
         failures.append("observer reported blocked game input")
     if "GFL_DebugAssertFail" in log_text:
         failures.append("emulator log contains GFL_DebugAssertFail")

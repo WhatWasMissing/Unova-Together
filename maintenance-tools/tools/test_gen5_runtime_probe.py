@@ -50,6 +50,29 @@ class RuntimeProbeReportTests(unittest.TestCase):
         }
         self.assertEqual(PROBE.check_report(report, 460, "", True, 1), [])
 
+    def test_missing_input_state_fails(self):
+        report = {"npcFixtureFrames": 6240, "npcFixturePosition": {"map": 460}}
+        failures = PROBE.check_report(report, 460, "", True, 1)
+        self.assertTrue(any("input state" in failure for failure in failures))
+
+    def test_malformed_input_state_fails(self):
+        report = {
+            "npcFixtureFrames": 6240,
+            "npcFixturePosition": {"map": 460},
+            "npcFixtureInputBlocked": 0,
+        }
+        failures = PROBE.check_report(report, 460, "", True, 1)
+        self.assertTrue(any("input state" in failure for failure in failures))
+
+    def test_blocked_input_fails(self):
+        report = {
+            "npcFixtureFrames": 6240,
+            "npcFixturePosition": {"map": 460},
+            "npcFixtureInputBlocked": True,
+        }
+        failures = PROBE.check_report(report, 460, "", True, 1)
+        self.assertTrue(any("blocked game input" in failure for failure in failures))
+
 
 if __name__ == "__main__":
     unittest.main()
