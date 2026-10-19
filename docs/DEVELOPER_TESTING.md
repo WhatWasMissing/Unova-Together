@@ -186,3 +186,26 @@ dotnet build SwissArmyKnife/SwissArmyKnife.Avalonia.csproj `
 **PASS:** The race-injection regression test preserves an external hard-linked sentinel and writes valid JSON to the intended metadata file. **PASS:** The negative control against pre-fix `unova_storage.py` from commit `a21c75bead764d6ed9f0a61422d8e13c6f68bc99` produced the expected failure: the sentinel was overwritten with metadata JSON. The isolated negative-control fixture was removed automatically after the run.
 
 The exact full-suite commands were `py -3.12 -B -m unittest discover -s launcher-source/tools -p 'test_*.py' -v` (**128 passed**) and `py -3.12 -B -m unittest discover -s maintenance-tools/tools -p 'test_*.py' -v` (**168 run: 162 passed, 6 skipped**). The launcher mirror check passed for 48 files, and `git diff --check` passed. Tests exercised the active checkout's Python production modules and temporary filesystem fixtures; optional ROM/RAM/external-runtime checks were skipped. No installation, ROM, save, update slot, or release artifact was modified.
+
+### Mega verification replay against the published 2.0.17 source — 2026-10-19
+
+The Mega suite was rebuilt from a fresh extraction of the published [2.0.17 source asset](https://github.com/WhatWasMissing/Unova-Together/releases/tag/v2.0.17). Its SHA-256 was `3d57a84e8e420dbd89b62a8e59dfda2fb4315b6113122766ccf8fc5a75180253`, matching the release asset digest. The Redux fixture was `FullSizeRoute7Test214.nds`, SHA-256 `332d07576e2077b4ef91e394603d144108098b7624c6a918b175f90530c0036a` before and after testing. CMake 4.4.1, Ninja 1.13.2, MSYS2 UCRT64 GCC 16.2.0, Qt, and ENet were used; build and extracted-source directories were held in an automatically removed temporary directory.
+
+For a rerun, set `$sourceRoot` to the extracted `Unova-Together-Source` folder, `$buildRoot` to a fresh temporary build directory, and `$reduxRom` to a disposable supported Redux ROM copy. The equivalent PowerShell commands are:
+
+```powershell
+$env:PATH = 'C:\msys64\ucrt64\bin;' + $env:PATH
+cmake -S "$sourceRoot/source/melonDS/tools" -B "$buildRoot" -G Ninja `
+  -DCMAKE_BUILD_TYPE=Release `
+  -DCMAKE_CXX_COMPILER=C:/msys64/ucrt64/bin/g++.exe `
+  -DUNOVA_MEGA_ROM:FILEPATH="$reduxRom" `
+  -DUNOVA_ENET_INCLUDE_DIR:PATH=C:/msys64/ucrt64/include `
+  -DUNOVA_ENET_LIBRARY:FILEPATH=C:/msys64/ucrt64/lib/libenet.dll.a
+cmake --build "$buildRoot" --parallel 4
+ctest --test-dir "$buildRoot" --output-on-failure `
+  -R 'mega_|gym_leaders|gen5_coop_role'
+```
+
+**PASS:** 15/15 selected CTest checks passed. The build compiled the published production Mega headers and test programs; the checks cover the 49-form roster and form data, stone/item mappings, move-selection transformation logic, ability restoration, artwork stream and icon layout, three final Gym Leader Mega teams, co-op packet handling, a synthetic host/guest ENet loopback, Redux shop/overlay resources, and Mega hook signatures. In the production battle helper test, a matching held stone plus a committed Fight action produces the expected opponent form event; a stale peer, wrong stone, missing Fight action, or invalid battle ID is rejected. The Redux cartridge tests read the fixture and left its hash unchanged.
+
+**SOURCE/UNIT VERIFIED:** The C++ test programs compile the published production headers and exercise the Mega rules and event-selection helpers. **INTEGRATION VERIFIED:** ROM-specific tests inspect the real Redux cartridge and the generated overlay data. The LAN test uses a synthetic RAM fixture and loopback transport, not two running emulator clients. **NOT RUN:** live Gym Leader/Cynthia AI behavior, player battles, high-latency multiplayer, and two-client co-op gameplay remain unverified.
