@@ -87,7 +87,7 @@
     "src/net/LAN.h",
     "src/PresenceOcclusion.h"
   ],
-  "patchSha256": "702847e299f027b59b8bcda8cc8ad6ec64d737e4d47d6cecfab0191527dac0cc",
+  "patchSha256": "a1aa062ddf55af3517ad9135afe7eeaffafa529c01571e7e8b204713590cd1a2",
   "spriteVariants": 743,
   "build": "1.0.7-dev"
 }

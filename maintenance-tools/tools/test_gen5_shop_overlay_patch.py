@@ -94,13 +94,13 @@ class ShopOverlayPatchTests(unittest.TestCase):
         self.assertEqual(filtered[:start], source[:start])
         self.assertEqual(filtered[start:end], rebuilt[start:end])
         self.assertEqual(filtered[end:source_size], source[end:])
-        self.assertEqual(filtered[source_size:], rebuilt[source_size:])
+        self.assertEqual(len(filtered), source_size)
 
     def test_filter_rejects_a_different_overlay_size(self):
         with self.assertRaises(ValueError):
             generator.filter_shop_ui_overlay(b"short", b"longer")
 
-    def test_distributed_patch_contains_only_shop_and_tail_delta_runs(self):
+    def test_distributed_patch_keeps_shop_delta_inside_original_overlay(self):
         header = packaged_shop_header()
         metadata = json.loads(METADATA_PATH.read_text(encoding="utf-8"))
         self.assertEqual(
@@ -116,15 +116,17 @@ class ShopOverlayPatchTests(unittest.TestCase):
         target_size = constant("TargetOverlaySize")
         run_count = constant("DeltaRunCount")
         self.assertEqual(constant("SourceOverlayCrc32"), 0xA7CF9125)
-        self.assertEqual(constant("TargetOverlayCrc32"), 0xD48275B7)
+        self.assertEqual(constant("TargetOverlayCrc32"), 0x3DC1FED8)
         self.assertEqual(source_size, generator.Gen5ShopOverlayPatchSourceSize)
-        self.assertEqual(target_size, source_size + 448)
-        self.assertEqual(run_count, 233)
+        self.assertEqual(target_size, source_size)
+        self.assertEqual(run_count, 232)
+        fieldmap_end = generator.RAM_BASE + target_size + 0x10040
+        self.assertLessEqual(fieldmap_end, 0x021E5800)
 
         array = re.search(r"EncodedDelta\{\{(.*?)\}\};", header, re.DOTALL)
         self.assertIsNotNone(array)
         encoded = bytes(int(value, 16) for value in re.findall(r"0x([0-9A-Fa-f]{2})", array.group(1)))
-        self.assertEqual(len(encoded), 8345)
+        self.assertEqual(len(encoded), 7892)
 
         start = generator.SHOP_UI_START - generator.RAM_BASE
         end = generator.SHOP_UI_END - generator.RAM_BASE
@@ -139,13 +141,12 @@ class ShopOverlayPatchTests(unittest.TestCase):
             self.assertGreaterEqual(offset, previous_end)
             self.assertLessEqual(offset + size, target_size)
             is_shop_code = start <= offset and offset + size <= end
-            is_appended_helper = source_size <= offset and offset + size <= target_size
-            self.assertTrue(is_shop_code or is_appended_helper, (offset, size))
+            self.assertTrue(is_shop_code, (offset, size))
             cursor += size
             changed_bytes += size
             previous_end = offset + size
         self.assertEqual(cursor, len(encoded))
-        self.assertEqual(changed_bytes, 7180)
+        self.assertEqual(changed_bytes, 6732)
 
 
 if __name__ == "__main__":

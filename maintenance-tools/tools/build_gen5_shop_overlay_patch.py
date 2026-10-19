@@ -4,9 +4,9 @@
 # GPL-3.0-or-later. Preserve all upstream notices.
 """Build the ROM-specific delta for the heap-backed BW2 shop overlay.
 
-Only the shop UI routines and rebuilt overlay tail are copied into the Redux
-overlay. Replacing all of overlay 36 also replaces the main field engine with
-a separately rebuilt binary and can stall when continuing a save.
+Only the shop UI routine span is copied, keeping the original overlay size and
+RAM allocation. Replacing the full overlay also replaces the main field engine
+with a separately rebuilt binary and can stall when continuing a save.
 """
 
 from __future__ import annotations
@@ -73,7 +73,7 @@ def map_symbol_range(path: Path, name: str, expected_start: int, expected_size: 
 
 
 def filter_shop_ui_overlay(source: bytes, rebuilt: bytes) -> bytes:
-    """Keep the shop UI section and appended helper bytes from a rebuilt overlay."""
+    """Keep only the shop UI section inside the original overlay allocation."""
     start = SHOP_UI_START - RAM_BASE
     end = SHOP_UI_END - RAM_BASE
     if len(source) != Gen5ShopOverlayPatchSourceSize:
@@ -83,7 +83,6 @@ def filter_shop_ui_overlay(source: bytes, rebuilt: bytes) -> bytes:
 
     filtered = bytearray(source)
     filtered[start:end] = rebuilt[start:end]
-    filtered.extend(rebuilt[len(source):])
     return bytes(filtered)
 
 
@@ -118,7 +117,7 @@ def render_header(output: Path, source_crc: int, target_crc: int,
         " * GitHub: WhatWasMissing - https://github.com/WhatWasMissing/Unova-Together\n"
         " * GPL-3.0-or-later.\n"
         " * Generated from the matching Redux overlay and heap-backed shop build.\n"
-        " * Only shop UI routines and appended helper bytes are copied.\n"
+        " * Only the shop UI routine span is copied; overlay size is preserved.\n"
         " */\n"
         "#pragma once\n#include <array>\n#include <cstdint>\n"
         "namespace Gen5ShopOverlayPatch {\n"

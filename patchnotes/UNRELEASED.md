@@ -1,3 +1,3 @@
 # Next update — draft
 
-No unreleased player-facing changes are currently documented.
+- Fixed a crash that could occur when entering a Pokémon Center.
