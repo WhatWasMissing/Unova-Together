@@ -3,6 +3,14 @@ from pathlib import Path
 from datetime import datetime, timezone
 import hashlib, ipaddress, json, os, platform, re, socket, uuid, zipfile, threading, time, zlib
 import urllib.request
+from . import versioning
+
+
+class RelayCompatibilityError(ValueError):
+    def __init__(self, message, *, replaceable_local=False, relay_build=None):
+        super().__init__(message)
+        self.replaceable_local=replaceable_local
+        self.relay_build=relay_build
 
 GUIDES=('PLAYER_GUIDE.md','KNOWN_ISSUES.md','TAILSCALE_COOP.md','UDP_SERVER_GUIDE.md','LAUNCHER.md','COMPANION_INTERACTIONS.md','COOP_TOOLS.md','RELEASE_CHECKS_1.0.6.md','FEATURES.md','ROADMAP.md')
 MAX_BACKUP_FILES=32
@@ -67,10 +75,23 @@ def cached_guide(home,name):
         return guide
     except (OSError,ValueError,KeyError,TypeError):return None
 
-def check_relay(values,start_local):
+def check_relay(values,start_local,restart_local=None):
     """Probe the actual protocol; only a refused loopback endpoint may be hosted here."""
     value=network(values)
     try:return probe(value)
+    except RelayCompatibilityError as exc:
+        if value['host'].lower() not in ('127.0.0.1','localhost') or not exc.replaceable_local:
+            raise
+        if restart_local is None:
+            raise ValueError(str(exc)+' Stop the old local relay and check again.') from exc
+        restart_local(value['port'])
+        deadline=time.monotonic()+8
+        while True:
+            try:return 'Outdated local relay replaced. '+probe(value)
+            except (OSError,ValueError) as retry_error:
+                if time.monotonic()>=deadline:
+                    raise ValueError('The old local relay was stopped, but the updated relay did not become ready. Check transfer/presence-relay.log and try again.') from retry_error
+                time.sleep(.15)
     except ValueError as exc:
         if value['host'].lower() not in ('127.0.0.1','localhost') or 'No presence relay is listening' not in str(exc):raise
         start_local(value['port'])
@@ -259,9 +280,29 @@ def probe(values):
             if not part:break
             data+=part
         if len(data)>8192:raise ValueError('Relay response exceeds size limit.')
-        message=json.loads(data.split(b'\n')[0])
-        if message.get('type')!='welcome' or message.get('version')!=1:raise ValueError('Address responds, but it is not a compatible presence relay.')
-    return 'Presence relay reachable. Native LAN/UDP pairing must still be checked in-game.'
+        try:message=json.loads(data.split(b'\n')[0])
+        except (UnicodeError,json.JSONDecodeError) as exc:raise ValueError('Address responds, but it is not a compatible presence relay.') from exc
+        if not isinstance(message,dict) or message.get('type')!='welcome' or message.get('version')!=1:
+            raise ValueError('Address responds, but it is not a compatible presence relay.')
+        expected_build=versioning.current_version()
+        relay_build=message.get('buildVersion')
+        if not isinstance(relay_build,str) or not relay_build:
+            raise RelayCompatibilityError(
+                'The relay does not report its build version. Update and restart the relay host.',
+                replaceable_local=True)
+        try:
+            older=versioning.numbers(relay_build)<versioning.numbers(expected_build)
+        except ValueError:
+            older=False
+        if relay_build!=expected_build:
+            raise RelayCompatibilityError(
+                f'Relay build {relay_build} does not match this launcher ({expected_build}). Update and restart the relay host.',
+                replaceable_local=older,relay_build=relay_build)
+        if message.get('fieldZonePresence') is not True:
+            raise RelayCompatibilityError(
+                f'Relay build {relay_build} is missing field-zone sharing. Restart the relay host after updating.',
+                relay_build=relay_build)
+    return f'Presence relay reachable (build {expected_build}). Native LAN/UDP pairing must still be checked in-game.'
 
 def save_connection(runtime,values,player='Player'):
     """Persist independently of reachability; native panels watch this file."""

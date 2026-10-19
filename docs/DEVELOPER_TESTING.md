@@ -512,3 +512,11 @@ py -3.12 -B maintenance-tools/tools/test_coop_reward_policy.py --source-root mai
 ```
 
 The first check structurally inspects the production runtime call site. The second compiles the actual `CoopRewardPolicy.h` and `CoopExperienceGuard.h` with the regression fixture; it checks both valid suppression and invalid signatures/addresses. Neither runs the emulator or establishes two-client gameplay behavior. The source tree was extracted from the 1.0.6 source archive (SHA-256 `c3833116062ed40811a252ae1945a23a7043694c1984d3c8ae3cc0ac6212dd25`) and has local changes; treat this as **UNVERIFIED SOURCE** for the released emulator. The archive digest identifies the baseline bytes, not the modified tree's authenticity.
+
+### Stale presence relay replacement — 2026-10-19
+
+The launcher now requires a relay handshake with the same release build and the field-zone capability used by Teleport. A stale loopback relay is replaced only when Windows confirms its listener port, relay command line, executable name, and managed installation path; other computers and unrelated processes are left alone. The relay includes its release version in the welcome message.
+
+Focused verification passed: `test_launcher_services.py` (**30/30**), `test_presence_relay_version.py` (**1/1**), `test_patchnotes_feed.py` (**5/5**), `test_release_validation.py` (**2/2**), `test_launcher_versioning.py` (**14/14**), and launcher-tree parity (**49 files**). A Windows process integration check launched the previous 2.0.19 relay from an isolated install, confirmed the new launcher identified and stopped it, then confirmed the replacement served the 2.0.20 handshake with Teleport support. The fixture was removed after the check.
+
+The released emulator executable is unchanged from 2.0.19; this update changes launcher-side relay identity and replacement. The release package retains the corresponding 2.0.19 emulator source and carries the updated launcher and connection helpers. Live multiplayer and Teleport gameplay were not exercised in this verification.

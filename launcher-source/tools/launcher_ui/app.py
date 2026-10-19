@@ -487,7 +487,7 @@ class Launcher(tk.Tk):
 
     def _check_connection(self):
         value=self._save_connection()
-        if value:self.connection_status.set('Checking presence relay…');self._worker('connection',lambda:services.check_relay(value,self._spawn_presence))
+        if value:self.connection_status.set('Checking presence relay…');self._worker('connection',lambda:services.check_relay(value,self._spawn_presence,self._restart_stale_presence))
 
     def _internet_wizard(self):
         try:
@@ -497,14 +497,22 @@ class Launcher(tk.Tk):
         except (OSError,ValueError) as exc:self.status.set(str(exc))
 
     def _host_presence(self):
-        if self.presence_process is not None and self.presence_process.poll() is None:
-            self.connection_status.set('This launcher is already hosting a presence relay.');return
         try:
             value=services.network({'mode':self.net_mode.get(),'host':'127.0.0.1','port':self.net_port.get(),'room':self.net_room.get()})
-            self._spawn_presence(value['port'])
             self.net_host.set('127.0.0.1');self._save_connection()
-            self.connection_status.set('Relay starting here on port '+str(value['port'])+'. Check relay to confirm. Guests use this PC’s LAN/Tailscale address. Allow the relay through Windows Firewall if prompted.')
+            self.connection_status.set('Starting or checking the local relay…')
+            self._worker('connection',lambda:services.check_relay(value,self._spawn_presence,self._restart_stale_presence))
         except (OSError,ValueError) as exc:self.connection_status.set(str(exc))
+
+    def _restart_stale_presence(self,port):
+        from .relay_process import RelayProcessError, stop_owned_listener
+        try:stopped=stop_owned_listener(self.home,port)
+        except RelayProcessError as exc:
+            raise ValueError(str(exc)+' Stop the old relay manually, then check again.') from exc
+        if not stopped:
+            raise ValueError('An outdated relay is listening, but it was not started from this Unova Together installation. Stop it on the host, then check again.')
+        self.presence_process=None
+        self._spawn_presence(port)
 
     def _spawn_presence(self,port):
         if self.presence_process is not None and self.presence_process.poll() is None:
@@ -1012,7 +1020,7 @@ class Launcher(tk.Tk):
         value=self._save_connection()
         if value:
             self.lan_status.set('Checking player sharing…')
-            self._worker('lan-'+action,lambda:services.check_relay(value,self._spawn_presence))
+            self._worker('lan-'+action,lambda:services.check_relay(value,self._spawn_presence,self._restart_stale_presence))
 
     def launch(self,lan_action=None):
         if self.selected_game.get()==game_routes.GAMES['pokemon-x']:self._launch_research('host' if lan_action=='host' else 'guest' if lan_action=='join' else None);return

@@ -2,6 +2,12 @@
   "schema": 1,
   "notes": [
     {
+      "version": "2.0.20",
+      "title": "More reliable relay updates",
+      "file": "RELEASE_NOTES_2.0.20.md",
+      "body": "The launcher now checks that the presence relay matches its release and supports the location updates needed by Teleport. When an outdated relay is still running from this installation, **Check relay** or **Host presence relay here** restarts it automatically. If the relay runs on another computer or was started outside this installation, update and restart it on the host before reconnecting."
+    },
+    {
       "version": "2.0.19",
       "title": "Mega Stone shops, Teleport, and co-op testing",
       "file": "RELEASE_NOTES_2.0.19.md",

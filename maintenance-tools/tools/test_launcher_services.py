@@ -221,7 +221,7 @@ class ServiceTests(unittest.TestCase):
             def __exit__(self,*args):pass
             def settimeout(self,t):pass
             def sendall(self,data):self.data=json.loads(data)
-            def recv(self,n):return b'{"type":"welcome","version":1}\n'
+            def recv(self,n):return b'{"type":"welcome","version":1,"buildVersion":"2.0.20","fieldZonePresence":true}\n'
         with patch.object(s.socket,'create_connection',return_value=Connection()):
             self.assertIn('reachable',s.probe({'host':'localhost','room':'test'}))
     def test_diagnostic_export_excludes_game_data_and_redacts(self):

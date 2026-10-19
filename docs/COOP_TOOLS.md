@@ -7,3 +7,5 @@ Invite a friend to supported trainer battles, choose solo or co-op trainer battl
 Use **Players** to see teammates and offer eligible trades. Use **Pokémon** for party tools. Use **Settings** to control your followers and other options. Switch pages with L/R or touch a tab; press B to close the menu.
 
 For connection help, see [Playing with friends](PLAYER_GUIDE.md). Some special battles and unstable connections may not work as expected; see [Known limits](KNOWN_ISSUES.md).
+
+The launcher checks that the presence relay matches the current release and supports Teleport. When an outdated relay is running from this installation, **Check relay** or **Host presence relay here** replaces it. For a relay hosted on another computer, update and restart it on the host before reconnecting.

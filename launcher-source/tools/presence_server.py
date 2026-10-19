@@ -127,9 +127,10 @@ class Peer:
     overworld_battles: bool = False
 
 class PresenceRelay:
-    def __init__(self, item_journal=None, pokemon_journal=None):
+    def __init__(self, item_journal=None, pokemon_journal=None, build_version='unknown'):
         self.peers = {}
         self.connections = 0
+        self.build_version = str(build_version)[:32]
         self.sessions = {}
         self.checkpoints = {}
         self.social = CoopSocial(self)
@@ -336,7 +337,7 @@ class PresenceRelay:
                 if any(p.item_client==token for p in self.peers.values()): raise ValueError('Duplicate item client identity')
                 peer.item_client=token
             self.peers[peer.id] = peer
-            writer.write((json.dumps({'type': 'welcome', 'version': 1, 'id': peer.id, 'interactions': True, 'battlePresence': True, 'checkpoints': True, 'fieldZonePresence': True, 'itemTrading': True, 'itemRecovery': True, 'pokemonTrading': True, 'overworldBattles': True, 'coopSocial': True}) + '\n').encode())
+            writer.write((json.dumps({'type': 'welcome', 'version': 1, 'buildVersion': self.build_version, 'id': peer.id, 'interactions': True, 'battlePresence': True, 'checkpoints': True, 'fieldZonePresence': True, 'itemTrading': True, 'itemRecovery': True, 'pokemonTrading': True, 'overworldBattles': True, 'coopSocial': True}) + '\n').encode())
             await writer.drain()
             self.item_trades.resume(peer)
             self.pokemon_trades.resume(peer)
@@ -416,8 +417,8 @@ class PresenceRelay:
                     continue
                 peer.writer.write(payloads[peer.room])
 
-async def run(host, port):
-    relay = PresenceRelay()
+async def run(host, port, build_version='unknown'):
+    relay = PresenceRelay(build_version=build_version)
     server = await asyncio.start_server(relay.client, host, port, limit=MAX_LINE)
     print(f'Presence relay listening on {host}:{port}; Ctrl+C stops it.', flush=True)
     broadcaster = asyncio.create_task(relay.broadcast())
@@ -435,6 +436,11 @@ if __name__ == '__main__':
     parser.add_argument('--port', type=int, default=8765)
     args = parser.parse_args()
     try:
-        asyncio.run(run(args.host, args.port))
+        from launcher_ui.versioning import current_version
+        build_version = current_version()
+    except (ImportError, OSError, ValueError, TypeError):
+        build_version = 'unknown'
+    try:
+        asyncio.run(run(args.host, args.port, build_version))
     except KeyboardInterrupt:
         pass

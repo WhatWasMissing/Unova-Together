@@ -35,7 +35,7 @@ def main():
         if not 1<=args.presence_relay<=65535:parser.error('Relay port must be 1–65535.')
         import asyncio
         from presence_server import run
-        asyncio.run(run('0.0.0.0',args.presence_relay));return
+        asyncio.run(run('0.0.0.0',args.presence_relay,versioning.current_version()));return
     executable=Path(sys.executable if getattr(sys,'frozen',False) else __file__).resolve()
     home=installation_home(executable,args.home)
     root=updates.active_root(home,allow_missing=True)
