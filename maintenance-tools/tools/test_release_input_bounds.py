@@ -1,16 +1,24 @@
 """Compile actual production decompression/crop code in isolated boundary tests."""
 from pathlib import Path
+import os
+import shutil
 import subprocess
+import sys
 import tempfile
+import unittest
 ROOT=Path(__file__).resolve().parents[1]
-src=ROOT/'melonDS-source-1.1/src'
-text=(src/'frontend/qt_sdl/EmuInstance.cpp').read_text(encoding='utf-8')
-start=text.index('u32 EmuInstance::decompressROM(')
-decompress=text[start:text.index('\nvoid EmuInstance::clearBackupState',start)].replace('EmuInstance::','')
-wifi=(src/'Wifi.cpp').read_text(encoding='utf-8')
-start=wifi.index('        // TODO: what are the maximum crop values?')
-crop=wifi[start:wifi.index('\n        break;',start)]
-program=r'''
+
+
+def run_boundary_check():
+    source_root = Path(os.environ.get('UNOVA_MELONDS_SOURCE_ROOT', ROOT/'melonDS-source-1.1'))
+    src = source_root/'src'
+    text=(src/'frontend/qt_sdl/EmuInstance.cpp').read_text(encoding='utf-8')
+    start=text.index('u32 EmuInstance::decompressROM(')
+    decompress=text[start:text.index('\nvoid EmuInstance::clearBackupState',start)].replace('EmuInstance::','')
+    wifi=(src/'Wifi.cpp').read_text(encoding='utf-8')
+    start=wifi.index('        // TODO: what are the maximum crop values?')
+    crop=wifi[start:wifi.index('\n        break;',start)]
+    program=r'''
 #include <zstd.h>
 #include <algorithm>
 #include <array>
@@ -55,7 +63,39 @@ int main(){
   std::cout<<"Production zstd known/unknown/truncated/reallocation and 514304 wireless crop bounds passed\n";
 }
 '''
-with tempfile.TemporaryDirectory(prefix='unova-input-boundary-') as temp:
-    path=Path(temp);(path/'check.cpp').write_text(program,encoding='utf-8')
-    subprocess.run(['g++','-std=c++20','-O2','-Wall','-Wextra','-Werror',str(path/'check.cpp'),'-lzstd','-o',str(path/'check.exe')],check=True)
-    subprocess.run([str(path/'check.exe')],check=True)
+    compiler = os.environ.get('UNOVA_CXX') or shutil.which('g++')
+    if not compiler:
+        raise RuntimeError('Set UNOVA_CXX or add g++ to PATH to run this native boundary test.')
+    compile_env=os.environ.copy()
+    compiler_path=Path(compiler)
+    if compiler_path.is_file():
+        compile_env['PATH']=str(compiler_path.parent)+os.pathsep+compile_env.get('PATH','')
+    with tempfile.TemporaryDirectory(prefix='unova-input-boundary-') as temp:
+        path=Path(temp);(path/'check.cpp').write_text(program,encoding='utf-8')
+        subprocess.run([compiler,'-std=c++20','-O2','-Wall','-Wextra','-Werror',str(path/'check.cpp'),'-lzstd','-o',str(path/'check.exe')],check=True,env=compile_env)
+        subprocess.run([str(path/'check.exe')],check=True,env=compile_env)
+
+
+class ReleaseInputBoundsTests(unittest.TestCase):
+    def test_production_decompression_and_wireless_crop_bounds(self):
+        source_root = Path(os.environ.get('UNOVA_MELONDS_SOURCE_ROOT', ROOT/'melonDS-source-1.1'))
+        required = (source_root/'src/frontend/qt_sdl/EmuInstance.cpp', source_root/'src/Wifi.cpp')
+        if not all(path.is_file() for path in required):
+            if os.environ.get('UNOVA_MELONDS_SOURCE_ROOT'):
+                self.fail(f'UNOVA_MELONDS_SOURCE_ROOT lacks required files: {required}')
+            self.skipTest('optional melonDS source tree is unavailable; set UNOVA_MELONDS_SOURCE_ROOT')
+        if not (os.environ.get('UNOVA_CXX') or shutil.which('g++')):
+            self.skipTest('g++ is unavailable; set UNOVA_CXX or add it to PATH')
+        env = os.environ.copy()
+        env['UNOVA_MELONDS_SOURCE_ROOT'] = str(source_root)
+        compiler=env.get('UNOVA_CXX') or shutil.which('g++')
+        if compiler and Path(compiler).is_file():
+            env['PATH']=str(Path(compiler).parent)+os.pathsep+env.get('PATH','')
+        result = subprocess.run([sys.executable, str(Path(__file__).resolve())], cwd=ROOT,
+                                env=env, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn('Production zstd known/unknown/truncated/reallocation and 514304 wireless crop bounds passed', result.stdout)
+
+
+if __name__ == '__main__':
+    run_boundary_check()

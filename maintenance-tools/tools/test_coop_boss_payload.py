@@ -1,5 +1,6 @@
 """Execute compiled boss setup: exact team conservation and failure cleanup."""
 from pathlib import Path
+import os
 import re
 import struct
 from unicorn import Uc, UC_ARCH_ARM, UC_MODE_THUMB, UC_HOOK_CODE
@@ -13,8 +14,10 @@ META_FIRST, META_SECOND = 0x03014000, 0x03014100
 REGS = [UC_ARM_REG_R0, UC_ARM_REG_R1, UC_ARM_REG_R2, UC_ARM_REG_R3]
 
 def check(count, trainer=156, fail_alloc=False, fail_add=False, ally=0, selected_count=1, secondary=0, second_count=2):
-    payload = (ROOT / 'research/co-op/CoopContext.bin').read_bytes()
-    header = (ROOT / 'melonDS-source-1.1/src/frontend/qt_sdl/NativeCoopPayload.h').read_text()
+    payload_path = Path(os.environ.get('UNOVA_COOP_CONTEXT', ROOT/'research/co-op/CoopContext.bin'))
+    source_root = Path(os.environ.get('UNOVA_MELONDS_SOURCE_ROOT', ROOT/'melonDS-source-1.1'))
+    payload = payload_path.read_bytes()
+    header = (source_root/'src/frontend/qt_sdl/NativeCoopPayload.h').read_text(encoding='utf-8')
     entry = CODE + int(re.search(r'PokePlayPrepareCoopSetupOffset=0x([0-9a-f]+)', header)[1], 16)
     cpu = Uc(UC_ARCH_ARM, UC_MODE_THUMB)
     cpu.mem_map(0x02000000, 0x400000)
