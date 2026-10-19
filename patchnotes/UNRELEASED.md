@@ -7,3 +7,4 @@
 - Damaged standalone-install metadata now gets a clear error without changing existing files.
 - Launcher repair now reports damaged release metadata clearly.
 - Old-install cleanup now skips malformed installation records safely instead of aborting.
+- Save backups now enforce the same file-count and size limits as restore, preventing the launcher from creating backups it cannot restore.

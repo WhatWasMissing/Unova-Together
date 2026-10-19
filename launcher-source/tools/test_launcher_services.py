@@ -108,6 +108,24 @@ class ServiceTests(unittest.TestCase):
         other=s.profile(str(self.rom),str(self.home/'separate'))
         self.assertIsNone(s.backup(self.home,other));self.assertFalse(s.backups(self.home,other))
         self.assertTrue(s.backup(self.home,self.item));self.assertFalse(s.backups(self.home,other))
+    def test_backup_refuses_more_save_files_than_restore_accepts(self):
+        for index in range(1,33):
+            (self.home/f'Black2.{index}.sav').write_bytes(b'save')
+        with self.assertRaisesRegex(ValueError,'32'):
+            s.backup(self.home,self.item)
+        self.assertFalse(s.backups(self.home,self.item))
+    def test_backup_and_restore_accept_the_maximum_file_count(self):
+        for index in range(1,32):
+            (self.home/f'Black2.{index}.sav').write_bytes(b'save')
+        archive=s.backup(self.home,self.item)
+        self.assertEqual(s.restore(self.home,self.item,archive),32)
+    def test_backup_refuses_payload_that_would_exceed_restore_archive_limit(self):
+        for index in range(1,6):
+            with (self.home/f'Black2.{index}.sav').open('wb') as save:
+                save.truncate(13*1024*1024)
+        with self.assertRaisesRegex(ValueError,'backup size limit'):
+            s.backup(self.home,self.item)
+        self.assertFalse(s.backups(self.home,self.item))
     def test_save_extension_instances_and_readable_backup_names(self):
         for name in ('Black2.save','Black2.2.SAVE'): (self.home/name).write_bytes(b'opaque save data')
         (self.home/'Different.save').write_bytes(b'another game')

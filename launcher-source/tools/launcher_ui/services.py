@@ -5,6 +5,10 @@ import hashlib, ipaddress, json, os, platform, re, socket, uuid, zipfile, thread
 import urllib.request
 
 GUIDES=('PLAYER_GUIDE.md','KNOWN_ISSUES.md','TAILSCALE_COOP.md','UDP_SERVER_GUIDE.md','LAUNCHER.md','COMPANION_INTERACTIONS.md','COOP_TOOLS.md','RELEASE_CHECKS_1.0.6.md','FEATURES.md','ROADMAP.md')
+MAX_BACKUP_FILES=32
+MAX_BACKUP_FILE_SIZE=16*1024*1024
+MAX_BACKUP_MANIFEST_SIZE=16384
+MAX_BACKUP_ARCHIVE_SIZE=64*1024*1024
 
 def _safe_guide_path(path,home):
     import unova_storage as storage
@@ -107,18 +111,28 @@ def backup(home,item,reason='manual'):
     if not re.fullmatch(r'[a-f0-9]{32}',str(item.get('id',''))):raise ValueError('Invalid profile identifier.')
     files=save_files(item)
     if not files:return None
+    if len(files)>MAX_BACKUP_FILES:raise ValueError(f'Too many save files to back up (maximum {MAX_BACKUP_FILES}).')
     folder=Path(home)/'save-backups'/item['id'];folder.mkdir(parents=True,exist_ok=True)
     stamp=datetime.now(timezone.utc).strftime('%Y%m%d-%H%M%S')
     target=folder/(stamp+'-'+reason+'-'+uuid.uuid4().hex[:6]+'.zip')
     manifest={'profile':item['id'],'created':datetime.now(timezone.utc).isoformat(),'reason':reason,'files':[]}
+    total_size=0
     pending=target.with_suffix('.pending')
     try:
         with zipfile.ZipFile(pending,'x',zipfile.ZIP_DEFLATED) as bundle:
             for path in files:
-                if path.stat().st_size>16*1024*1024:raise ValueError('Save exceeds backup size limit: '+path.name)
-                data=path.read_bytes();bundle.writestr(path.name,data)
+                if path.stat().st_size>MAX_BACKUP_FILE_SIZE:raise ValueError('Save exceeds backup size limit: '+path.name)
+                data=path.read_bytes()
+                if len(data)>MAX_BACKUP_FILE_SIZE:raise ValueError('Save exceeds backup size limit: '+path.name)
+                total_size+=len(data)
+                if total_size>MAX_BACKUP_ARCHIVE_SIZE-MAX_BACKUP_MANIFEST_SIZE:
+                    raise ValueError('Combined saves exceed backup size limit.')
+                bundle.writestr(path.name,data)
                 manifest['files'].append({'name':path.name,'size':len(data),'sha256':hashlib.sha256(data).hexdigest()})
-            bundle.writestr('manifest.json',json.dumps(manifest,indent=2))
+            manifest_data=json.dumps(manifest,indent=2).encode('utf-8')
+            if len(manifest_data)>MAX_BACKUP_MANIFEST_SIZE:raise ValueError('Backup manifest exceeds size limit.')
+            if total_size+len(manifest_data)>MAX_BACKUP_ARCHIVE_SIZE:raise ValueError('Combined saves exceed backup size limit.')
+            bundle.writestr('manifest.json',manifest_data)
         os.replace(pending,target)
     finally:
         if pending.exists():pending.unlink()
@@ -142,11 +156,11 @@ def restore(home,item,archive):
     payload=[]
     with zipfile.ZipFile(archive) as bundle:
         entries=bundle.infolist()
-        if len(entries)>33 or sum(entry.file_size for entry in entries)>64*1024*1024:raise ValueError('Backup exceeds size limits.')
+        if len(entries)>MAX_BACKUP_FILES+1 or sum(entry.file_size for entry in entries)>MAX_BACKUP_ARCHIVE_SIZE:raise ValueError('Backup exceeds size limits.')
         if len({entry.filename for entry in entries})!=len(entries):raise ValueError('Backup contains duplicate files.')
         members={entry.filename:entry for entry in entries}
         manifest_info=members.get('manifest.json')
-        if manifest_info is None or manifest_info.is_dir() or manifest_info.file_size>16384:raise ValueError('Invalid backup manifest.')
+        if manifest_info is None or manifest_info.is_dir() or manifest_info.file_size>MAX_BACKUP_MANIFEST_SIZE:raise ValueError('Invalid backup manifest.')
         def read_member(info):
             if info.flag_bits&1 or info.compress_type not in (zipfile.ZIP_STORED,zipfile.ZIP_DEFLATED):
                 raise ValueError('Backup contains an unsupported file.')
@@ -158,13 +172,13 @@ def restore(home,item,archive):
         if not isinstance(manifest,dict):raise ValueError('Invalid backup manifest.')
         if manifest.get('profile')!=item['id']:raise ValueError('Backup belongs to a different profile.')
         files=manifest.get('files')
-        if not isinstance(files,list) or not 1<=len(files)<=32:raise ValueError('Invalid backup manifest.')
+        if not isinstance(files,list) or not 1<=len(files)<=MAX_BACKUP_FILES:raise ValueError('Invalid backup manifest.')
         pattern=re.escape(Path(item['rom']).stem)+r'(?:\.\d+)?\.(?:sav|save|dsv)'
         validated=[];seen=set()
         for entry in files:
             if not isinstance(entry,dict):raise ValueError('Invalid backup manifest.')
             name=entry.get('name');size=entry.get('size');checksum=entry.get('sha256')
-            if (not isinstance(name,str) or type(size) is not int or not 0<=size<=16*1024*1024 or
+            if (not isinstance(name,str) or type(size) is not int or not 0<=size<=MAX_BACKUP_FILE_SIZE or
                     not isinstance(checksum,str) or not re.fullmatch(r'[0-9a-f]{64}',checksum) or name in seen):
                 raise ValueError('Invalid backup manifest.')
             if not re.fullmatch(pattern,name,re.I):raise ValueError('Backup contains an unexpected file.')
