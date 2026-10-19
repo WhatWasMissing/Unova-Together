@@ -8,3 +8,4 @@
 - Launcher repair now reports damaged release metadata clearly.
 - Old-install cleanup now skips malformed installation records safely instead of aborting.
 - Save backups now enforce the same file-count and size limits as restore, preventing the launcher from creating backups it cannot restore.
+- Emulator and Multiplayer windows now show the same release version as the packaged game.

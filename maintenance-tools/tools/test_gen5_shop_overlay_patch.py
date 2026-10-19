@@ -45,6 +45,17 @@ def packaged_shop_header() -> str:
     return "\n".join(line[1:] for line in match.group(1).splitlines() if line.startswith("+"))
 
 
+def added_source(path: str) -> str:
+    patch = PATCH_PATH.read_text(encoding="utf-8")
+    relative = re.escape(path)
+    match = re.search(
+        rf"(?ms)^--- a/{relative}\n\+\+\+ b/{relative}\n(.*?)(?=^--- |\Z)", patch
+    )
+    if not match:
+        raise AssertionError(f"development patch does not change {path}")
+    return "\n".join(line[1:] for line in match.group(1).splitlines() if line.startswith("+"))
+
+
 class ShopOverlayPatchTests(unittest.TestCase):
     def test_packager_keeps_no_final_newline_diffs_separate(self):
         lines = packager.unified_diff_lines(
@@ -72,6 +83,18 @@ class ShopOverlayPatchTests(unittest.TestCase):
             )
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(source.read_bytes(), b"after")
+
+    def test_emulator_and_multiplayer_titles_use_the_packaged_release_version(self):
+        version_text = (ROOT / "VERSION.txt").read_text(encoding="utf-8")
+        version_match = re.search(r"\b(\d+\.\d+\.\d+)\b", version_text)
+        self.assertIsNotNone(version_match)
+        version = version_match.group(1)
+        credits = added_source("source/melonDS/src/frontend/qt_sdl/ProjectCredits.h")
+        panel = added_source("source/melonDS/src/frontend/qt_sdl/MultiplayerPanel.cpp")
+        self.assertIn(f'inline constexpr char Version[] = "{version}";', credits)
+        self.assertIn(f'inline constexpr char WindowTitle[] = "Unova Together {version}";', credits)
+        self.assertIn(f'"<b>Unova Together {version}</b>', credits)
+        self.assertIn('setWindowTitle("Multiplayer ["+identifier+"] - "+ProjectCredits::WindowTitle);', panel)
 
     def test_distributed_source_patch_is_parseable(self):
         result = subprocess.run(

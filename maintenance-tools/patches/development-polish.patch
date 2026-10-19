@@ -3363,7 +3363,8 @@
  
 @@ -184,6 +188,11 @@
      }
-     setWindowTitle("Multiplayer ["+identifier+"] - "+buildName);
+-    setWindowTitle("Multiplayer ["+identifier+"] - "+buildName);
++    setWindowTitle("Multiplayer ["+identifier+"] - "+ProjectCredits::WindowTitle);
      resize(600, 500);
 +    QSettings menuSoundSettings("PokePlay","Multiplayer");
 +    menuSoundsEnabled=menuSoundSettings.value("menuSounds",true).toBool();
@@ -7940,11 +7941,11 @@
  inline constexpr char Name[] = "Unova Together";
 -inline constexpr char Version[] = "1.0.2";
 -inline constexpr char WindowTitle[] = "Unova Together 1.0.2";
-+inline constexpr char Version[] = "1.0.32";
-+inline constexpr char WindowTitle[] = "Unova Together 1.0.32";
++inline constexpr char Version[] = "2.0.17";
++inline constexpr char WindowTitle[] = "Unova Together 2.0.17";
  inline constexpr char Html[] =
 -    "<b>Unova Together 1.0.2</b> — Created by <b>mvq1303</b> · "
-+    "<b>Unova Together 1.0.32</b> — Created by <b>mvq1303</b> · "
++    "<b>Unova Together 2.0.17</b> — Created by <b>mvq1303</b> · "
      "<a href=\"https://github.com/WhatWasMissing/Unova-Together\">GitHub: WhatWasMissing</a>"
      "<br>Playtesters: maxback221 · randomitem19";
  }
