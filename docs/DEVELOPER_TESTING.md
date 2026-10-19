@@ -292,6 +292,8 @@ The diagnostics exporter redacted the `Authorization` header name and scheme but
 
 The same export test also reproduced that IPv6 addresses (`2001:db8::1`, `::1`, and zone-qualified `fe80::abcd%12`) remained in logs. The exporter now validates IPv6-like tokens with Python's standard `ipaddress` module and redacts valid addresses, including bracketed host-and-port and zone-qualified forms. The focused diagnostics test and full 20-test launcher-services suite pass in both trees; launcher UI parity remains **48/48**.
 
+The diagnostics test now also covers a JSON `Proxy-Authorization` field. The existing key/value matcher already removed that credential, so this was test hardening only; the focused test passed in both launcher trees and the **48-file** parity check passed.
+
 ### Guide cache rejects linked paths — 2026-10-19
 
 Guide refresh and offline-cache writes did not validate the `.updates/guides` directory against symlinks or junctions. A linked cache could redirect guide writes outside the launcher home, including replacing an existing `active.json`. The guide service now checks the cache directory and each marker, document bundle, and cached guide path against the install's managed-path policy before network access or file operations; offline reads fall back safely when the cache path is linked.

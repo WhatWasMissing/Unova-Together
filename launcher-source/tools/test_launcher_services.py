@@ -182,7 +182,7 @@ class ServiceTests(unittest.TestCase):
             self.assertIn('reachable',s.probe({'host':'localhost','room':'test'}))
     def test_diagnostic_export_excludes_game_data_and_redacts(self):
         logs=self.home/'transfer';logs.mkdir()
-        (logs/'bridge.log').write_text('token=private-token\n{"access_key":"secret-key"}\n127.0.0.1 C:\\Users\\Private\\game.nds\nAuthorization: Bearer bearer-secret-value\nProxy-Authorization: Basic basic-secret-value\nPeers: [2001:db8::1]:8765 ::1 fe80::abcd%12')
+        (logs/'bridge.log').write_text('token=private-token\n{"access_key":"secret-key"}\n{"Proxy-Authorization":"Basic json-proxy-secret"}\n127.0.0.1 C:\\Users\\Private\\game.nds\nAuthorization: Bearer bearer-secret-value\nProxy-Authorization: Basic basic-secret-value\nPeers: [2001:db8::1]:8765 ::1 fe80::abcd%12')
         (logs/'private.ramdump').write_bytes(b'private RAM')
         separate=self.home/'installed';separate.mkdir()
         output=self.home/'diagnostics.zip';s.diagnostics(separate,output,self.home)
@@ -191,6 +191,7 @@ class ServiceTests(unittest.TestCase):
             contents=''.join(z.read(i).decode() for i in z.namelist())
             self.assertNotIn('private-token',contents);self.assertNotIn('secret-key',contents);self.assertNotIn('127.0.0.1',contents);self.assertNotIn('Private',contents)
             self.assertNotIn('bearer-secret-value',contents);self.assertNotIn('basic-secret-value',contents)
+            self.assertNotIn('json-proxy-secret',contents)
             self.assertNotIn('2001:db8::1',contents);self.assertNotIn('::1',contents);self.assertNotIn('fe80::abcd',contents)
             self.assertTrue(all(Path(n).suffix not in ('.sav','.nds','.ramdump') for n in z.namelist()))
     def test_diagnostic_export_preserves_preexisting_pending_file(self):
