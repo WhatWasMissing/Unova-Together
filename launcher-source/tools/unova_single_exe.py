@@ -1,6 +1,6 @@
 """Single-download Unova Together bootstrap. mvq1303 / WhatWasMissing."""
 from pathlib import Path
-import argparse, ctypes, json, os, shutil, subprocess, sys
+import argparse, ctypes, json, os, re, shutil, subprocess, sys
 import unova_updater as updates
 import launcher_migration
 
@@ -30,12 +30,18 @@ def install_bundle(home,payload,metadata):
     marker_pending=marker.with_suffix('.pending');state_pending=state.with_suffix('.pending')
     for path in (marker,state,marker_pending,state_pending):_assert_safe_bundle_path(path,home)
     current=updates.active_root(home,allow_missing=True)
+    if marker.exists() and current==home:
+        raise ValueError('The active update record is damaged. Open an installed launcher copy and repair it before continuing.')
     previous={}
-    if state.exists():
-        if state.stat().st_size>4096:raise ValueError('Invalid standalone state.')
-        previous=json.loads(state.read_text())
-    active={}
-    if marker.exists():active=json.loads(marker.read_text())
+    if state.exists() and state.stat().st_size<=4096:
+        try:
+            candidate=json.loads(state.read_text(encoding='utf-8'))
+            if isinstance(candidate,dict):
+                label='.'.join(map(str,updates.version(candidate.get('version'))))
+                previous_slot=candidate.get('slot')
+                if isinstance(previous_slot,str) and re.fullmatch(re.escape(label)+r'-repair-[a-f0-9]{12}',previous_slot):previous=candidate
+        except (OSError,UnicodeError,ValueError,TypeError,AttributeError):pass
+    active={'slot':current.parent.name} if current!=home else {}
     try: current_revision=int((current/'launcher/BUILD_REVISION.txt').read_text().strip())
     except (OSError,ValueError): current_revision=0
     bundled_revision=int(metadata.get('launcher_revision',0))

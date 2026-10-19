@@ -106,4 +106,23 @@ class BundleTests(unittest.TestCase):
         with self.assertRaises(ValueError):install_bundle(self.home,self.archive,metadata)
         self.assertFalse((self.home/'.updates/active.json').exists())
 
+    def test_corrupt_active_marker_stops_bundle_without_changing_install(self):
+        root=install_bundle(self.home,self.archive,self.metadata);marker=self.home/'.updates/active.json'
+        for raw in ('{','[]','{"version":null}'):
+            marker.write_text(raw,encoding='utf-8')
+            with self.subTest(marker=raw),self.assertRaisesRegex(ValueError,'active update record is damaged'):
+                install_bundle(self.home,self.archive,self.metadata)
+            self.assertEqual(marker.read_text(encoding='utf-8'),raw)
+            self.assertTrue(launcher_executable(root).is_file())
+
+    def test_corrupt_standalone_sidecar_is_recovered_without_replacing_bundle(self):
+        root=install_bundle(self.home,self.archive,self.metadata);state=self.home/'.standalone.json'
+        expected={'version':'0.3.5','slot':root.parent.name}
+        for raw in ('{','[]','x'*4097):
+            state.write_text(raw,encoding='utf-8')
+            with self.subTest(state=raw[:24]):
+                self.assertEqual(install_bundle(self.home,self.archive,self.metadata),root)
+            self.assertEqual(state.read_text(encoding='utf-8'),raw)
+            self.assertEqual(json.loads((self.home/'.updates/active.json').read_text()),expected)
+
 if __name__=='__main__':unittest.main()

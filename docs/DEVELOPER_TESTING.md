@@ -271,3 +271,9 @@ Old-install cleanup could crash when an installation receipt contained valid JSO
 ### Deterministic reused-bundle safety test — 2026-10-19
 
 The hard-link safety test rebuilt a ZIP fixture when asking the installer to reuse the previously installed bundle. ZIP timestamps can change the archive digest, making the test intermittently exercise a new slot instead of the reused one. It now restores and reuses the exact previously installed archive bytes and checksum in both test trees. The test-only change does not modify installer behavior.
+
+### Standalone bootstrap recovery from damaged metadata — 2026-10-19
+
+The standalone bootstrap re-read active-update JSON after resolving the current installation, so a corrupt marker could still fail setup before it could report a useful recovery error. It now derives the active slot from the validated install path and stops before changing files when the marker is damaged. The optional standalone sidecar is treated as advisory: malformed or oversized content no longer blocks an otherwise valid installed bundle.
+
+**PASS — SOURCE/UNIT VERIFIED:** Production bundle-install tests cover truncated JSON, non-object JSON, and a null version in the active marker; each gets a clear error and preserves the marker and installed launcher. Separate cases cover malformed, non-object, and oversized standalone sidecars; the valid installed bundle and active marker remain unchanged. Final full discovery passed with `py -3.12 -B -m unittest discover -s launcher-source/tools -p 'test_*.py'` (**140 tests**) and `py -3.12 -B -m unittest discover -s maintenance-tools/tools -p 'test_*.py'` (**185 run, six optional skips**). `py -3.12 -B check_launcher_tree_parity.py` passed for all **48 UI files**.
