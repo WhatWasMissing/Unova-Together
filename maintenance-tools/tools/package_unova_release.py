@@ -42,6 +42,11 @@ def require_release_condition(condition, message):
     if not condition:
         raise RuntimeError(f'Release package validation failed: {message}')
 
+def runtime_matches_shop_overlay_source(runtime: bytes, patch_header: bytes) -> bool:
+    """Match the PE version-resource fingerprint to the packaged patch source."""
+    fingerprint = hashlib.sha256(patch_header).hexdigest()
+    return fingerprint.encode('utf-16le') in runtime
+
 def check_launcher_ui_mirror():
     checker = REPOSITORY_ROOT/'launcher-source/tools/check_launcher_tree_parity.py'
     if not checker.is_file():
@@ -67,7 +72,7 @@ def main():
     launcher = args.launcher_root.resolve() if args.launcher_root else ROOT/'builds/mod-hub/current/Pokemon Together'
     if not launcher.is_relative_to(ROOT/'builds'):
         raise ValueError('Launcher must be staged within workspace builds')
-    repo = ROOT/'tools/unova-together-release'
+    repo = REPOSITORY_ROOT
     output = args.artifact_dir.resolve() if args.artifact_dir else ROOT/'downloads/releases'
     if not output.is_relative_to(ROOT/'downloads/releases'):
         raise ValueError('Release artifacts must stay under downloads/releases')
@@ -82,6 +87,13 @@ def main():
     release_label=output.name if args.artifact_dir else f'release-{version}'
     stage_root=ROOT/'builds'/release_label
     stage=stage_root/'Unova-Together'
+    source_root=ROOT/'melonDS-source-1.1'
+    patch_header=source_root/'src/Gen5ShopOverlayPatch.h'
+    require_release_condition(patch_header.is_file(), 'Mega shop overlay patch source is missing')
+    require_release_condition(
+        runtime_matches_shop_overlay_source((current/'melonDS.exe').read_bytes(), patch_header.read_bytes()),
+        'Staged emulator was not built from the packaged Mega shop overlay patch source; rebuild it before packaging',
+    )
     work_root=ROOT/'test-fixtures'/f'{release_label}-single-exe'
     standalone_dir=stage_root/'standalone'
     if any(path.exists() for path in (runtime,source,standalone,repair,sums,stage_root,work_root)):
@@ -139,7 +151,6 @@ def main():
         z.writestr('Unova-Together/START HERE.md', '# Start here\n\nRun **Start Unova Together.cmd**, choose your own ROM and select Play. The launcher checks official GitHub releases and offers verified updates. Follow docs/PLAYER_GUIDE.md to connect. Both players need matching ROMs/builds and independent saves.\n')
         for name in (manifest['installer'], 'bundle.json', 'LICENSE.txt', 'README.txt'):
             z.write(tailscale/name, 'Unova-Together/setup/Tailscale/'+name)
-    source_root = ROOT/'melonDS-source-1.1'
     with zipfile.ZipFile(source, 'x', zipfile.ZIP_DEFLATED, compresslevel=6) as z:
         for name in ('check_follower_appearance.cpp','check_pokemon_follower.cpp','check_presence_rendering.cpp','test_presence_polling.py','test_party_stats.py','test_unova_storage.py'):
             z.write(ROOT/'tools'/name,'Unova-Together-Source/tools/'+name)

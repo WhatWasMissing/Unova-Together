@@ -773,8 +773,8 @@
  1 VERSIONINFO
 -FILEVERSION 1,0,2,0
 -PRODUCTVERSION 1,0,2,0
-+FILEVERSION 2,0,16,0
-+PRODUCTVERSION 2,0,16,0
++FILEVERSION 2,0,18,0
++PRODUCTVERSION 2,0,18,0
  FILETYPE VFT_APP
  {
    BLOCK "StringFileInfo"
@@ -783,7 +783,7 @@
  		{
  			VALUE "CompanyName", "Melon Factory of Kuribo64"
 -			VALUE "FileVersion", "1.0.2"
-+			VALUE "FileVersion", "2.0.16"
++			VALUE "FileVersion", "2.0.18"
  			VALUE "FileDescription", "Unova Together - modified melonDS 1.1"
  			VALUE "InternalName", "SDnolem"
  			VALUE "LegalCopyright", "2016-2025 melonDS team; 2026 mvq1303 (Unova Together contributions)"
@@ -791,7 +791,7 @@
  			VALUE "OriginalFilename", "melonDS.exe"
  			VALUE "ProductName", "Unova Together"
 -			VALUE "ProductVersion", "1.0.2"
-+			VALUE "ProductVersion", "2.0.16"
++			VALUE "ProductVersion", "2.0.18"
 +			VALUE "UnovaShopOverlaySourceSHA256", "${UNOVA_SHOP_OVERLAY_SOURCE_SHA256}"
  		}
  	}
@@ -1349,7 +1349,7 @@
      }
      const auto companionSuppressed=companionChordHeld?((1<<0)|(buttons&(1<<8))):0;
 -    inputMask=(menuInputBlocked.load() || waitForNeutralInput.load())?0xfff:(rawMask|companionSuppressed);
-+    constexpr int megaChord=Gen5MegaBattle::MegaActivationChord;
++    constexpr unsigned megaChord=Gen5MegaBattle::MegaActivationChord;
 +    const bool inputBlocked=menuInputBlocked.load() || waitForNeutralInput.load();
 +    const bool megaChordDown=(buttons&megaChord)==megaChord;
 +    if(Gen5MegaBattle::megaActivationPressed(buttons,previousButtons,inputBlocked))
@@ -3161,6 +3161,24 @@
  }
  
  QVariantList Gen5Menu::bossChallenges(const unsigned char* bytes,std::size_t length,QString& reason)
+@@ -501,7 +622,7 @@
+         // starter-dependent rival records. Never enable a retail slot merely
+         // because Redux assigns an important trainer to that numeric slot.
+         const auto names=entry(file(rom,{"a","0","0","2"}),382);
+-        const QSet<QString> majorNames={"Rival","Hugh","Cheren","Roxie","Burgh","Elesa",
++        const QSet<QString> majorNames={"Rival","Hugh","Cheren","Roxie","Burgh","Elesa","Cynthia",
+             "Clay","Skyla","Drayden","Marlon","Shauntal","Marshal","Grimsley",
+             "Caitlin","Iris","Colress","Ghetsis","Zinzolin","Shadow","Rood",
+             "Grunt","Grunts","Bianca","Benga","Lance","Charles","Alder","N","N?","Ghetsis?",
+@@ -509,7 +630,7 @@
+             "Wattson","Flannery","Norman","Juan","Winona","Tate","Liza",
+             "Blue","Clair","Red","Drayano","AphexCubed"};
+         QSet<unsigned> included;for(const auto& entry:result) included.insert(entry.toMap().value("id").toUInt());
+-        const auto trainerLimit=qMin(qMin(entryCount(trainers),entryCount(parties)),891u);
++        const auto trainerLimit=qMin(qMin(entryCount(trainers),entryCount(parties)),892u);
+         for(unsigned id=0;id<qMin(names.half(2),trainerLimit);++id) {
+             if(included.contains(id) || id==4 || id==5 || id==6 || id==371 || id==581) continue;
+             const auto name=trainerName(names,id);
 @@ -578,6 +699,11 @@
      return result;
  }
@@ -8497,7 +8515,7 @@
 -    "<a href=\"https://github.com/WhatWasMissing/Unova-Together\">GitHub: WhatWasMissing</a>"
 -    "<br>Playtesters: maxback221 · randomitem19";
 +// Keep the multiplayer build identifier aligned with each packaged release.
-+inline constexpr char Version[] = "2.0.16";
++inline constexpr char Version[] = "2.0.18";
 +
 +inline QString ReleaseVersion()
 +{

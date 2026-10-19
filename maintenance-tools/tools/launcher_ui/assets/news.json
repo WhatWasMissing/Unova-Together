@@ -2,6 +2,12 @@
   "schema": 1,
   "notes": [
     {
+      "version": "2.0.18",
+      "title": "Pokémon Center crash fix and launcher reliability",
+      "file": "RELEASE_NOTES_2.0.18.md",
+      "body": "- Fixed a crash when entering a Pokémon Center.\n- Cynthia is available through Practice rematches without the unsupported-trainer error.\n- Updates and launcher repair handle damaged or incomplete setup information more safely. A failed update can be retried without replacing the current game.\n- Save backups and restores use matching size and file-count limits. Damaged backups show a clear error and leave the current save intact.\n- Old-version cleanup skips damaged installation records instead of stopping the whole cleanup.\n- Games & saves, backup folders, and problem-report folders show clearer errors when files cannot be accessed or opened.\n- The emulator-settings editor reports damaged settings sections instead of crashing.\n- Prepared player-model games are checked before reuse, and cached game copies and profile storage receive additional safeguards.\n- Emulator and Multiplayer windows display the same release number as the launcher.\n- Problem reports better hide network addresses and authorization information."
+    },
+    {
       "version": "2.0.17",
       "title": "Save-loading fix",
       "file": "RELEASE_NOTES_2.0.17.md",

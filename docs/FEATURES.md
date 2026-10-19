@@ -1,6 +1,6 @@
 # Features
 
-Unova Together **2.0.17** brings friends, Pokémon tools, and Mega Evolution to supported English Blaze Black 2 Redux profiles on Windows.
+Unova Together **2.0.18** brings friends, Pokémon tools, and Mega Evolution to supported English Blaze Black 2 Redux profiles on Windows.
 
 ## Play with friends
 

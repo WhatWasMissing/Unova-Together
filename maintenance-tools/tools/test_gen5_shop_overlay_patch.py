@@ -92,9 +92,15 @@ class ShopOverlayPatchTests(unittest.TestCase):
         credits = added_source("source/melonDS/src/frontend/qt_sdl/ProjectCredits.h")
         panel = added_source("source/melonDS/src/frontend/qt_sdl/MultiplayerPanel.cpp")
         self.assertIn(f'inline constexpr char Version[] = "{version}";', credits)
-        self.assertIn(f'inline constexpr char WindowTitle[] = "Unova Together {version}";', credits)
-        self.assertIn(f'"<b>Unova Together {version}</b>', credits)
-        self.assertIn('setWindowTitle("Multiplayer ["+identifier+"] - "+ProjectCredits::WindowTitle);', panel)
+        self.assertIn('inline QString ReleaseVersion()', credits)
+        self.assertIn('filePath("VERSION.txt")', credits)
+        self.assertIn('return QString::fromLatin1(Version);', credits)
+        self.assertIn('inline QString WindowTitle()', credits)
+        self.assertIn("QString::fromLatin1(Name) + ' ' + ReleaseVersion()", credits)
+        self.assertIn('WindowTitle().toHtmlEscaped()', credits)
+        self.assertIn('setWindowTitle("Multiplayer ["+identifier+"] - "+ProjectCredits::WindowTitle());', panel)
+        for relative in ('Window.cpp', 'PokePlayIntro.h', 'AboutDialog.cpp'):
+            self.assertIn('ProjectCredits::', added_source('source/melonDS/src/frontend/qt_sdl/' + relative))
 
     def test_distributed_source_patch_is_parseable(self):
         result = subprocess.run(

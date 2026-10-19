@@ -44,7 +44,9 @@ def main():
     patch=output_root/'maintenance-tools/patches/development-polish.patch';patch.write_text(''.join(delta),encoding='utf-8',newline='\n')
     with base_archive.open('rb') as baseline_file:
         baseline_sha256=hashlib.file_digest(baseline_file,'sha256').hexdigest()
-    metadata={'baseline':base_archive.name,'baselineSha256':baseline_sha256,'changedNativeFiles':changed,'patchSha256':hashlib.sha256(patch.read_bytes()).hexdigest(),'spriteVariants':743,'build':'1.0.7-dev'}
+    version_file=output_root/'VERSION.txt'
+    build_label=version_file.read_text(encoding='utf-8-sig').strip().removeprefix('Unova Together ') if version_file.is_file() else 'development'
+    metadata={'baseline':base_archive.name,'baselineSha256':baseline_sha256,'changedNativeFiles':changed,'patchSha256':hashlib.sha256(patch.read_bytes()).hexdigest(),'spriteVariants':743,'build':build_label}
     (output_root/'maintenance-tools/patches/development-polish.json').write_text(json.dumps(metadata,indent=2)+'\n')
     if args.patch_only:
         print(json.dumps(metadata,indent=2))
