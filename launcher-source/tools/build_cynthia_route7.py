@@ -17,6 +17,7 @@ import shutil
 import struct
 import subprocess
 import sys
+import uuid
 from pathlib import Path
 
 import ndspy.color
@@ -740,6 +741,24 @@ def compile_script(decomp: Path, src_text: str, messages_path: Path, work: Path,
     return binary.read_bytes()
 
 
+def save_rom_copy(rom, output: Path) -> Path:
+    """Write and promote a generated ROM without reusing a predictable temp path."""
+    output = Path(output)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    pending = output.with_name(output.name + "." + uuid.uuid4().hex + ".pending")
+    with pending.open("xb"):
+        pass
+    try:
+        rom.saveToFile(str(pending))
+        os.replace(pending, output)
+    finally:
+        try:
+            pending.unlink()
+        except FileNotFoundError:
+            pass
+    return output
+
+
 def build(args: argparse.Namespace) -> dict:
     from tools.data.event_data import events_bytes, events_json
     from tools.data.gen_constants import ordered_names
@@ -877,12 +896,7 @@ def build(args: argparse.Namespace) -> dict:
     rom.files[rom.filenames.idOf("a/0/4/8")] = resource_archive.save()
     rom.files[rom.filenames.idOf("a/0/5/6")] = scripts.save()
 
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    pending = args.output.with_suffix(args.output.suffix + ".pending")
-    if pending.exists():
-        pending.unlink()
-    rom.saveToFile(str(pending))
-    os.replace(pending, args.output)
+    save_rom_copy(rom, args.output)
 
     verify = ndspy.rom.NintendoDSRom.fromFile(str(args.output))
     verify_resources = ndspy.narc.NARC(verify.getFileByName("a/0/4/8"))
