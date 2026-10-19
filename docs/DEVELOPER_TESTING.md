@@ -288,6 +288,12 @@ Launcher migration assumed `BUILD_INFO.json` was an object; a non-object JSON va
 
 **PASS — SOURCE/UNIT VERIFIED:** The migration test exercises truncated JSON, a list, a null version, and an oversized metadata file. Each is rejected as `ValueError` by the production repair entrypoint. Final full discovery passed with `py -3.12 -B -m unittest discover -s launcher-source/tools -p 'test_*.py'` (**141 tests**) and `py -3.12 -B -m unittest discover -s maintenance-tools/tools -p 'test_*.py'` (**186 run, six optional skips**). `py -3.12 -B check_launcher_tree_parity.py` passed for all **48 UI files**.
 
+### Launcher repair bounds rollback metadata reads — 2026-10-19
+
+Launcher repair rejected sidecar records above 8 KiB when parsing them, but then used an unbounded `read_bytes()` to snapshot the same invalid file for rollback. A corrupted oversized `.launcher-home.json` could allocate its full size in memory. The rollback snapshot now reads at most 8 KiB plus one byte and aborts before staging or renaming the old launcher when the limit is exceeded. Regression tests confirm the oversized sidecar and old launcher stay unchanged and no temporary executable is left behind.
+
+**PASS — SOURCE/UNIT VERIFIED:** Focused migration tests passed **14/14** in `launcher-source` and **15/15** in `maintenance-tools`. Full discovery passed with `py -3.12 -B -m unittest discover -s tools -p 'test_*.py'` (**167/167** in `launcher-source`; **213 run, six optional skips** in `maintenance-tools`). The packaged launcher and a live repair of an installed copy were not run.
+
 ### Diagnostics Authorization-header redaction — 2026-10-19
 
 The diagnostics exporter redacted the `Authorization` header name and scheme but could leave the credential following `Bearer` or `Basic` in raw HTTP header lines. It now redacts the entire value of raw `Authorization` and `Proxy-Authorization` lines before applying the existing key/value, path, and IPv4 redactions.

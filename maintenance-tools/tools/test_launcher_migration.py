@@ -114,6 +114,15 @@ class MigrationTests(unittest.TestCase):
             info.write_text(raw,encoding='utf-8')
             with self.subTest(info=raw[:24]),self.assertRaisesRegex(ValueError,'metadata'):
                 m.active_launcher(self.home)
+
+    def test_oversized_launcher_sidecar_aborts_before_replacement(self):
+        sidecar=self.entry.parent/m.SIDECAR;original=b'x'*8193
+        sidecar.write_bytes(original);old_entry=self.entry.read_bytes()
+        with self.assertRaisesRegex(ValueError,'too large'):
+            m.migrate(self.home,self.entry,self.source)
+        self.assertEqual(sidecar.read_bytes(),original)
+        self.assertEqual(self.entry.read_bytes(),old_entry)
+        self.assertFalse(list(self.entry.parent.glob('.launcher-update-*.exe')))
     def test_repair_lock_rejects_hardlinked_lock_file(self):
         directory=self.home/'.updates';directory.mkdir(exist_ok=True)
         outside=self.base/'external-repair-lock';outside.write_bytes(b'')

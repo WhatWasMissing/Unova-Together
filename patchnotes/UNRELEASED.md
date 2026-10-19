@@ -6,6 +6,7 @@
 - Corrupted update metadata no longer prevents the launcher from opening its repair tools.
 - Damaged standalone-install metadata now gets a clear error without changing existing files.
 - Launcher repair now reports damaged release metadata clearly.
+- Launcher repair now stops safely if its saved setup details are unusually large, leaving the existing launcher unchanged.
 - Old-install cleanup now skips malformed installation records safely instead of aborting.
 - Save backups now enforce the same file-count and size limits as restore, preventing the launcher from creating backups it cannot restore.
 - Emulator and Multiplayer windows now show the same release version as the packaged game.

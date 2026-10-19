@@ -115,5 +115,14 @@ class MigrationTests(unittest.TestCase):
             with self.subTest(info=raw[:24]),self.assertRaisesRegex(ValueError,'metadata'):
                 m.active_launcher(self.home)
 
+    def test_oversized_launcher_sidecar_aborts_before_replacement(self):
+        sidecar=self.entry.parent/m.SIDECAR;original=b'x'*8193
+        sidecar.write_bytes(original);old_entry=self.entry.read_bytes()
+        with self.assertRaisesRegex(ValueError,'too large'):
+            m.migrate(self.home,self.entry,self.source)
+        self.assertEqual(sidecar.read_bytes(),original)
+        self.assertEqual(self.entry.read_bytes(),old_entry)
+        self.assertFalse(list(self.entry.parent.glob('.launcher-update-*.exe')))
+
 
 if __name__=='__main__':unittest.main()

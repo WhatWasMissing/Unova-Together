@@ -15,11 +15,12 @@ ENTRY = 'launcher-entry.json'
 SIDECAR = '.launcher-home.json'
 REPORT = 'launcher-migration.json'
 BRIDGE = 'Pokemon Together Bootstrap.exe'
+MAX_RECORD_BYTES = 8192
 
 
 def read(path):
     path = Path(path)
-    if path.stat().st_size > 8192:raise ValueError('Launcher record is too large.')
+    if path.stat().st_size > MAX_RECORD_BYTES:raise ValueError('Launcher record is too large.')
     data = json.loads(path.read_text(encoding='utf-8'))
     if not isinstance(data,dict) or data.get('schema') != 1 or data.get('product') != PRODUCT:
         raise ValueError('Invalid shared launcher record.')
@@ -38,6 +39,17 @@ def atomic(path, data):
 
 def digest(path):
     with Path(path).open('rb') as stream:return hashlib.file_digest(stream,'sha256').hexdigest()
+
+
+def snapshot_sidecar(path):
+    try:
+        with Path(path).open('rb') as stream:
+            previous = stream.read(MAX_RECORD_BYTES + 1)
+    except FileNotFoundError:
+        return None
+    if len(previous) > MAX_RECORD_BYTES:
+        raise ValueError('Launcher metadata is too large to repair safely.')
+    return previous
 
 
 def active_launcher(home):
@@ -129,7 +141,7 @@ def _migrate_unlocked(home, entry, source, *, timeout=0, status=lambda text:None
     except (OSError,ValueError):pass
     entry.parent.mkdir(parents=True,exist_ok=True)
     pending = entry.with_name('.launcher-update-'+uuid.uuid4().hex+'.exe')
-    previous = sidecar.read_bytes() if sidecar.exists() else None
+    previous = snapshot_sidecar(sidecar)
     shutil.copy2(source,pending)
     backup = None;deadline = time.monotonic()+timeout
     try:
