@@ -773,8 +773,8 @@
  1 VERSIONINFO
 -FILEVERSION 1,0,2,0
 -PRODUCTVERSION 1,0,2,0
-+FILEVERSION 2,0,19,0
-+PRODUCTVERSION 2,0,19,0
++FILEVERSION 2,0,21,0
++PRODUCTVERSION 2,0,21,0
  FILETYPE VFT_APP
  {
    BLOCK "StringFileInfo"
@@ -783,7 +783,7 @@
  		{
  			VALUE "CompanyName", "Melon Factory of Kuribo64"
 -			VALUE "FileVersion", "1.0.2"
-+			VALUE "FileVersion", "2.0.19"
++			VALUE "FileVersion", "2.0.21"
  			VALUE "FileDescription", "Unova Together - modified melonDS 1.1"
  			VALUE "InternalName", "SDnolem"
  			VALUE "LegalCopyright", "2016-2025 melonDS team; 2026 mvq1303 (Unova Together contributions)"
@@ -791,7 +791,7 @@
  			VALUE "OriginalFilename", "melonDS.exe"
  			VALUE "ProductName", "Unova Together"
 -			VALUE "ProductVersion", "1.0.2"
-+			VALUE "ProductVersion", "2.0.19"
++			VALUE "ProductVersion", "2.0.21"
 +			VALUE "UnovaShopOverlaySourceSHA256", "${UNOVA_SHOP_OVERLAY_SOURCE_SHA256}"
  		}
  	}
@@ -4338,8 +4338,8 @@
 +            row("resetEVName",pokemon.value("name").toString(),{8,34,240,20},false);
 +        }
 +        row("resetEVCost",QString("Reset all EVs for %1 P?").arg(PokemonTrading::EVResetCost),{8,60,240,20},false);
-+        row("confirmEVReset","Confirm reset",{8,88,240,20});
-+        row("cancelEVReset","Cancel",{8,113,240,18});
++        row("confirmEVReset","Yes, reset EVs",{8,88,240,20});
++        row("cancelEVReset","No, keep them",{8,113,240,18});
 +        hint="This cannot be undone. Your Pokemon's stats will recalculate.";
      } else if(menuMode=="invite") {
          title="CO-OP INVITATION";
@@ -4536,7 +4536,7 @@
 +            statsActionMessage="This Pokemon has no EVs to reset.";drawGameMenu();return;
 +        }
 +        resetEvRecord=pokemon.value("record").toByteArray();
-+        menuMode="reset-ev-confirm";menuFocus=0;drawGameMenu();return;
++        menuMode="reset-ev-confirm";menuFocus=3;drawGameMenu();return;
 +    }
 +    if(action=="cancelEVReset") {resetEvRecord.clear();menuMode="stats";menuFocus=0;drawGameMenu();return;}
 +    if(action=="confirmEVReset") {
@@ -8712,7 +8712,7 @@
 -    "<a href=\"https://github.com/WhatWasMissing/Unova-Together\">GitHub: WhatWasMissing</a>"
 -    "<br>Playtesters: maxback221 · randomitem19";
 +// Keep the multiplayer build identifier aligned with each packaged release.
-+inline constexpr char Version[] = "2.0.19";
++inline constexpr char Version[] = "2.0.21";
 +
 +inline QString ReleaseVersion()
 +{

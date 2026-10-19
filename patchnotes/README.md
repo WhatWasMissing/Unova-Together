@@ -2,6 +2,7 @@
 
 Pick a version to read what changed. The newest release is first.
 
+- [Unova Together 2.0.21 — Safer co-op testing and EV resets](RELEASE_NOTES_2.0.21.md)
 - [Unova Together 2.0.20 — More reliable relay updates](RELEASE_NOTES_2.0.20.md)
 - [Unova Together 2.0.19 — Mega Stone shops, Teleport, and co-op testing](RELEASE_NOTES_2.0.19.md)
 - [Unova Together 2.0.18 — Pokémon Center crash fix and launcher reliability](RELEASE_NOTES_2.0.18.md)

@@ -379,7 +379,7 @@ class Launcher(tk.Tk):
         if index<0:return
         self._save();self.active_profile_id=self.play_profiles[index]['id'];self._init_profiles();self._switching=True
         item=self._active_profile();self.profile_label.set(item['label']);self.player.set(item['player']);self.save_dir.set(item['save_dir'])
-        values=prefs.defaults(self.root/'builds/current');values.update(self.preference_values);self.pause.set(values['pause']);self.filter.set(values['filter']);self.volume.set(values['volume']);self.area_scenery.set(values.get('area_scenery',False));self.companion_interactions.set(values['companion_interactions']);self.reduced_follower_motion.set(values.get('reduced_follower_motion',False));self.coop_exp_suppression.set(values.get('coop_exp_suppression',False));self._refresh_player_model_label()
+        values=prefs.defaults(self.root/'builds/current');values.update(self.preference_values);self.pause.set(values['pause']);self.filter.set(values['filter']);self.volume.set(values['volume']);self.area_scenery.set(values.get('area_scenery',False));self.companion_interactions.set(values['companion_interactions']);self.reduced_follower_motion.set(values.get('reduced_follower_motion',False));self.coop_exp_suppression.set(values.get('coop_exp_suppression',True));self._refresh_player_model_label()
         self.lan_slots.set(str(item.get('lan_slots',16)))
         self.connection_role.set(item['lan_role']);self.last_lan_action=item['lan_role'].lower()
         self.net_mode.set(item['network']['mode']);self.net_host.set(item['network']['host']);self.net_port.set(str(item['network']['port']));self.net_room.set(item['network']['room'])
@@ -758,10 +758,10 @@ class Launcher(tk.Tk):
         coop_test=card(parent);coop_test.pack(fill='x',pady=(0,18))
         coop_test_box=tk.Frame(coop_test,bg=C['surface']);coop_test_box.pack(fill='x',padx=18,pady=16)
         label(coop_test_box,'CO-OP TESTING',size=9,bold=True,bg=C['surface']).pack(anchor='w',pady=(0,8))
-        self.coop_exp_suppression=tk.BooleanVar(value=values.get('coop_exp_suppression',False))
+        self.coop_exp_suppression=tk.BooleanVar(value=values.get('coop_exp_suppression',True))
         ttk.Checkbutton(coop_test_box,text='Suppress EXP in co-op battles (testing)',variable=self.coop_exp_suppression,
             command=lambda:self._preference('coop_exp_suppression',self.coop_exp_suppression.get())).pack(anchor='w',pady=4)
-        label(coop_test_box,'Skips EXP, level-up and move-learning rewards during co-op test/story battles. Off by default; applies on the next launch.',size=9,color=C['muted'],bg=C['surface'],wraplength=620,justify='left').pack(anchor='w',pady=(2,0))
+        label(coop_test_box,'Skips EXP, level-up and move-learning rewards during co-op test/story battles. On by default; turn it off to test normal EXP rewards. Applies on the next launch.',size=9,color=C['muted'],bg=C['surface'],wraplength=620,justify='left').pack(anchor='w',pady=(2,0))
         followers=card(parent);followers.pack(fill='x',pady=(0,18))
         follower_box=tk.Frame(followers,bg=C['surface']);follower_box.pack(fill='x',padx=18,pady=16)
         label(follower_box,'FOLLOWING POKÉMON',size=9,bold=True,bg=C['surface']).pack(anchor='w',pady=(0,8))
@@ -1057,7 +1057,7 @@ class Launcher(tk.Tk):
             env['UNOVA_COMPANION_INTERACTIONS']=companion
             env['UNOVA_EXPERIMENTAL_COMPANION']=companion # compatibility with existing released runtimes
             env['UNOVA_FOLLOWER_REDUCED_MOTION']='1' if settings.get('reduced_follower_motion',False) else '0'
-            env['UNOVA_COOP_EXP_SUPPRESSION']='1' if settings.get('coop_exp_suppression',False) else '0'
+            env['UNOVA_COOP_EXP_SUPPRESSION']='1' if settings.get('coop_exp_suppression',True) else '0'
             self._stop_game_workers()
             env.pop('UNOVA_AREA_CATALOG',None)
             env.pop('UNOVA_SURROUNDINGS_DIR',None)

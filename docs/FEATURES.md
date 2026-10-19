@@ -1,6 +1,6 @@
 # Features
 
-Unova Together **2.0.20** brings friends, Pokémon tools, and Mega Evolution to supported English Blaze Black 2 Redux profiles on Windows.
+Unova Together **2.0.21** brings friends, Pokémon tools, and Mega Evolution to supported English Blaze Black 2 Redux profiles on Windows.
 
 ## Play with friends
 
@@ -9,7 +9,7 @@ Unova Together **2.0.20** brings friends, Pokémon tools, and Mega Evolution to 
 - Invite a friend to supported co-op trainer battles or choose a friendly player battle.
 - Find practice trainers for battles that do not change story progress.
 
-Both players should use the same release and matching game version. Co-op battles use the normal experience reward flow by default. For testing, you can turn on **Suppress EXP in co-op battles** in launcher Settings; use the same choice on both computers. Each player keeps a separate save. For setup and connection choices, see [Playing with friends](PLAYER_GUIDE.md). Some slow or restricted networks may interrupt a session; the [known limits](KNOWN_ISSUES.md) page has tips.
+Both players should use the same release and matching game version. Co-op battles suppress experience, level-up and move-learning rewards by default while this feature is tested. Turn off **Suppress EXP in co-op battles** in launcher Settings to test normal rewards; use the same choice on both computers. Each player keeps a separate save. For setup and connection choices, see [Playing with friends](PLAYER_GUIDE.md). Some slow or restricted networks may interrupt a session; the [known limits](KNOWN_ISSUES.md) page has tips.
 
 ## Mega Evolution
 
@@ -35,7 +35,7 @@ Face your follower and press **R + A**, or tap its sprite, to open the companion
 - Browse ordinary grass, water, and fishing encounters in the loaded game.
 - Relearn eligible level-up moves for the Pokémon’s current form.
 - Use supported field HMs without taking up a battle move slot. The game’s story requirements still apply.
-- Solo battles earn 1.25× experience on supported profiles. Co-op battles use the game’s normal reward flow unless EXP suppression is enabled for testing in launcher Settings.
+- Solo battles earn 1.25× experience on supported profiles. Co-op experience, level-up and move-learning rewards are suppressed by default; launcher Settings can restore normal rewards for testing.
 
 ## Launcher and presentation
 
