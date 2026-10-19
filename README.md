@@ -10,7 +10,7 @@ Unova Together is a free fan project by **mvq1303 / WhatWasMissing**, built on m
 
 Give a Pokémon its matching Mega Stone, then hold **L + R** while choosing a move in battle. Mega Evolution lasts until the battle ends. Every Poké Mart stocks all 49 Mega Stones for **₽50,000** each, and both Battle Point counters sell the full selection for **50 BP**.
 
-There are 49 Mega forms, including Mega Serperior with Adaptability, Mega Charizard Y with Drought, and Mega Salamence with Intimidate. Gym Leaders in the final three gyms and Cynthia’s Route 7 rematch can also Mega Evolve their Pokémon. Forty-six forms have animated battle artwork. See the [Mega Evolution guide](docs/MEGA_EVOLUTION.md) for every stone, ability and stat total.
+There are 49 Mega forms, including Mega Serperior with Adaptability, Mega Charizard Y with Drought, and Mega Salamence with Intimidate. The final three Gym Leaders and Cynthia’s Route 7 rematch have Pokémon holding Mega Stones. Most Mega battle sprites animate; Sceptile, Mawile, and Aggron use static front and back sprites, while Altaria’s front and Glalie’s back are static. See the [Mega Evolution guide](docs/MEGA_EVOLUTION.md) for every stone, ability and stat total.
 
 After defeating Skyla, meet Cynthia near the Route 7 entrance for a Mega Evolution lesson and a free matching stone. Return farther north for her rematch with Mega Garchomp. See the [Cynthia Route 7 guide](docs/CYNTHIA_ROUTE_7.md) for supported game versions.
 

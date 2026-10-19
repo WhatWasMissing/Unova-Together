@@ -125,6 +125,12 @@ ctest --test-dir 'temp-npc-catalog-probe/build-mega-tests-v216-filtered' --outpu
 
 **ROM ARTIFACT CHECK:** On the same supported-ROM fixture, ARM9 overlay 142 has RAM base `0x021998C0`; bytes at `0x0219E4DC` match the expected selected-item preview function signature `F0 B5 85 B0 0E 1C 6B 21`. The 47 imported Mega Stone icon arrays have opaque pixel bounds and nonzero-pixel centroids centered on the 32×32 canvas. This supports the conclusion that the selected-item preview offset is caused by the renderer actor's native coordinates, not transparent padding in the icon files. It does not verify the Bag, mart, or battle screen visually; those still need an in-game check.
 
+### Mega cartridge and sprite follow-up — 2026-10-19
+
+Using the existing Release test build from the 2.0.16 source archive (SHA-256 `6d29cbbcc05376f4e53027e27d8acaf97ccbf52a6904128113ccc84f5f7aad76`), the battle-selection, native-call, gym-team, ENet co-op, and Mega Stone preview-layout executables all passed. Assertions were enabled in that build. The supported Redux ROM fixture (`332d07576e2077b4ef91e394603d144108098b7624c6a918b175f90530c0036a`) also passed the full Mega cartridge-overlay check, Gym Leader overlay check, and ARM9 hook-signature check; its SHA-256 was identical before and after these read-only checks. The cartridge test confirmed Mega Stone stock in every Poké Mart and both BP counters.
+
+The ROM-side sprite test reports animated artwork on 84 of 92 front/back sides. Static fallbacks are Sceptile front and back, Mawile front and back, Aggron front and back, Altaria front, and Glalie back. The emulator preview hook remains guarded by the verified Redux actor-creation call and only changes matching Mega Stone preview coordinates. These source and ROM checks do not verify the Bag or mart visually, a live trainer Mega action, or an actual two-client battle; those gameplay checks remain **NOT RUN**.
+
 ### Maintenance test discovery and external fixtures
 
 On 2026-10-19, maintenance test discovery was hardened so native checks are registered with `unittest` and ROM/RAM-dependent checks no longer read private fixtures while Python imports the test modules. The decompression and wireless-crop boundary test compiles the extracted production routines in a temporary directory. Its external melonDS source tree and C++ compiler must be supplied when not on the default local paths:

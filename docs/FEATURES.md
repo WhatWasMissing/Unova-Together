@@ -13,11 +13,11 @@ Both players should use the same release and matching game version. Co-op experi
 
 ## Mega Evolution
 
-There are **49 Mega forms**, each paired with its own Mega Stone. Every Poké Mart carries the full selection for **₽50,000** per stone, and both Battle Point counters sell all 49 for **50 BP**. Give the matching stone to a Pokémon, then hold **L + R together** while choosing a move in battle, including double battles. The form lasts until the battle ends. Gym Leaders in the final three gyms and Cynthia in her Route 7 rematch also have Mega-capable Pokémon and matching stones.
+There are **49 Mega forms**, each paired with its own Mega Stone. Every Poké Mart carries the full selection for **₽50,000** per stone, and both Battle Point counters sell all 49 for **50 BP**. Give the matching stone to a Pokémon, then hold **L + R together** while choosing a move in battle, including double battles. The form lasts until the battle ends. The final three Gym Leaders and Cynthia’s Route 7 rematch have Pokémon holding Mega Stones.
 
 Examples: Mega Serperior gains **Adaptability**; Mega Charizard Y gains **Drought**; Mega Salamence uses **Intimidate**; Mega Lucario Z gains **Adaptability**. The full roster, abilities, stones, and base-stat totals are in the [Mega Evolution guide](MEGA_EVOLUTION.md).
 
-Animated battle artwork is available for 46 Mega forms. Pokémon with supplied animations play through the full timed sequence.
+Most Mega battle sprites animate. Sceptile, Mawile, and Aggron use static front and back sprites; Altaria’s front and Glalie’s back are static. Supplied animations play through their full timed sequences.
 
 After defeating Skyla, meet Cynthia near the Mistralton City and Route 7 transition for a Mega Evolution lesson and a free matching stone. Visit her again farther north on Route 7 to battle her team and Mega Garchomp. The launcher prepares a separate event-ready copy for supported game revisions; see the [Cynthia Route 7 guide](CYNTHIA_ROUTE_7.md).
 
