@@ -4,6 +4,11 @@ import argparse, ctypes, json, os, shutil, subprocess, sys
 import unova_updater as updates
 import launcher_migration
 
+def _assert_safe_bundle_path(path,home):
+    import unova_storage as storage
+    if not storage.safe_managed_path(path,home):
+        raise ValueError('Unsafe installation path; nothing was installed')
+
 def launcher_executable(root):
     path=Path(root)/'launcher/Pokemon Together.exe'
     if not path.is_file():raise ValueError('Cached shared launcher is missing. Remove this bundle slot and run again.')
@@ -15,9 +20,15 @@ def install_bundle(home,payload,metadata):
     digest=metadata['sha256']
     if len(digest)!=64 or any(c not in '0123456789abcdef' for c in digest):raise ValueError('Invalid bundled checksum.')
     slot=version+'-repair-'+digest[:12]
-    versions=home/'.updates/versions';versions.mkdir(parents=True,exist_ok=True)
+    updates_dir=home/'.updates';_assert_safe_bundle_path(updates_dir,home)
+    updates_dir.mkdir(exist_ok=True);_assert_safe_bundle_path(updates_dir,home)
+    versions=updates_dir/'versions';_assert_safe_bundle_path(versions,home)
+    versions.mkdir(exist_ok=True);_assert_safe_bundle_path(versions,home)
     target=versions/slot;root=target/'Unova-Together'
-    marker=home/'.updates/active.json';state=home/'.standalone.json'
+    _assert_safe_bundle_path(target,home)
+    marker=updates_dir/'active.json';state=home/'.standalone.json'
+    marker_pending=marker.with_suffix('.pending');state_pending=state.with_suffix('.pending')
+    for path in (marker,state,marker_pending,state_pending):_assert_safe_bundle_path(path,home)
     current=updates.active_root(home,allow_missing=True)
     previous={}
     if state.exists():
@@ -47,6 +58,8 @@ def install_bundle(home,payload,metadata):
             if activate and config.is_file():shutil.copy2(config,extracted/'builds/current/melonDS.toml')
             import unova_storage as storage
             storage.share_binaries(extracted,current);storage.record_package(extracted)
+            for path in (updates_dir,versions,target,marker,state,marker_pending,state_pending):
+                _assert_safe_bundle_path(path,home)
             Path(temp).rename(target)
     launcher_executable(root)
     if activate:
@@ -54,8 +67,10 @@ def install_bundle(home,payload,metadata):
         storage.remember_previous(home,current,slot)
         config=current/'builds/current/melonDS.toml'
         if current!=root and config.is_file():shutil.copy2(config,root/'builds/current/melonDS.toml')
-        pending=marker.with_suffix('.pending');pending.write_text(json.dumps({'version':version,'slot':slot}));os.replace(pending,marker)
-    pending=state.with_suffix('.pending');pending.write_text(json.dumps({'version':version,'slot':slot}));os.replace(pending,state)
+        for path in (updates_dir,marker,marker_pending):_assert_safe_bundle_path(path,home)
+        marker_pending.write_text(json.dumps({'version':version,'slot':slot}));os.replace(marker_pending,marker)
+    _assert_safe_bundle_path(state_pending,home)
+    state_pending.write_text(json.dumps({'version':version,'slot':slot}));os.replace(state_pending,state)
     return updates.active_root(home,allow_missing=True)
 
 def main():
@@ -67,17 +82,9 @@ def main():
     metadata=json.loads((assets/'bundle.json').read_text())
     # Share the updater's OS-owned lock, preventing two first runs extracting
     # or activating the same bundle at once. Never replace a live game file.
-    (home/'.updates').mkdir(parents=True,exist_ok=True)
-    with (home/'.updates/install.lock').open('a+b') as guard:
-        if guard.tell()==0:guard.write(b'0');guard.flush()
-        guard.seek(0)
-        if os.name=='nt':
-            import msvcrt
-            try:msvcrt.locking(guard.fileno(),msvcrt.LK_NBLCK,1)
-            except OSError:raise ValueError('Another Unova Together setup or update is running. Try again shortly.')
-        try:root=install_bundle(home,assets/'runtime.zip',metadata)
-        finally:
-            if os.name=='nt':guard.seek(0);msvcrt.locking(guard.fileno(),msvcrt.LK_UNLCK,1)
+    import unova_storage as storage
+    with storage.installation_lock(home,'Another Unova Together setup or update is running. Try again shortly.'):
+        root=install_bundle(home,assets/'runtime.zip',metadata)
     if not args.self_test:
         try:launcher_migration.schedule(home,root,default_entry=True)
         except (OSError,ValueError):pass

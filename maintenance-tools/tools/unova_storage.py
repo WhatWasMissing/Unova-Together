@@ -2,6 +2,7 @@
 from contextlib import contextmanager
 import hashlib, json, os, re, subprocess, sys
 from pathlib import Path, PurePosixPath
+import stat
 
 SLOT=re.compile(r'\d{1,4}\.\d{1,4}\.\d{1,4}(?:-repair-[a-f0-9]{12})?')
 RECEIPT='.installed-files.json'
@@ -21,6 +22,16 @@ def safe(path,base):
         cursor=cursor.parent
     return not linked(base)
 
+def hardlinked(path):
+    """Return true for a regular file with another directory entry to its data."""
+    try:info=Path(path).stat(follow_symlinks=False)
+    except FileNotFoundError:return False
+    return stat.S_ISREG(info.st_mode) and info.st_nlink>1
+
+def safe_managed_path(path,base):
+    """Validate a managed path against reparse points and external hard links."""
+    return safe(path,base) and not hardlinked(path)
+
 def files(root):
     for directory,dirs,names in os.walk(root):
         dirs[:]=[n for n in dirs if not linked(Path(directory)/n)]
@@ -37,7 +48,8 @@ def read(path,limit=4*1024*1024):
 
 def atomic(path,value):
     pending=path.with_name(path.name+'.pending')
-    if linked(path) or linked(pending):raise ValueError('Linked installation record.')
+    if linked(path) or linked(pending) or hardlinked(path) or hardlinked(pending):
+        raise ValueError('Unsafe installation record.')
     pending.write_text(json.dumps(value,indent=2),encoding='utf-8');os.replace(pending,path)
 
 def record_package(root):
@@ -85,23 +97,25 @@ def running_paths():
     return paths
 
 @contextmanager
-def installation_lock(home):
+def installation_lock(home, conflict_message='Another installation is in progress. Try cleanup again when it finishes.'):
     updates=home/'.updates'
     if not safe(updates,home):raise ValueError('Unsafe update folder.')
     updates.mkdir(parents=True,exist_ok=True);lock=updates/'install.lock'
-    if not safe(lock,home):raise ValueError('Unsafe installation lock.')
+    if not safe_managed_path(updates,home) or not safe_managed_path(lock,home):
+        raise ValueError('Unsafe installation lock.')
     with lock.open('a+b') as guard:
         if guard.tell()==0:guard.write(b'0');guard.flush()
         guard.seek(0)
         if os.name=='nt':
             import msvcrt
             try:msvcrt.locking(guard.fileno(),msvcrt.LK_NBLCK,1)
-            except OSError:raise ValueError('Another installation is in progress. Try cleanup again when it finishes.')
+            except OSError as exc:raise ValueError(conflict_message) from exc
             try:yield
             finally:guard.seek(0);msvcrt.locking(guard.fileno(),msvcrt.LK_UNLCK,1)
         else:
             import fcntl
-            fcntl.flock(guard,fcntl.LOCK_EX|fcntl.LOCK_NB)
+            try:fcntl.flock(guard,fcntl.LOCK_EX|fcntl.LOCK_NB)
+            except OSError as exc:raise ValueError(conflict_message) from exc
             try:yield
             finally:fcntl.flock(guard,fcntl.LOCK_UN)
 

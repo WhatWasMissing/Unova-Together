@@ -80,8 +80,13 @@ def validate_entry(entry, home, active):
 
 @contextmanager
 def repair_lock(home):
-    directory=Path(home)/'.updates';directory.mkdir(parents=True,exist_ok=True)
-    with (directory/'launcher-migration.lock').open('a+b') as guard:
+    import unova_storage as storage
+    home=Path(home).resolve();directory=home/'.updates'
+    if not storage.safe_managed_path(directory,home):raise ValueError('Unsafe launcher repair folder.')
+    directory.mkdir(parents=True,exist_ok=True);lock=directory/'launcher-migration.lock'
+    if not storage.safe_managed_path(directory,home) or not storage.safe_managed_path(lock,home):
+        raise ValueError('Unsafe launcher repair lock.')
+    with lock.open('a+b') as guard:
         if guard.tell()==0:guard.write(b'0');guard.flush()
         guard.seek(0)
         if os.name=='nt':

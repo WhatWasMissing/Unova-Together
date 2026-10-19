@@ -1,6 +1,6 @@
 """Client migration and permanent-entry regression tests. mvq1303."""
 from pathlib import Path
-import json
+import json, os
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -107,6 +107,13 @@ class MigrationTests(unittest.TestCase):
     def test_installer_can_schedule_default_entry_without_prior_record(self):
         with patch.object(m.subprocess,'Popen') as spawn:m.schedule(self.home,self.root,default_entry=True)
         self.assertIn(str(self.home/'launcher/Pokemon Together.exe'),spawn.call_args.args[0])
+    def test_repair_lock_rejects_hardlinked_lock_file(self):
+        directory=self.home/'.updates';directory.mkdir(exist_ok=True)
+        outside=self.base/'external-repair-lock';outside.write_bytes(b'')
+        os.link(outside,directory/'launcher-migration.lock')
+        with self.assertRaisesRegex(ValueError,'Unsafe launcher repair lock'):
+            with m.repair_lock(self.home):pass
+        self.assertEqual(outside.read_bytes(),b'')
 
 
 if __name__=='__main__':unittest.main()

@@ -1,6 +1,6 @@
 """Test persistent single-EXE extraction with tiny disposable payloads."""
 from pathlib import Path
-import hashlib, json, tempfile, unittest, zipfile
+import hashlib, json, os, subprocess, tempfile, unittest, zipfile
 from unova_single_exe import install_bundle, launcher_executable
 import unova_updater as updates
 
@@ -59,6 +59,21 @@ class BundleTests(unittest.TestCase):
         self.assertFalse((self.home/'.updates/active.json').exists())
         with self.assertRaises(ValueError):install_bundle(self.home,self.archive,self.bundle('0.3.5',unsafe=True))
         self.assertFalse((self.home/'.updates/active.json').exists())
+    def test_install_bundle_rejects_linked_update_directories_before_external_writes(self):
+        for link_updates in (True,False):
+            with self.subTest(link_updates=link_updates),tempfile.TemporaryDirectory() as temp:
+                base=Path(temp);home=base/'home';home.mkdir();outside=base/'outside';outside.mkdir()
+                link=home/'.updates' if link_updates else home/'.updates/versions'
+                if not link_updates:(home/'.updates').mkdir()
+                if os.name=='nt':
+                    def quote(value):return "'"+str(value).replace("'","''")+"'"
+                    command=f'New-Item -ItemType Junction -Path {quote(link)} -Target {quote(outside)} | Out-Null'
+                    result=subprocess.run(['powershell.exe','-NoProfile','-Command',command],capture_output=True,text=True)
+                    self.assertEqual(result.returncode,0,result.stderr or result.stdout)
+                else:link.symlink_to(outside,target_is_directory=True)
+                with self.assertRaisesRegex(ValueError,'Unsafe installation path'):
+                    install_bundle(home,self.archive,self.metadata)
+                self.assertEqual(list(outside.iterdir()),[])
     def test_mismatched_version_does_not_activate(self):
         metadata=dict(self.metadata);metadata['version']='0.3.9'
         with self.assertRaises(ValueError):install_bundle(self.home,self.archive,metadata)

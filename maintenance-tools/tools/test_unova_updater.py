@@ -118,6 +118,28 @@ class UpdaterTests(unittest.TestCase):
                 self.assertEqual(opened,[])
                 self.assertEqual(list(outside.iterdir()),[])
 
+    def test_install_rejects_hardlinked_update_metadata_before_external_writes(self):
+        raw=self.bundle();name='Unova-Together-0.3.5-Windows-x64.zip'
+        base=f'https://github.com/{u.REPO}/releases/download/v0.3.5/'
+        release={'version':'0.3.5','name':name,'size':len(raw),'url':base+name,
+                 'sums':base+'SHA256SUMS-Unova-Together-0.3.5.txt'}
+        sums=(hashlib.sha256(raw).hexdigest()+'  '+name+'\n').encode()
+
+        for filename in ('install.lock','active.json.pending'):
+            with self.subTest(filename=filename),tempfile.TemporaryDirectory() as temp:
+                base_path=Path(temp);home=base_path/'home';updates=home/'.updates'
+                updates.mkdir(parents=True)
+                outside=base_path/'outside-metadata';outside.write_bytes(b'')
+                os.link(outside,updates/filename)
+                opened=[]
+                def opener(url):
+                    opened.append(url)
+                    return io.BytesIO(sums if url==release['sums'] else raw)
+                with self.assertRaisesRegex(ValueError,'Unsafe update path'):
+                    u.install(home,release,threading.Event(),lambda *_:None,opener)
+                self.assertEqual(opened,[])
+                self.assertEqual(outside.read_bytes(),b'')
+
     def test_checksum_mismatch_extracts_nothing(self):
         with tempfile.TemporaryDirectory() as temp:
             p=Path(temp)/'a.zip';p.write_bytes(self.bundle());out=Path(temp)/'out'

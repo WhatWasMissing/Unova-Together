@@ -277,9 +277,9 @@ def install(home: Path, release: dict, cancel: threading.Event, progress, opener
         finally:fcntl.flock(guard,fcntl.LOCK_UN)
 
 def _assert_safe_update_path(path: Path, home: Path) -> None:
-    """Refuse update paths that traverse a symlink or junction."""
+    """Refuse update paths that traverse reparse points or hard-linked metadata."""
     import unova_storage as storage
-    if not storage.safe(path, home):
+    if not storage.safe_managed_path(path, home):
         raise ValueError('Unsafe update path; nothing was installed')
 
 def _install_unlocked(home: Path, release: dict, cancel: threading.Event, progress, opener=_open) -> Path:

@@ -57,6 +57,18 @@ class StorageTests(unittest.TestCase):
         old=self.slot('1.0.1');self.slot('1.0.2');self.slot('1.0.3');self.active('1.0.3');outside=self.home/'outside.dll';outside.write_bytes(b'external')
         s.atomic(old/s.RECEIPT,{'schema':1,'files':{'../../../outside.dll':s.digest(outside),str(outside):s.digest(outside)}})
         s.cleanup(self.home,processes=[]);self.assertEqual(outside.read_bytes(),b'external')
+    def test_atomic_rejects_hardlinked_pending_record(self):
+        outside=self.home/'external-record';outside.write_bytes(b'')
+        target=self.home/'.updates/metadata.json';os.link(outside,target.with_name(target.name+'.pending'))
+        with self.assertRaisesRegex(ValueError,'Unsafe installation record'):
+            s.atomic(target,{'schema':1})
+        self.assertEqual(outside.read_bytes(),b'')
+    def test_installation_lock_rejects_hardlinked_lock_file(self):
+        outside=self.home/'external-lock';outside.write_bytes(b'')
+        os.link(outside,self.home/'.updates/install.lock')
+        with self.assertRaisesRegex(ValueError,'Unsafe installation lock'):
+            with s.installation_lock(self.home):pass
+        self.assertEqual(outside.read_bytes(),b'')
     def test_junction_outside_installation_is_never_followed(self):
         old=self.slot('1.0.1');self.slot('1.0.2');self.slot('1.0.3');self.active('1.0.3');outside=self.home/'outside';outside.mkdir();victim=outside/'victim.dll';victim.write_bytes(b'external')
         link=old/'linked'
