@@ -2,7 +2,9 @@
 import hashlib
 import io
 import json
+import os
 from pathlib import Path
+import subprocess
 import tempfile
 import threading
 import unittest
@@ -83,6 +85,38 @@ class UpdaterTests(unittest.TestCase):
             with self.subTest(name=name),tempfile.TemporaryDirectory() as temp:
                 raw=self.bundle({name:b'bad'});p=Path(temp)/'a.zip';p.write_bytes(raw)
                 with self.assertRaises(ValueError):u.extract_verified(p,Path(temp)/'out',hashlib.sha256(raw).hexdigest())
+
+    def test_install_rejects_linked_update_directories_before_external_writes(self):
+        raw=self.bundle();name='Unova-Together-0.3.5-Windows-x64.zip'
+        base=f'https://github.com/{u.REPO}/releases/download/v0.3.5/'
+        release={'version':'0.3.5','name':name,'size':len(raw),'url':base+name,
+                 'sums':base+'SHA256SUMS-Unova-Together-0.3.5.txt'}
+        sums=(hashlib.sha256(raw).hexdigest()+'  '+name+'\n').encode()
+        opened=[]
+        def opener(url):
+            opened.append(url)
+            return io.BytesIO(sums if url==release['sums'] else raw)
+
+        for link_updates in (True,False):
+            with self.subTest(link_updates=link_updates),tempfile.TemporaryDirectory() as temp:
+                base_path=Path(temp);home=base_path/'home';home.mkdir()
+                outside=base_path/'outside';outside.mkdir()
+                if link_updates:
+                    link=home/'.updates'
+                else:
+                    (home/'.updates').mkdir()
+                    link=home/'.updates'/'versions'
+                if os.name=='nt':
+                    def quote(value):return "'"+str(value).replace("'","''")+"'"
+                    command=f'New-Item -ItemType Junction -Path {quote(link)} -Target {quote(outside)} | Out-Null'
+                    result=subprocess.run(['powershell.exe','-NoProfile','-Command',command],capture_output=True,text=True)
+                    self.assertEqual(result.returncode,0,result.stderr or result.stdout)
+                else:
+                    link.symlink_to(outside,target_is_directory=True)
+                with self.assertRaisesRegex(ValueError,'Unsafe update path'):
+                    u.install(home,release,threading.Event(),lambda *_:None,opener)
+                self.assertEqual(opened,[])
+                self.assertEqual(list(outside.iterdir()),[])
 
     def test_checksum_mismatch_extracts_nothing(self):
         with tempfile.TemporaryDirectory() as temp:

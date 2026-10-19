@@ -254,9 +254,14 @@ def extract_verified(archive: Path, destination: Path, expected: str) -> Path:
     return root
 
 def install(home: Path, release: dict, cancel: threading.Event, progress, opener=_open) -> Path:
-    home=home.resolve();(home/'.updates').mkdir(exist_ok=True)
+    home=home.resolve();updates=home/'.updates'
+    _assert_safe_update_path(updates,home)
+    updates.mkdir(exist_ok=True)
+    _assert_safe_update_path(updates,home)
+    lock=updates/'install.lock'
+    _assert_safe_update_path(lock,home)
     # OS-owned locks release even if the launcher is terminated mid-download.
-    with (home/'.updates/install.lock').open('a+b') as guard:
+    with lock.open('a+b') as guard:
         if guard.tell()==0:guard.write(b'0');guard.flush()
         guard.seek(0)
         if os.name=='nt':
@@ -271,6 +276,12 @@ def install(home: Path, release: dict, cancel: threading.Event, progress, opener
         try:return _install_unlocked(home,release,cancel,progress,opener)
         finally:fcntl.flock(guard,fcntl.LOCK_UN)
 
+def _assert_safe_update_path(path: Path, home: Path) -> None:
+    """Refuse update paths that traverse a symlink or junction."""
+    import unova_storage as storage
+    if not storage.safe(path, home):
+        raise ValueError('Unsafe update path; nothing was installed')
+
 def _install_unlocked(home: Path, release: dict, cancel: threading.Event, progress, opener=_open) -> Path:
     home = home.resolve()
     label = '.'.join(map(str, version(release['version'])))
@@ -278,10 +289,18 @@ def _install_unlocked(home: Path, release: dict, cancel: threading.Event, progre
     slot=label+'-repair-'+uuid.uuid4().hex[:12] if repairing else label
     current = active_root(home,allow_missing=True)
     updates = home / '.updates'
+    _assert_safe_update_path(updates,home)
     updates.mkdir(exist_ok=True)
     versions = updates / 'versions'
+    _assert_safe_update_path(versions,home)
     versions.mkdir(exist_ok=True)
-    if (versions / slot).exists():
+    destination=versions / slot
+    _assert_safe_update_path(destination,home)
+    marker=updates / 'active.json.pending'
+    active=updates / 'active.json'
+    _assert_safe_update_path(marker,home)
+    _assert_safe_update_path(active,home)
+    if destination.exists():
         raise ValueError('This version is already installed; no files were replaced')
     if shutil.disk_usage(home).free < release['size'] * 3 + 128 * 1024 * 1024:
         raise ValueError('Not enough free disk space for a safe update')
@@ -328,10 +347,16 @@ def _install_unlocked(home: Path, release: dict, cancel: threading.Event, progre
         storage.record_package(root)
         if cancel.is_set():raise InterruptedError('Update cancelled; your installed version is unchanged')
         storage.remember_previous(home,current,slot)
-        (work / 'unpacked').rename(versions / slot)
-        marker = updates / 'active.json.pending'
+        _assert_safe_update_path(updates,home)
+        _assert_safe_update_path(versions,home)
+        _assert_safe_update_path(destination,home)
+        _assert_safe_update_path(marker,home)
+        _assert_safe_update_path(active,home)
+        (work / 'unpacked').rename(destination)
+        _assert_safe_update_path(marker,home)
+        _assert_safe_update_path(active,home)
         marker.write_text(json.dumps({'version': label,'slot':slot}), encoding='utf-8')
-        os.replace(marker, updates / 'active.json')
+        os.replace(marker, active)
     return active_root(home)
 
 def record_integrity(root: Path):
