@@ -11,6 +11,7 @@ import time
 
 from verify_solo_xp_battle import ROOT, FIX, ram_party
 from inspect_npc_badge import inspect
+from lan_harness_config import make_instance_parent_tables_explicit
 
 
 def main():
@@ -19,6 +20,8 @@ def main():
     parser.add_argument('--expected', required=True, type=Path, help='PKHeX inspector JSON')
     parser.add_argument('--output', required=True, type=Path)
     parser.add_argument('--exe', required=True, type=Path)
+    parser.add_argument('--runtime', type=Path, default=FIX/'maintenance-100-runtime')
+    parser.add_argument('--rom', type=Path, default=FIX/'game/Redux-maintenance.nds')
     parser.add_argument('--seconds', type=int, default=90)
     args = parser.parse_args()
     output = args.output.resolve()
@@ -32,15 +35,17 @@ def main():
             os.link(source, destination)
             return destination
         return shutil.copy2(source, destination)
-    shutil.copytree(FIX/'maintenance-100-runtime', output, copy_function=copy,
+    shutil.copytree(args.runtime, output, copy_function=copy,
                     ignore=shutil.ignore_patterns('melonDS.exe'))
     shutil.copy2(args.exe, output/'melonDS.exe')
-    config = (output/'melonDS.toml').read_text(encoding='utf-8-sig')
+    config = make_instance_parent_tables_explicit(
+        (output/'melonDS.toml').read_text(encoding='utf-8-sig'))
     config = re.sub(r'SaveFilePath = "[^"]*"', 'SaveFilePath = '+json.dumps(output.as_posix()), config)
     config = re.sub(r'(?ms)^\[Instance\d+\.Audio\]\n.*?(?=^\[|\Z)', '', config)
     config += '\n[Instance0.Audio]\nVolume = 0\nDSiVolumeSync = false\n'
     (output/'melonDS.toml').write_text(config, encoding='utf-8')
-    rom = FIX/'game/Redux-maintenance.nds'
+    rom = args.rom.resolve()
+    shutil.copy2(rom, output/rom.name)
     shutil.copy2(args.save, output/rom.with_suffix('.sav').name)
     script = output/'input.json'
     script.write_text(json.dumps([dict(frame=f, duration=4, keyMask=0xffe)
@@ -54,7 +59,7 @@ def main():
     startup.dwFlags |= subprocess.STARTF_USESHOWWINDOW
     startup.wShowWindow = 0
     with (output/'reload.log').open('w', encoding='utf-8') as log:
-        proc = subprocess.Popen([str(output/'melonDS.exe'), str(rom)], cwd=output, env=env,
+        proc = subprocess.Popen([str(output/'melonDS.exe'), str(output/rom.name)], cwd=output, env=env,
                                 startupinfo=startup, stdout=log, stderr=log)
         try:
             deadline = time.monotonic()+args.seconds

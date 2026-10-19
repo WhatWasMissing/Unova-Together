@@ -12,6 +12,8 @@ import tempfile
 from unittest import mock
 import unittest
 
+from PIL import Image
+
 
 MODULE_PATH = Path(__file__).with_name("run_gen5_runtime_probe.py")
 SPEC = importlib.util.spec_from_file_location("run_gen5_runtime_probe", MODULE_PATH)
@@ -120,6 +122,54 @@ class RuntimeProbeReportTests(unittest.TestCase):
         }
         failures = PROBE.check_report(report, 460, "", True, 1)
         self.assertTrue(any("blocked game input" in failure for failure in failures))
+
+    def test_captured_gen5_fatal_error_screen_fails_even_with_observer_progress(self):
+        with tempfile.TemporaryDirectory(prefix="unova-fatal-screen-") as folder:
+            root = Path(folder)
+            error_screen = Image.new("RGB", (256, 192), "black")
+            for y in (80, 96):
+                for x in range(40, 216):
+                    error_screen.putpixel((x, y), (251, 251, 251))
+            error_screen.save(root / "top.png")
+            Image.new("RGB", (256, 192), "black").save(root / "bottom.png")
+
+            details, failures = PROBE.inspect_captured_screens(
+                [root / "top.png", root / "bottom.png"]
+            )
+
+        self.assertEqual(len(details), 2)
+        self.assertTrue(any("fatal error screen" in failure for failure in failures))
+
+    def test_colorful_gameplay_capture_passes_screen_inspection(self):
+        with tempfile.TemporaryDirectory(prefix="unova-gameplay-screen-") as folder:
+            root = Path(folder)
+            screen = Image.new("RGB", (256, 192))
+            pixels = screen.load()
+            for y in range(192):
+                for x in range(256):
+                    pixels[x, y] = ((x * 7) % 256, (y * 11) % 256, (x + y) % 256)
+            screen.save(root / "top.png")
+            screen.save(root / "bottom.png")
+
+            details, failures = PROBE.inspect_captured_screens(
+                [root / "top.png", root / "bottom.png"]
+            )
+
+        self.assertEqual(len(details), 2)
+        self.assertEqual(failures, [])
+
+    def test_missing_or_invalid_screen_cannot_pass(self):
+        with tempfile.TemporaryDirectory(prefix="unova-missing-screen-") as folder:
+            root = Path(folder)
+            Image.new("RGB", (256, 192), "red").save(root / "top.png")
+            (root / "bottom.png").write_bytes(b"not an image")
+
+            details, failures = PROBE.inspect_captured_screens(
+                [root / "top.png", root / "bottom.png"]
+            )
+
+        self.assertEqual(len(details), 1)
+        self.assertTrue(any("missing or unreadable" in failure for failure in failures))
 
     def test_cli_rejects_unmarked_rom_folder_before_launch(self):
         with tempfile.TemporaryDirectory(prefix="unova-unmarked-probe-") as folder:

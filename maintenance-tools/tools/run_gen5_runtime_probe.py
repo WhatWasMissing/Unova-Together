@@ -15,6 +15,7 @@ import os
 from pathlib import Path
 import subprocess
 import time
+from typing import Any
 
 
 def validate_disposable_fixture(runtime: Path, rom: Path, prefix: Path) -> None:
@@ -73,6 +74,59 @@ def check_report(
     return failures
 
 
+def inspect_captured_screens(paths: list[Path]) -> tuple[list[dict[str, Any]], list[str]]:
+    """Require both DS screen captures and reject the Gen 5 fatal error screen.
+
+    melonDS can keep updating observer state after the game draws its fatal
+    "An error has occurred" screen. A map ID and live process are therefore
+    insufficient evidence that scripted gameplay succeeded.
+    """
+    if len(paths) != 2:
+        return [], [f"expected two captured DS screens, found {len(paths)}"]
+
+    try:
+        from PIL import Image
+    except ImportError as error:
+        return [], [f"Pillow is required to inspect captured gameplay screens: {error}"]
+
+    inspected: list[dict[str, Any]] = []
+    failures: list[str] = []
+    for index, path in enumerate(paths):
+        try:
+            with Image.open(path) as source:
+                screen = source.convert("RGB")
+                if screen.size != (256, 192):
+                    failures.append(
+                        f"screen {index} has unexpected dimensions {screen.width}x{screen.height}"
+                    )
+                    continue
+                colors = screen.getcolors(maxcolors=17)
+                unique_color_count = len(colors) if colors is not None else None
+                dark_pixels = sum(screen.convert("L").histogram()[:17])
+                dark_ratio = dark_pixels / (screen.width * screen.height)
+                fatal_screen = (
+                    dark_ratio >= 0.95
+                    and unique_color_count is not None
+                    and unique_color_count <= 16
+                )
+                inspected.append({
+                    "screen": index,
+                    "path": str(path),
+                    "darkPixelRatio": round(dark_ratio, 5),
+                    "uniqueColorCount": unique_color_count,
+                    "moreThan17UniqueColors": colors is None,
+                    "fatalErrorScreen": fatal_screen,
+                })
+                if fatal_screen:
+                    failures.append(
+                        f"screen {index} resembles the Gen 5 fatal error screen "
+                        f"({dark_ratio:.1%} dark pixels, {unique_color_count} colors)"
+                    )
+        except (OSError, ValueError) as error:
+            failures.append(f"screen {index} is missing or unreadable: {error}")
+    return inspected, failures
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--runtime", required=True, type=Path, help="melonDS executable")
@@ -99,7 +153,8 @@ def main() -> int:
     outputs = [Path(f"{prefix}{suffix}") for suffix in (
         ".npc.json", ".npc.ramdump", ".stdout", ".stderr",
     )]
-    outputs.extend(Path(f"{prefix}.npc-screen-{screen}.png") for screen in range(2))
+    screen_paths = [Path(f"{prefix}.npc-screen-{screen}.png") for screen in range(2)]
+    outputs.extend(screen_paths)
     existing = [str(path) for path in outputs if path.exists()]
     if existing:
         parser.error("refusing to overwrite existing probe outputs: " + ", ".join(existing))
@@ -170,6 +225,8 @@ def main() -> int:
     failures = check_report(
         data, args.expect_map, log_text, timed_out, process.returncode if process else None
     )
+    screen_details, screen_failures = inspect_captured_screens(screen_paths)
+    failures.extend(screen_failures)
     result = {
         "pid": process.pid if process else None,
         "returncode": process.returncode if process else None,
@@ -183,11 +240,7 @@ def main() -> int:
         "moving": position.get("moving"),
         "inBattle": position.get("inBattle"),
         "inputBlocked": report_data.get("npcFixtureInputBlocked"),
-        "screens": [
-            str(Path(f"{prefix}.npc-screen-{screen}.png"))
-            for screen in range(2)
-            if Path(f"{prefix}.npc-screen-{screen}.png").exists()
-        ],
+        "screens": screen_details,
         "report": str(report_path) if report_path.exists() else None,
         "stdout": str(Path(f"{prefix}.stdout")),
         "stderr": str(Path(f"{prefix}.stderr")),
