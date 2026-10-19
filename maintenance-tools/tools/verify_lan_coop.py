@@ -1,6 +1,7 @@
 """Private two-process native LAN battle check with a delayed UDP link."""
 from pathlib import Path
 import argparse,hashlib,heapq,json,os,re,select,shutil,socket,struct,subprocess,threading,time
+from lan_harness_config import make_instance_parent_tables_explicit
 ROOT=Path(__file__).resolve().parents[1]; FIX=ROOT/'test-fixtures/coop-launcher'
 p=argparse.ArgumentParser();p.add_argument('--retry-after-cancel',action='store_true',help='Start a second battle after native checkpoint rollback');p.add_argument('--spectator',action='store_true',help='Connect an idle first guest before the active battle partner')
 p.add_argument('--delay-ms',type=int,default=0);p.add_argument('--seconds',type=int,default=65);p.add_argument('--boss',type=int,default=156);p.add_argument('--port',type=int,default=17064);p.add_argument('--cancel-frame',type=int);p.add_argument('--forfeit-frame',type=int);p.add_argument('--baseline',action='store_true');p.add_argument('--pvp',action='store_true');p.add_argument('--rom',type=Path,default=FIX/'game/Redux.nds')
@@ -106,7 +107,8 @@ try:
         for name in ('platforms','imageformats','styles','tls','networkinformation','multimedia','generic','iconengines'):
             source=a.runtime_dir/name
             if source.is_dir():shutil.copytree(source,folder/name,dirs_exist_ok=True,copy_function=copy_runtime_file)
-        config=(a.runtime_dir/'melonDS.toml').read_text(encoding='utf-8-sig')
+        config=make_instance_parent_tables_explicit(
+            (a.runtime_dir/'melonDS.toml').read_text(encoding='utf-8-sig'))
         config=re.sub(r'MAC = "[^"]*"',f'MAC = "00:09:BF:11:22:{34+i:02X}"',config)
         config=re.sub(r'(\[Instance\d+\.Firmware\]\n)',r'\1OverrideSettings = true\n',config)
         config=re.sub(r'Volume = \d+','Volume = 0',config)
