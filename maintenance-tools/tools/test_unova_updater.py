@@ -9,6 +9,7 @@ import tempfile
 import threading
 import unittest
 import zipfile
+from unittest.mock import patch
 import unova_updater as u
 
 class UpdaterTests(unittest.TestCase):
@@ -139,6 +140,34 @@ class UpdaterTests(unittest.TestCase):
                     u.install(home,release,threading.Event(),lambda *_:None,opener)
                 self.assertEqual(opened,[])
                 self.assertEqual(outside.read_bytes(),b'')
+
+    def test_install_does_not_write_through_metadata_link_added_after_preflight(self):
+        raw=self.bundle();name='Unova-Together-0.3.5-Windows-x64.zip'
+        base=f'https://github.com/{u.REPO}/releases/download/v0.3.5/'
+        release={'version':'0.3.5','name':name,'size':len(raw),'url':base+name,
+                 'sums':base+'SHA256SUMS-Unova-Together-0.3.5.txt'}
+        sums=(hashlib.sha256(raw).hexdigest()+'  '+name+'\n').encode()
+        with tempfile.TemporaryDirectory() as temp:
+            base_path=Path(temp);home=base_path/'home';home.mkdir()
+            updates=home/'.updates';updates.mkdir()
+            outside=base_path/'outside-metadata';outside.write_bytes(b'keep this file unchanged')
+            marker=updates/'active.json.pending';original=u._assert_safe_update_path
+            calls=0;injected=False
+            def check_then_inject(path,root):
+                nonlocal calls,injected
+                original(path,root)
+                if Path(path)==marker:
+                    calls+=1
+                    if calls==3:
+                        os.link(outside,marker);injected=True
+            opener=lambda url:io.BytesIO(sums if url==release['sums'] else raw)
+            with patch.object(u,'_assert_safe_update_path',side_effect=check_then_inject):
+                with self.assertRaisesRegex(ValueError,'Unsafe installation record'):
+                    u.install(home,release,threading.Event(),lambda *_:None,opener)
+            self.assertTrue(injected)
+            self.assertEqual(outside.read_bytes(),b'keep this file unchanged')
+            self.assertFalse((updates/'active.json').exists())
+            self.assertTrue(marker.exists())
 
     def test_checksum_mismatch_extracts_nothing(self):
         with tempfile.TemporaryDirectory() as temp:

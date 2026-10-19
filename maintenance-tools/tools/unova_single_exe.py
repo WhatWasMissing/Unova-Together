@@ -68,9 +68,11 @@ def install_bundle(home,payload,metadata):
         config=current/'builds/current/melonDS.toml'
         if current!=root and config.is_file():shutil.copy2(config,root/'builds/current/melonDS.toml')
         for path in (updates_dir,marker,marker_pending):_assert_safe_bundle_path(path,home)
-        marker_pending.write_text(json.dumps({'version':version,'slot':slot}));os.replace(marker_pending,marker)
+        storage.atomic(marker,{'version':version,'slot':slot})
     _assert_safe_bundle_path(state_pending,home)
-    state_pending.write_text(json.dumps({'version':version,'slot':slot}));os.replace(state_pending,state)
+    _assert_safe_bundle_path(state,home)
+    import unova_storage as storage
+    storage.atomic(state,{'version':version,'slot':slot})
     return updates.active_root(home,allow_missing=True)
 
 def main():

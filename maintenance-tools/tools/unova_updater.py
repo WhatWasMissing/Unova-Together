@@ -296,6 +296,8 @@ def _install_unlocked(home: Path, release: dict, cancel: threading.Event, progre
     versions.mkdir(exist_ok=True)
     destination=versions / slot
     _assert_safe_update_path(destination,home)
+    # Check the legacy fixed staging name for unsafe leftovers, but publish
+    # activation metadata through the shared exclusive/unique staging writer.
     marker=updates / 'active.json.pending'
     active=updates / 'active.json'
     _assert_safe_update_path(marker,home)
@@ -355,8 +357,7 @@ def _install_unlocked(home: Path, release: dict, cancel: threading.Event, progre
         (work / 'unpacked').rename(destination)
         _assert_safe_update_path(marker,home)
         _assert_safe_update_path(active,home)
-        marker.write_text(json.dumps({'version': label,'slot':slot}), encoding='utf-8')
-        os.replace(marker, active)
+        storage.atomic(active, {'version': label,'slot':slot})
     return active_root(home)
 
 def record_integrity(root: Path):

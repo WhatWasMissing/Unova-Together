@@ -1,7 +1,9 @@
 """Test persistent single-EXE extraction with tiny disposable payloads."""
 from pathlib import Path
 import hashlib, json, os, subprocess, tempfile, unittest, zipfile
+from unittest.mock import patch
 from unova_single_exe import install_bundle, launcher_executable
+import unova_single_exe as bundle_module
 import unova_updater as updates
 
 class BundleTests(unittest.TestCase):
@@ -59,6 +61,26 @@ class BundleTests(unittest.TestCase):
         self.assertFalse((self.home/'.updates/active.json').exists())
         with self.assertRaises(ValueError):install_bundle(self.home,self.archive,self.bundle('0.3.5',unsafe=True))
         self.assertFalse((self.home/'.updates/active.json').exists())
+
+    def test_install_does_not_write_through_legacy_state_link_added_after_preflight(self):
+        self.home.mkdir()
+        state_pending=self.home/'.standalone.pending'
+        outside=self.base/'external-state';outside.write_bytes(b'keep this file unchanged')
+        original=bundle_module._assert_safe_bundle_path;checks=0;injected=False
+        def check_then_inject(path,home):
+            nonlocal checks,injected
+            original(path,home)
+            if Path(path)==state_pending:
+                checks+=1
+                if checks==3:
+                    os.link(outside,state_pending);injected=True
+        with patch.object(bundle_module,'_assert_safe_bundle_path',side_effect=check_then_inject):
+            root=install_bundle(self.home,self.archive,self.metadata)
+        self.assertTrue(injected)
+        self.assertEqual(outside.read_bytes(),b'keep this file unchanged')
+        state=json.loads((self.home/'.standalone.json').read_text())
+        self.assertEqual(state,{'version':'0.3.5','slot':root.parent.name})
+        self.assertTrue(state_pending.exists())
     def test_install_bundle_rejects_linked_update_directories_before_external_writes(self):
         for link_updates in (True,False):
             with self.subTest(link_updates=link_updates),tempfile.TemporaryDirectory() as temp:
