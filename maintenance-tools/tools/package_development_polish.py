@@ -6,6 +6,20 @@ REPO=ROOT/'tools/unova-together-release'
 SOURCE=ROOT/'melonDS-source-1.1'
 BASE=ROOT/'downloads/releases/release-1.0.6-publish/Unova-Together-1.0.6-Source.zip'
 PREFIX='Unova-Together-Source/source/melonDS/'
+
+def unified_diff_lines(before, after, fromfile, tofile):
+    """Emit valid Git patch records even when source files lack final newlines."""
+    lines=difflib.unified_diff(before.splitlines(True),after.splitlines(True),fromfile=fromfile,tofile=tofile)
+    records=[]
+    for index,line in enumerate(lines):
+        if line.endswith(('\n','\r')):
+            records.append(line)
+        elif index >= 3 and line[:1] in (' ','+','-'):
+            records.extend((line+'\n','\\ No newline at end of file\n'))
+        else:
+            records.append(line+'\n')
+    return records
+
 def main():
     delta=[];changed=[]
     with zipfile.ZipFile(BASE) as baseline:
@@ -17,7 +31,7 @@ def main():
             current=path.read_text(encoding='utf-8-sig').replace('\r\n','\n')
             if previous==current:continue
             target='source/melonDS/'+relative
-            delta.extend(difflib.unified_diff(previous.splitlines(True),current.splitlines(True),fromfile='a/'+target if previous else '/dev/null',tofile='b/'+target))
+            delta.extend(unified_diff_lines(previous,current,fromfile='a/'+target if previous else '/dev/null',tofile='b/'+target))
             changed.append(relative)
     patch=REPO/'maintenance-tools/patches/development-polish.patch';patch.write_text(''.join(delta),encoding='utf-8',newline='\n')
     assets=REPO/'maintenance-tools/assets/followers'
