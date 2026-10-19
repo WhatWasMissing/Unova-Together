@@ -394,7 +394,19 @@ def _install_unlocked(home: Path, release: dict, cancel: threading.Event, progre
         (work / 'unpacked').rename(destination)
         _assert_safe_update_path(marker,home)
         _assert_safe_update_path(active,home)
-        storage.atomic(active, {'version': label,'slot':slot})
+        try:
+            storage.atomic(active, {'version': label,'slot':slot})
+        except Exception:
+            # The new slot is not usable until its activation record is written.
+            # Remove only the exact, verified slot created by this transaction so
+            # a failed activation can be retried without deleting unrelated data.
+            try:
+                _assert_safe_update_path(destination,home)
+                if destination.parent == versions and destination.name == slot and destination.is_dir():
+                    shutil.rmtree(destination)
+            except (OSError,ValueError):
+                pass
+            raise
     return active_root(home)
 
 def record_integrity(root: Path):

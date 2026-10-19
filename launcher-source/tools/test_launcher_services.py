@@ -4,6 +4,7 @@ import hashlib, io, json, os, subprocess, tempfile, threading, unittest, zipfile
 from unittest.mock import patch
 from launcher_ui import services as s
 import unova_updater as u
+import unova_storage as storage
 
 
 class ServiceTests(unittest.TestCase):
@@ -260,6 +261,29 @@ class ServiceTests(unittest.TestCase):
         self.assertEqual((self.runtime/'melonDS.exe').read_bytes(),b'old');self.assertEqual(self.save.read_bytes(),b'original save')
         self.assertEqual((repaired/'launcher/local.txt').read_text(),'current launcher')
         self.assertEqual(u.active_root(self.home),repaired)
+    def test_failed_activation_removes_staging_slot_and_allows_retry(self):
+        data=io.BytesIO()
+        with zipfile.ZipFile(data,'w') as z:
+            z.writestr('Unova-Together/builds/current/melonDS.exe',b'new runtime')
+            z.writestr('Unova-Together/builds/current/VERSION.txt','0.3.6')
+        raw=data.getvalue();name='Unova-Together-0.3.6-Windows-x64.zip';base=f'https://github.com/{u.REPO}/releases/download/v0.3.6/'
+        release={'version':'0.3.6','name':name,'size':len(raw),'url':base+name,'sums':base+'sums.txt'}
+        sums=(hashlib.sha256(raw).hexdigest()+'  '+name+'\n').encode()
+        opener=lambda url:io.BytesIO(sums if url==release['sums'] else raw)
+        original=storage.atomic
+        def fail_activation(path,value):
+            if Path(path)==self.home/'.updates/active.json':raise OSError('fixture activation write failure')
+            return original(path,value)
+        destination=self.home/'.updates/versions/0.3.6/Unova-Together'
+        with patch.object(storage,'atomic',side_effect=fail_activation):
+            with self.assertRaisesRegex(OSError,'activation write failure'):
+                u.install(self.home,release,threading.Event(),lambda *_:None,opener)
+        self.assertEqual(u.active_root(self.home),self.home)
+        self.assertFalse(destination.exists())
+        self.assertEqual((self.runtime/'melonDS.exe').read_bytes(),b'old')
+        retried=u.install(self.home,release,threading.Event(),lambda *_:None,opener)
+        self.assertEqual(u.local_version(retried),(0,3,6))
+        self.assertEqual(u.active_root(self.home),retried)
     def test_integrity_finds_changed_and_missing_files(self):
         u.record_integrity(self.home);self.assertIn('Verified',s.integrity(self.home))
         (self.runtime/'melonDS.exe').write_bytes(b'changed');self.assertIn('changed files',s.integrity(self.home))
