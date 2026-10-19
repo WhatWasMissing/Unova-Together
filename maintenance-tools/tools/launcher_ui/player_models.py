@@ -180,8 +180,13 @@ def prepare_variant(source, home, model_id):
     if target.exists() and manifest.is_file():
         try:
             saved = json.loads(manifest.read_text(encoding='utf-8'))
-            if (saved == {'source_sha256': source_digest, 'model_id': model_id,
-                          'output_size': target.stat().st_size}):
+            expected = {
+                'source_sha256': source_digest,
+                'model_id': model_id,
+                'output_size': target.stat().st_size,
+                'output_sha256': _sha256(target),
+            }
+            if saved == expected:
                 return target
         except (OSError, ValueError, TypeError):
             pass
@@ -208,5 +213,6 @@ def prepare_variant(source, home, model_id):
             'source_sha256': source_digest,
             'model_id': model_id,
             'output_size': target.stat().st_size,
+            'output_sha256': _sha256(target),
         }))
     return target

@@ -1,4 +1,5 @@
 """Regression checks for the ROM-backed animated player model selector."""
+import hashlib
 import json
 import os
 import struct
@@ -58,6 +59,37 @@ class PlayerModelTests(unittest.TestCase):
         self.assertEqual(normalized['preferences'], {'player_model': 4715, 'volume': 60})
         profile['preferences']['player_model'] = -1
         self.assertNotIn('player_model', services.normalize(profile)['preferences'])
+
+    def test_model_cache_rebuilds_same_size_corrupted_variant(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / 'reviewed.nds'
+            original = b'reviewed ROM fixture'
+            prepared = b'prepared ROM fixture'
+            source.write_bytes(original)
+            model_id = 4715
+            overlay_data = bytearray(42)
+            struct.pack_into('<H', overlay_data, 0, model_id)
+            struct.pack_into('<H', overlay_data, 40, model_id)
+            overlay = SimpleNamespace(data=overlay_data)
+            source_rom = SimpleNamespace(saveToFile=lambda path: Path(path).write_bytes(prepared))
+            checked_rom = SimpleNamespace(arm9OverlayTable=object(), files={})
+
+            with patch.object(player_models, '_load_rom', side_effect=[source_rom, checked_rom, source_rom, checked_rom]), \
+                 patch.object(player_models, '_patch_rom') as patch_rom, \
+                 patch.object(player_models.ndspy.code, 'loadOverlayTable', return_value={player_models.OVERLAY_ID: overlay}), \
+                 patch.object(player_models, '_player_map_offset', return_value=0):
+                target = player_models.prepare_variant(source, root, model_id)
+                self.assertEqual(target.read_bytes(), prepared)
+                target.write_bytes(b'X' * len(prepared))
+
+                rebuilt = player_models.prepare_variant(source, root, model_id)
+
+            self.assertEqual(rebuilt.read_bytes(), prepared)
+            self.assertEqual(patch_rom.call_count, 2)
+            manifest = json.loads(rebuilt.with_name(rebuilt.name + '.player-model.json').read_text(encoding='utf-8'))
+            self.assertEqual(manifest['output_sha256'], hashlib.sha256(prepared).hexdigest())
+            self.assertEqual(source.read_bytes(), original)
 
     def test_model_copy_preserves_preexisting_pending_hardlinks(self):
         with tempfile.TemporaryDirectory() as directory:
