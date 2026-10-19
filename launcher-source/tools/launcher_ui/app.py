@@ -690,9 +690,13 @@ class Launcher(tk.Tk):
                 text.insert('end',name+'\n'+data[:8192].decode('utf-8',errors='replace')+('\n[Preview shortened. Open the ZIP to review this file in full.]' if len(data)>8192 else '')+'\n\n')
         text.configure(state='disabled')
         controls=tk.Frame(window,bg=C['background']);controls.pack(fill='x',padx=16,pady=12)
-        button(controls,'Open report folder',lambda:os.startfile(str(path.parent))).pack(side='left')
+        button(controls,'Open report folder',lambda:self._open_report_folder(path.parent)).pack(side='left')
         button(controls,'Open GitHub issues',lambda:webbrowser.open('https://github.com/'+updates.REPO+'/issues')).pack(side='left',padx=8)
         button(controls,'Close',window.destroy).pack(side='right')
+
+    def _open_report_folder(self,path):
+        try:os.startfile(str(path))
+        except OSError as exc:self.status.set('Could not open report folder: '+str(exc))
 
     def _apply_save_folder(self,runtime,item,default_directory=None):
         doc=prefs.read_document(runtime);value=item.get('save_dir','')

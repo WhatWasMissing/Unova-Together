@@ -437,6 +437,19 @@ class LauncherTests(unittest.TestCase):
         self.app._review_report(report);self.app.update()
         windows=[w for w in self.app.winfo_children() if w.winfo_class()=='Toplevel']
         self.assertTrue(windows)
+        def descendants(widget):
+            for child in widget.winfo_children():
+                yield child
+                yield from descendants(child)
+        folder_button=next(child for child in descendants(windows[0])
+                           if 'text' in child.keys() and child.cget('text')=='Open report folder')
+        callback_errors=[]
+        self.app.report_callback_exception=lambda kind,value,traceback:callback_errors.append(value)
+        with patch('launcher_ui.app.os.startfile',side_effect=PermissionError('folder unavailable')):
+            folder_button.invoke()
+        self.assertFalse(callback_errors)
+        self.assertIn('Could not open report folder',self.app.status.get())
+        self.assertIn('folder unavailable',self.app.status.get())
         for window in windows:window.destroy()
 
     def test_theme_contract_drift(self):

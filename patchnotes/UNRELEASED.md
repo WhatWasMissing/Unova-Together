@@ -14,3 +14,4 @@
 - The advanced emulator-settings editor now reports malformed settings sections clearly instead of crashing.
 - If an update cannot write its final activation record, the downloaded version is cleaned up so the update can be retried without affecting the current game.
 - Opening the save-backups folder now reports a clear error if the folder cannot be created or opened.
+- The problem-report window now shows an error in the launcher if its report folder cannot be opened.
