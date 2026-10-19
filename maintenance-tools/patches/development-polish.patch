@@ -3002,6 +3002,16 @@
  }
  
  QVariantList Gen5Menu::bossChallenges(const unsigned char* bytes,std::size_t length,QString& reason)
+@@ -504,3 +625,3 @@
+-        const QSet<QString> majorNames={"Rival","Hugh","Cheren","Roxie","Burgh","Elesa",
++        const QSet<QString> majorNames={"Rival","Hugh","Cheren","Roxie","Burgh","Elesa","Cynthia",
+             "Clay","Skyla","Drayden","Marlon","Shauntal","Marshal","Grimsley",
+             "Caitlin","Iris","Colress","Ghetsis","Zinzolin","Shadow","Rood",
+@@ -512,3 +633,3 @@
+         QSet<unsigned> included;for(const auto& entry:result) included.insert(entry.toMap().value("id").toUInt());
+-        const auto trainerLimit=qMin(qMin(entryCount(trainers),entryCount(parties)),891u);
++        const auto trainerLimit=qMin(qMin(entryCount(trainers),entryCount(parties)),892u);
+         for(unsigned id=0;id<qMin(names.half(2),trainerLimit);++id) {
 @@ -578,6 +699,11 @@
      return result;
  }
