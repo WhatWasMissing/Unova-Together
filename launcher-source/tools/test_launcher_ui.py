@@ -4,7 +4,7 @@ import argparse, io, json, hashlib, tempfile, time, threading, unittest, zipfile
 from unittest.mock import patch, MagicMock
 from PIL import ImageGrab
 from launcher_ui.app import Launcher
-from launcher_ui.components import HERE, THEME
+from launcher_ui.components import C, HERE, THEME
 import unova_updater as u
 
 OUTPUT=None
@@ -199,13 +199,16 @@ class LauncherTests(unittest.TestCase):
 
     def test_pages_keyboard_and_small_window(self):
         self.assertTrue(self.app.news);self.assertGreaterEqual(len(self.app.images),4)
-        for size in ('1040x760','860x660'):
+        for size in ('1040x760','860x660','800x620'):
             self.app.geometry(size);self.app.update()
             for page in ('Play','Profiles','Co-op','Features','News','Updates','Settings','Tools','Setup'):
                 self.app.show_page(page);self.app.update()
                 self.assertTrue(self.app.pages[page].winfo_ismapped())
                 self.assertGreater(self.app.nav[page].winfo_height(),20)
                 self.assertLessEqual(self.app.nav[page].winfo_rooty()+self.app.nav[page].winfo_height(),self.app.winfo_rooty()+self.app.winfo_height())
+                for group,_ in self.app._navigation_groups():
+                    section=self.app.nav_sections[group]
+                    self.assertLessEqual(section.winfo_rooty()+section.winfo_height(),self.app.winfo_rooty()+self.app.winfo_height())
                 self.assertEqual(self.app.title(),'Pokemon Together · Unova Together · '+('Games & saves' if page=='Profiles' else page))
                 visible_actions={'Play':self.app.play,'News':self.app.news_link,'Updates':self.app.cancel_button}
                 if page in visible_actions:
@@ -222,6 +225,21 @@ class LauncherTests(unittest.TestCase):
         self.assertEqual(self.app.page_name,'News')
         self.app.news_text.focus_force();self.app.news_text.event_generate('<Tab>');self.app.update()
         self.assertNotEqual(self.app.focus_get(),self.app.news_text)
+
+    def test_navigation_groups_settings_shortcuts_and_activity_feedback(self):
+        self.app._return_library()
+        self.assertEqual(self.app._navigation_groups(),(('MOD LIBRARY',('Library',)),))
+        self.app._open_mod('black2',save=False)
+        groups=self.app._navigation_groups()
+        self.assertIn(('PLAY',('Play','Co-op','Features')),groups)
+        self.assertIn(('MANAGE',('Profiles','News','Updates','Tools','Setup','Settings')),groups)
+        self.app.show_page('Settings');self.app.settings_jumps['Appearance'].invoke();self.app.update()
+        self.assertGreater(self.app.pages['Settings'].canvas.yview()[0],0)
+        self.assertEqual(self.app.nav['Settings'].cget('bg'),C['navSelected'])
+        self.app.busy=True;self.app._sync();self.app.update_idletasks()
+        self.assertTrue(self.app.footer_activity.winfo_ismapped())
+        self.app.busy=False;self.app._sync();self.app.update_idletasks()
+        self.assertFalse(self.app.footer_activity.winfo_ismapped())
     def test_refresh_success_offline_error_and_cache(self):
         self.app.rom.set(str(self.rom))
         with patch.object(u,'launcher_feed',return_value=self.feed()):self.app.check();self.wait()
@@ -319,7 +337,7 @@ class LauncherTests(unittest.TestCase):
             self.app.cheat_buttons['repel'].invoke();self.app._preference('volume',35)
         data=json.loads(self.app.config_path.read_text())
         self.assertTrue(data['cheats']['test-rom']['repel']);self.assertEqual(data['preferences']['volume'],35)
-        self.app.destroy();self.app=Launcher(self.home,testing=True);self.app.update()
+        self.app.destroy();self.app=Launcher(self.home,testing=True);self.app._open_mod('black2',save=False);self.app.update()
         self.assertEqual(self.app.volume.get(),35)
         with patch('launcher_ui.preferences.identify',return_value=profile):self.app._identify_rom()
         self.assertTrue(self.app.cheat_vars['repel'].get())

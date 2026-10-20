@@ -17,15 +17,15 @@ def button(parent, text, command, kind='neutral', **kw):
     primary=kind=='primary';nav=kind=='nav'
     bg=C['primary'] if primary else C['nav'] if nav else C['surface']
     fg=C['surface'] if primary else C['navText'] if nav else C['text']
-    return tk.Button(parent, text=text, command=command, font=(F['body'],11,'bold' if primary else 'normal'),
-        bg=bg, fg=fg, activebackground=C['primaryHover'] if primary else C['hero'] if nav else C['selection'],
+    return tk.Button(parent, text=text, command=command, font=(F['body'],10 if nav else 11,'bold' if primary else 'normal'),
+        bg=bg, fg=fg, activebackground=C['primaryHover'] if primary else C['navHover'] if nav else C['selection'],
         activeforeground=C['surface'] if primary or nav else C['text'],
-        relief='flat', bd=0, padx=16, pady=4 if nav else 11, cursor='hand2', takefocus=True,
+        relief='flat', bd=0, padx=14, pady=2 if nav else 9, cursor='hand2', takefocus=True,
         highlightthickness=2, highlightbackground=bg, highlightcolor=C['focus'],
         disabledforeground=C['disabledText'], **kw)
 
 def card(parent, background=None):
-    return tk.Frame(parent, bg=background or C['surface'], highlightbackground=C['border'],highlightthickness=1,bd=2,relief='groove')
+    return tk.Frame(parent, bg=background or C['surface'], highlightbackground=C['border'],highlightthickness=1,bd=0,relief='flat')
 
 def set_enabled(widget, enabled, kind='neutral'):
     background=C['primary'] if kind=='primary' else C['surface']

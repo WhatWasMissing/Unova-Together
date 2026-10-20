@@ -1,32 +1,39 @@
 {
   "colors": {
-    "background": "#e8e8e8",
+    "background": "#f3f6fa",
     "surface": "#ffffff",
-    "nav": "#202020",
-    "hero": "#303030",
-    "primary": "#9b2536",
-    "primaryHover": "#741b29",
-    "text": "#202020",
-    "muted": "#555555",
-    "border": "#9b9b9b",
-    "navText": "#dedede",
-    "accent": "#f4f4f4",
-    "selection": "#dcdcdc",
-    "warning": "#8b5417",
-    "warningSurface": "#fff0d8",
-    "danger": "#a33434",
-    "disabled": "#dce5e5",
-    "disabledText": "#61777d",
-    "focus": "#9b2536"
+    "nav": "#17263b",
+    "navHover": "#263b54",
+    "navSelected": "#f7e8ec",
+    "navSelectedText": "#8f1e35",
+    "hero": "#263b54",
+    "primary": "#a8253d",
+    "primaryHover": "#861d32",
+    "text": "#182433",
+    "muted": "#526274",
+    "border": "#d5dee9",
+    "navText": "#dce5ef",
+    "accent": "#eaf0f7",
+    "selection": "#e7edf5",
+    "warning": "#7a4b0c",
+    "warningSurface": "#fff5de",
+    "danger": "#a52a38",
+    "disabled": "#e8edf2",
+    "disabledText": "#596879",
+    "focus": "#087f8c"
   },
   "fonts": {
-    "display": "Consolas",
+    "display": "Segoe UI",
     "body": "Segoe UI",
     "utility": "Consolas"
   },
   "layout": {
-    "sidebar": 198,
-    "padding": 26,
-    "heroHeight": 238
+    "sidebar": 220,
+    "sidebarCompact": 178,
+    "padding": 22,
+    "paddingCompact": 14,
+    "minWidth": 780,
+    "minHeight": 620,
+    "heroHeight": 220
   }
 }
