@@ -1,5 +1,7 @@
 # Follower art credits
 
+HGSS walking sheets supplied for the 2.0.23 update: **Dragoon / The Spriters Resource** (Generations 1, 2, 4 and miscellaneous) and **redblueyellow**, with thanks to **PokeTex** (Generation 3). Pokémon artwork belongs to its original owners, including Nintendo, Game Freak and Creatures. These credits do not place game artwork under the project's source-code license.
+
 The follower artwork in Unova Together comes from contributors who shared their work with the Pokémon community. Thank you to everyone listed below. Their artwork remains credited to its original creators.
 
 Contributors: Aero,

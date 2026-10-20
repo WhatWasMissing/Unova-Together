@@ -2,6 +2,7 @@
 
 Pick a version to read what changed. The newest release is first.
 
+- [Unova Together 2.0.23 — What changed](RELEASE_NOTES_2.0.23.md)
 - [Unova Together 2.0.22 — Trade items from the Unova menu](RELEASE_NOTES_2.0.22.md)
 - [Unova Together 2.0.21 — Safer co-op testing and EV resets](RELEASE_NOTES_2.0.21.md)
 - [Unova Together 2.0.20 — More reliable relay updates](RELEASE_NOTES_2.0.20.md)

@@ -24,7 +24,7 @@ HELPERS = (
 COMMANDS = ('Online Co-op.cmd', 'Install UDP Dependencies.cmd', 'Start LAN Presence Relay.cmd')
 DOCS = ('PLAYER_GUIDE.md', 'KNOWN_ISSUES.md', 'TAILSCALE_COOP.md', 'UDP_SERVER_GUIDE.md',
         'LAUNCHER.md', 'COMPANION_INTERACTIONS.md', 'COOP_TOOLS.md', 'FEATURES.md',
-        'ROADMAP.md', 'BAG_CAPACITY.md')
+        'ROADMAP.md', 'BAG_CAPACITY.md', 'FOLLOWING_POKEMON.md', 'FOLLOWER_ART_CREDITS.md')
 FORBIDDEN = {'.nds', '.gba', '.sav', '.save', '.dsv', '.ramdump', '.ml1', '.ml2', '.ml3', '.ml4', '.ml5', '.ml6', '.ml7', '.ml8', '.pem', '.key', '.pyc'}
 
 def validate_windows_platform_plugin(current):
@@ -152,6 +152,9 @@ def main():
         for name in (manifest['installer'], 'bundle.json', 'LICENSE.txt', 'README.txt'):
             z.write(tailscale/name, 'Unova-Together/setup/Tailscale/'+name)
     with zipfile.ZipFile(source, 'x', zipfile.ZIP_DEFLATED, compresslevel=6) as z:
+        for name in ('audit_hgss_walking_sheets.py','import_hgss_walking_sheets.py','verify_hgss_import.py','test_hgss_followers.py','check_hgss_followers.cpp'):
+            z.write(ROOT/'tools'/name,'Unova-Together-Source/tools/'+name)
+        z.write(repo/'docs/HGSS_FOLLOWER_IMPORT.md','Unova-Together-Source/docs/HGSS_FOLLOWER_IMPORT.md')
         for name in ('check_follower_appearance.cpp','check_pokemon_follower.cpp','check_presence_rendering.cpp','test_presence_polling.py','test_party_stats.py','test_unova_storage.py','test_native_options_menu.py'):
             z.write(ROOT/'tools'/name,'Unova-Together-Source/tools/'+name)
         z.write(ROOT/'tools/test_launcher_migration.py','Unova-Together-Source/tools/test_launcher_migration.py')

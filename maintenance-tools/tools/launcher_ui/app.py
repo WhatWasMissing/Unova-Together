@@ -1261,7 +1261,7 @@ class Launcher(tk.Tk):
             panel.bind('<Configure>',lambda e,w=text:w.configure(wraplength=max(240,e.width-32)))
         extras=card(parent);extras.pack(fill='x')
         for title,copy in (
-            ('Following Pokémon','649 base species plus supported female and form variants: 743 directional assets with normal and shiny palettes. Larger art retains its original dimensions. Unsupported forms use base art. Reduced follower motion is available in Settings.'),
+            ('Following Pokémon','All 649 base species can follow you. Generations 1–4 use HGSS artwork, with matching gender and form variants. Shiny Pokémon keep their separate shiny sprites; Generation 5 and uncovered forms keep their existing art. Reduced follower motion is available in Settings.'),
             ('Super Repels','Super Repels cost ₽10, the lowest positive price supported by the game. Available in active ordinary money shops. ROM files and saves are not edited.'),
             ('Encounter finder & move relearning','Unova → Pokémon lists ordinary wild encounters by season and offers free level-up move relearning. Gifts, scripted legendaries and Hidden Grottos are excluded.'),
             ('Field HMs','Owned HMs work without occupying battle move slots. Native story requirements still apply; Fly needs an available field-action slot.'),

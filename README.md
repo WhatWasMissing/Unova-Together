@@ -1,14 +1,14 @@
 # Unova Together
 
-**Current release: 2.0.21.** Play Blaze Black 2 Redux with friends, explore with your Pokémon, and discover **49 Mega forms**.
+**Current release: 2.0.23.** Play Blaze Black 2 Redux with friends, explore with your Pokémon, and discover **49 Mega forms**.
 
-[Download Unova Together 2.0.21](https://github.com/WhatWasMissing/Unova-Together/releases/latest)
+[Download Unova Together 2.0.23](https://github.com/WhatWasMissing/Unova-Together/releases/latest)
 
 Unova Together is a free fan project by **mvq1303 / WhatWasMissing**, built on melonDS. It requires an English **Blaze Black 2 Redux Complete v1.4.1** game file. The launcher prepares the Cynthia Route 7 event in a separate copy for this version. No full game patch is currently bundled; if a compatible Unova Together patch is released for another Redux version, use the patch listed for that exact version. Downloads do not include game files, saves, or firmware.
 
 ## Mega Evolution
 
-Give a Pokémon its matching Mega Stone, then hold **L + R** while choosing a move in battle. Mega Evolution lasts until the battle ends. Poké Marts alternate between two Mega Stone selections, so all 49 stones are available around Unova for **₽50,000** each. Both Battle Point counters sell the full selection for **50 BP**.
+Give a Pokémon its matching Mega Stone, then hold **L + R** while choosing a move in battle. Mega Evolution lasts until the battle ends. Pokémon Center Marts carry three Mega Stones per inventory, with all 49 stones spread across Unova for **₽50,000** each. Both Battle Point counters sell the full selection for **50 BP**.
 
 There are 49 Mega forms, including Mega Serperior with Adaptability, Mega Charizard Y with Drought, and Mega Salamence with Intimidate. The final three Gym Leaders and Cynthia’s Route 7 rematch have Pokémon holding Mega Stones. Most Mega battle sprites animate; Sceptile, Mawile, and Aggron use static front and back sprites, while Altaria’s front and Glalie’s back are static. See the [Mega Evolution guide](docs/MEGA_EVOLUTION.md) for every stone, ability and stat total.
 
@@ -26,7 +26,7 @@ Everyone in a co-op session should use the same release and Redux version. The l
 
 - Explore together, trade eligible items and Pokémon, and join supported trainer battles.
 - Choose an animated field character from your game in launcher settings.
-- Bring a Pokémon along; all 649 base species have follower artwork.
+- Bring a Pokémon along; all 649 base species have follower artwork. Generations 1–4 use HGSS artwork where covered, while shiny Pokémon keep their separate shiny sprites.
 - Check IVs and EVs, reset a Pokémon’s EVs for ₽50,000, search ordinary wild encounters, relearn eligible moves, and use supported field HMs.
 - Keep the normal bag capacity; all Mega Stones use existing item entries. See the [bag capacity guide](docs/BAG_CAPACITY.md).
 - Adjust the camera, save slots, controls, music and optional battle scenery.

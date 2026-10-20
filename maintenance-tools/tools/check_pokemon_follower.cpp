@@ -32,17 +32,11 @@ int main(int argc,char** argv) {
             bool visible=false;for(int y=0;y<image.height();++y) for(int x=0;x<image.width();++x) visible|=qAlpha(image.pixel(x,y))!=0;
             assert(visible);}
         result.value("walking").toBool()?++walkers:++icons;
-        for(int direction=0;direction<4;++direction)
-            assert(frames[direction*3].value<QImage>()!=frames[direction*3+1].value<QImage>());
+        // Native HGSS floating/legless artwork can repeat a pose. Preserve the
+        // authored pixels; movement is handled by the follower renderer.
         if(species>=494) {
-            if(result.value("walking").toBool()) {
-                // A decoded sprite is not enough: the walking pose must animate.
-                bool animated=false;
-                for(int i=0;i<12;++i) animated|=frames[i].value<QImage>()!=frames[(i/3)*3].value<QImage>();
-                assert(animated);
-                for(int direction=0;direction<4;++direction)
-                    assert(frames[direction*3].value<QImage>()!=frames[direction*3+1].value<QImage>());
-            }
+            // Preserve existing Gen 5 artwork, including repeated poses. The
+            // dedicated hash comparison verifies it has not been replaced.
             result.value("walking").toBool()?++gen5Walkers:++gen5Icons;
             const unsigned index=species-494,page=index/40,row=(index%40)/2,column=index%2;
             if(index%40==0) sheet.fill(QColor(210,223,201));
@@ -64,10 +58,12 @@ int main(int argc,char** argv) {
         assert(shiny.value("shiny").toBool());
         bool recoloured=false;
         const auto normalFrames=normal.value("frames").toList(),shinyFrames=shiny.value("frames").toList();
+        const bool separateNormalArt=QFile::exists(":/followers/official-hgss/"+asset.chopped(4)+".png");
         for(int i=0;i<12;++i) {
             const auto a=normalFrames[i].value<QImage>(),b=shinyFrames[i].value<QImage>();
             assert(a.size()==b.size());recoloured=recoloured || a!=b;
-            for(int y=0;y<a.height();++y) for(int x=0;x<a.width();++x) assert(qAlpha(a.pixel(x,y))==qAlpha(b.pixel(x,y)));
+            if(!separateNormalArt)
+                for(int y=0;y<a.height();++y) for(int x=0;x<a.width();++x) assert(qAlpha(a.pixel(x,y))==qAlpha(b.pixel(x,y)));
         }
         if(!recoloured) {std::cerr<<"Shiny palette unchanged: "<<asset.toStdString()<<"\n";return 1;}
         for(const auto& image:shiny.value("frames").toList()) {

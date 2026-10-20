@@ -1,6 +1,6 @@
 --- a/source/melonDS/res/followers.qrc
 +++ b/source/melonDS/res/followers.qrc
-@@ -155,4 +155,747 @@
+@@ -155,4 +155,1292 @@
  <file alias="647.btx">followers/647.btx</file>
  <file alias="648.btx">followers/648.btx</file>
  <file alias="649.btx">followers/649.btx</file>
@@ -747,6 +747,551 @@
 +<file alias="variants/649-2-2.btx">followers/variants/649-2-2.btx</file>
 +<file alias="variants/649-3-2.btx">followers/variants/649-3-2.btx</file>
 +<file alias="variants/649-4-2.btx">followers/variants/649-4-2.btx</file>
++<file alias="official-hgss/1-0-2.png">followers/official-hgss/1-0-2.png</file>
++<file alias="official-hgss/2-0-2.png">followers/official-hgss/2-0-2.png</file>
++<file alias="official-hgss/3-0-2.png">followers/official-hgss/3-0-2.png</file>
++<file alias="official-hgss/3-0-1.png">followers/official-hgss/3-0-1.png</file>
++<file alias="official-hgss/4-0-2.png">followers/official-hgss/4-0-2.png</file>
++<file alias="official-hgss/5-0-2.png">followers/official-hgss/5-0-2.png</file>
++<file alias="official-hgss/6-0-2.png">followers/official-hgss/6-0-2.png</file>
++<file alias="official-hgss/7-0-2.png">followers/official-hgss/7-0-2.png</file>
++<file alias="official-hgss/8-0-2.png">followers/official-hgss/8-0-2.png</file>
++<file alias="official-hgss/9-0-2.png">followers/official-hgss/9-0-2.png</file>
++<file alias="official-hgss/10-0-2.png">followers/official-hgss/10-0-2.png</file>
++<file alias="official-hgss/11-0-2.png">followers/official-hgss/11-0-2.png</file>
++<file alias="official-hgss/12-0-2.png">followers/official-hgss/12-0-2.png</file>
++<file alias="official-hgss/13-0-2.png">followers/official-hgss/13-0-2.png</file>
++<file alias="official-hgss/14-0-2.png">followers/official-hgss/14-0-2.png</file>
++<file alias="official-hgss/15-0-2.png">followers/official-hgss/15-0-2.png</file>
++<file alias="official-hgss/16-0-2.png">followers/official-hgss/16-0-2.png</file>
++<file alias="official-hgss/17-0-2.png">followers/official-hgss/17-0-2.png</file>
++<file alias="official-hgss/18-0-2.png">followers/official-hgss/18-0-2.png</file>
++<file alias="official-hgss/19-0-2.png">followers/official-hgss/19-0-2.png</file>
++<file alias="official-hgss/20-0-2.png">followers/official-hgss/20-0-2.png</file>
++<file alias="official-hgss/21-0-2.png">followers/official-hgss/21-0-2.png</file>
++<file alias="official-hgss/22-0-2.png">followers/official-hgss/22-0-2.png</file>
++<file alias="official-hgss/23-0-2.png">followers/official-hgss/23-0-2.png</file>
++<file alias="official-hgss/24-0-2.png">followers/official-hgss/24-0-2.png</file>
++<file alias="official-hgss/25-0-2.png">followers/official-hgss/25-0-2.png</file>
++<file alias="official-hgss/25-0-1.png">followers/official-hgss/25-0-1.png</file>
++<file alias="official-hgss/26-0-2.png">followers/official-hgss/26-0-2.png</file>
++<file alias="official-hgss/27-0-2.png">followers/official-hgss/27-0-2.png</file>
++<file alias="official-hgss/28-0-2.png">followers/official-hgss/28-0-2.png</file>
++<file alias="official-hgss/29-0-2.png">followers/official-hgss/29-0-2.png</file>
++<file alias="official-hgss/30-0-2.png">followers/official-hgss/30-0-2.png</file>
++<file alias="official-hgss/31-0-2.png">followers/official-hgss/31-0-2.png</file>
++<file alias="official-hgss/32-0-2.png">followers/official-hgss/32-0-2.png</file>
++<file alias="official-hgss/33-0-2.png">followers/official-hgss/33-0-2.png</file>
++<file alias="official-hgss/34-0-2.png">followers/official-hgss/34-0-2.png</file>
++<file alias="official-hgss/35-0-2.png">followers/official-hgss/35-0-2.png</file>
++<file alias="official-hgss/36-0-2.png">followers/official-hgss/36-0-2.png</file>
++<file alias="official-hgss/37-0-2.png">followers/official-hgss/37-0-2.png</file>
++<file alias="official-hgss/38-0-2.png">followers/official-hgss/38-0-2.png</file>
++<file alias="official-hgss/39-0-2.png">followers/official-hgss/39-0-2.png</file>
++<file alias="official-hgss/40-0-2.png">followers/official-hgss/40-0-2.png</file>
++<file alias="official-hgss/41-0-2.png">followers/official-hgss/41-0-2.png</file>
++<file alias="official-hgss/42-0-2.png">followers/official-hgss/42-0-2.png</file>
++<file alias="official-hgss/43-0-2.png">followers/official-hgss/43-0-2.png</file>
++<file alias="official-hgss/44-0-2.png">followers/official-hgss/44-0-2.png</file>
++<file alias="official-hgss/45-0-2.png">followers/official-hgss/45-0-2.png</file>
++<file alias="official-hgss/46-0-2.png">followers/official-hgss/46-0-2.png</file>
++<file alias="official-hgss/47-0-2.png">followers/official-hgss/47-0-2.png</file>
++<file alias="official-hgss/48-0-2.png">followers/official-hgss/48-0-2.png</file>
++<file alias="official-hgss/49-0-2.png">followers/official-hgss/49-0-2.png</file>
++<file alias="official-hgss/50-0-2.png">followers/official-hgss/50-0-2.png</file>
++<file alias="official-hgss/51-0-2.png">followers/official-hgss/51-0-2.png</file>
++<file alias="official-hgss/52-0-2.png">followers/official-hgss/52-0-2.png</file>
++<file alias="official-hgss/53-0-2.png">followers/official-hgss/53-0-2.png</file>
++<file alias="official-hgss/54-0-2.png">followers/official-hgss/54-0-2.png</file>
++<file alias="official-hgss/55-0-2.png">followers/official-hgss/55-0-2.png</file>
++<file alias="official-hgss/56-0-2.png">followers/official-hgss/56-0-2.png</file>
++<file alias="official-hgss/57-0-2.png">followers/official-hgss/57-0-2.png</file>
++<file alias="official-hgss/58-0-2.png">followers/official-hgss/58-0-2.png</file>
++<file alias="official-hgss/59-0-2.png">followers/official-hgss/59-0-2.png</file>
++<file alias="official-hgss/60-0-2.png">followers/official-hgss/60-0-2.png</file>
++<file alias="official-hgss/61-0-2.png">followers/official-hgss/61-0-2.png</file>
++<file alias="official-hgss/62-0-2.png">followers/official-hgss/62-0-2.png</file>
++<file alias="official-hgss/63-0-2.png">followers/official-hgss/63-0-2.png</file>
++<file alias="official-hgss/64-0-2.png">followers/official-hgss/64-0-2.png</file>
++<file alias="official-hgss/65-0-2.png">followers/official-hgss/65-0-2.png</file>
++<file alias="official-hgss/66-0-2.png">followers/official-hgss/66-0-2.png</file>
++<file alias="official-hgss/67-0-2.png">followers/official-hgss/67-0-2.png</file>
++<file alias="official-hgss/68-0-2.png">followers/official-hgss/68-0-2.png</file>
++<file alias="official-hgss/69-0-2.png">followers/official-hgss/69-0-2.png</file>
++<file alias="official-hgss/70-0-2.png">followers/official-hgss/70-0-2.png</file>
++<file alias="official-hgss/71-0-2.png">followers/official-hgss/71-0-2.png</file>
++<file alias="official-hgss/72-0-2.png">followers/official-hgss/72-0-2.png</file>
++<file alias="official-hgss/73-0-2.png">followers/official-hgss/73-0-2.png</file>
++<file alias="official-hgss/74-0-2.png">followers/official-hgss/74-0-2.png</file>
++<file alias="official-hgss/75-0-2.png">followers/official-hgss/75-0-2.png</file>
++<file alias="official-hgss/76-0-2.png">followers/official-hgss/76-0-2.png</file>
++<file alias="official-hgss/77-0-2.png">followers/official-hgss/77-0-2.png</file>
++<file alias="official-hgss/78-0-2.png">followers/official-hgss/78-0-2.png</file>
++<file alias="official-hgss/79-0-2.png">followers/official-hgss/79-0-2.png</file>
++<file alias="official-hgss/80-0-2.png">followers/official-hgss/80-0-2.png</file>
++<file alias="official-hgss/81-0-2.png">followers/official-hgss/81-0-2.png</file>
++<file alias="official-hgss/82-0-2.png">followers/official-hgss/82-0-2.png</file>
++<file alias="official-hgss/83-0-2.png">followers/official-hgss/83-0-2.png</file>
++<file alias="official-hgss/84-0-2.png">followers/official-hgss/84-0-2.png</file>
++<file alias="official-hgss/85-0-2.png">followers/official-hgss/85-0-2.png</file>
++<file alias="official-hgss/86-0-2.png">followers/official-hgss/86-0-2.png</file>
++<file alias="official-hgss/87-0-2.png">followers/official-hgss/87-0-2.png</file>
++<file alias="official-hgss/88-0-2.png">followers/official-hgss/88-0-2.png</file>
++<file alias="official-hgss/89-0-2.png">followers/official-hgss/89-0-2.png</file>
++<file alias="official-hgss/90-0-2.png">followers/official-hgss/90-0-2.png</file>
++<file alias="official-hgss/91-0-2.png">followers/official-hgss/91-0-2.png</file>
++<file alias="official-hgss/92-0-2.png">followers/official-hgss/92-0-2.png</file>
++<file alias="official-hgss/93-0-2.png">followers/official-hgss/93-0-2.png</file>
++<file alias="official-hgss/94-0-2.png">followers/official-hgss/94-0-2.png</file>
++<file alias="official-hgss/95-0-2.png">followers/official-hgss/95-0-2.png</file>
++<file alias="official-hgss/96-0-2.png">followers/official-hgss/96-0-2.png</file>
++<file alias="official-hgss/97-0-2.png">followers/official-hgss/97-0-2.png</file>
++<file alias="official-hgss/98-0-2.png">followers/official-hgss/98-0-2.png</file>
++<file alias="official-hgss/99-0-2.png">followers/official-hgss/99-0-2.png</file>
++<file alias="official-hgss/100-0-2.png">followers/official-hgss/100-0-2.png</file>
++<file alias="official-hgss/101-0-2.png">followers/official-hgss/101-0-2.png</file>
++<file alias="official-hgss/102-0-2.png">followers/official-hgss/102-0-2.png</file>
++<file alias="official-hgss/103-0-2.png">followers/official-hgss/103-0-2.png</file>
++<file alias="official-hgss/104-0-2.png">followers/official-hgss/104-0-2.png</file>
++<file alias="official-hgss/105-0-2.png">followers/official-hgss/105-0-2.png</file>
++<file alias="official-hgss/106-0-2.png">followers/official-hgss/106-0-2.png</file>
++<file alias="official-hgss/107-0-2.png">followers/official-hgss/107-0-2.png</file>
++<file alias="official-hgss/108-0-2.png">followers/official-hgss/108-0-2.png</file>
++<file alias="official-hgss/109-0-2.png">followers/official-hgss/109-0-2.png</file>
++<file alias="official-hgss/110-0-2.png">followers/official-hgss/110-0-2.png</file>
++<file alias="official-hgss/111-0-2.png">followers/official-hgss/111-0-2.png</file>
++<file alias="official-hgss/112-0-2.png">followers/official-hgss/112-0-2.png</file>
++<file alias="official-hgss/113-0-2.png">followers/official-hgss/113-0-2.png</file>
++<file alias="official-hgss/114-0-2.png">followers/official-hgss/114-0-2.png</file>
++<file alias="official-hgss/115-0-2.png">followers/official-hgss/115-0-2.png</file>
++<file alias="official-hgss/116-0-2.png">followers/official-hgss/116-0-2.png</file>
++<file alias="official-hgss/117-0-2.png">followers/official-hgss/117-0-2.png</file>
++<file alias="official-hgss/118-0-2.png">followers/official-hgss/118-0-2.png</file>
++<file alias="official-hgss/119-0-2.png">followers/official-hgss/119-0-2.png</file>
++<file alias="official-hgss/120-0-2.png">followers/official-hgss/120-0-2.png</file>
++<file alias="official-hgss/121-0-2.png">followers/official-hgss/121-0-2.png</file>
++<file alias="official-hgss/122-0-2.png">followers/official-hgss/122-0-2.png</file>
++<file alias="official-hgss/123-0-2.png">followers/official-hgss/123-0-2.png</file>
++<file alias="official-hgss/124-0-2.png">followers/official-hgss/124-0-2.png</file>
++<file alias="official-hgss/125-0-2.png">followers/official-hgss/125-0-2.png</file>
++<file alias="official-hgss/126-0-2.png">followers/official-hgss/126-0-2.png</file>
++<file alias="official-hgss/127-0-2.png">followers/official-hgss/127-0-2.png</file>
++<file alias="official-hgss/128-0-2.png">followers/official-hgss/128-0-2.png</file>
++<file alias="official-hgss/129-0-2.png">followers/official-hgss/129-0-2.png</file>
++<file alias="official-hgss/130-0-2.png">followers/official-hgss/130-0-2.png</file>
++<file alias="official-hgss/131-0-2.png">followers/official-hgss/131-0-2.png</file>
++<file alias="official-hgss/132-0-2.png">followers/official-hgss/132-0-2.png</file>
++<file alias="official-hgss/133-0-2.png">followers/official-hgss/133-0-2.png</file>
++<file alias="official-hgss/134-0-2.png">followers/official-hgss/134-0-2.png</file>
++<file alias="official-hgss/135-0-2.png">followers/official-hgss/135-0-2.png</file>
++<file alias="official-hgss/136-0-2.png">followers/official-hgss/136-0-2.png</file>
++<file alias="official-hgss/137-0-2.png">followers/official-hgss/137-0-2.png</file>
++<file alias="official-hgss/138-0-2.png">followers/official-hgss/138-0-2.png</file>
++<file alias="official-hgss/139-0-2.png">followers/official-hgss/139-0-2.png</file>
++<file alias="official-hgss/140-0-2.png">followers/official-hgss/140-0-2.png</file>
++<file alias="official-hgss/141-0-2.png">followers/official-hgss/141-0-2.png</file>
++<file alias="official-hgss/142-0-2.png">followers/official-hgss/142-0-2.png</file>
++<file alias="official-hgss/143-0-2.png">followers/official-hgss/143-0-2.png</file>
++<file alias="official-hgss/144-0-2.png">followers/official-hgss/144-0-2.png</file>
++<file alias="official-hgss/145-0-2.png">followers/official-hgss/145-0-2.png</file>
++<file alias="official-hgss/146-0-2.png">followers/official-hgss/146-0-2.png</file>
++<file alias="official-hgss/147-0-2.png">followers/official-hgss/147-0-2.png</file>
++<file alias="official-hgss/148-0-2.png">followers/official-hgss/148-0-2.png</file>
++<file alias="official-hgss/149-0-2.png">followers/official-hgss/149-0-2.png</file>
++<file alias="official-hgss/150-0-2.png">followers/official-hgss/150-0-2.png</file>
++<file alias="official-hgss/151-0-2.png">followers/official-hgss/151-0-2.png</file>
++<file alias="official-hgss/152-0-2.png">followers/official-hgss/152-0-2.png</file>
++<file alias="official-hgss/153-0-2.png">followers/official-hgss/153-0-2.png</file>
++<file alias="official-hgss/154-0-2.png">followers/official-hgss/154-0-2.png</file>
++<file alias="official-hgss/154-0-1.png">followers/official-hgss/154-0-1.png</file>
++<file alias="official-hgss/155-0-2.png">followers/official-hgss/155-0-2.png</file>
++<file alias="official-hgss/156-0-2.png">followers/official-hgss/156-0-2.png</file>
++<file alias="official-hgss/157-0-2.png">followers/official-hgss/157-0-2.png</file>
++<file alias="official-hgss/158-0-2.png">followers/official-hgss/158-0-2.png</file>
++<file alias="official-hgss/159-0-2.png">followers/official-hgss/159-0-2.png</file>
++<file alias="official-hgss/160-0-2.png">followers/official-hgss/160-0-2.png</file>
++<file alias="official-hgss/161-0-2.png">followers/official-hgss/161-0-2.png</file>
++<file alias="official-hgss/162-0-2.png">followers/official-hgss/162-0-2.png</file>
++<file alias="official-hgss/163-0-2.png">followers/official-hgss/163-0-2.png</file>
++<file alias="official-hgss/164-0-2.png">followers/official-hgss/164-0-2.png</file>
++<file alias="official-hgss/165-0-2.png">followers/official-hgss/165-0-2.png</file>
++<file alias="official-hgss/166-0-2.png">followers/official-hgss/166-0-2.png</file>
++<file alias="official-hgss/167-0-2.png">followers/official-hgss/167-0-2.png</file>
++<file alias="official-hgss/168-0-2.png">followers/official-hgss/168-0-2.png</file>
++<file alias="official-hgss/169-0-2.png">followers/official-hgss/169-0-2.png</file>
++<file alias="official-hgss/170-0-2.png">followers/official-hgss/170-0-2.png</file>
++<file alias="official-hgss/171-0-2.png">followers/official-hgss/171-0-2.png</file>
++<file alias="official-hgss/172-0-2.png">followers/official-hgss/172-0-2.png</file>
++<file alias="official-hgss/173-0-2.png">followers/official-hgss/173-0-2.png</file>
++<file alias="official-hgss/174-0-2.png">followers/official-hgss/174-0-2.png</file>
++<file alias="official-hgss/175-0-2.png">followers/official-hgss/175-0-2.png</file>
++<file alias="official-hgss/176-0-2.png">followers/official-hgss/176-0-2.png</file>
++<file alias="official-hgss/177-0-2.png">followers/official-hgss/177-0-2.png</file>
++<file alias="official-hgss/178-0-2.png">followers/official-hgss/178-0-2.png</file>
++<file alias="official-hgss/179-0-2.png">followers/official-hgss/179-0-2.png</file>
++<file alias="official-hgss/180-0-2.png">followers/official-hgss/180-0-2.png</file>
++<file alias="official-hgss/181-0-2.png">followers/official-hgss/181-0-2.png</file>
++<file alias="official-hgss/182-0-2.png">followers/official-hgss/182-0-2.png</file>
++<file alias="official-hgss/183-0-2.png">followers/official-hgss/183-0-2.png</file>
++<file alias="official-hgss/184-0-2.png">followers/official-hgss/184-0-2.png</file>
++<file alias="official-hgss/185-0-2.png">followers/official-hgss/185-0-2.png</file>
++<file alias="official-hgss/186-0-2.png">followers/official-hgss/186-0-2.png</file>
++<file alias="official-hgss/187-0-2.png">followers/official-hgss/187-0-2.png</file>
++<file alias="official-hgss/188-0-2.png">followers/official-hgss/188-0-2.png</file>
++<file alias="official-hgss/189-0-2.png">followers/official-hgss/189-0-2.png</file>
++<file alias="official-hgss/190-0-2.png">followers/official-hgss/190-0-2.png</file>
++<file alias="official-hgss/191-0-2.png">followers/official-hgss/191-0-2.png</file>
++<file alias="official-hgss/192-0-2.png">followers/official-hgss/192-0-2.png</file>
++<file alias="official-hgss/193-0-2.png">followers/official-hgss/193-0-2.png</file>
++<file alias="official-hgss/194-0-2.png">followers/official-hgss/194-0-2.png</file>
++<file alias="official-hgss/195-0-2.png">followers/official-hgss/195-0-2.png</file>
++<file alias="official-hgss/196-0-2.png">followers/official-hgss/196-0-2.png</file>
++<file alias="official-hgss/197-0-2.png">followers/official-hgss/197-0-2.png</file>
++<file alias="official-hgss/198-0-2.png">followers/official-hgss/198-0-2.png</file>
++<file alias="official-hgss/199-0-2.png">followers/official-hgss/199-0-2.png</file>
++<file alias="official-hgss/200-0-2.png">followers/official-hgss/200-0-2.png</file>
++<file alias="official-hgss/201-0-2.png">followers/official-hgss/201-0-2.png</file>
++<file alias="official-hgss/201-1-2.png">followers/official-hgss/201-1-2.png</file>
++<file alias="official-hgss/201-2-2.png">followers/official-hgss/201-2-2.png</file>
++<file alias="official-hgss/201-3-2.png">followers/official-hgss/201-3-2.png</file>
++<file alias="official-hgss/201-4-2.png">followers/official-hgss/201-4-2.png</file>
++<file alias="official-hgss/201-5-2.png">followers/official-hgss/201-5-2.png</file>
++<file alias="official-hgss/201-6-2.png">followers/official-hgss/201-6-2.png</file>
++<file alias="official-hgss/201-7-2.png">followers/official-hgss/201-7-2.png</file>
++<file alias="official-hgss/201-8-2.png">followers/official-hgss/201-8-2.png</file>
++<file alias="official-hgss/201-9-2.png">followers/official-hgss/201-9-2.png</file>
++<file alias="official-hgss/201-10-2.png">followers/official-hgss/201-10-2.png</file>
++<file alias="official-hgss/201-11-2.png">followers/official-hgss/201-11-2.png</file>
++<file alias="official-hgss/201-12-2.png">followers/official-hgss/201-12-2.png</file>
++<file alias="official-hgss/201-13-2.png">followers/official-hgss/201-13-2.png</file>
++<file alias="official-hgss/201-14-2.png">followers/official-hgss/201-14-2.png</file>
++<file alias="official-hgss/201-15-2.png">followers/official-hgss/201-15-2.png</file>
++<file alias="official-hgss/201-16-2.png">followers/official-hgss/201-16-2.png</file>
++<file alias="official-hgss/201-17-2.png">followers/official-hgss/201-17-2.png</file>
++<file alias="official-hgss/201-18-2.png">followers/official-hgss/201-18-2.png</file>
++<file alias="official-hgss/201-19-2.png">followers/official-hgss/201-19-2.png</file>
++<file alias="official-hgss/201-20-2.png">followers/official-hgss/201-20-2.png</file>
++<file alias="official-hgss/201-21-2.png">followers/official-hgss/201-21-2.png</file>
++<file alias="official-hgss/201-22-2.png">followers/official-hgss/201-22-2.png</file>
++<file alias="official-hgss/201-23-2.png">followers/official-hgss/201-23-2.png</file>
++<file alias="official-hgss/201-24-2.png">followers/official-hgss/201-24-2.png</file>
++<file alias="official-hgss/201-25-2.png">followers/official-hgss/201-25-2.png</file>
++<file alias="official-hgss/201-26-2.png">followers/official-hgss/201-26-2.png</file>
++<file alias="official-hgss/201-27-2.png">followers/official-hgss/201-27-2.png</file>
++<file alias="official-hgss/202-0-2.png">followers/official-hgss/202-0-2.png</file>
++<file alias="official-hgss/202-0-1.png">followers/official-hgss/202-0-1.png</file>
++<file alias="official-hgss/203-0-2.png">followers/official-hgss/203-0-2.png</file>
++<file alias="official-hgss/204-0-2.png">followers/official-hgss/204-0-2.png</file>
++<file alias="official-hgss/205-0-2.png">followers/official-hgss/205-0-2.png</file>
++<file alias="official-hgss/206-0-2.png">followers/official-hgss/206-0-2.png</file>
++<file alias="official-hgss/207-0-2.png">followers/official-hgss/207-0-2.png</file>
++<file alias="official-hgss/208-0-2.png">followers/official-hgss/208-0-2.png</file>
++<file alias="official-hgss/208-0-1.png">followers/official-hgss/208-0-1.png</file>
++<file alias="official-hgss/209-0-2.png">followers/official-hgss/209-0-2.png</file>
++<file alias="official-hgss/210-0-2.png">followers/official-hgss/210-0-2.png</file>
++<file alias="official-hgss/211-0-2.png">followers/official-hgss/211-0-2.png</file>
++<file alias="official-hgss/212-0-2.png">followers/official-hgss/212-0-2.png</file>
++<file alias="official-hgss/213-0-2.png">followers/official-hgss/213-0-2.png</file>
++<file alias="official-hgss/214-0-2.png">followers/official-hgss/214-0-2.png</file>
++<file alias="official-hgss/214-0-1.png">followers/official-hgss/214-0-1.png</file>
++<file alias="official-hgss/215-0-2.png">followers/official-hgss/215-0-2.png</file>
++<file alias="official-hgss/216-0-2.png">followers/official-hgss/216-0-2.png</file>
++<file alias="official-hgss/217-0-2.png">followers/official-hgss/217-0-2.png</file>
++<file alias="official-hgss/218-0-2.png">followers/official-hgss/218-0-2.png</file>
++<file alias="official-hgss/219-0-2.png">followers/official-hgss/219-0-2.png</file>
++<file alias="official-hgss/220-0-2.png">followers/official-hgss/220-0-2.png</file>
++<file alias="official-hgss/221-0-2.png">followers/official-hgss/221-0-2.png</file>
++<file alias="official-hgss/222-0-2.png">followers/official-hgss/222-0-2.png</file>
++<file alias="official-hgss/223-0-2.png">followers/official-hgss/223-0-2.png</file>
++<file alias="official-hgss/224-0-2.png">followers/official-hgss/224-0-2.png</file>
++<file alias="official-hgss/225-0-2.png">followers/official-hgss/225-0-2.png</file>
++<file alias="official-hgss/226-0-2.png">followers/official-hgss/226-0-2.png</file>
++<file alias="official-hgss/227-0-2.png">followers/official-hgss/227-0-2.png</file>
++<file alias="official-hgss/228-0-2.png">followers/official-hgss/228-0-2.png</file>
++<file alias="official-hgss/229-0-2.png">followers/official-hgss/229-0-2.png</file>
++<file alias="official-hgss/230-0-2.png">followers/official-hgss/230-0-2.png</file>
++<file alias="official-hgss/231-0-2.png">followers/official-hgss/231-0-2.png</file>
++<file alias="official-hgss/232-0-2.png">followers/official-hgss/232-0-2.png</file>
++<file alias="official-hgss/233-0-2.png">followers/official-hgss/233-0-2.png</file>
++<file alias="official-hgss/234-0-2.png">followers/official-hgss/234-0-2.png</file>
++<file alias="official-hgss/235-0-2.png">followers/official-hgss/235-0-2.png</file>
++<file alias="official-hgss/236-0-2.png">followers/official-hgss/236-0-2.png</file>
++<file alias="official-hgss/237-0-2.png">followers/official-hgss/237-0-2.png</file>
++<file alias="official-hgss/238-0-2.png">followers/official-hgss/238-0-2.png</file>
++<file alias="official-hgss/239-0-2.png">followers/official-hgss/239-0-2.png</file>
++<file alias="official-hgss/240-0-2.png">followers/official-hgss/240-0-2.png</file>
++<file alias="official-hgss/241-0-2.png">followers/official-hgss/241-0-2.png</file>
++<file alias="official-hgss/242-0-2.png">followers/official-hgss/242-0-2.png</file>
++<file alias="official-hgss/243-0-2.png">followers/official-hgss/243-0-2.png</file>
++<file alias="official-hgss/244-0-2.png">followers/official-hgss/244-0-2.png</file>
++<file alias="official-hgss/245-0-2.png">followers/official-hgss/245-0-2.png</file>
++<file alias="official-hgss/246-0-2.png">followers/official-hgss/246-0-2.png</file>
++<file alias="official-hgss/247-0-2.png">followers/official-hgss/247-0-2.png</file>
++<file alias="official-hgss/248-0-2.png">followers/official-hgss/248-0-2.png</file>
++<file alias="official-hgss/249-0-2.png">followers/official-hgss/249-0-2.png</file>
++<file alias="official-hgss/250-0-2.png">followers/official-hgss/250-0-2.png</file>
++<file alias="official-hgss/251-0-2.png">followers/official-hgss/251-0-2.png</file>
++<file alias="official-hgss/252-0-2.png">followers/official-hgss/252-0-2.png</file>
++<file alias="official-hgss/253-0-2.png">followers/official-hgss/253-0-2.png</file>
++<file alias="official-hgss/254-0-2.png">followers/official-hgss/254-0-2.png</file>
++<file alias="official-hgss/255-0-2.png">followers/official-hgss/255-0-2.png</file>
++<file alias="official-hgss/256-0-2.png">followers/official-hgss/256-0-2.png</file>
++<file alias="official-hgss/257-0-2.png">followers/official-hgss/257-0-2.png</file>
++<file alias="official-hgss/258-0-2.png">followers/official-hgss/258-0-2.png</file>
++<file alias="official-hgss/259-0-2.png">followers/official-hgss/259-0-2.png</file>
++<file alias="official-hgss/260-0-2.png">followers/official-hgss/260-0-2.png</file>
++<file alias="official-hgss/261-0-2.png">followers/official-hgss/261-0-2.png</file>
++<file alias="official-hgss/262-0-2.png">followers/official-hgss/262-0-2.png</file>
++<file alias="official-hgss/263-0-2.png">followers/official-hgss/263-0-2.png</file>
++<file alias="official-hgss/264-0-2.png">followers/official-hgss/264-0-2.png</file>
++<file alias="official-hgss/265-0-2.png">followers/official-hgss/265-0-2.png</file>
++<file alias="official-hgss/266-0-2.png">followers/official-hgss/266-0-2.png</file>
++<file alias="official-hgss/267-0-2.png">followers/official-hgss/267-0-2.png</file>
++<file alias="official-hgss/268-0-2.png">followers/official-hgss/268-0-2.png</file>
++<file alias="official-hgss/269-0-2.png">followers/official-hgss/269-0-2.png</file>
++<file alias="official-hgss/270-0-2.png">followers/official-hgss/270-0-2.png</file>
++<file alias="official-hgss/271-0-2.png">followers/official-hgss/271-0-2.png</file>
++<file alias="official-hgss/272-0-2.png">followers/official-hgss/272-0-2.png</file>
++<file alias="official-hgss/273-0-2.png">followers/official-hgss/273-0-2.png</file>
++<file alias="official-hgss/274-0-2.png">followers/official-hgss/274-0-2.png</file>
++<file alias="official-hgss/275-0-2.png">followers/official-hgss/275-0-2.png</file>
++<file alias="official-hgss/276-0-2.png">followers/official-hgss/276-0-2.png</file>
++<file alias="official-hgss/277-0-2.png">followers/official-hgss/277-0-2.png</file>
++<file alias="official-hgss/278-0-2.png">followers/official-hgss/278-0-2.png</file>
++<file alias="official-hgss/279-0-2.png">followers/official-hgss/279-0-2.png</file>
++<file alias="official-hgss/280-0-2.png">followers/official-hgss/280-0-2.png</file>
++<file alias="official-hgss/281-0-2.png">followers/official-hgss/281-0-2.png</file>
++<file alias="official-hgss/282-0-2.png">followers/official-hgss/282-0-2.png</file>
++<file alias="official-hgss/283-0-2.png">followers/official-hgss/283-0-2.png</file>
++<file alias="official-hgss/284-0-2.png">followers/official-hgss/284-0-2.png</file>
++<file alias="official-hgss/285-0-2.png">followers/official-hgss/285-0-2.png</file>
++<file alias="official-hgss/286-0-2.png">followers/official-hgss/286-0-2.png</file>
++<file alias="official-hgss/287-0-2.png">followers/official-hgss/287-0-2.png</file>
++<file alias="official-hgss/288-0-2.png">followers/official-hgss/288-0-2.png</file>
++<file alias="official-hgss/289-0-2.png">followers/official-hgss/289-0-2.png</file>
++<file alias="official-hgss/290-0-2.png">followers/official-hgss/290-0-2.png</file>
++<file alias="official-hgss/291-0-2.png">followers/official-hgss/291-0-2.png</file>
++<file alias="official-hgss/292-0-2.png">followers/official-hgss/292-0-2.png</file>
++<file alias="official-hgss/293-0-2.png">followers/official-hgss/293-0-2.png</file>
++<file alias="official-hgss/294-0-2.png">followers/official-hgss/294-0-2.png</file>
++<file alias="official-hgss/295-0-2.png">followers/official-hgss/295-0-2.png</file>
++<file alias="official-hgss/296-0-2.png">followers/official-hgss/296-0-2.png</file>
++<file alias="official-hgss/297-0-2.png">followers/official-hgss/297-0-2.png</file>
++<file alias="official-hgss/298-0-2.png">followers/official-hgss/298-0-2.png</file>
++<file alias="official-hgss/299-0-2.png">followers/official-hgss/299-0-2.png</file>
++<file alias="official-hgss/300-0-2.png">followers/official-hgss/300-0-2.png</file>
++<file alias="official-hgss/301-0-2.png">followers/official-hgss/301-0-2.png</file>
++<file alias="official-hgss/302-0-2.png">followers/official-hgss/302-0-2.png</file>
++<file alias="official-hgss/303-0-2.png">followers/official-hgss/303-0-2.png</file>
++<file alias="official-hgss/304-0-2.png">followers/official-hgss/304-0-2.png</file>
++<file alias="official-hgss/305-0-2.png">followers/official-hgss/305-0-2.png</file>
++<file alias="official-hgss/306-0-2.png">followers/official-hgss/306-0-2.png</file>
++<file alias="official-hgss/307-0-2.png">followers/official-hgss/307-0-2.png</file>
++<file alias="official-hgss/308-0-2.png">followers/official-hgss/308-0-2.png</file>
++<file alias="official-hgss/309-0-2.png">followers/official-hgss/309-0-2.png</file>
++<file alias="official-hgss/310-0-2.png">followers/official-hgss/310-0-2.png</file>
++<file alias="official-hgss/311-0-2.png">followers/official-hgss/311-0-2.png</file>
++<file alias="official-hgss/312-0-2.png">followers/official-hgss/312-0-2.png</file>
++<file alias="official-hgss/313-0-2.png">followers/official-hgss/313-0-2.png</file>
++<file alias="official-hgss/314-0-2.png">followers/official-hgss/314-0-2.png</file>
++<file alias="official-hgss/315-0-2.png">followers/official-hgss/315-0-2.png</file>
++<file alias="official-hgss/316-0-2.png">followers/official-hgss/316-0-2.png</file>
++<file alias="official-hgss/317-0-2.png">followers/official-hgss/317-0-2.png</file>
++<file alias="official-hgss/318-0-2.png">followers/official-hgss/318-0-2.png</file>
++<file alias="official-hgss/319-0-2.png">followers/official-hgss/319-0-2.png</file>
++<file alias="official-hgss/320-0-2.png">followers/official-hgss/320-0-2.png</file>
++<file alias="official-hgss/321-0-2.png">followers/official-hgss/321-0-2.png</file>
++<file alias="official-hgss/322-0-2.png">followers/official-hgss/322-0-2.png</file>
++<file alias="official-hgss/323-0-2.png">followers/official-hgss/323-0-2.png</file>
++<file alias="official-hgss/324-0-2.png">followers/official-hgss/324-0-2.png</file>
++<file alias="official-hgss/325-0-2.png">followers/official-hgss/325-0-2.png</file>
++<file alias="official-hgss/326-0-2.png">followers/official-hgss/326-0-2.png</file>
++<file alias="official-hgss/327-0-2.png">followers/official-hgss/327-0-2.png</file>
++<file alias="official-hgss/328-0-2.png">followers/official-hgss/328-0-2.png</file>
++<file alias="official-hgss/329-0-2.png">followers/official-hgss/329-0-2.png</file>
++<file alias="official-hgss/330-0-2.png">followers/official-hgss/330-0-2.png</file>
++<file alias="official-hgss/331-0-2.png">followers/official-hgss/331-0-2.png</file>
++<file alias="official-hgss/332-0-2.png">followers/official-hgss/332-0-2.png</file>
++<file alias="official-hgss/333-0-2.png">followers/official-hgss/333-0-2.png</file>
++<file alias="official-hgss/334-0-2.png">followers/official-hgss/334-0-2.png</file>
++<file alias="official-hgss/335-0-2.png">followers/official-hgss/335-0-2.png</file>
++<file alias="official-hgss/336-0-2.png">followers/official-hgss/336-0-2.png</file>
++<file alias="official-hgss/337-0-2.png">followers/official-hgss/337-0-2.png</file>
++<file alias="official-hgss/338-0-2.png">followers/official-hgss/338-0-2.png</file>
++<file alias="official-hgss/339-0-2.png">followers/official-hgss/339-0-2.png</file>
++<file alias="official-hgss/340-0-2.png">followers/official-hgss/340-0-2.png</file>
++<file alias="official-hgss/341-0-2.png">followers/official-hgss/341-0-2.png</file>
++<file alias="official-hgss/342-0-2.png">followers/official-hgss/342-0-2.png</file>
++<file alias="official-hgss/343-0-2.png">followers/official-hgss/343-0-2.png</file>
++<file alias="official-hgss/344-0-2.png">followers/official-hgss/344-0-2.png</file>
++<file alias="official-hgss/345-0-2.png">followers/official-hgss/345-0-2.png</file>
++<file alias="official-hgss/346-0-2.png">followers/official-hgss/346-0-2.png</file>
++<file alias="official-hgss/347-0-2.png">followers/official-hgss/347-0-2.png</file>
++<file alias="official-hgss/348-0-2.png">followers/official-hgss/348-0-2.png</file>
++<file alias="official-hgss/349-0-2.png">followers/official-hgss/349-0-2.png</file>
++<file alias="official-hgss/350-0-2.png">followers/official-hgss/350-0-2.png</file>
++<file alias="official-hgss/351-0-2.png">followers/official-hgss/351-0-2.png</file>
++<file alias="official-hgss/352-0-2.png">followers/official-hgss/352-0-2.png</file>
++<file alias="official-hgss/353-0-2.png">followers/official-hgss/353-0-2.png</file>
++<file alias="official-hgss/354-0-2.png">followers/official-hgss/354-0-2.png</file>
++<file alias="official-hgss/355-0-2.png">followers/official-hgss/355-0-2.png</file>
++<file alias="official-hgss/356-0-2.png">followers/official-hgss/356-0-2.png</file>
++<file alias="official-hgss/357-0-2.png">followers/official-hgss/357-0-2.png</file>
++<file alias="official-hgss/358-0-2.png">followers/official-hgss/358-0-2.png</file>
++<file alias="official-hgss/359-0-2.png">followers/official-hgss/359-0-2.png</file>
++<file alias="official-hgss/360-0-2.png">followers/official-hgss/360-0-2.png</file>
++<file alias="official-hgss/361-0-2.png">followers/official-hgss/361-0-2.png</file>
++<file alias="official-hgss/362-0-2.png">followers/official-hgss/362-0-2.png</file>
++<file alias="official-hgss/363-0-2.png">followers/official-hgss/363-0-2.png</file>
++<file alias="official-hgss/364-0-2.png">followers/official-hgss/364-0-2.png</file>
++<file alias="official-hgss/365-0-2.png">followers/official-hgss/365-0-2.png</file>
++<file alias="official-hgss/366-0-2.png">followers/official-hgss/366-0-2.png</file>
++<file alias="official-hgss/367-0-2.png">followers/official-hgss/367-0-2.png</file>
++<file alias="official-hgss/368-0-2.png">followers/official-hgss/368-0-2.png</file>
++<file alias="official-hgss/369-0-2.png">followers/official-hgss/369-0-2.png</file>
++<file alias="official-hgss/370-0-2.png">followers/official-hgss/370-0-2.png</file>
++<file alias="official-hgss/371-0-2.png">followers/official-hgss/371-0-2.png</file>
++<file alias="official-hgss/372-0-2.png">followers/official-hgss/372-0-2.png</file>
++<file alias="official-hgss/373-0-2.png">followers/official-hgss/373-0-2.png</file>
++<file alias="official-hgss/374-0-2.png">followers/official-hgss/374-0-2.png</file>
++<file alias="official-hgss/375-0-2.png">followers/official-hgss/375-0-2.png</file>
++<file alias="official-hgss/376-0-2.png">followers/official-hgss/376-0-2.png</file>
++<file alias="official-hgss/377-0-2.png">followers/official-hgss/377-0-2.png</file>
++<file alias="official-hgss/378-0-2.png">followers/official-hgss/378-0-2.png</file>
++<file alias="official-hgss/379-0-2.png">followers/official-hgss/379-0-2.png</file>
++<file alias="official-hgss/380-0-2.png">followers/official-hgss/380-0-2.png</file>
++<file alias="official-hgss/381-0-2.png">followers/official-hgss/381-0-2.png</file>
++<file alias="official-hgss/382-0-2.png">followers/official-hgss/382-0-2.png</file>
++<file alias="official-hgss/383-0-2.png">followers/official-hgss/383-0-2.png</file>
++<file alias="official-hgss/384-0-2.png">followers/official-hgss/384-0-2.png</file>
++<file alias="official-hgss/385-0-2.png">followers/official-hgss/385-0-2.png</file>
++<file alias="official-hgss/386-0-2.png">followers/official-hgss/386-0-2.png</file>
++<file alias="official-hgss/386-1-2.png">followers/official-hgss/386-1-2.png</file>
++<file alias="official-hgss/386-2-2.png">followers/official-hgss/386-2-2.png</file>
++<file alias="official-hgss/386-3-2.png">followers/official-hgss/386-3-2.png</file>
++<file alias="official-hgss/387-0-2.png">followers/official-hgss/387-0-2.png</file>
++<file alias="official-hgss/388-0-2.png">followers/official-hgss/388-0-2.png</file>
++<file alias="official-hgss/389-0-2.png">followers/official-hgss/389-0-2.png</file>
++<file alias="official-hgss/390-0-2.png">followers/official-hgss/390-0-2.png</file>
++<file alias="official-hgss/391-0-2.png">followers/official-hgss/391-0-2.png</file>
++<file alias="official-hgss/392-0-2.png">followers/official-hgss/392-0-2.png</file>
++<file alias="official-hgss/393-0-2.png">followers/official-hgss/393-0-2.png</file>
++<file alias="official-hgss/394-0-2.png">followers/official-hgss/394-0-2.png</file>
++<file alias="official-hgss/395-0-2.png">followers/official-hgss/395-0-2.png</file>
++<file alias="official-hgss/396-0-2.png">followers/official-hgss/396-0-2.png</file>
++<file alias="official-hgss/397-0-2.png">followers/official-hgss/397-0-2.png</file>
++<file alias="official-hgss/398-0-2.png">followers/official-hgss/398-0-2.png</file>
++<file alias="official-hgss/399-0-2.png">followers/official-hgss/399-0-2.png</file>
++<file alias="official-hgss/400-0-2.png">followers/official-hgss/400-0-2.png</file>
++<file alias="official-hgss/401-0-2.png">followers/official-hgss/401-0-2.png</file>
++<file alias="official-hgss/402-0-2.png">followers/official-hgss/402-0-2.png</file>
++<file alias="official-hgss/403-0-2.png">followers/official-hgss/403-0-2.png</file>
++<file alias="official-hgss/404-0-2.png">followers/official-hgss/404-0-2.png</file>
++<file alias="official-hgss/405-0-2.png">followers/official-hgss/405-0-2.png</file>
++<file alias="official-hgss/406-0-2.png">followers/official-hgss/406-0-2.png</file>
++<file alias="official-hgss/407-0-2.png">followers/official-hgss/407-0-2.png</file>
++<file alias="official-hgss/408-0-2.png">followers/official-hgss/408-0-2.png</file>
++<file alias="official-hgss/409-0-2.png">followers/official-hgss/409-0-2.png</file>
++<file alias="official-hgss/410-0-2.png">followers/official-hgss/410-0-2.png</file>
++<file alias="official-hgss/411-0-2.png">followers/official-hgss/411-0-2.png</file>
++<file alias="official-hgss/412-0-2.png">followers/official-hgss/412-0-2.png</file>
++<file alias="official-hgss/412-1-2.png">followers/official-hgss/412-1-2.png</file>
++<file alias="official-hgss/412-2-2.png">followers/official-hgss/412-2-2.png</file>
++<file alias="official-hgss/413-0-2.png">followers/official-hgss/413-0-2.png</file>
++<file alias="official-hgss/413-1-2.png">followers/official-hgss/413-1-2.png</file>
++<file alias="official-hgss/413-2-2.png">followers/official-hgss/413-2-2.png</file>
++<file alias="official-hgss/414-0-2.png">followers/official-hgss/414-0-2.png</file>
++<file alias="official-hgss/415-0-2.png">followers/official-hgss/415-0-2.png</file>
++<file alias="official-hgss/415-0-1.png">followers/official-hgss/415-0-1.png</file>
++<file alias="official-hgss/416-0-2.png">followers/official-hgss/416-0-2.png</file>
++<file alias="official-hgss/417-0-2.png">followers/official-hgss/417-0-2.png</file>
++<file alias="official-hgss/418-0-2.png">followers/official-hgss/418-0-2.png</file>
++<file alias="official-hgss/419-0-2.png">followers/official-hgss/419-0-2.png</file>
++<file alias="official-hgss/420-0-2.png">followers/official-hgss/420-0-2.png</file>
++<file alias="official-hgss/421-0-2.png">followers/official-hgss/421-0-2.png</file>
++<file alias="official-hgss/422-0-2.png">followers/official-hgss/422-0-2.png</file>
++<file alias="official-hgss/422-1-2.png">followers/official-hgss/422-1-2.png</file>
++<file alias="official-hgss/423-0-2.png">followers/official-hgss/423-0-2.png</file>
++<file alias="official-hgss/423-1-2.png">followers/official-hgss/423-1-2.png</file>
++<file alias="official-hgss/424-0-2.png">followers/official-hgss/424-0-2.png</file>
++<file alias="official-hgss/425-0-2.png">followers/official-hgss/425-0-2.png</file>
++<file alias="official-hgss/426-0-2.png">followers/official-hgss/426-0-2.png</file>
++<file alias="official-hgss/427-0-2.png">followers/official-hgss/427-0-2.png</file>
++<file alias="official-hgss/428-0-2.png">followers/official-hgss/428-0-2.png</file>
++<file alias="official-hgss/429-0-2.png">followers/official-hgss/429-0-2.png</file>
++<file alias="official-hgss/430-0-2.png">followers/official-hgss/430-0-2.png</file>
++<file alias="official-hgss/431-0-2.png">followers/official-hgss/431-0-2.png</file>
++<file alias="official-hgss/432-0-2.png">followers/official-hgss/432-0-2.png</file>
++<file alias="official-hgss/433-0-2.png">followers/official-hgss/433-0-2.png</file>
++<file alias="official-hgss/434-0-2.png">followers/official-hgss/434-0-2.png</file>
++<file alias="official-hgss/435-0-2.png">followers/official-hgss/435-0-2.png</file>
++<file alias="official-hgss/436-0-2.png">followers/official-hgss/436-0-2.png</file>
++<file alias="official-hgss/437-0-2.png">followers/official-hgss/437-0-2.png</file>
++<file alias="official-hgss/438-0-2.png">followers/official-hgss/438-0-2.png</file>
++<file alias="official-hgss/439-0-2.png">followers/official-hgss/439-0-2.png</file>
++<file alias="official-hgss/440-0-2.png">followers/official-hgss/440-0-2.png</file>
++<file alias="official-hgss/441-0-2.png">followers/official-hgss/441-0-2.png</file>
++<file alias="official-hgss/442-0-2.png">followers/official-hgss/442-0-2.png</file>
++<file alias="official-hgss/443-0-2.png">followers/official-hgss/443-0-2.png</file>
++<file alias="official-hgss/444-0-2.png">followers/official-hgss/444-0-2.png</file>
++<file alias="official-hgss/445-0-2.png">followers/official-hgss/445-0-2.png</file>
++<file alias="official-hgss/446-0-2.png">followers/official-hgss/446-0-2.png</file>
++<file alias="official-hgss/447-0-2.png">followers/official-hgss/447-0-2.png</file>
++<file alias="official-hgss/448-0-2.png">followers/official-hgss/448-0-2.png</file>
++<file alias="official-hgss/449-0-2.png">followers/official-hgss/449-0-2.png</file>
++<file alias="official-hgss/449-0-1.png">followers/official-hgss/449-0-1.png</file>
++<file alias="official-hgss/450-0-2.png">followers/official-hgss/450-0-2.png</file>
++<file alias="official-hgss/450-0-1.png">followers/official-hgss/450-0-1.png</file>
++<file alias="official-hgss/451-0-2.png">followers/official-hgss/451-0-2.png</file>
++<file alias="official-hgss/452-0-2.png">followers/official-hgss/452-0-2.png</file>
++<file alias="official-hgss/453-0-2.png">followers/official-hgss/453-0-2.png</file>
++<file alias="official-hgss/454-0-2.png">followers/official-hgss/454-0-2.png</file>
++<file alias="official-hgss/455-0-2.png">followers/official-hgss/455-0-2.png</file>
++<file alias="official-hgss/456-0-2.png">followers/official-hgss/456-0-2.png</file>
++<file alias="official-hgss/457-0-2.png">followers/official-hgss/457-0-2.png</file>
++<file alias="official-hgss/458-0-2.png">followers/official-hgss/458-0-2.png</file>
++<file alias="official-hgss/459-0-2.png">followers/official-hgss/459-0-2.png</file>
++<file alias="official-hgss/460-0-2.png">followers/official-hgss/460-0-2.png</file>
++<file alias="official-hgss/461-0-2.png">followers/official-hgss/461-0-2.png</file>
++<file alias="official-hgss/462-0-2.png">followers/official-hgss/462-0-2.png</file>
++<file alias="official-hgss/463-0-2.png">followers/official-hgss/463-0-2.png</file>
++<file alias="official-hgss/464-0-2.png">followers/official-hgss/464-0-2.png</file>
++<file alias="official-hgss/465-0-2.png">followers/official-hgss/465-0-2.png</file>
++<file alias="official-hgss/466-0-2.png">followers/official-hgss/466-0-2.png</file>
++<file alias="official-hgss/467-0-2.png">followers/official-hgss/467-0-2.png</file>
++<file alias="official-hgss/468-0-2.png">followers/official-hgss/468-0-2.png</file>
++<file alias="official-hgss/469-0-2.png">followers/official-hgss/469-0-2.png</file>
++<file alias="official-hgss/470-0-2.png">followers/official-hgss/470-0-2.png</file>
++<file alias="official-hgss/471-0-2.png">followers/official-hgss/471-0-2.png</file>
++<file alias="official-hgss/472-0-2.png">followers/official-hgss/472-0-2.png</file>
++<file alias="official-hgss/473-0-2.png">followers/official-hgss/473-0-2.png</file>
++<file alias="official-hgss/474-0-2.png">followers/official-hgss/474-0-2.png</file>
++<file alias="official-hgss/475-0-2.png">followers/official-hgss/475-0-2.png</file>
++<file alias="official-hgss/476-0-2.png">followers/official-hgss/476-0-2.png</file>
++<file alias="official-hgss/477-0-2.png">followers/official-hgss/477-0-2.png</file>
++<file alias="official-hgss/478-0-2.png">followers/official-hgss/478-0-2.png</file>
++<file alias="official-hgss/479-0-2.png">followers/official-hgss/479-0-2.png</file>
++<file alias="official-hgss/479-1-2.png">followers/official-hgss/479-1-2.png</file>
++<file alias="official-hgss/479-2-2.png">followers/official-hgss/479-2-2.png</file>
++<file alias="official-hgss/479-3-2.png">followers/official-hgss/479-3-2.png</file>
++<file alias="official-hgss/479-4-2.png">followers/official-hgss/479-4-2.png</file>
++<file alias="official-hgss/479-5-2.png">followers/official-hgss/479-5-2.png</file>
++<file alias="official-hgss/480-0-2.png">followers/official-hgss/480-0-2.png</file>
++<file alias="official-hgss/481-0-2.png">followers/official-hgss/481-0-2.png</file>
++<file alias="official-hgss/482-0-2.png">followers/official-hgss/482-0-2.png</file>
++<file alias="official-hgss/483-0-2.png">followers/official-hgss/483-0-2.png</file>
++<file alias="official-hgss/484-0-2.png">followers/official-hgss/484-0-2.png</file>
++<file alias="official-hgss/485-0-2.png">followers/official-hgss/485-0-2.png</file>
++<file alias="official-hgss/486-0-2.png">followers/official-hgss/486-0-2.png</file>
++<file alias="official-hgss/487-0-2.png">followers/official-hgss/487-0-2.png</file>
++<file alias="official-hgss/487-1-2.png">followers/official-hgss/487-1-2.png</file>
++<file alias="official-hgss/488-0-2.png">followers/official-hgss/488-0-2.png</file>
++<file alias="official-hgss/489-0-2.png">followers/official-hgss/489-0-2.png</file>
++<file alias="official-hgss/490-0-2.png">followers/official-hgss/490-0-2.png</file>
++<file alias="official-hgss/491-0-2.png">followers/official-hgss/491-0-2.png</file>
++<file alias="official-hgss/492-0-2.png">followers/official-hgss/492-0-2.png</file>
++<file alias="official-hgss/492-1-2.png">followers/official-hgss/492-1-2.png</file>
++<file alias="official-hgss/493-0-2.png">followers/official-hgss/493-0-2.png</file>
  </qresource></RCC>
 --- /dev/null
 +++ b/source/melonDS/res/mega_animations.qrc
@@ -773,8 +1318,8 @@
  1 VERSIONINFO
 -FILEVERSION 1,0,2,0
 -PRODUCTVERSION 1,0,2,0
-+FILEVERSION 2,0,22,0
-+PRODUCTVERSION 2,0,22,0
++FILEVERSION 2,0,23,0
++PRODUCTVERSION 2,0,23,0
  FILETYPE VFT_APP
  {
    BLOCK "StringFileInfo"
@@ -783,7 +1328,7 @@
  		{
  			VALUE "CompanyName", "Melon Factory of Kuribo64"
 -			VALUE "FileVersion", "1.0.2"
-+			VALUE "FileVersion", "2.0.22"
++			VALUE "FileVersion", "2.0.23"
  			VALUE "FileDescription", "Unova Together - modified melonDS 1.1"
  			VALUE "InternalName", "SDnolem"
  			VALUE "LegalCopyright", "2016-2025 melonDS team; 2026 mvq1303 (Unova Together contributions)"
@@ -791,7 +1336,7 @@
  			VALUE "OriginalFilename", "melonDS.exe"
  			VALUE "ProductName", "Unova Together"
 -			VALUE "ProductVersion", "1.0.2"
-+			VALUE "ProductVersion", "2.0.22"
++			VALUE "ProductVersion", "2.0.23"
 +			VALUE "UnovaShopOverlaySourceSHA256", "${UNOVA_SHOP_OVERLAY_SOURCE_SHA256}"
  		}
  	}
@@ -8759,7 +9304,7 @@
 -    "<a href=\"https://github.com/WhatWasMissing/Unova-Together\">GitHub: WhatWasMissing</a>"
 -    "<br>Playtesters: maxback221 · randomitem19";
 +// Keep the multiplayer build identifier aligned with each packaged release.
-+inline constexpr char Version[] = "2.0.22";
++inline constexpr char Version[] = "2.0.23";
 +
 +inline QString ReleaseVersion()
 +{
@@ -8861,7 +9406,7 @@
      QList<QImage> source;
      for(unsigned frame=0;frame<count;++frame) {
          const auto param=tex.word(info+4+frame*8);
-@@ -152,36 +152,30 @@
+@@ -152,36 +152,52 @@
              const auto color=tex.half(palette+index*2);
              if(index || !(param&(1u<<29))) image.setPixel(x,y,qRgba((color&31)*255/31,((color>>5)&31)*255/31,((color>>10)&31)*255/31,255));
          }
@@ -8870,8 +9415,7 @@
 -        for(int y=0;y<image.height();++y) for(int x=0;x<image.width();++x)
 -            canvas.setPixel((32-image.width())/2+x,32-image.height()+y,image.pixel(x,y));
 -        source.append(canvas);
-+        source.append(image);
-     }
+-    }
 -    // Several native floating/legless sprites repeat the idle pose. Give their
 -    // second movement pose a one-pixel lift without redrawing or clipping art.
 -    for(int direction=0;direction<source.size()/2;++direction) {
@@ -8890,24 +9434,51 @@
 -        frames.append(image);
 -    }
 -    return frames;
-+    return NormalizeFollowerSpriteFrames(source);
- }
- 
- }
+-}
+-
+-}
 -QVariantMap LoadLocalPokemonSprites(const unsigned char* rom,std::size_t size,unsigned species,unsigned form) {
++        source.append(image);
++    }
++    return NormalizeFollowerSpriteFrames(source);
++}
++
++}
 +QVariantMap LoadLocalPokemonSprites(const unsigned char* rom,std::size_t size,unsigned species,unsigned form,unsigned gender,bool shiny) {
      try {
 -        if(!rom || size<0x200 || species<1 || species>649) throw std::runtime_error("Invalid follower species");
 +        if(!rom || size<0x200 || species<1 || species>649 || form>31 || gender>2) throw std::runtime_error("Invalid follower species or appearance");
++        // These sheets contain normal art only. Never resolve a shiny through
++        // this branch, or substitute a base form for an uncovered alternate.
++        if(!shiny) {
++            QString art=QString(":/followers/official-hgss/%1-%2-%3.png").arg(species).arg(form).arg(gender);
++            const bool authoredFemale=gender==1 && QFile::exists(QString(":/followers/variants/%1-%2-1.btx").arg(species).arg(form));
++            if(!QFile::exists(art) && !authoredFemale)
++                art=QString(":/followers/official-hgss/%1-%2-2.png").arg(species).arg(form);
++            if(QFile::exists(art)) {
++                const QImage atlas(art);
++                const int side=atlas.width(),count=side?atlas.height()/side:0;
++                if(!atlas.isNull() && (side==32 || side==64) && atlas.height()==count*side && (count==6 || count==8)) {
++                    QList<QImage> source;
++                    for(int frame=0;frame<count;++frame)
++                        source.append(atlas.copy(0,frame*side,side,side).convertToFormat(QImage::Format_ARGB32));
++                    const auto images=NormalizeFollowerSpriteFrames(source);
++                    if(images.size()==12) {
++                        QVariantList frames;for(const auto& image:images) frames.append(QVariant::fromValue(image));
++                        return {{"frames",frames},{"walking",true},{"shiny",false},{"formSupported",true},
++                            {"genderVariant",gender==1 && authoredFemale},{"status","HGSS directional follower"}};
++                    }
++                }
++                // A corrupt override must not remove the existing fallback.
++            }
++        }
 +        QString variant=QString(":/followers/variants/%1-%2-%3.btx").arg(species).arg(form).arg(gender);
 +        const bool exactGender=QFile::exists(variant);
 +        if(!exactGender) variant=QString(":/followers/variants/%1-%2-2.btx").arg(species).arg(form);
 +        bool exactForm=QFile::exists(variant);
 +        if(!exactForm) variant=QString(":/followers/variants/%1-0-2.btx").arg(species);
-+        // Keep normal/shiny/gender variants on the same directional artwork.
-+        // Switching between ROM art and variant art changes silhouettes and
-+        // foot anchors even when only the palette should change. Unknown normal
-+        // forms retain the native ROM path rather than silently using base art.
++        // Shiny artwork and forms absent from the normal HGSS sheets retain
++        // their authored directional variants and original palette selection.
 +        if(QFile::exists(variant) && (exactForm || shiny)) {
 +            QFile asset(variant);if(!asset.open(QIODevice::ReadOnly)) throw std::runtime_error("Follower variant unavailable");
 +            const auto bytes=asset.readAll();const auto images=followerTextures({reinterpret_cast<const unsigned char*>(bytes.constData()),std::size_t(bytes.size())},shiny);
