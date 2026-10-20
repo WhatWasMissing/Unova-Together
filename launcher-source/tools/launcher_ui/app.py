@@ -20,7 +20,7 @@ class Launcher(tk.Tk):
         super().__init__()
         self.home=Path(home).resolve();self.root=updates.active_root(self.home,allow_missing=True);self.testing=testing
         self.config_path=self.home/'.launcher-test.json' if testing else Path(os.environ.get('APPDATA',Path.home()))/'UnovaTogether/launcher.json'
-        self.title('Pokemon Together');self.geometry('1040x760');self.minsize(860,660);self.configure(bg=C['background'])
+        self.title('Pokemon Together');self.geometry('1040x760');self.minsize(THEME['layout']['minWidth'],THEME['layout']['minHeight']);self.configure(bg=C['background'])
         try:self.iconbitmap(str(HERE/'assets/launcher.ico'))
         except tk.TclError:pass
         self.messages=queue.Queue();self.busy=False;self.release=None;self.game=None;self.operation='';self.guides_busy=False
@@ -46,27 +46,34 @@ class Launcher(tk.Tk):
 
     def _build(self):
         style=ttk.Style(self);style.theme_use('clam')
-        style.configure('TScrollbar',background=C['border'],troughcolor=C['background'],arrowcolor=C['muted'],borderwidth=0)
-        style.configure('TProgressbar',background=C['primary'],troughcolor=C['selection'],borderwidth=0)
-        style.configure('TCheckbutton',background=C['background'],foreground=C['text'],font=(F['body'],11))
-        style.map('TCheckbutton',background=[('active',C['selection'])])
+        style.configure('TScrollbar',background=C['border'],troughcolor=C['background'],arrowcolor=C['muted'],borderwidth=0,arrowsize=13)
+        style.map('TScrollbar',background=[('active',C['muted'])])
+        style.configure('TProgressbar',background=C['primary'],troughcolor=C['selection'],borderwidth=0,thickness=9)
+        style.configure('TCheckbutton',background=C['surface'],foreground=C['text'],font=(F['body'],11),padding=(3,5))
+        style.map('TCheckbutton',background=[('active',C['surface'])],foreground=[('disabled',C['disabledText'])])
+        style.configure('TCombobox',fieldbackground=C['surface'],background=C['surface'],foreground=C['text'],arrowcolor=C['primary'],bordercolor=C['border'],lightcolor=C['border'],darkcolor=C['border'],padding=7)
+        style.map('TCombobox',fieldbackground=[('readonly',C['surface']),('disabled',C['disabled'])],foreground=[('readonly',C['text']),('disabled',C['disabledText'])])
+        style.configure('TEntry',fieldbackground=C['surface'],foreground=C['text'],padding=7)
+        style.map('TEntry',fieldbackground=[('disabled',C['disabled'])],foreground=[('disabled',C['disabledText'])])
         self.nav_cursor=tk.PhotoImage(file=HERE/'assets/menu-cursor.png');self.images.append(self.nav_cursor)
-        sidebar=tk.Frame(self,bg=C['nav'],width=THEME['layout']['sidebar']);sidebar.pack(side='left',fill='y');sidebar.pack_propagate(False)
-        emblem(sidebar,size=48).pack(anchor='w',padx=23,pady=(16,8))
-        label(sidebar,'POKEMON\nTOGETHER',size=18,bold=True,color=C['surface'],bg=C['nav'],role='display',justify='left').pack(anchor='w',padx=24)
-        self.mod_caption=label(sidebar,'MULTIPLAYER MODS',size=9,color=C['navText'],bg=C['nav'],wraplength=150)
-        self.mod_caption.pack(anchor='w',padx=24,pady=(12,8))
+        sidebar=tk.Frame(self,bg=C['nav'],width=THEME['layout']['sidebar']);self.sidebar=sidebar;sidebar.pack(side='left',fill='y');sidebar.pack_propagate(False)
+        emblem(sidebar,size=42).pack(anchor='w',padx=22,pady=(10,4))
+        label(sidebar,'POKEMON\nTOGETHER',size=16,bold=True,color=C['surface'],bg=C['nav'],role='display',justify='left').pack(anchor='w',padx=22)
+        self.mod_caption=label(sidebar,'MULTIPLAYER MODS',size=9,bold=True,color=C['navText'],bg=C['nav'],wraplength=170)
+        self.mod_caption.pack(anchor='w',padx=22,pady=(5,4))
+        self.nav_sections={name:label(sidebar,name,size=8,bold=True,color=C['navText'],bg=C['nav'],role='utility') for name in ('MOD LIBRARY','PLAY','MANAGE','EXPERIMENTAL')}
         for name in ('Library','Play','Co-op','Features','Profiles','News','Updates','Settings','Tools','Setup','XPlay','XCoop','XGuides'):
             self.nav[name]=button(sidebar,game_routes.PAGE_LABELS.get(name,name),lambda n=name:self.show_page(n),kind='nav',anchor='w')
-            self.nav[name].pack(fill='x',padx=12,pady=3)
-        credit=tk.Frame(sidebar,bg=C['nav']);credit.pack(side='bottom',fill='x',padx=24,pady=16)
+        credit=tk.Frame(sidebar,bg=C['nav']);credit.pack(side='bottom',fill='x',padx=20,pady=4)
         label(credit,'Made by mvq1303',size=10,color=C['surface'],bg=C['nav']).pack(anchor='w')
         label(credit,'WhatWasMissing\nBuilt on melonDS / Azahar',size=9,color=C['navText'],bg=C['nav'],justify='left').pack(anchor='w',pady=(5,0))
         shell=tk.Frame(self,bg=C['background']);shell.pack(side='right',fill='both',expand=True)
         footer=tk.Frame(shell,bg=C['surface'],height=48,highlightbackground=C['border'],highlightthickness=1);footer.pack(side='bottom',fill='x');footer.pack_propagate(False)
         self.music_button=button(footer,'Music: off',self._toggle_music);self.music_button.pack(side='right',padx=4)
         self.footer_version=label(footer,self._version_text(),size=9,color=C['muted'],bg=C['surface'],role='utility');self.footer_version.pack(side='right',padx=18)
-        self.footer_status=label(footer,size=9,bg=C['surface'],textvariable=self.status);self.footer_status.pack(side='left',fill='x',expand=True,padx=18)
+        self.footer_status=label(footer,size=10,bg=C['surface'],textvariable=self.status);self.footer_status.pack(side='left',fill='x',expand=True,padx=18)
+        self.footer_activity=ttk.Progressbar(footer,mode='indeterminate',length=58)
+        self._activity_running=False
         credits_bar=tk.Frame(shell,bg=C['surface'],highlightbackground=C['border'],highlightthickness=1)
         credits_bar.pack(side='bottom',fill='x')
         self.playtester_credit=label(credits_bar,'Playtesters: maxback221 · randomitem19',size=10,color=C['nav'],bg=C['surface'],justify='left')
@@ -82,11 +89,25 @@ class Launcher(tk.Tk):
         self._research_coop_page(self.pages['XCoop'].content)
         self._research_guides_page(self.pages['XGuides'].content)
         self.deck.bind('<Configure>',lambda e:self.footer_status.configure(wraplength=max(220,e.width-175)))
+        self.bind('<Configure>',self._responsive_layout,add='+')
+
+    def _responsive_layout(self,event):
+        if event.widget is not self:return
+        compact=event.width<980
+        if getattr(self,'_compact_layout',None)==compact:return
+        self._compact_layout=compact
+        layout=THEME['layout']
+        self.sidebar.configure(width=layout['sidebarCompact'] if compact else layout['sidebar'])
+        padding=layout['paddingCompact'] if compact else layout['padding']
+        self.deck.pack_configure(padx=padding,pady=padding)
 
     def _heading(self,parent,kicker,title,subtitle):
-        label(parent,title,size=25,bold=True,role='display').pack(anchor='w',pady=(0,0 if subtitle else 16))
-        note=label(parent,subtitle,size=10,color=C['muted'],wraplength=700,justify='left');note.pack(anchor='w',pady=(7,16)) if subtitle else None
-        parent.bind('<Configure>',lambda e:note.configure(wraplength=max(280,e.width-12)),add='+')
+        if kicker:label(parent,kicker.upper(),size=9,bold=True,color=C['primary'],role='utility').pack(anchor='w',pady=(0,5))
+        label(parent,title,size=25,bold=True,role='display').pack(anchor='w',pady=(0,0 if subtitle else 14))
+        if subtitle:
+            note=label(parent,subtitle,size=10,color=C['muted'],wraplength=700,justify='left')
+            note.pack(anchor='w',pady=(5,16))
+            parent.bind('<Configure>',lambda e,w=note:w.configure(wraplength=max(260,e.width-12)),add='+')
 
     def _library_page(self,parent):
         self._heading(parent,'LIBRARY','Mod library','')
@@ -256,7 +277,7 @@ class Launcher(tk.Tk):
         context=game_routes.MODS[self.active_mod]['name']+' · ' if self.active_mod and name!='Library' else ''
         self.title('Pokemon Together · '+context+game_routes.PAGE_LABELS.get(name,name))
         if isinstance(self.pages[name],ScrollPage):self.pages[name].canvas.yview_moveto(0)
-        for key,b in self.nav.items():b.configure(bg=C['selection'] if key==name else C['nav'],fg=C['text'] if key==name else C['navText'],highlightbackground=C['selection'] if key==name else C['nav'],image=self.nav_cursor if key==name else '',compound='left')
+        self._highlight_navigation(name)
 
     def _wheel(self,event):
         page=self.pages.get(self.page_name);widget=event.widget
@@ -733,7 +754,15 @@ class Launcher(tk.Tk):
 
     def _settings_page(self,parent):
         self._heading(parent,'MAKE IT YOURS','Settings','Applies next launch.')
+        self.settings_sections={}
+        shortcuts=tk.Frame(parent,bg=C['background']);shortcuts.pack(fill='x',pady=(0,14))
+        self.settings_jumps={}
+        for title,section in (('General','General'),('Co-op','Co-op'),('Followers','Followers'),('Appearance','Appearance'),('Cheats','Cheats')):
+            control=button(shortcuts,title,lambda key=section:self._jump_settings(key))
+            control.pack(side='left',fill='x',expand=True,padx=(0,6))
+            self.settings_jumps[section]=control
         general=card(parent);general.pack(fill='x',pady=(0,18))
+        self.settings_sections['General']=general
         box=tk.Frame(general,bg=C['surface']);box.pack(fill='x',padx=18,pady=16)
         label(box,'LAUNCHER & GAME',size=9,bold=True,bg=C['surface']).pack(anchor='w',pady=(0,10))
         ttk.Checkbutton(box,text='Check for updates on startup',variable=self.auto,command=self._save).pack(anchor='w',pady=4)
@@ -756,6 +785,7 @@ class Launcher(tk.Tk):
         button(box,'All emulator settings',self._all_settings).pack(anchor='w',pady=(12,0))
         label(box,'Controls, display, audio and more.',size=9,color=C['muted'],bg=C['surface'],wraplength=620,justify='left').pack(anchor='w',pady=8)
         coop_test=card(parent);coop_test.pack(fill='x',pady=(0,18))
+        self.settings_sections['Co-op']=coop_test
         coop_test_box=tk.Frame(coop_test,bg=C['surface']);coop_test_box.pack(fill='x',padx=18,pady=16)
         label(coop_test_box,'CO-OP TESTING',size=9,bold=True,bg=C['surface']).pack(anchor='w',pady=(0,8))
         self.coop_exp_suppression=tk.BooleanVar(value=values.get('coop_exp_suppression',True))
@@ -763,6 +793,7 @@ class Launcher(tk.Tk):
             command=lambda:self._preference('coop_exp_suppression',self.coop_exp_suppression.get())).pack(anchor='w',pady=4)
         label(coop_test_box,'Skips EXP, level-up and move-learning rewards during co-op test/story battles. On by default; turn it off to test normal EXP rewards. Applies on the next launch.',size=9,color=C['muted'],bg=C['surface'],wraplength=620,justify='left').pack(anchor='w',pady=(2,0))
         followers=card(parent);followers.pack(fill='x',pady=(0,18))
+        self.settings_sections['Followers']=followers
         follower_box=tk.Frame(followers,bg=C['surface']);follower_box.pack(fill='x',padx=18,pady=16)
         label(follower_box,'FOLLOWING POKÉMON',size=9,bold=True,bg=C['surface']).pack(anchor='w',pady=(0,8))
         self.companion_interactions=tk.BooleanVar(value=values['companion_interactions'])
@@ -775,6 +806,7 @@ class Launcher(tk.Tk):
             command=lambda:self._preference('reduced_follower_motion',self.reduced_follower_motion.get())).pack(anchor='w',pady=(8,4))
         label(follower_box,'Keeps reaction symbols; disables decorative bobbing and reaction movement.',size=9,color=C['muted'],bg=C['surface'],wraplength=620,justify='left').pack(anchor='w')
         appearance=card(parent);appearance.pack(fill='x',pady=(0,18))
+        self.settings_sections['Appearance']=appearance
         appearance_box=tk.Frame(appearance,bg=C['surface']);appearance_box.pack(fill='x',padx=18,pady=16)
         label(appearance_box,'PLAYER APPEARANCE',size=9,bold=True,bg=C['surface']).pack(anchor='w')
         self.player_model_label=tk.StringVar()
@@ -783,6 +815,7 @@ class Launcher(tk.Tk):
         button(appearance_box,'Choose a field character',self._choose_player_model).pack(anchor='w',pady=(6,8))
         label(appearance_box,'Choose from animated characters stored in your ROM. This changes your walking character; bike and surf forms keep their normal game animations. Applies next launch.',size=9,color=C['muted'],bg=C['surface'],wraplength=620,justify='left').pack(anchor='w')
         cheats=card(parent);cheats.pack(fill='x')
+        self.settings_sections['Cheats']=cheats
         box=tk.Frame(cheats,bg=C['surface']);box.pack(fill='x',padx=18,pady=16)
         label(box,'OPTIONAL CHEATS',size=9,bold=True,bg=C['surface']).pack(anchor='w')
         self.cheat_status=label(box,'Choose a ROM on Play to check compatibility.',size=10,color=C['muted'],bg=C['surface'],wraplength=620,justify='left')
@@ -797,6 +830,14 @@ class Launcher(tk.Tk):
         label(box,'Disable cheats after use. Saved changes are permanent.',
             size=9,color=C['muted'],bg=C['surface'],wraplength=620,justify='left').pack(anchor='w',pady=(15,8))
         button(box,'Code sources & licenses',self.cheat_sources).pack(anchor='w')
+
+    def _jump_settings(self,section):
+        target=self.settings_sections.get(section)
+        page=self.pages.get('Settings')
+        if target is None or not isinstance(page,ScrollPage):return
+        page.canvas.update_idletasks()
+        height=max(1,page.content.winfo_height())
+        page.canvas.yview_moveto(min(1,max(0,target.winfo_y()/height)))
 
     def _preference(self,key,value):
         self.preference_values[key]=value;self._save()
@@ -917,6 +958,7 @@ class Launcher(tk.Tk):
         except OSError as exc:self.status.set('Could not save settings: '+str(exc))
 
     def _sync(self):
+        self._sync_activity()
         self.library_details['black2'].set(self._version_text())
         path=Path(self.rom.get());valid=path.is_file() and path.suffix.lower()=='.nds';running=self._game_is_running()
         present=(self.root/'builds/current/melonDS.exe').is_file()
@@ -937,6 +979,14 @@ class Launcher(tk.Tk):
         message=('Game running. Save normally and close it before starting another session.' if running else 'Emulator missing. Extract the complete release folder.' if not present else
             'Requires Blaze Black 2 Redux Complete v1.4.1. Use a patch only when it is listed for your exact Redux version.' if not self.rom.get() else 'Game file not found. Browse to an existing .nds file.' if not valid else 'Game file selected. Use a supported Redux version to play.')
         self.game_hint.configure(text=message)
+
+    def _sync_activity(self):
+        active=self.busy or self.guides_busy
+        if active and not self._activity_running:
+            self.footer_activity.pack(side='right',padx=(0,12))
+            self.footer_activity.start(14);self._activity_running=True
+        elif not active and self._activity_running:
+            self.footer_activity.stop();self.footer_activity.pack_forget();self._activity_running=False
 
     def _game_is_running(self):
         child=self.game is not None and self.game.poll() is None
@@ -980,13 +1030,40 @@ class Launcher(tk.Tk):
             if self.auto.get():self.after(300,lambda:self.check() if self.active_mod=='black2' else None)
             self.after(600,lambda:self.refresh_guides() if self.active_mod=='black2' else None)
 
+    def _navigation_groups(self):
+        if self.active_mod=='black2':
+            return (
+                ('MOD LIBRARY',('Library',)),
+                ('PLAY',('Play','Co-op','Features')),
+                ('MANAGE',('Profiles','News','Updates','Tools','Setup','Settings')),
+            )
+        if self.active_mod=='pokemon-x':
+            return (('MOD LIBRARY',('Library',)),('EXPERIMENTAL',('XPlay','XCoop','XGuides')))
+        return (('MOD LIBRARY',('Library',)),)
+
+    def _highlight_navigation(self,name):
+        for key,control in self.nav.items():
+            selected=key==name
+            control.configure(
+                bg=C['navSelected'] if selected else C['nav'],
+                fg=C['navSelectedText'] if selected else C['navText'],
+                activebackground=C['navSelected'] if selected else C['navHover'],
+                activeforeground=C['navSelectedText'] if selected else C['navText'],
+                highlightbackground=C['navSelected'] if selected else C['nav'],
+                image=self.nav_cursor if selected else '',compound='left')
+
     def _apply_navigation(self):
-        self.visible_pages=('Library',)+game_routes.MODS[self.active_mod]['pages'] if self.active_mod else ('Library',)
+        groups=self._navigation_groups()
+        self.visible_pages=tuple(name for _,names in groups for name in names)
+        for section in self.nav_sections.values():section.pack_forget()
         for name,control in self.nav.items():
             control.pack_forget()
-            if name in self.visible_pages:control.pack(fill='x',padx=12,pady=2)
+        for group,names in groups:
+            self.nav_sections[group].pack(fill='x',padx=22,pady=(3,1))
+            for name in names:self.nav[name].pack(fill='x',padx=10,pady=1)
         self.mod_caption.configure(text=game_routes.MODS[self.active_mod]['name'] if self.active_mod else 'MULTIPLAYER MODS')
         self.footer_version.configure(text=self._version_text() if self.active_mod=='black2' else 'Pokemon X · Prototype' if self.active_mod else 'Multiplayer mod library')
+        if self.page_name:self._highlight_navigation(self.page_name)
 
     def _return_library(self):
         if self.busy:self.status.set('Wait for the current operation before changing mods.');return
@@ -1091,7 +1168,7 @@ class Launcher(tk.Tk):
 
     def refresh_guides(self):
         if self.guides_busy:return
-        self.guides_busy=True;self.guide_status.set('Checking GitHub guides…')
+        self.guides_busy=True;self.guide_status.set('Checking GitHub guides…');self._sync()
         def run():
             try:self.messages.put(('guides',services.refresh_guides(self.home)))
             except Exception:self.messages.put(('guides-offline',None))
@@ -1124,7 +1201,7 @@ class Launcher(tk.Tk):
             while True:
                 action,value=self.messages.get_nowait()
                 if action in ('guides','guides-offline'):
-                    self.guides_busy=False;self.guide_status.set('Guides up to date' if action=='guides' else 'Offline · using saved guides');continue
+                    self.guides_busy=False;self.guide_status.set('Guides up to date' if action=='guides' else 'Offline · using saved guides');self._sync();continue
                 if action=='storage-progress':
                     self._storage_progress(value);continue
                 if action=='progress':
