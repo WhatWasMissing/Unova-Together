@@ -69,9 +69,7 @@ class ShopOverlayPatchTests(unittest.TestCase):
         policy = added_source("source/melonDS/src/Gen5ShopPolicy.h")
         mega = added_source("source/melonDS/src/Gen5MegaEvolution.h")
         self.assertRegex(policy, r"MaxShopUIEntries\s*=\s*45\s*;")
-        self.assertRegex(policy, r"MegaStoneShopGroupCount\s*=\s*2\s*;")
-        self.assertIn("member % MegaStoneShopGroupCount", policy)
-        self.assertIn("stoneIndex < firstStone || stoneIndex >= endStone", policy)
+        self.assertRegex(policy, r"MegaStonesPerPokemonCenterMart\s*=\s*3\s*;")
         self.assertNotIn("appendHeapBackedShopOverlay(combined, rom)", mega)
 
     def test_packager_keeps_no_final_newline_diffs_separate(self):

@@ -89251,7 +89251,7 @@
 +}
 --- /dev/null
 +++ b/source/melonDS/src/Gen5ShopPolicy.h
-@@ -0,0 +1,210 @@
+@@ -0,0 +1,221 @@
 +// Unova Together: Copyright (C) 2026 mvq1303. GPL-3.0-or-later.
 +// Shop policy maintenance with OpenAI Codex (2026). Original ROM/save untouched.
 +#pragma once
@@ -89267,13 +89267,13 @@
 +// (shop ID + 6). Badge marts and the special marts use different members.
 +inline constexpr unsigned FirstPokemonCenterMartMember=6;
 +inline constexpr unsigned PokemonCenterMartCount=20;
++inline constexpr unsigned MegaStonesPerPokemonCenterMart=3;
 +// The decompiled ShopUIWork contains fixed entries[45] and tutorMoveIndices[45]
 +// arrays. Keep every patched mart at or below this native capacity.
 +inline constexpr unsigned MaxShopUIEntries=45;
 +// ShopUI_LoadPokeMartItems can address badge marts 0..5, regular marts 6..25,
 +// and the eight six-stage special marts 26..73 (BW2 ov036/scrcmd_shop.c).
 +inline constexpr unsigned AllPokeMartListCount=74;
-+inline constexpr unsigned MegaStoneShopGroupCount=2;
 +// BW2's ShopUI_LoadPokeMartItems selects TM formatting for the entire list
 +// when the first item is a TM/HM. These IDs mirror PML_ItemIsTMHM in the decomp
 +// (ITEM_TM01..ITEM_HM06 and ITEM_TM93..ITEM_TM95).
@@ -89348,12 +89348,14 @@
 +    word(result,8,uint32_t(result.size()));return result;
 +}
 +template<std::size_t StoneCount>
-+inline bool appendMegaStonesAcrossPokeMarts(
++inline bool distributeMegaStonesAcrossPokemonCenterMarts(
 +    Narc& shops, Narc& counts, const std::array<uint16_t, StoneCount>& stones,
 +    unsigned* addedRows = nullptr)
 +{
 +    if (counts.files.size() != 1 || counts.files[0].size() != shops.files.size() ||
-+        shops.files.size() < AllPokeMartListCount)
++        shops.files.size() < AllPokeMartListCount ||
++        StoneCount < MegaStonesPerPokemonCenterMart ||
++        StoneCount > PokemonCenterMartCount * MegaStonesPerPokemonCenterMart)
 +        return false;
 +    for (const auto stone : stones) if (stone > 638) return false;
 +    for (std::size_t i = 0; i < stones.size(); ++i)
@@ -89369,9 +89371,6 @@
 +        const unsigned count = stockCounts[member];
 +        const auto& stock = shops.files[member];
 +        if (count > MaxShopUIEntries || count * 2 > stock.size()) return false;
-+        const auto group = member % MegaStoneShopGroupCount;
-+        const auto firstStone = stones.size() * group / MegaStoneShopGroupCount;
-+        const auto endStone = stones.size() * (group + 1) / MegaStoneShopGroupCount;
 +        Bytes current{stock.data(), stock.size()};
 +        auto& normalized = normalizedStock[member];
 +        normalized.reserve(stock.size());
@@ -89380,28 +89379,40 @@
 +            const auto item = current.half(i * 2);
 +            if (item > 638) return false;
 +            const auto stone = std::find(stones.begin(), stones.end(), item);
-+            if (stone != stones.end())
-+            {
-+                const auto stoneIndex = std::size_t(std::distance(stones.begin(), stone));
-+                if (stoneIndex < firstStone || stoneIndex >= endStone) continue;
-+                if (retained[member][stoneIndex]) continue;
-+                retained[member][stoneIndex] = true;
-+            }
++            // Remove any old overlay entries before applying the balanced
++            // assignment. This keeps repeated application idempotent and
++            // leaves non-center shops with their normal assortments.
++            if (stone != stones.end()) continue;
 +            normalized.push_back(uint8_t(item));
 +            normalized.push_back(uint8_t(item >> 8));
 +        }
-+        // Split the roster across alternating marts so the full collection is
-+        // available throughout Unova without exceeding ShopUIWork::entries[45].
-+        for (std::size_t stoneIndex = 0; stoneIndex < stones.size(); ++stoneIndex)
++        const bool isPokemonCenterMart = member >= FirstPokemonCenterMartMember &&
++            member < FirstPokemonCenterMartMember + PokemonCenterMartCount;
++        if (isPokemonCenterMart)
 +        {
-+            if (stoneIndex < firstStone || stoneIndex >= endStone) continue;
-+            if (retained[member][stoneIndex]) continue;
-+            if (normalized.size() / 2 >= MaxShopUIEntries) return false;
-+            normalized.push_back(uint8_t(stones[stoneIndex]));
-+            normalized.push_back(uint8_t(stones[stoneIndex] >> 8));
-+            retained[member][stoneIndex] = true;
-+            ++inserted;
++            if (normalized.size() / 2 + MegaStonesPerPokemonCenterMart > MaxShopUIEntries)
++                return false;
++            const auto center = member - FirstPokemonCenterMartMember;
++            for (unsigned slot = 0; slot < MegaStonesPerPokemonCenterMart; ++slot)
++            {
++                auto stoneIndex = std::size_t(
++                    (center + slot * PokemonCenterMartCount) % StoneCount);
++                for (std::size_t attempt = 0; attempt < StoneCount && retained[member][stoneIndex]; ++attempt)
++                    stoneIndex = (stoneIndex + 1) % StoneCount;
++                if (retained[member][stoneIndex]) return false;
++                normalized.push_back(uint8_t(stones[stoneIndex]));
++                normalized.push_back(uint8_t(stones[stoneIndex] >> 8));
++                retained[member][stoneIndex] = true;
++                ++inserted;
++            }
 +        }
++    }
++    for (std::size_t stoneIndex = 0; stoneIndex < stones.size(); ++stoneIndex)
++    {
++        bool covered = false;
++        for (unsigned center = 0; center < PokemonCenterMartCount; ++center)
++            covered |= retained[FirstPokemonCenterMartMember + center][stoneIndex];
++        if (!covered) return false;
 +    }
 +    for (unsigned member = 0; member < AllPokeMartListCount; ++member)
 +    {
@@ -89438,7 +89449,7 @@
 +        }
 +        if (!megaStones.empty()) {
 +            unsigned insertedRows = 0;
-+            if (!appendMegaStonesAcrossPokeMarts(shops, numbers, megaStones, &insertedRows)) return {};
++            if (!distributeMegaStonesAcrossPokemonCenterMarts(shops, numbers, megaStones, &insertedRows)) return {};
 +            changes += insertedRows;
 +        }
 +        if(!changes) return result;

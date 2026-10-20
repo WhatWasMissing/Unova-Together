@@ -13,7 +13,7 @@ Both players should use the same release and matching game version. Co-op battle
 
 ## Mega Evolution
 
-There are **49 Mega forms**, each paired with its own Mega Stone. Poké Marts alternate between two Mega Stone selections, making all 49 available around Unova for **₽50,000** per stone; both Battle Point counters sell all 49 for **50 BP**. Give the matching stone to a Pokémon, then hold **L + R together** while choosing a move in battle, including double battles. The form lasts until the battle ends. The final three Gym Leaders and Cynthia’s Route 7 rematch have Pokémon holding Mega Stones.
+There are **49 Mega forms**, each paired with its own Mega Stone. The 20 Pokémon Center Mart inventories carry three stones each, spread across Unova so all 49 are available; eleven stones appear in two inventories to keep each shop's stock equal. Each costs **₽50,000**, and both Battle Point counters sell the full selection for **50 BP**. Give the matching stone to a Pokémon, then hold **L + R together** while choosing a move in battle, including double battles. The form lasts until the battle ends. The final three Gym Leaders and Cynthia’s Route 7 rematch have Pokémon holding Mega Stones.
 
 Examples: Mega Serperior gains **Adaptability**; Mega Charizard Y gains **Drought**; Mega Salamence uses **Intimidate**; Mega Lucario Z gains **Adaptability**. The full roster, abilities, stones, and base-stat totals are in the [Mega Evolution guide](MEGA_EVOLUTION.md).
 
