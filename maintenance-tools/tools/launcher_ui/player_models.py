@@ -13,9 +13,12 @@ import struct
 import ndspy.code
 import ndspy.narc
 import ndspy.rom
+import ndspy.texture
+from PIL import Image
 
 import unova_storage as storage
 from . import preferences as prefs
+from .player_model_names import NPC_MODEL_LABELS, POKEMON_MODEL_LABELS, SPECIAL_NPC_MODEL_LABELS
 
 
 PLAYER_MAP = (
@@ -30,15 +33,21 @@ CONFIG_ARCHIVE = 'a/0/4/7'
 RESOURCE_ARCHIVE = 'a/0/4/8'
 CONFIG_RECORD_SIZE = 28
 CONFIG_COUNT = 1008
-HUMANOID_SCENE_NODES = frozenset((10, 11))
-WALK_ANIMATION_CONTROLLERS = frozenset((13, 14))
-KNOWN_LABELS = {0x126B: 'Cynthia'}
+HUMAN_SCENE_NODES = frozenset((2,))
+HUMAN_WALK_ANIMATION_CONTROLLERS = frozenset((2, 3))
+POKEMON_SCENE_NODES = frozenset((10, 11))
+POKEMON_WALK_ANIMATION_CONTROLLERS = frozenset((13, 14))
 
 
 def display_name(model_id):
     model_id = int(model_id)
-    known = KNOWN_LABELS.get(model_id)
-    return f'{known} (model {model_id})' if known else f'NPC model {model_id}'
+    if model_id in SPECIAL_NPC_MODEL_LABELS:
+        return f'{SPECIAL_NPC_MODEL_LABELS[model_id]} (model {model_id})'
+    if model_id in NPC_MODEL_LABELS:
+        return f'NPC · {NPC_MODEL_LABELS[model_id]} (model {model_id})'
+    if model_id in POKEMON_MODEL_LABELS:
+        return f'Pokémon · {POKEMON_MODEL_LABELS[model_id]} (model {model_id})'
+    return f'Field character model {model_id}'
 
 
 def _player_map_offset(data):
@@ -89,13 +98,21 @@ def _actor_models(config_data, resources):
         entity_type, scene_node = struct.unpack_from('<BB', row, 2)
         sprite_controller = row[9]
         texture_resource, model_resource = struct.unpack_from('<HH', row, 16)
-        if (entity_type != 1 or scene_node not in HUMANOID_SCENE_NODES
-                or sprite_controller not in WALK_ANIMATION_CONTROLLERS
+        is_animated_human = (
+            scene_node in HUMAN_SCENE_NODES
+            and sprite_controller in HUMAN_WALK_ANIMATION_CONTROLLERS
+        )
+        is_animated_pokemon = (
+            scene_node in POKEMON_SCENE_NODES
+            and sprite_controller in POKEMON_WALK_ANIMATION_CONTROLLERS
+        )
+        if (entity_type != 1 or not (is_animated_human or is_animated_pokemon)
                 or model_id in seen or texture_resource >= len(resources)
                 or model_resource >= len(resources)):
             continue
-        # Gen 5 stores the animated model in res2 and its matching texture in
-        # res1. Reject props, incomplete actors and entries with missing art.
+        # Field characters and Pokémon use billboard actors backed by BTX0
+        # textures plus the shared BMD0 model. Restrict both categories to the
+        # reviewed walking-animation sets; props and partial records are out.
         if resources[texture_resource][:4] != b'BTX0' or resources[model_resource][:4] != b'BMD0':
             continue
         seen.add(model_id)
@@ -124,8 +141,88 @@ def _catalog_from_rom(rom):
 
 
 def list_models(path):
-    """Return compatible animated humanoid NPC object codes from a ROM."""
+    """Return compatible animated human and Pokémon field actor codes from a ROM."""
     return _catalog_from_rom(_load_rom(Path(path)))
+
+
+def _render_i4(texture, palette):
+    if texture.format != ndspy.texture.TextureFormat.I4:
+        raise ValueError('This field character uses an unsupported preview texture format.')
+    width, height = texture.width, texture.height
+    if not (0 < width <= 128 and 0 < height <= 128):
+        raise ValueError('This field character has an unsupported preview image size.')
+    packed = texture.data1
+    pixel_count = width * height
+    if len(packed) * 2 < pixel_count or len(palette.colors) < 16:
+        raise ValueError('This field character has incomplete preview graphics.')
+    image = Image.new('RGBA', (width, height))
+    pixels = []
+    for byte in packed[:(pixel_count + 1) // 2]:
+        pixels.append(byte & 0x0F)
+        if len(pixels) < pixel_count:
+            pixels.append(byte >> 4)
+    colors = [(color.r * 255 // 31, color.g * 255 // 31, color.b * 255 // 31, 0 if index == 0 else 255)
+              for index, color in enumerate(palette.colors[:16])]
+    image.putdata([colors[index] for index in pixels])
+    return image
+
+
+def _preview_steps(controller):
+    # The face sequence and durations follow the pinned B2W2 field billboard
+    # animation tables. NPC controllers 2 and 3 expose the north-facing walk
+    # cycle; Pokémon controllers 13 and 14 use their native two-frame field loop.
+    if controller == 2:
+        return ((1, False, 4), (0, False, 4), (1, True, 4), (0, False, 4)), 'Walk cycle'
+    if controller == 3:
+        return ((1, False, 4), (0, False, 4), (2, False, 4), (0, False, 4)), 'Walk cycle'
+    if controller in POKEMON_WALK_ANIMATION_CONTROLLERS:
+        return ((0, False, 10), (1, False, 10)), 'Field animation'
+    raise ValueError('This field character does not have a supported animated preview.')
+
+
+def _decode_preview_frames(textures, palette, controller):
+    steps, _label = _preview_steps(controller)
+    frames = []
+    for face, flip_s, ticks in steps:
+        if face >= len(textures):
+            raise ValueError('This field character is missing an animation frame.')
+        image = _render_i4(textures[face], palette)
+        if flip_s:
+            image = image.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
+        frames.append((image, max(1, round(ticks * 1000 / 60))))
+    return frames
+
+
+def load_preview(path, model_id):
+    """Decode a small, native field-animation preview from the selected ROM."""
+    if type(model_id) is not int or not 0 <= model_id <= 0xFFFF:
+        raise ValueError('Choose a valid field character.')
+    rom = _load_rom(Path(path))
+    config = ndspy.narc.NARC(rom.getFileByName(CONFIG_ARCHIVE))
+    resources = ndspy.narc.NARC(rom.getFileByName(RESOURCE_ARCHIVE))
+    for index in range(CONFIG_COUNT):
+        offset = 4 + index * CONFIG_RECORD_SIZE
+        row = config.files[0][offset:offset + CONFIG_RECORD_SIZE]
+        if struct.unpack_from('<H', row, 0)[0] != model_id:
+            continue
+        entity_type, scene_node = struct.unpack_from('<BB', row, 2)
+        controller = row[9]
+        texture_resource, model_resource = struct.unpack_from('<HH', row, 16)
+        is_human = scene_node in HUMAN_SCENE_NODES and controller in HUMAN_WALK_ANIMATION_CONTROLLERS
+        is_pokemon = scene_node in POKEMON_SCENE_NODES and controller in POKEMON_WALK_ANIMATION_CONTROLLERS
+        if entity_type != 1 or not (is_human or is_pokemon):
+            break
+        if (texture_resource >= len(resources.files) or model_resource >= len(resources.files)
+                or resources.files[texture_resource][:4] != b'BTX0'
+                or resources.files[model_resource][:4] != b'BMD0'):
+            raise ValueError('This field character is missing its preview graphics.')
+        btx = ndspy.texture.NSBTX(resources.files[texture_resource])
+        if not btx.textures or not btx.palettes:
+            raise ValueError('This field character is missing its preview graphics.')
+        frames = _decode_preview_frames([texture for _name, texture in btx.textures], btx.palettes[0][1], controller)
+        _preview_label = _preview_steps(controller)[1]
+        return frames, _preview_label
+    raise ValueError('This field character is not available in the selected game.')
 
 
 def _verify_model_in_rom(rom, model_id):

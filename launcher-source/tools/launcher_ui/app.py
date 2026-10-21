@@ -1,6 +1,6 @@
 """Native launcher UI by mvq1303 / WhatWasMissing. Updater owns installation."""
 from pathlib import Path
-import json, os, queue, re, time, uuid, subprocess, sys, threading, tkinter as tk, webbrowser, zipfile
+import json, os, queue, random, re, time, uuid, subprocess, sys, threading, tkinter as tk, webbrowser, zipfile
 import tomlkit
 from tkinter import filedialog, messagebox, ttk
 import unova_updater as updates
@@ -10,6 +10,7 @@ from . import preferences as prefs
 from . import services
 from . import gen5_tools
 from . import player_models
+from . import player_model_preferences as model_preferences
 from . import cynthia_event
 from . import game_routes
 from . import versioning
@@ -813,7 +814,7 @@ class Launcher(tk.Tk):
         self._refresh_player_model_label()
         label(appearance_box,textvariable=self.player_model_label,size=11,bold=True,bg=C['surface']).pack(anchor='w',pady=(8,4))
         button(appearance_box,'Choose a field character',self._choose_player_model).pack(anchor='w',pady=(6,8))
-        label(appearance_box,'Choose from animated characters stored in your ROM. This changes your walking character; bike and surf forms keep their normal game animations. Applies next launch.',size=9,color=C['muted'],bg=C['surface'],wraplength=620,justify='left').pack(anchor='w')
+        label(appearance_box,'Browse and preview animated people and Pokémon from your game. Filter or search the list, keep favorites, save named looks, or choose at random. Battle portraits are separate art. Only normal walking changes; bike and surf keep their original forms. Applies next launch.',size=9,color=C['muted'],bg=C['surface'],wraplength=620,justify='left').pack(anchor='w')
         cheats=card(parent);cheats.pack(fill='x')
         self.settings_sections['Cheats']=cheats
         box=tk.Frame(cheats,bg=C['surface']);box.pack(fill='x',padx=18,pady=16)
@@ -850,17 +851,32 @@ class Launcher(tk.Tk):
         source=Path(self.rom.get())
         if not source.is_file() or source.suffix.lower()!='.nds':
             self.status.set('Choose a supported Redux game on Play before selecting a character.');return
-        window=tk.Toplevel(self);window.title('Choose field character');window.geometry('460x540');window.minsize(360,420);window.transient(self)
+        window=tk.Toplevel(self);window.title('Choose field character');window.geometry('720x650');window.minsize(560,500);window.transient(self)
         outer=tk.Frame(window,bg=C['background']);outer.pack(fill='both',expand=True,padx=16,pady=16)
-        label(outer,'Choose an animated character',size=16,bold=True,bg=C['background']).pack(anchor='w')
-        label(outer,'Search by name or model number. Characters are read from the selected ROM.',size=9,color=C['muted'],bg=C['background'],wraplength=420,justify='left').pack(anchor='w',pady=(6,12))
-        query=tk.StringVar();entry=tk.Entry(outer,textvariable=query,font=(F['body'],11),highlightthickness=2,highlightcolor=C['focus']);entry.pack(fill='x',pady=(0,10))
-        body=tk.Frame(outer,bg=C['surface']);body.pack(fill='both',expand=True)
-        choices=tk.Listbox(body,font=(F['body'],11),bg=C['surface'],fg=C['text'],selectbackground=C['primary'],selectforeground=C['surface'],activestyle='none',exportselection=False,relief='flat',highlightthickness=0)
-        scroll=ttk.Scrollbar(body,command=choices.yview);scroll.pack(side='right',fill='y');choices.configure(yscrollcommand=scroll.set);choices.pack(fill='both',expand=True)
-        state=label(outer,'Reading character models…',size=9,color=C['muted'],bg=C['background']);state.pack(anchor='w',pady=(8,6))
-        actions=tk.Frame(outer,bg=C['background']);actions.pack(fill='x',pady=(8,0))
-        result_queue=queue.Queue();models=[];visible=[];ready=False
+        label(outer,'Choose your field character',size=16,bold=True,bg=C['background']).pack(anchor='w')
+        label(outer,'Browse animated people and Pokémon from the selected game. Preview graphics are read from your ROM.',size=9,color=C['muted'],bg=C['background'],wraplength=660,justify='left').pack(anchor='w',pady=(6,12))
+        query=tk.StringVar();entry=tk.Entry(outer,textvariable=query,font=(F['body'],11),highlightthickness=2,highlightcolor=C['focus']);entry.pack(fill='x',pady=(0,8))
+        browse=tk.Frame(outer,bg=C['background']);browse.pack(fill='x',pady=(0,8))
+        category=tk.StringVar(value=model_preferences.FILTER_ALL);category_box=ttk.Combobox(browse,textvariable=category,state='readonly',values=model_preferences.FILTERS,width=18);category_box.pack(side='left')
+        sort=tk.StringVar(value='Alphabetical');sort_box=ttk.Combobox(browse,textvariable=sort,state='readonly',values=('Alphabetical','Model number'),width=16);sort_box.pack(side='left',padx=(8,0))
+        body=tk.Frame(outer,bg=C['background']);body.pack(fill='both',expand=True)
+        body.columnconfigure(0,weight=3);body.columnconfigure(1,weight=2);body.rowconfigure(0,weight=1)
+        list_card=tk.Frame(body,bg=C['surface']);list_card.grid(row=0,column=0,sticky='nsew',padx=(0,8))
+        choices=tk.Listbox(list_card,font=(F['body'],10),bg=C['surface'],fg=C['text'],selectbackground=C['primary'],selectforeground=C['surface'],activestyle='none',exportselection=False,relief='flat',highlightthickness=0)
+        scroll=ttk.Scrollbar(list_card,command=choices.yview);scroll.pack(side='right',fill='y');choices.configure(yscrollcommand=scroll.set);choices.pack(fill='both',expand=True,padx=(10,0),pady=10)
+        preview_box=tk.Frame(body,bg=C['surface']);preview_box.grid(row=0,column=1,sticky='nsew')
+        label(preview_box,'LIVE FIELD PREVIEW',size=9,bold=True,bg=C['surface']).pack(anchor='w',padx=12,pady=(12,4))
+        preview=tk.Label(preview_box,text='Select a character to preview',font=(F['body'],9),bg=C['background'],fg=C['muted'],width=20,height=12,compound='center')
+        preview.pack(fill='both',expand=True,padx=12,pady=8)
+        preview_name=tk.StringVar(value='No character selected');label(preview_box,textvariable=preview_name,size=10,bold=True,bg=C['surface'],wraplength=205,justify='center').pack(fill='x',padx=8,pady=(0,4))
+        preview_type=tk.StringVar(value='');label(preview_box,textvariable=preview_type,size=9,color=C['muted'],bg=C['surface'],wraplength=205,justify='center').pack(fill='x',padx=8,pady=(0,12))
+        state=label(outer,'Reading character models…',size=9,color=C['muted'],bg=C['background']);state.pack(anchor='w',pady=(8,4))
+        preset_row=tk.Frame(outer,bg=C['background']);preset_row.pack(fill='x',pady=(6,0))
+        preset_name=tk.StringVar();preset_entry=tk.Entry(preset_row,textvariable=preset_name,font=(F['body'],10),highlightthickness=1,highlightcolor=C['focus'])
+        preset_entry.pack(side='left',fill='x',expand=True)
+        presets=tk.StringVar();preset_box=ttk.Combobox(preset_row,textvariable=presets,state='readonly',width=21);preset_box.pack(side='left',padx=(8,0))
+        result_queue=queue.Queue();models=[];visible=[];ready=False;preview_generation=0;preview_timer=None;preview_playback=None;queue_poll=None;active_frames=[]
+        selected_model=self.preference_values.get('player_model',0)
         def load_models():
             try:result_queue.put(('models',player_models.list_models(source)))
             except Exception as exc:result_queue.put(('error',str(exc)))
@@ -868,34 +884,151 @@ class Launcher(tk.Tk):
         def populate(*_):
             nonlocal visible
             term=query.get().strip().casefold();current=choices.curselection();selected=visible[current[0]] if current else None
-            visible=[model for model in models if not term or term in player_models.display_name(model).casefold() or term in str(model)]
+            visible=model_preferences.filter_models(models,term,category.get(),self.preference_values.get('player_model_favorites',[]),'number' if sort.get()=='Model number' else 'name')
             choices.delete(0,'end')
-            for model in visible:choices.insert('end',player_models.display_name(model))
-            if selected in visible:
-                index=visible.index(selected);choices.selection_set(index);choices.see(index)
+            favorites=set(self.preference_values.get('player_model_favorites',[]))
+            for model in visible:choices.insert('end',('★ ' if model in favorites else '')+player_models.display_name(model))
+            target=selected if selected in visible else selected_model if selected_model in visible else None
+            if target is not None:
+                index=visible.index(target);choices.selection_set(index);choices.see(index)
+            update_favorite_label()
+            refresh_presets()
+        def current_choice():
+            selected=choices.curselection()
+            return visible[selected[0]] if selected and selected[0]<len(visible) else None
+        def update_favorite_label():
+            model=current_choice()
+            favorite_button.configure(text='Remove favorite' if model in self.preference_values.get('player_model_favorites',[]) else 'Add favorite')
+        def set_preview_message(message):
+            nonlocal active_frames
+            active_frames=[];preview.configure(image='',text=message);preview.image=None;preview_type.set('')
+            if preview_playback is not None:
+                try:window.after_cancel(preview_playback)
+                except tk.TclError:pass
+        def cancel_picker_jobs():
+            nonlocal preview_generation,preview_timer,preview_playback,queue_poll
+            preview_generation+=1
+            for job in (preview_timer,preview_playback,queue_poll):
+                if job is not None:
+                    try:window.after_cancel(job)
+                    except tk.TclError:pass
+            preview_timer=preview_playback=queue_poll=None
+        def close_picker():
+            cancel_picker_jobs()
+            try:window.destroy()
+            except tk.TclError:pass
+        def play_preview(frame_index=0):
+            nonlocal preview_playback
+            if not window.winfo_exists() or not active_frames:return
+            image,duration=active_frames[frame_index]
+            from PIL import Image,ImageTk
+            image=ImageTk.PhotoImage(image.resize((128,128),resample=Image.Resampling.NEAREST))
+            preview.configure(image=image,text='');preview.image=image
+            preview_playback=window.after(duration,lambda:play_preview((frame_index+1)%len(active_frames)))
+        def request_preview(*_):
+            nonlocal preview_generation,preview_timer
+            model=current_choice();preview_generation+=1;generation=preview_generation
+            if preview_timer is not None:
+                try:window.after_cancel(preview_timer)
+                except tk.TclError:pass
+                preview_timer=None
+            if model is None:
+                preview_name.set('No character selected');set_preview_message('Select a character to preview');return
+            preview_name.set(player_models.display_name(model));preview_type.set('Loading field animation…');set_preview_message('Loading from game…')
+            def start_preview():
+                nonlocal preview_timer
+                preview_timer=None
+                if not window.winfo_exists() or generation!=preview_generation:return
+                def read_preview():
+                    try:result_queue.put(('preview',generation,model,player_models.load_preview(source,model)))
+                    except Exception as exc:result_queue.put(('preview_error',generation,model,str(exc)))
+                threading.Thread(target=read_preview,daemon=True).start()
+            preview_timer=window.after(180,start_preview)
+        def refresh_presets():
+            names=['Choose a saved look…']+[item['name'] for item in self.preference_values.get('player_model_presets',[])]
+            preset_box['values']=names
+            if not presets.get() or presets.get() not in names:preset_box.current(0)
+        def save_preset():
+            model=current_choice();name=preset_name.get().strip()[:model_preferences.MAX_PRESET_NAME]
+            if model is None:state.configure(text='Select a character before saving a look.');return
+            if not name:state.configure(text='Enter a name for this saved look.');return
+            saved=model_preferences.normalize_presets(self.preference_values.get('player_model_presets',[]))
+            existing=next((i for i,item in enumerate(saved) if item['name'].casefold()==name.casefold()),None)
+            if existing is None and len(saved)>=model_preferences.MAX_PRESETS:
+                state.configure(text=f'You can save up to {model_preferences.MAX_PRESETS} looks. Delete one to make room.');return
+            item={'name':name,'model_id':model}
+            if existing is None:saved.append(item)
+            else:saved[existing]=item
+            self.preference_values['player_model_presets']=saved;self._save();refresh_presets();presets.set(name);state.configure(text=f'Saved “{name}” to this game profile.')
+        def apply_preset():
+            name=presets.get()
+            if not name or name=='Choose a saved look…':state.configure(text='Choose a saved look first.');return
+            item=next((item for item in self.preference_values.get('player_model_presets',[]) if item['name']==name),None)
+            if item is None:return
+            model=item['model_id']
+            if model and model not in models:state.configure(text='This saved character is not in the selected game.');return
+            self.preference_values['player_model']=model;self._refresh_player_model_label();self._save();self.status.set(f'Saved look “{name}” selected · applies next launch.');close_picker()
+        def delete_preset():
+            name=presets.get()
+            if not name or name=='Choose a saved look…':state.configure(text='Choose a saved look to remove.');return
+            self.preference_values['player_model_presets']=[item for item in self.preference_values.get('player_model_presets',[]) if item['name']!=name]
+            self._save();refresh_presets();state.configure(text=f'Removed saved look “{name}”.')
+        def toggle_favorite():
+            model=current_choice()
+            if model is None:return
+            favorites=model_preferences.normalize_favorites(self.preference_values.get('player_model_favorites',[]))
+            if model in favorites:favorites.remove(model)
+            else:
+                if len(favorites)>=model_preferences.MAX_FAVORITES:state.configure(text=f'You can keep up to {model_preferences.MAX_FAVORITES} favorites.');return
+                favorites.append(model)
+            self.preference_values['player_model_favorites']=favorites;self._save();populate();request_preview();state.configure(text='Favorites saved to this game profile.')
+        def choose_random():
+            if not ready or not visible:state.configure(text='No characters match the current filters.');return
+            model=random.choice(visible)
+            self.preference_values['player_model']=model;self._refresh_player_model_label();self._save();self.status.set('Random field character selected · applies next launch.');close_picker()
         def apply_selection():
             if not ready:return
-            selected=choices.curselection()
-            if not selected:return
-            self.preference_values['player_model']=visible[selected[0]];self._refresh_player_model_label();self._save()
-            self.status.set('Character saved · applies next launch.');window.destroy()
+            model=current_choice()
+            if model is None:return
+            self.preference_values['player_model']=model;self._refresh_player_model_label();self._save()
+            self.status.set('Character saved · applies next launch.');close_picker()
         def use_default():
             self.preference_values['player_model']=0;self._refresh_player_model_label();self._save()
-            self.status.set('Default character selected · applies next launch.');window.destroy()
-        def poll_catalog():
-            nonlocal ready
+            self.status.set('Default character selected · applies next launch.');close_picker()
+        def poll_queue():
+            nonlocal ready,active_frames,queue_poll
             if not window.winfo_exists():return
             try:
-                kind,value=result_queue.get_nowait();ready=True
-                if kind=='error':state.configure(text='Could not read models: '+str(value))
-                else:
-                    models.extend(value);populate();state.configure(text=f'{len(models)} animated characters available.');entry.focus_set()
-            except queue.Empty:window.after(100,poll_catalog)
+                while True:
+                    item=result_queue.get_nowait();kind=item[0]
+                    if kind=='models':
+                        ready=True;models.extend(item[1]);populate();state.configure(text=f'{len(models)} animated field characters available.');entry.focus_set();request_preview()
+                    elif kind=='error':
+                        ready=True;state.configure(text='Could not read models: '+str(item[1]))
+                    elif kind in ('preview','preview_error'):
+                        _kind,generation,model,value=item
+                        if generation!=preview_generation or model!=current_choice():continue
+                        if kind=='preview_error':set_preview_message('Preview not available');preview_type.set(str(value))
+                        else:
+                            active_frames,label_text=value;preview_type.set(label_text+' · native game frames');play_preview()
+            except queue.Empty:pass
+            queue_poll=window.after(100,poll_queue)
         query.trace_add('write',populate)
+        category.trace_add('write',populate);sort.trace_add('write',populate)
         choices.bind('<Double-Button-1>',lambda _event:apply_selection())
-        button(actions,'Default character',use_default).pack(side='left')
+        choices.bind('<<ListboxSelect>>',request_preview)
+        category_box.bind('<<ComboboxSelected>>',populate);sort_box.bind('<<ComboboxSelected>>',populate)
+        window.protocol('WM_DELETE_WINDOW',close_picker)
+        window._launcher_close=close_picker
+        favorite_button=button(browse,'Add favorite',toggle_favorite);favorite_button.pack(side='right')
+        button(preset_row,'Save look',save_preset).pack(side='left',padx=(8,0))
+        button(preset_row,'Apply',apply_preset).pack(side='left',padx=(8,0),after=preset_box)
+        button(preset_row,'Remove',delete_preset).pack(side='left',padx=(6,0),after=preset_box)
+        actions=tk.Frame(outer,bg=C['background']);actions.pack(fill='x',pady=(10,0))
+        button(actions,'Default',use_default).pack(side='left')
+        button(actions,'Random from results',choose_random).pack(side='left',padx=(8,0))
         button(actions,'Use selected',apply_selection,kind='primary').pack(side='right')
-        poll_catalog()
+        poll_queue()
 
     def _all_settings(self):
         from .settings_editor import SettingsEditor
@@ -945,7 +1078,7 @@ class Launcher(tk.Tk):
             self.active_profile_id=str(data.get('active_profile',''))
             if type(data.get('check')) is bool:self.auto.set(data['check'])
             if type(data.get('music')) is bool:self.music.set(data['music'])
-            if isinstance(data.get('preferences'),dict):self.preference_values={k:v for k,v in data['preferences'].items() if (k in ('pause','filter','area_scenery','companion_interactions','reduced_follower_motion','coop_exp_suppression') and type(v) is bool) or (k=='volume' and type(v) is int and 0<=v<=100) or (k=='player_model' and type(v) is int and 0<=v<=65535)}
+            if isinstance(data.get('preferences'),dict):self.preference_values=services.normalize_preferences(data['preferences'])
             if isinstance(data.get('cheats'),dict):self.cheat_choices={k:{ident:flag for ident,flag in v.items() if ident in self.cheat_vars_ids() and type(flag) is bool} for k,v in list(data['cheats'].items())[-32:] if isinstance(k,str) and len(k)<=32 and isinstance(v,dict)}
         except (OSError,ValueError,AttributeError):pass
 
@@ -1346,7 +1479,7 @@ class Launcher(tk.Tk):
             ('Area battle scenery · optional','Generate nearby battle scenery locally from your ROM. Enable Nearby battle scenery in Settings. This remains experimental; special scenes keep original backgrounds, and environments are not all playtested.'),
             ('LAN & internet play','Host, join and retry from Co-op. Use Tailscale across networks. The UDP bridge is experimental and needs your group’s server and Python; no public server is supplied.'),
             ('Games & saves','Separate save slots, automatic names and per-slot settings. Back up and restore saves from Games & saves or Tools; old installations can be cleaned while keeping saves and backups.'),
-            ('Player appearance','Choose an animated character model stored in your supported game. It changes your walking character; bike and surf forms keep their original animations.'),
+            ('Player appearance','Browse and preview animated NPCs and Pokémon from your supported game, then filter, favorite, save named looks, or choose randomly. Changes apply to normal walking; bike and surf keep their original animations.'),
             ('Generation 5 menu sounds','The added in-game menus use movement, confirmation and back sounds inspired by Generation 5 games. Turn them off from the in-game Unova → Settings menu.'),
             ('Gen 5 tools','Check ROM compatibility, compare copied saves and estimate Redux Challenge XP budgets. These tools read data; they do not edit your game.'),
             ('Settings & maintenance','Controller navigation, music, emulator settings and reviewed optional cheats. Verified updates, repair and reviewed troubleshooting reports are available.')):
@@ -1456,5 +1589,10 @@ class Launcher(tk.Tk):
     def destroy(self):
         # Cancel this Tcl interpreter's UI timers before disposing its widgets.
         self.cancel.set();self._stop_music();self._stop_game_workers()
+        for child in list(self.winfo_children()):
+            close_dialog=getattr(child,'_launcher_close',None)
+            if callable(close_dialog):
+                try:close_dialog()
+                except tk.TclError:pass
         for token in self.tk.call('after','info'):self.after_cancel(token)
         super().destroy()
