@@ -2,6 +2,12 @@
   "schema": 1,
   "notes": [
     {
+      "version": "2.0.24",
+      "title": "A clearer, more responsive launcher",
+      "file": "RELEASE_NOTES_2.0.24.md",
+      "body": "Navigation is grouped into clear sections, with a highlighted current page. Settings has shortcuts to General, Co-op, Followers, Appearance, and Cheats. The layout adjusts to smaller windows, and a progress indicator shows when background work is running.\n\nThis is a launcher and presentation update. Your game files and saves are unaffected."
+    },
+    {
       "version": "2.0.23",
       "title": "What changed",
       "file": "RELEASE_NOTES_2.0.23.md",
