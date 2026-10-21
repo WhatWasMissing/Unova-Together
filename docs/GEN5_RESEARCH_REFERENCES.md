@@ -17,4 +17,6 @@ Project Pokémon's [Generation 5 technical documentation](https://projectpokemon
 
 The local archive also records the user's extracted Black 2 / White 2 decomp path, its observed README hash, and the limits of what has been verified about that local copy.
 
+The [BW2 decompilation research note](BW2_DECOMP_RESEARCH.md) cross-checks event scripting, flags, actors, trainer battles, memory structures, and selected clean-base versus Redux v1.4.1 resources. Its [read-only ROM audit tool](../maintenance-tools/tools/research/bw2_rom_reference_audit.py) reproduces the selected NARC-member and ARM9-overlay comparisons.
+
 For implementation details, also consult the [Black 2 and White 2 decompilation](https://github.com/fuddlesworth/pokebw2). Its source and GPL license remain in the upstream project. Cross-check vanilla-game references against the exact Redux revision supported by Unova Together before changing game data or runtime hooks.
