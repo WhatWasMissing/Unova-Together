@@ -9,11 +9,14 @@ import unittest
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
+from PIL import Image
+import ndspy.texture
 
 from launcher_ui import player_models, services
+from launcher_ui import player_model_preferences as model_preferences
 
 
-def actor_row(model_id, *, entity=1, scene=10, controller=13, texture=0, model=1):
+def actor_row(model_id, *, entity=1, scene=2, controller=2, texture=0, model=1):
     row = bytearray(player_models.CONFIG_RECORD_SIZE)
     struct.pack_into('<H', row, 0, model_id)
     row[2] = entity
@@ -42,23 +45,76 @@ class PlayerModelTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'player-model table'):
             player_models._patch_player_map(ambiguous, 4715)
 
-    def test_catalog_requires_animated_humanoid_and_matching_model_resources(self):
+    def test_catalog_includes_animated_humans_and_pokemon_but_rejects_static_actors_and_props(self):
         config = bytearray(4 + player_models.CONFIG_COUNT * player_models.CONFIG_RECORD_SIZE)
         struct.pack_into('<I', config, 0, player_models.CONFIG_COUNT)
-        config[4:4 + 28] = actor_row(4715)
-        config[4 + 28:4 + 56] = actor_row(4716, controller=1)
-        config[4 + 56:4 + 84] = actor_row(4717, scene=1)
-        config[4 + 84:4 + 112] = actor_row(4718, texture=2)
+        rows = (
+            actor_row(11),
+            actor_row(12, controller=3),
+            actor_row(13, controller=4),
+            actor_row(0x1000, scene=10, controller=13),
+            actor_row(0x1001, scene=11, controller=14),
+            actor_row(0x2000, entity=2, scene=12, controller=0),
+            actor_row(14, controller=9),
+            actor_row(15, texture=2),
+            actor_row(11),
+        )
+        for index, row in enumerate(rows):
+            offset = 4 + index * player_models.CONFIG_RECORD_SIZE
+            config[offset:offset + player_models.CONFIG_RECORD_SIZE] = row
         models = player_models._actor_models(bytes(config), [b'BTX0texture', b'BMD0model'])
-        self.assertEqual(models, [4715])
+        self.assertEqual(models, [11, 12, 0x1000, 0x1001])
+
+    def test_model_names_use_actor_codes_and_patched_cynthia_override(self):
+        self.assertEqual(player_models.display_name(11), 'NPC · Youngster (model 11)')
+        self.assertEqual(player_models.display_name(0x1000), 'Pokémon · Bulbasaur (model 4096)')
+        self.assertEqual(player_models.display_name(0x126B), 'Cynthia (model 4715)')
+        self.assertEqual(player_models.display_name(5000), 'Field character model 5000')
+        self.assertEqual(len(player_models.NPC_MODEL_LABELS), 245)
+        self.assertEqual(len(player_models.POKEMON_MODEL_LABELS), 619)
+        self.assertEqual(len(player_models.SPECIAL_NPC_MODEL_LABELS), 1)
 
     def test_model_choice_survives_profile_normalization(self):
         profile = services.profile(rom='game.nds')
-        profile['preferences'] = {'player_model': 4715, 'volume': 60}
+        profile['preferences'] = {
+            'player_model': 4715, 'volume': 60,
+            'player_model_favorites': [11, 11, -1, '12'],
+            'player_model_presets': [
+                {'name': 'Cynthia', 'model_id': 4715},
+                {'name': 'cynthia', 'model_id': 12},
+                {'name': 'Bad', 'model_id': -1},
+            ],
+        }
         normalized = services.normalize(profile)
-        self.assertEqual(normalized['preferences'], {'player_model': 4715, 'volume': 60})
+        self.assertEqual(normalized['preferences'], {
+            'player_model': 4715, 'volume': 60,
+            'player_model_favorites': [11],
+            'player_model_presets': [{'name': 'Cynthia', 'model_id': 4715}],
+        })
         profile['preferences']['player_model'] = -1
         self.assertNotIn('player_model', services.normalize(profile)['preferences'])
+
+    def test_model_browser_filters_categories_favorites_search_and_sort(self):
+        models = [11, 4096, 4715]
+        self.assertEqual(model_preferences.filter_models(models, category='People'), [4715, 11])
+        self.assertEqual(model_preferences.filter_models(models, category='Pokémon'), [4096])
+        self.assertEqual(model_preferences.filter_models(models, category='Favorites', favorites=[4715]), [4715])
+        self.assertEqual(model_preferences.filter_models(models, query='bulba', category='All characters'), [4096])
+        self.assertEqual(model_preferences.filter_models(models, sort='number'), [11, 4096, 4715])
+
+    def test_preview_decoder_uses_native_i4_colors_and_walk_cycle_frames(self):
+        palette = SimpleNamespace(colors=[SimpleNamespace(r=i, g=i, b=i) for i in range(16)])
+        texture = SimpleNamespace(format=ndspy.texture.TextureFormat.I4, width=2, height=2, data1=bytes((0x10, 0x32)))
+        image = player_models._render_i4(texture, palette)
+        self.assertEqual(image.getpixel((0, 0))[3], 0)
+        self.assertEqual(image.getpixel((1, 0)), (255 // 31, 255 // 31, 255 // 31, 255))
+        frames = player_models._decode_preview_frames([texture] * 3, palette, 2)
+        self.assertEqual(len(frames), 4)
+        self.assertTrue(all(frame.size == (2, 2) for frame, _duration in frames))
+        self.assertTrue(all(duration == round(4 * 1000 / 60) for _frame, duration in frames))
+        self.assertEqual(frames[2][0].tobytes(), frames[0][0].transpose(Image.Transpose.FLIP_LEFT_RIGHT).tobytes())
+        with self.assertRaisesRegex(ValueError, 'does not have a supported animated preview'):
+            player_models._preview_steps(4)
 
     def test_model_cache_rebuilds_same_size_corrupted_variant(self):
         with tempfile.TemporaryDirectory() as directory:

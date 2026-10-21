@@ -1,6 +1,8 @@
 """Exercise real native launcher pages with disposable data; no game is launched."""
 from pathlib import Path
 import argparse, io, json, hashlib, tempfile, time, threading, unittest, zipfile
+import tkinter as tk
+from tkinter import ttk
 from unittest.mock import patch, MagicMock
 from PIL import ImageGrab
 from launcher_ui.app import Launcher
@@ -18,6 +20,14 @@ class LauncherTests(unittest.TestCase):
         self.rom=self.home/'fixture.nds';self.rom.write_bytes(b'disposable ROM placeholder')
         self.app=Launcher(self.home,testing=True);self.app._open_mod('black2',save=False);self.app.update_idletasks();self.app.update()
     def tearDown(self):
+        if self.app is None:
+            self.temp.cleanup();return
+        for child in list(self.app.winfo_children()):
+            if isinstance(child,tk.Toplevel):
+                command=child.protocol('WM_DELETE_WINDOW')
+                if command:
+                    try:self.app.tk.call(command)
+                    except tk.TclError:child.destroy()
         self.app.destroy();self.temp.cleanup()
     def wait(self,timeout=5):
         deadline=time.monotonic()+timeout
@@ -124,6 +134,79 @@ class LauncherTests(unittest.TestCase):
         self.app._apply_save_folder(self.home/'builds/current',item,default_directory=self.rom.parent)
         document=prefs.read_document(self.home/'builds/current')
         self.assertEqual(Path(document['Instance0']['SaveFilePath']).resolve(),self.rom.parent.resolve())
+
+    def test_player_model_picker_preview_favorites_and_named_looks(self):
+        from PIL import Image
+        from launcher_ui import player_models
+        self.app.rom.set(str(self.rom))
+        frames=[(Image.new('RGBA',(32,32),(0,0,0,0)),100)]
+        with patch.object(player_models,'list_models',return_value=[11,4096,4715]), \
+             patch.object(player_models,'load_preview',return_value=(frames,'Walk cycle')):
+            self.app._choose_player_model()
+            windows=[child for child in self.app.winfo_children() if child.winfo_class()=='Toplevel']
+            self.assertEqual(len(windows),1);window=windows[0]
+            def descendants(widget):
+                for child in widget.winfo_children():
+                    yield child
+                    yield from descendants(child)
+            deadline=time.monotonic()+3
+            choices=None
+            while time.monotonic()<deadline:
+                self.app.update()
+                choices=next((child for child in descendants(window) if isinstance(child,tk.Listbox)),None)
+                if choices is not None and choices.size():break
+                time.sleep(.01)
+            self.assertIsNotNone(choices);self.assertGreater(choices.size(),0)
+            people=next(child for child in descendants(window) if isinstance(child,ttk.Combobox) and 'People' in child['values'])
+            people.set('People');self.app.update()
+            self.assertEqual(choices.size(),2)
+            choices.selection_set(0);choices.event_generate('<<ListboxSelect>>')
+            preview=next(child for child in descendants(window) if isinstance(child,tk.Label) and child.cget('width')==20)
+            deadline=time.monotonic()+3
+            while time.monotonic()<deadline and not preview.cget('image'):
+                self.app.update();time.sleep(.01)
+            self.assertTrue(preview.cget('image'))
+            favorite=next(child for child in descendants(window) if 'text' in child.keys() and child.cget('text')=='Add favorite')
+            favorite.invoke();self.app.update()
+            people.set('Favorites');self.app.update();self.assertEqual(choices.size(),1);choices.selection_set(0)
+            preset_box=next(child for child in descendants(window) if isinstance(child,ttk.Combobox) and 'Choose a saved look…' in child['values'])
+            next(child for child in preset_box.master.winfo_children() if isinstance(child,tk.Entry)).insert(0,'Test look')
+            next(child for child in descendants(window) if 'text' in child.keys() and child.cget('text')=='Save look').invoke()
+            self.assertEqual(self.app.preference_values.get('player_model_presets'),[{'name':'Test look','model_id':4715}],
+                f"Picker status: {next(child for child in descendants(window) if isinstance(child,tk.Label) and child.cget('text').startswith(('Select','Enter','Saved','You can'))).cget('text')!r}; selected: {choices.curselection()}")
+            preset=next(child for child in descendants(window) if isinstance(child,ttk.Combobox) and 'Test look' in child['values'])
+            preset.set('Test look')
+            next(child for child in descendants(window) if 'text' in child.keys() and child.cget('text')=='Apply').invoke()
+            self.assertEqual(self.app.preference_values['player_model'],4715)
+
+    def test_closing_launcher_with_player_model_picker_open_cleans_up_dialog(self):
+        from launcher_ui import player_models
+        self.app.rom.set(str(self.rom))
+        with patch.object(player_models,'list_models',return_value=[11]):
+            self.app._choose_player_model();self.app.update()
+            self.app.destroy();self.app=None
+
+    def test_player_model_picker_random_uses_the_current_results(self):
+        from launcher_ui import player_models
+        self.app.rom.set(str(self.rom))
+        with patch.object(player_models,'list_models',return_value=[11,4096,4715]), \
+             patch('launcher_ui.app.random.choice',return_value=4096):
+            self.app._choose_player_model()
+            window=next(child for child in self.app.winfo_children() if isinstance(child,tk.Toplevel))
+            def descendants(widget):
+                for child in widget.winfo_children():
+                    yield child
+                    yield from descendants(child)
+            deadline=time.monotonic()+3
+            choices=None
+            while time.monotonic()<deadline:
+                self.app.update();choices=next((child for child in descendants(window) if isinstance(child,tk.Listbox)),None)
+                if choices is not None and choices.size()==3:break
+                time.sleep(.01)
+            self.assertIsNotNone(choices);self.assertEqual(choices.size(),3)
+            next(child for child in descendants(window) if 'text' in child.keys() and child.cget('text')=='Random from results').invoke()
+            self.assertEqual(self.app.preference_values['player_model'],4096)
+            self.assertIn('Random field character selected',self.app.status.get())
 
     def test_coop_experience_suppression_is_enabled_by_default_and_profile_scoped(self):
         from launcher_ui import services
