@@ -178,6 +178,8 @@ def main():
             z.write(ROOT/'tools'/name,'Unova-Together-Source/tools/'+name)
         for name in ('check_launcher_tree_parity.py','test_launcher_tree_parity.py','test_release_validation.py'):
             z.write(REPOSITORY_ROOT/'launcher-source/tools'/name,'Unova-Together-Source/tools/'+name)
+        z.write(REPOSITORY_ROOT/'launcher-source/tools/test_player_models.py',
+                'Unova-Together-Source/tools/test_player_models.py')
         z.write(REPOSITORY_ROOT/'docs/DEVELOPER_TESTING.md','Unova-Together-Source/docs/DEVELOPER_TESTING.md')
         for name in COMMANDS:
             z.write(ROOT/name, 'Unova-Together-Source/'+name)
