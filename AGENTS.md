@@ -175,6 +175,8 @@ You are authorized to independently create and execute reasonable subtasks **nec
 
 **Branch and review discipline:** Before starting, inspect branch and working tree; create a dedicated branch for nontrivial code changes unless the user specifies another workflow. Before committing, inspect `git diff --check`, the full diff, untracked files, and the staged diff. Never commit user secrets, ROMs, saves, generated archives, or unrelated work. If publishing through an API after Git authentication fails, compare the remote commit/tree against the reviewed local content and disclose any differences. Do not claim a clean checkout if it contains pre-existing edits.
 
+**Reusable patterns and branch names:** Read the repository-root `skills.md` before repeating a documented class of fix or design work. When a verified fix or design choice is likely to recur, add its cause, reusable approach, scope limits, and useful verification to `skills.md`, then reference it from this file. Name new working branches `MVQ1303/<short-topic>`; do not use the former `Codex/` prefix.
+
 You may suggest future tasks discovered during investigation, but do not autonomously start unrelated roadmap features. Keep optional improvements separate from requested work.
 
 ## 11. Stop conditions and recovery
