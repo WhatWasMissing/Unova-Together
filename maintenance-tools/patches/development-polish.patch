@@ -8926,7 +8926,7 @@
          if (!valid) lastCameraTime=-1;
          return valid;
      }
-@@ -225,6 +226,23 @@
+@@ -225,6 +226,26 @@
      for(double value:clip) if(!std::isfinite(value)) return unavailable();
      if (clip[3]<=0.001 || clip[2]<-clip[3] || clip[2]>clip[3]) return unavailable();
      return {128*(1+clip[0]/clip[3]),96*(1-clip[1]/clip[3])};
@@ -8946,11 +8946,14 @@
 +    for(double value:clip) if(!std::isfinite(value)) return std::numeric_limits<double>::quiet_NaN();
 +    if(clip[3]<=0.001 || clip[2]<-clip[3] || clip[2]>clip[3])
 +        return std::numeric_limits<double>::quiet_NaN();
-+    return (clip[2]/clip[3]+1.0)*0.5;
++    // Match GPU3D::SubmitPolygon's native Z conversion (including its bias
++    // and 0x200 quantization), as used by both software and OpenGL renderers.
++    const double nativeZ=(std::trunc(clip[2]/clip[3]*0x4000)+0x3FFF)*0x200;
++    return std::clamp(nativeZ,0.0,16777215.0)/16777216.0;
  }
  
  bool PresenceCalibration::calibrate(int mapId, QPointF origin, QPointF eastTile, QPointF southTile, QPointF local)
-@@ -248,7 +266,7 @@
+@@ -248,7 +269,7 @@
  }
  
  QImage DrawPresenceOverlay(const PresenceCalibration& c, QPointF local,
@@ -8959,7 +8962,7 @@
  {
      if (!c.valid) return {};
      QImage frame(256,192,QImage::Format_RGBA8888_Premultiplied);
-@@ -281,7 +299,17 @@
+@@ -281,7 +302,17 @@
      const auto localFeet=c.automatic?c.projectWorld(local,localAvatar.height):c.project(local,local);
      QRegion localSilhouette;
      if(!markers && localAvatar.sprites.size()>=12 && std::isfinite(localFeet.x()) && std::isfinite(localFeet.y())) {
@@ -8978,7 +8981,7 @@
          auto localPose=localAvatar;localPose.position=local;
          const double scale=avatarScale(c,local,localPose);
          const auto mask=sprite.scaled(qMax(1,int(std::round(32*scale))),qMax(1,int(std::round(32*scale))),Qt::IgnoreAspectRatio,Qt::FastTransformation);
-@@ -303,7 +331,7 @@
+@@ -303,7 +334,7 @@
      for (const auto& avatar : sorted)
      {
          const auto basePos = c.automatic ? c.projectWorld(avatar.position,avatar.height) : c.project(avatar.position,local);
@@ -8987,7 +8990,7 @@
          const bool reactionActive=avatar.companion && !avatar.companionMotion.isEmpty() &&
              elapsedMs>=avatar.companionReactionStarted && elapsedMs<avatar.companionReactionUntil;
          quint32 hash = 2166136261u;
-@@ -312,6 +340,7 @@
+@@ -312,6 +343,7 @@
          double scale=avatarScale(c,local,avatar);
          QPointF pos=basePos;
          double actionBob=0,actionLean=0,actionTurn=0;
@@ -8995,20 +8998,58 @@
          qint64 reactionAge=0;
          if(reactionActive) {
              reactionAge=elapsedMs-avatar.companionReactionStarted;
-@@ -337,6 +366,7 @@
+@@ -337,15 +369,56 @@
                  actionLean=std::sin(reactionAge*0.008)*1.5;
              }
          }
 +        pos=basePos+(pos-basePos)*motionScale;
          p.save();
-         // The emulator overlay has no game depth buffer. Preserve the local
-         // trainer silhouette when a remote trainer stands behind or on it.
-@@ -344,8 +374,12 @@
+-        // The emulator overlay has no game depth buffer. Preserve the local
+-        // trainer silhouette when a remote trainer stands behind or on it.
++        // Preserve the local trainer silhouette when another avatar stands
++        // behind it, including when scene depth is temporarily unavailable.
+         const bool behindLocal=reactionActive && avatar.companionMotion=="run"
              ?pos.y()<localFeet.y()-3.0
              :avatarDepth(c,local,avatar)<=localDepth+(c.automatic?0.03125:0.5);
          if(!localSilhouette.isEmpty() && behindLocal) p.setClipRegion(QRegion(QRect(0,0,256,192)).subtracted(localSilhouette),Qt::IntersectClip);
 -        p.translate(std::round(pos.x()),std::round(pos.y()));
 -        p.translate(actionLean,0);
++        p.save(); // Scene occlusion covers actor art, not status labels or emotes.
++        // Clip in screen coordinates before fractional translation or a reaction
++        // rotation. Apply the same scene test to companions and co-op trainers,
++        // including their shadows; UI markers remain intentionally visible.
++        if(sceneDepth && c.automatic && (!markers || avatar.companion)) {
++            const double actorDepth=c.projectWorldDepth(avatar.position,avatar.height);
++            if(std::isfinite(actorDepth)) {
++                QTransform placement;
++                placement.translate(avatar.companion?pos.x():std::round(pos.x()),
++                                    avatar.companion?pos.y():std::round(pos.y()));
++                placement.translate(actionLean*motionScale,0);
++                QRectF bounds=placement.mapRect(QRectF(-6,-2,12,4));
++                if(avatar.sprites.size()>=12) {
++                    const auto& sprite=avatar.sprites[0]; // Shared canvas for all poses.
++                    const double width=avatar.companion?sprite.width():32;
++                    const double height=avatar.companion?sprite.height():32;
++                    const double ground=avatar.companion?height:30;
++                    const double bob=reactionActive?actionBob*motionScale:0;
++                    auto billboard=placement;billboard.rotate(actionTurn*motionScale);
++                    bounds=bounds.united(billboard.mapRect(QRectF(-width*scale/2,
++                        -ground*scale-bob,width*scale,height*scale)));
++                } else bounds=bounds.united(placement.mapRect(QRectF(-6,-25,12,30)));
++                const auto pixels=bounds.toAlignedRect().intersected(QRect(0,0,256,192));
++                QRegion hidden;
++                for(int y=pixels.top();y<=pixels.bottom();++y) {
++                    int x=pixels.left();
++                    while(x<=pixels.right()) {
++                        while(x<=pixels.right() && !melonDS::IsPresenceOccludedByDepth(sceneDepth[y*256+x],static_cast<float>(actorDepth))) ++x;
++                        const int begin=x;
++                        while(x<=pixels.right() && melonDS::IsPresenceOccludedByDepth(sceneDepth[y*256+x],static_cast<float>(actorDepth))) ++x;
++                        if(x>begin) hidden+=QRect(begin,y,x-begin,1);
++                    }
++                }
++                p.setClipRegion(QRegion(QRect(0,0,256,192)).subtracted(hidden),Qt::IntersectClip);
++            }
++        }
 +        // Pixel art stays unfiltered, but fractional companion positions keep
 +        // the overlay from holding for a frame and then hopping one pixel as
 +        // its 3D-projected world position crosses integer screen coordinates.
@@ -9018,7 +9059,7 @@
          p.setPen(Qt::NoPen); p.setBrush(QColor(0,0,0,100)); p.drawEllipse(QRectF(-6,-2,12,4));
          if (markers && !avatar.companion)
          {
-@@ -355,24 +389,51 @@
+@@ -355,24 +428,30 @@
          else if (avatar.sprites.size()>=12)
          {
              auto pose=avatar;
@@ -9051,27 +9092,6 @@
 +                // frame; the gait bounce below moves the whole sprite.
 +                ground=height;
 +            }
-+            if(avatar.companion && sceneDepth && c.automatic && !actionTurn) {
-+                const double actorDepth=c.projectWorldDepth(avatar.position,avatar.height);
-+                if(std::isfinite(actorDepth)) {
-+                    const int left=std::max(0,int(std::floor(pos.x()+actionLean*motionScale-width*scale/2)));
-+                    const int right=std::min(256,int(std::ceil(pos.x()+actionLean*motionScale+width*scale/2)));
-+                    const int top=std::max(0,int(std::floor(pos.y()-ground*scale-2)));
-+                    const int bottom=std::min(192,int(std::ceil(pos.y()+2)));
-+                    QRegion visible;
-+                    for(int y=top;y<bottom;++y) {
-+                        int x=left;
-+                        while(x<right) {
-+                            while(x<right && melonDS::IsPresenceOccludedByDepth(sceneDepth[y*256+x],static_cast<float>(actorDepth))) ++x;
-+                            const int begin=x;
-+                            while(x<right && !melonDS::IsPresenceOccludedByDepth(sceneDepth[y*256+x],static_cast<float>(actorDepth))) ++x;
-+                            if(x>begin) visible+=QRect(begin,y,x-begin,1);
-+                        }
-+                    }
-+                    visible.translate(-qRound(pos.x()+actionLean*motionScale),-qRound(pos.y()));
-+                    p.setClipRegion(visible,Qt::IntersectClip);
-+                }
-+            }
 +            // Keep the foot anchor stable during ordinary gait and idle. A
 +            // fractional whole-sprite bob aliases against the pixel grid at
 +            // the follower's small rendered size, making it jump between
@@ -9081,7 +9101,19 @@
              p.restore();
          }
          else
-@@ -397,7 +458,11 @@
+@@ -391,13 +470,23 @@
+             else if (avatar.facing == "West") p.fillRect(QRect(-5,-18,2,2),Qt::black);
+             else { p.fillRect(QRect(-3,-18,2,2),Qt::black); p.fillRect(QRect(1,-18,2,2),Qt::black); }
+         }
++        p.restore();
++        // Return to the same anchor for UI badges, labels and emotes, retaining
++        // their existing visibility independently of the actor's scene depth.
++        p.translate(avatar.companion?pos.x():std::round(pos.x()),
++                    avatar.companion?pos.y():std::round(pos.y()));
++        p.translate(actionLean*motionScale,0);
+         QPointF arrow(0,-4);
+         if (avatar.facing=="South") arrow=QPointF(0,4);
+         else if (avatar.facing=="East") arrow=QPointF(4,0);
          else if (avatar.facing=="West") arrow=QPointF(-4,0);
          if (markers && !avatar.companion) { p.setPen(QPen(color,2)); p.drawLine(QPointF(0,-5),QPointF(0,-5)+arrow*2); }
          if (avatar.companion) {
@@ -9094,7 +9126,7 @@
              p.restore(); continue;
          }
          QFont font=p.font(); font.setPixelSize(8); p.setFont(font);
-@@ -484,9 +549,10 @@
+@@ -484,9 +573,10 @@
  {
      if (!c.valid) return {};
      const auto pos=c.automatic ? c.projectWorld(a.position,a.height) : c.project(a.position,local);
@@ -91145,7 +91177,7 @@
      ENetAddress RecoveryAddress{};
 --- /dev/null
 +++ b/source/melonDS/src/PresenceOcclusion.h
-@@ -0,0 +1,30 @@
+@@ -0,0 +1,33 @@
 +// Unova Together: Copyright (C) 2026 mvq1303. GPL-3.0-or-later.
 +#pragma once
 +
@@ -91167,12 +91199,15 @@
 +        (compositorFlags & BackgroundLayers) && backgroundPriority < actorPriority;
 +}
 +
-+// The scene depth and projected companion depth both use normalized [0, 1]
-+// device coordinates, where smaller values are closer to the camera.
++// Field actors use native Z-buffering. The renderer exports 24-bit depth
++// divided by 2^24; native Z is quantized in steps of 0x200. Allow one such
++// step for projection rounding, rather than a camera-distance-dependent gap.
 +constexpr bool IsPresenceOccludedByDepth(float sceneDepth, float actorDepth,
-+                                         float tolerance = 0.0015f) noexcept
++                                         float tolerance = 512.0f / 16777216.0f) noexcept
 +{
-+    return sceneDepth + tolerance < actorDepth;
++    return sceneDepth >= 0.0f && sceneDepth <= 1.0f &&
++        actorDepth >= 0.0f && actorDepth <= 1.0f && tolerance >= 0.0f &&
++        sceneDepth + tolerance < actorDepth;
 +}
 +
 +}
