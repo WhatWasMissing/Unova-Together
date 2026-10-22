@@ -6,6 +6,7 @@ from tkinter import filedialog, messagebox, ttk
 import unova_updater as updates
 import unova_storage as storage
 import launcher_migration
+from PIL import Image, ImageTk
 from . import preferences as prefs
 from . import services
 from . import gen5_tools
@@ -31,7 +32,10 @@ class Launcher(tk.Tk):
         self.update_status=tk.StringVar(value='Check GitHub for the latest Windows release.')
         self.available=tk.StringVar(value='Not checked yet');self.phase=tk.StringVar(value='No download in progress')
         self.news=self._read_news();self.pages={};self.nav={};self.images=[];self.page_name=''
-        self.feature_mega_frames=[];self.feature_mega_labels=[];self.feature_mega_frame=0;self.feature_mega_after=None
+        self.feature_mega_frames=[];self.feature_mega_photos=[];self.feature_mega_static=[];self.feature_mega_labels=[];self.feature_mega_frame=0;self.feature_mega_after=None
+        self.feature_mega_loading=False;self.feature_mega_loaded=False
+        self.feature_gen5_art=[]
+        self.play_fan_art=[]
         self.preference_values={};self.cheat_choices={};self.profile=None;self.rom_timer=None
         self.play_profiles=[];self.active_profile_id='';self.repair_release=None;self._switching=False
         self.presence_process=None;self.lan_request='';self.lan_status_time=0;self.lan_started=0;self.last_lan_action='host';self.lan_was_connected=False
@@ -110,6 +114,30 @@ class Launcher(tk.Tk):
             note.pack(anchor='w',pady=(5,16))
             parent.bind('<Configure>',lambda e,w=note:w.configure(wraplength=max(260,e.width-12)),add='+')
 
+    def _load_gif_frames(self,path,scale=1):
+        frames=[]
+        with Image.open(path) as animation:
+            for index in range(getattr(animation,'n_frames',1)):
+                animation.seek(index);frame=animation.convert('RGBA')
+                if scale!=1:
+                    width,height=frame.size
+                    frame=frame.resize((width*scale,height*scale),Image.Resampling.NEAREST)
+                frames.append(frame.copy())
+        return frames
+
+    def _load_feature_mega_worker(self):
+        try:
+            assets=HERE/'assets/features'
+            frames=[self._load_gif_frames(assets/name,scale=2) for name in ('mega-mawile-front.gif','mega-mawile-back.gif')]
+            self.messages.put(('feature-mega-frames',frames))
+        except Exception as exc:
+            self.messages.put(('feature-mega-error',str(exc)))
+
+    def _ensure_feature_mega_loaded(self):
+        if self.feature_mega_loading or self.feature_mega_loaded:return
+        self.feature_mega_loading=True;self.feature_art_status.configure(text='Loading animated sprite previews…')
+        threading.Thread(target=self._load_feature_mega_worker,daemon=True).start()
+
     def _library_page(self,parent):
         self._heading(parent,'LIBRARY','Mod library','')
         self.library_details={}
@@ -176,19 +204,17 @@ class Launcher(tk.Tk):
     def _play_page(self,parent):
         self._heading(parent,'PLAY','Play','')
         hero=tk.Frame(parent,bg=C['hero'],height=THEME['layout']['heroHeight']);hero.pack(fill='x');hero.pack_propagate(False)
-        try:
-            picture=tk.PhotoImage(file=HERE/'assets/explore.png');self.images.append(picture)
-        except tk.TclError:picture=None
-        art=tk.Label(hero,image=picture,bg=C['hero'],bd=0);art.pack(side='right',padx=(0,18),pady=18)
+        art=tk.Frame(hero,bg=C['hero']);art.pack(side='right',padx=(0,18),pady=18)
+        label(art,'MEGA ALTARIA · GEN 5 STYLE',size=8,bold=True,color=C['accent'],bg=C['hero']).pack(anchor='center',pady=(0,2))
+        art_sprites=tk.Frame(art,bg=C['hero']);art_sprites.pack()
+        for filename in ('mega-altaria-front.gif','mega-altaria-back.gif'):
+            picture=tk.PhotoImage(file=HERE/'assets/features/gen5-fan'/filename,format='gif -index 0')
+            self.images.append(picture);self.play_fan_art.append(picture)
+            tk.Label(art_sprites,image=picture,bg=C['hero'],bd=0).pack(side='left',padx=2)
         words=tk.Frame(hero,bg=C['hero']);words.pack(side='left',fill='both',expand=True,padx=24,pady=24)
         label(words,'BLAZE BLACK 2 REDUX · CO-OP',size=9,bold=True,color=C['accent'],bg=C['hero']).pack(anchor='w')
         label(words,'Pokemon\nTogether',size=25,bold=True,color=C['surface'],bg=C['hero'],role='display',justify='left').pack(anchor='w',pady=(10,12))
-        starters=tk.Frame(words,bg=C['hero']);starters.pack(anchor='w')
-        for species in (495,498,501):
-            try:
-                sprite=tk.PhotoImage(file=HERE/f'assets/gen5-{species}.png');self.images.append(sprite)
-                tk.Label(starters,image=sprite,bg=C['hero'],bd=0).pack(side='left')
-            except tk.TclError:pass
+        label(words,'Mega Evolution · co-op · animated followers',size=10,color=C['accent'],bg=C['hero']).pack(anchor='w')
         def fit(e):
             if e.width<675:art.pack_forget()
             elif not art.winfo_manager():art.pack(side='right',padx=(0,18),pady=18,before=words)
@@ -274,6 +300,7 @@ class Launcher(tk.Tk):
         if name=='Profiles':self._save();self._refresh_backups()
         for page in self.pages.values():page.pack_forget()
         self.pages[name].pack(fill='both',expand=True);self.page_name=name
+        if name=='Features':self._ensure_feature_mega_loaded()
         self._set_feature_mega_animation(name=='Features')
         context=game_routes.MODS[self.active_mod]['name']+' · ' if self.active_mod and name!='Library' else ''
         self.title('Pokemon Together · '+context+game_routes.PAGE_LABELS.get(name,name))
@@ -1341,6 +1368,25 @@ class Launcher(tk.Tk):
                     self.bar['value']=value
                     if not self.cancel.is_set():self.phase.set('Verifying and preparing update…' if value>=100 else f'Downloading · {value:.0f}%')
                     continue
+                if action=='feature-mega-frames':
+                    try:
+                        self.feature_mega_frames=value;self.feature_mega_photos=[]
+                        for widget,frames in zip(self.feature_mega_labels,self.feature_mega_frames):
+                            photo=ImageTk.PhotoImage(frames[0],master=self);self.images.append(photo);self.feature_mega_photos.append(photo)
+                            widget.configure(image=photo)
+                        self.feature_mega_loaded=True;self.feature_mega_loading=False
+                        self.feature_art_status.configure(text='Animated Mega Mawile previews ready.')
+                        for photo in self.feature_mega_static:
+                            if photo in self.images:self.images.remove(photo)
+                        self.feature_mega_static=[]
+                        self._set_feature_mega_animation(self.page_name=='Features')
+                    except (tk.TclError,OSError,ValueError) as exc:
+                        self.feature_mega_loading=False;self.feature_art_status.configure(text='Animation preview unavailable; showing stills.')
+                        self.status.set('Could not load Mega Mawile animation preview: '+str(exc))
+                    continue
+                if action=='feature-mega-error':
+                    self.feature_mega_loading=False;self.feature_art_status.configure(text='Animation preview unavailable; showing stills.')
+                    continue
                 finished_operation=self.operation;self.busy=False;self.operation=''
                 if action in ('storage-clean','storage-auto'):
                     message=storage.summary(value)
@@ -1426,69 +1472,90 @@ class Launcher(tk.Tk):
         self._start_lan(self.last_lan_action)
 
     def _features_page(self,parent):
-        self._heading(parent,'FEATURES','Features','Explore Mega Evolution, co-op and more')
-        mega=card(parent);mega.pack(fill='x',pady=(0,12))
-        art=tk.Frame(mega,bg=C['surface']);art.pack(anchor='w',padx=14,pady=(14,8))
+        self._heading(parent,'FEATURES','Features','A quick guide to what you can do in Unova Together.')
+        banner=tk.Frame(parent,bg=C['hero'],height=132);banner.pack(fill='x',pady=(0,14));banner.pack_propagate(False)
+        copy=tk.Frame(banner,bg=C['hero']);copy.pack(side='left',fill='both',expand=True,padx=20,pady=18)
+        label(copy,'EXPLORE TOGETHER',size=9,bold=True,color=C['accent'],bg=C['hero']).pack(anchor='w')
+        label(copy,'Make Unova your own',size=17,bold=True,color=C['surface'],bg=C['hero'],role='display').pack(anchor='w',pady=(7,4))
+        note=label(copy,'Mega Evolution, co-op, animated followers and more.',size=10,color=C['accent'],bg=C['hero'],wraplength=480,justify='left')
+        note.pack(anchor='w')
+        copy.bind('<Configure>',lambda e,w=note:w.configure(wraplength=max(220,e.width-4)))
+        fan_art=tk.Frame(banner,bg=C['hero']);fan_art.pack(side='right',padx=(0,14),pady=4)
+        label(fan_art,'MEGA AMPHAROS · GEN 5 STYLE',size=8,bold=True,color=C['accent'],bg=C['hero']).pack(anchor='center',pady=(0,1))
+        fan_sprites=tk.Frame(fan_art,bg=C['hero']);fan_sprites.pack()
+        for filename in ('mega-ampharos-front.gif','mega-ampharos-back.gif'):
+            picture=tk.PhotoImage(file=HERE/'assets/features/gen5-fan'/filename,format='gif -index 0')
+            self.images.append(picture);self.feature_gen5_art.append(picture)
+            tk.Label(fan_sprites,image=picture,bg=C['hero'],bd=0).pack(side='left',padx=2)
+
+        grid=tk.Frame(parent,bg=C['background']);grid.pack(fill='x')
+        self.feature_grid=grid;self.feature_grid_columns=0;self.feature_cards=[]
+        mega=card(grid);self.feature_cards.append(mega)
+        layout=tk.Frame(mega,bg=C['surface']);layout.pack(fill='x',padx=16,pady=14)
+        art=tk.Frame(layout,bg=C['surface']);self.feature_mega_art=art
         for side,filename in (('FRONT','mega-mawile-front.gif'),('BACK','mega-mawile-back.gif')):
-            pose=tk.Frame(art,bg=C['surface']);pose.pack(side='left',padx=(0,18))
+            pose=tk.Frame(art,bg=C['surface']);pose.pack(side='left',padx=(0,12))
             label(pose,side,size=8,color=C['muted'],bg=C['surface']).pack(anchor='center')
-            frames=[tk.PhotoImage(file=HERE/'assets/features'/filename,format=f'gif -index {frame}').zoom(2,2) for frame in range(72)]
-            sprite=tk.Label(pose,image=frames[0],bg=C['surface'],bd=0);sprite.pack()
-            self.feature_mega_frames.append(frames);self.feature_mega_labels.append(sprite)
-        label(mega,'Mega Evolution',size=15,bold=True,bg=C['surface']).pack(anchor='w',padx=14)
-        label(mega,'Try 49 Mega forms, each with its own matching Mega Stone. Give the stone to its Pokémon, then press L + R together while choosing a move in battle. Mega Evolution lasts until the battle ends.',size=10,color=C['muted'],bg=C['surface'],wraplength=570,justify='left').pack(anchor='w',padx=14,pady=(6,8))
-        label(mega,'Examples: Mega Serperior gains Adaptability; Mega Charizard Y gains Drought; Mega Salamence gains Intimidate. Animated battle artwork is available for 46 forms.',size=10,bg=C['surface'],wraplength=570,justify='left').pack(anchor='w',padx=14,pady=(0,4))
-        label(mega,'The launcher shows Mawile’s supplied front and back animation.',size=9,color=C['muted'],bg=C['surface']).pack(anchor='w',padx=14,pady=(2,0))
-        button(mega,'Mega Evolution guide',lambda:self.guide('MEGA_EVOLUTION.md')).pack(anchor='w',padx=14,pady=(8,14))
-        story=card(parent);story.pack(fill='x',pady=(0,12))
-        label(story,'Cynthia’s Route 7 challenge',size=13,bold=True,bg=C['surface']).pack(anchor='w',padx=14,pady=(14,4))
-        label(story,'After you defeat Skyla, Cynthia appears near the Mistralton City and Route 7 transition. She explains Mega Evolution and gives you a stone for a Pokémon in your party, or a Serperiorite if no one is ready. Return later to challenge her team and Mega Garchomp. For Blaze Black 2 Redux Complete v1.4.1, the launcher prepares a separate event-ready copy and keeps your selected game file and saves intact.',size=10,color=C['muted'],bg=C['surface'],wraplength=570,justify='left').pack(anchor='w',padx=14,pady=(4,14))
-        companion=card(parent);companion.pack(fill='x',pady=(0,12))
-        label(companion,'Companion interactions',size=13,bold=True,bg=C['surface']).pack(anchor='w',padx=14,pady=(14,4))
-        label(companion,'Expanded in 1.0.6 · on by default in this launcher',size=9,color=C['muted'],bg=C['surface']).pack(anchor='w',padx=14)
-        for copy in (
-            'Talk, pet, play, praise, tell a story, ask about today, sit together, show a trick, tell a joke or sing together.',
-            'Five friendship bands, subtle nature cues and session visit counts. Area, calendar, Pokémon type and recent battles add context. Hearts, !, ?, stars and notes accompany peeks, sways, hops, spins and short runs.',
-            'Stop, face your follower and press R+A, or tap its sprite. A alone advances game text. Manage interactions in Settings → Following Pokémon; show or hide followers in Unova → Settings.',
-            'Cosmetic only: HP, friendship, items and saves are unchanged.'):
-            text=label(companion,copy,size=10,bg=C['surface'],wraplength=570,justify='left')
-            text.pack(anchor='w',padx=14,pady=(8,4))
-            companion.bind('<Configure>',lambda e,w=text:w.configure(wraplength=max(240,e.width-32)),add='+')
-        button(companion,'Interaction guide',lambda:self.guide('COMPANION_INTERACTIONS.md')).pack(anchor='w',padx=14,pady=(8,14))
+            photo=tk.PhotoImage(file=HERE/'assets/features'/filename,format='gif -index 0').zoom(2,2)
+            self.images.append(photo);self.feature_mega_static.append(photo)
+            sprite=tk.Label(pose,image=photo,bg=C['surface'],bd=0);sprite.pack()
+            self.feature_mega_labels.append(sprite)
+        details=tk.Frame(layout,bg=C['surface']);self.feature_mega_details=details
+        label(details,'MEGA EVOLUTION',size=9,bold=True,color=C['primary'],bg=C['surface']).pack(anchor='w')
+        label(details,'49 Mega forms',size=16,bold=True,bg=C['surface'],role='display').pack(anchor='w',pady=(5,3))
+        mega_copy=label(details,'Give it the matching stone, then press L + R during move selection. Mega Evolution lasts until battle ends.',size=10,color=C['muted'],bg=C['surface'],wraplength=520,justify='left')
+        mega_copy.pack(anchor='w',fill='x',pady=(0,5))
+        label(details,'Examples: Serperior · Charizard Y · Salamence',size=9,bg=C['surface']).pack(anchor='w')
+        self.feature_art_status=label(details,'Animated previews load when you open this page.',size=8,color=C['muted'],bg=C['surface'])
+        self.feature_art_status.pack(anchor='w',pady=(5,0))
+        details.bind('<Configure>',lambda e,w=mega_copy:w.configure(wraplength=max(100,e.width-8)),add='+')
+        def arrange_mega(event):
+            horizontal=event.width>=650
+            if getattr(layout,'_horizontal',None)==horizontal:return
+            layout._horizontal=horizontal
+            art.pack_forget();details.pack_forget()
+            if horizontal:
+                art.pack(side='left',anchor='n',padx=(0,16));details.pack(side='left',fill='x',expand=True)
+            else:
+                art.pack(side='top',anchor='center',pady=(0,10));details.pack(side='top',fill='x',expand=True)
+        layout.bind('<Configure>',arrange_mega,add='+')
+
         entries=(
-            ('walking','Explore together','See teammates and their followers on the map. Unova → Players shows their status and offers Join map / Teleport.'),
-            ('items','Give items','Send an item and quantity from Unova → Players. Your teammate accepts the offer; both players save afterward.'),
-            ('battle','Co-op trainer battles','Choose Solo or Co-op before an encounter. Supported trainers and practice rematches use independent parties and saves. Co-op XP is disabled; interrupted battles may roll back.'),
-            ('pokemon','Pokémon trades & player battles','Exchange party Pokémon or request a friendly battle from Unova → Players. Direct trades exclude eggs, held Mail and trade evolutions.'),
-            ('camera','Custom camera','Adjust tilt, rotation and zoom in System → Multiplayer → Camera. Each player chooses their own view.'),
-            ('stats','Party IVs & EVs','Open Unova → Pokémon → IVs and EVs to view each Pokémon’s stats.'))
-        for asset,title,description in entries:
-            panel=card(parent);panel.pack(fill='x',pady=(0,12))
-            image=tk.PhotoImage(file=HERE/f'assets/features/{asset}.png');self.images.append(image)
-            tk.Label(panel,image=image,bg=C['surface'],bd=0).pack(anchor='w',padx=14,pady=(14,8))
-            label(panel,title,size=13,bold=True,bg=C['surface']).pack(anchor='w',padx=14)
-            text=label(panel,description,size=10,color=C['muted'],bg=C['surface'],wraplength=570,justify='left');text.pack(anchor='w',padx=14,pady=(6,14))
-            panel.bind('<Configure>',lambda e,w=text:w.configure(wraplength=max(240,e.width-32)))
-        extras=card(parent);extras.pack(fill='x')
-        for title,copy in (
-            ('Following Pokémon','All 649 base species can follow you. Generations 1–4 use HGSS artwork, with matching gender and form variants. Shiny Pokémon keep their separate shiny sprites; Generation 5 and uncovered forms keep their existing art. Reduced follower motion is available in Settings.'),
-            ('Super Repels','Super Repels cost ₽10, the lowest positive price supported by the game. Available in active ordinary money shops. ROM files and saves are not edited.'),
-            ('Encounter finder & move relearning','Unova → Pokémon lists ordinary wild encounters by season and offers free level-up move relearning. Gifts, scripted legendaries and Hidden Grottos are excluded.'),
-            ('Field HMs','Owned HMs work without occupying battle move slots. Native story requirements still apply; Fly needs an available field-action slot.'),
-            ('Solo XP','Supported solo battles award 1.25× XP automatically. Existing XP is unchanged. Co-op battles award no XP.'),
-            ('Area battle scenery · optional','Generate nearby battle scenery locally from your ROM. Enable Nearby battle scenery in Settings. This remains experimental; special scenes keep original backgrounds, and environments are not all playtested.'),
-            ('LAN & internet play','Host, join and retry from Co-op. Use Tailscale across networks. The UDP bridge is experimental and needs your group’s server and Python; no public server is supplied.'),
-            ('Games & saves','Separate save slots, automatic names and per-slot settings. Back up and restore saves from Games & saves or Tools; old installations can be cleaned while keeping saves and backups.'),
-            ('Player appearance','Browse and preview animated NPCs and Pokémon from your supported game, then filter, favorite, save named looks, or choose randomly. Changes apply to normal walking; bike and surf keep their original animations.'),
-            ('Generation 5 menu sounds','The added in-game menus use movement, confirmation and back sounds inspired by Generation 5 games. Turn them off from the in-game Unova → Settings menu.'),
-            ('Gen 5 tools','Check ROM compatibility, compare copied saves and estimate Redux Challenge XP budgets. These tools read data; they do not edit your game.'),
-            ('Settings & maintenance','Controller navigation, music, emulator settings and reviewed optional cheats. Verified updates, repair and reviewed troubleshooting reports are available.')):
-            label(extras,title,size=12,bold=True,bg=C['surface']).pack(anchor='w',padx=14,pady=(12,4))
-            text=label(extras,copy,size=10,color=C['muted'],bg=C['surface'],wraplength=570,justify='left');text.pack(anchor='w',padx=14,pady=(0,8))
-            extras.bind('<Configure>',lambda e,w=text:w.configure(wraplength=max(240,e.width-32)),add='+')
-        guides=tk.Frame(parent,bg=C['background']);guides.pack(fill='x',pady=12)
-        for title,doc in (('Feature guide','FEATURES.md'),('Known issues','KNOWN_ISSUES.md'),('Roadmap','ROADMAP.md')):
+            ('STORY','Cynthia’s Route 7 challenge','After Skyla, meet Cynthia near Route 7 for a Mega Stone. Return later to face her team and Mega Garchomp; the launcher prepares the event-ready game copy.'),
+            ('CO-OP','Play with friends','See teammates, trade Pokémon, share items and battle supported trainers. Co-op XP is disabled to protect save consistency.'),
+            ('POKÉMON','Following Pokémon','Animated followers include separate shiny sprites. Adjust follower motion in launcher Settings.'),
+            ('CUSTOMIZE','Field models & camera','Choose a valid animated character from your game, save favorite looks, and adjust camera tilt, rotation and zoom.'),
+            ('TEAM TOOLS','Encounters, moves & stats','Find wild encounters, relearn level-up moves, view IVs and EVs, and use supported field HMs.'),
+            ('SAVES','Profiles & backups','Keep separate save slots, create backups, restore a save, and clean old installations while keeping your progress.'),
+            ('BATTLES','Optional battle scenery','Build nearby battle backgrounds from your own game file. This optional feature is experimental.'),)
+        for category,title,description in entries:
+            panel=card(grid);self.feature_cards.append(panel)
+            body=tk.Frame(panel,bg=C['surface']);body.pack(fill='both',expand=True,padx=16,pady=14)
+            label(body,category,size=8,bold=True,color=C['primary'],bg=C['surface'],role='utility').pack(anchor='w')
+            label(body,title,size=13,bold=True,bg=C['surface']).pack(anchor='w',pady=(5,4))
+            text=label(body,description,size=10,color=C['muted'],bg=C['surface'],wraplength=360,justify='left')
+            text.pack(anchor='w',fill='x')
+            body.bind('<Configure>',lambda e,w=text:w.configure(wraplength=max(200,e.width-4)),add='+')
+        grid.bind('<Configure>',self._layout_feature_grid,add='+')
+        guides=tk.Frame(parent,bg=C['background']);guides.pack(fill='x',pady=(14,4))
+        guide_rows=(('Feature guide','FEATURES.md'),('Mega Evolution','MEGA_EVOLUTION.md'),('Follower interactions','COMPANION_INTERACTIONS.md'))
+        for title,doc in guide_rows:
             button(guides,title,lambda name=doc:self.guide(name)).pack(side='left',padx=(0,8))
+        more=tk.Frame(parent,bg=C['background']);more.pack(fill='x',pady=(0,12))
+        for title,doc in (('Known issues','KNOWN_ISSUES.md'),('Roadmap','ROADMAP.md')):
+            button(more,title,lambda name=doc:self.guide(name)).pack(side='left',padx=(0,8))
+
+    def _layout_feature_grid(self,event):
+        columns=2 if event.width>=640 else 1
+        if columns==self.feature_grid_columns:return
+        self.feature_grid_columns=columns
+        self.feature_grid.grid_columnconfigure(0,weight=1,uniform='feature-card')
+        self.feature_grid.grid_columnconfigure(1,weight=1 if columns==2 else 0,uniform='feature-card' if columns==2 else '')
+        for index,panel in enumerate(self.feature_cards):
+            if columns==2 and index==0:row,column,span=0,0,2
+            elif columns==2:row,column,span=1+(index-1)//2,(index-1)%2,1
+            else:row,column,span=index,0,1
+            panel.grid(row=row,column=column,columnspan=span,sticky='ew',padx=(0,8) if columns==2 and column==0 and span==1 else (8,0) if columns==2 and column==1 else 0,pady=(0,10))
 
     def _set_feature_mega_animation(self,active):
         if active:
@@ -1501,8 +1568,8 @@ class Launcher(tk.Tk):
         self.feature_mega_after=None
         if not self.feature_mega_frames:return
         self.feature_mega_frame=(self.feature_mega_frame+1)%len(self.feature_mega_frames[0])
-        for widget,frames in zip(self.feature_mega_labels,self.feature_mega_frames):
-            widget.configure(image=frames[self.feature_mega_frame])
+        for photo,frames in zip(self.feature_mega_photos,self.feature_mega_frames):
+            photo.paste(frames[self.feature_mega_frame])
         if self.page_name=='Features':self.feature_mega_after=self.after(80,self._advance_feature_mega_animation)
 
     def _cycle_page(self,direction):
