@@ -84,6 +84,12 @@ Those are findings for the two exact files in that dated comparison, not a unive
 - Verify with relevant launcher tests, the UI parity check, and a real launch/visual inspection when available. Report screenshot or live-runtime checks that could not be completed.
 - Confirm distribution rights for each artwork contribution before packaging it; a sprite-hosting repository's code license does not cover Pokémon images. When requested, fan-made Generation 5-style Pokémon sprites are appropriate launcher art only if the artist or project explicitly permits reuse; credit both the animator and any base-sprite artists, pin the source revision, and record the terms in `assets/ART-CREDITS.md`. Do not infer art permissions from source-code licenses, and do not bundle game captures or ROM-extracted character art in launcher pages.
 
+## Launcher News and patch notes
+
+- The launcher fetches `patchnotes/index.json` from the repository's `main` branch, and its “Read on GitHub” links also target `main`. Notes added only to a release branch or a GitHub release description will not appear in the News page. When releasing from a non-main branch, publish the note file and matching index entry to `main` as part of the release workflow; keep `patchnotes/README.md` in sync.
+- Keep the patch-note index, Markdown files, and bundled `launcher-source/tools/launcher_ui/assets/news.json` consistent in the release source. Verify the launcher's real `launcher_feed()` fetch against the public `main` endpoint; local index tests alone cannot detect that the default branch is behind. GitHub's raw endpoint may serve a cached index for up to five minutes, so confirm the live feed after that cache expires.
+- On the default branch, the newest published note may be newer than that branch's embedded `VERSION.txt`. Tests should require the current version's note to be present and the feed to be correctly ordered without assuming the checkout version is always the newest published note.
+
 ## Verification, packaging, and handoff
 
 Report the evidence level precisely:
