@@ -299,7 +299,9 @@ def probe(values):
         try:
             older=versioning.numbers(relay_build)<versioning.numbers(expected_build)
         except ValueError:
-            older=False
+            # An unknown build can only be replaced on loopback, and the
+            # process helper independently verifies ownership before stopping it.
+            older=True
         if relay_build!=expected_build:
             raise RelayCompatibilityError(
                 f'Relay build {relay_build} does not match this launcher ({expected_build}). Update and restart the relay host.',
@@ -307,7 +309,7 @@ def probe(values):
         if message.get('fieldZonePresence') is not True:
             raise RelayCompatibilityError(
                 f'Relay build {relay_build} is missing field-zone sharing. Restart the relay host after updating.',
-                relay_build=relay_build)
+                replaceable_local=True,relay_build=relay_build)
     return f'Presence relay reachable (build {expected_build}). Native LAN/UDP pairing must still be checked in-game.'
 
 def save_connection(runtime,values,player='Player'):

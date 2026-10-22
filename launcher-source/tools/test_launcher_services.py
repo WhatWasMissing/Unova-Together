@@ -238,7 +238,9 @@ class ServiceTests(unittest.TestCase):
             for welcome,replaceable in (
                 ({'type':'welcome','version':1,'fieldZonePresence':True},True),
                 ({'type':'welcome','version':1,'buildVersion':'2.0.19','fieldZonePresence':True},True),
-                ({'type':'welcome','version':1,'buildVersion':'2.0.20','fieldZonePresence':False},False),
+                ({'type':'welcome','version':1,'buildVersion':'2.0.20','fieldZonePresence':False},True),
+                ({'type':'welcome','version':1,'buildVersion':'not-a-release','fieldZonePresence':True},True),
+                ({'type':'welcome','version':1,'buildVersion':'2.0.21','fieldZonePresence':True},False),
             ):
                 with self.subTest(welcome=welcome),patch.object(s.socket,'create_connection',return_value=Connection(welcome)):
                     with self.assertRaises(s.RelayCompatibilityError) as raised:s.probe({'host':'localhost','room':'test'})
@@ -268,13 +270,19 @@ class ServiceTests(unittest.TestCase):
                 self.assertFalse(relayproc.stop_owned_listener(home,8765))
                 script=run.call_args.args[0][-1]
                 self.assertIn('Get-NetTCPConnection -State Listen -LocalPort $port',script)
-                self.assertIn("$process.CommandLine -notmatch $portPattern",script)
+                self.assertIn("$process.CommandLine -match $portPattern",script)
                 self.assertIn('Invoke-CimMethod -InputObject $process -MethodName Terminate',script)
+                self.assertIn('presence_server.py',script)
+                self.assertIn('unova_launcher.py',script)
+                self.assertIn("$pythonName -ieq 'python.exe'",script)
                 self.assertNotIn(str(home),script)
-                run.return_value=subprocess.CompletedProcess([],0,'[{"stopped":true}]','')
+                run.return_value=subprocess.CompletedProcess([],0,'[{"owned":true,"stopped":true}]','')
                 self.assertTrue(relayproc.stop_owned_listener(home,8765))
-                run.return_value=subprocess.CompletedProcess([],0,'[{"stopped":false}]','')
+                run.return_value=subprocess.CompletedProcess([],0,'[{"owned":true,"stopped":false}]','')
                 with self.assertRaises(relayproc.RelayProcessError):relayproc.stop_owned_listener(home,8765)
+                run.return_value=subprocess.CompletedProcess([],0,'[{"owned":false,"stopped":false}]','')
+                with self.assertRaisesRegex(relayproc.RelayProcessError,'not started by this installation'):
+                    relayproc.stop_owned_listener(home,8765)
                 run.return_value=subprocess.CompletedProcess([],1,'','error')
                 with self.assertRaises(relayproc.RelayProcessError):relayproc.stop_owned_listener(home,8765)
     def test_diagnostic_export_excludes_game_data_and_redacts(self):

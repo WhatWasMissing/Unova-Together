@@ -21,6 +21,11 @@ $managedRoot = [Text.Encoding]::Unicode.GetString([Convert]::FromBase64String('{
 $prefix = $managedRoot + '\\'
 $port = {port}
 $portPattern = '(?:^|\\s)--presence-relay\\s+' + [regex]::Escape([string]$port) + '(?:\\s|$)'
+$legacyScript = Join-Path (Join-Path $managedRoot 'tools') 'presence_server.py'
+$legacyScriptPattern = '(?:^|\\s)"?' + [regex]::Escape($legacyScript) + '"?(?=\\s|$)'
+$legacyArgsPattern = '(?:^|\\s)--host\\s+0\\.0\\.0\\.0\\s+--port\\s+' + [regex]::Escape([string]$port) + '(?:\\s|$)'
+$legacyLauncher = Join-Path (Join-Path $managedRoot 'tools') 'unova_launcher.py'
+$legacyLauncherPattern = '(?:^|\\s)"?' + [regex]::Escape($legacyLauncher) + '"?(?=\\s|$)'
 $owners = @(Get-NetTCPConnection -State Listen -LocalPort $port -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique)
 $results = @()
 foreach ($ownerId in $owners) {{
@@ -28,31 +33,49 @@ foreach ($ownerId in $owners) {{
     $process = Get-CimInstance -ClassName Win32_Process -Filter (\"ProcessId = {{0}}\" -f $ownerId) -ErrorAction SilentlyContinue
     if ($null -eq $process -or !$process.ExecutablePath -or !$process.CommandLine) {{ continue }}
     try {{ $fullPath = [IO.Path]::GetFullPath($process.ExecutablePath) }} catch {{ continue }}
-    if (!$fullPath.StartsWith($prefix, [StringComparison]::OrdinalIgnoreCase)) {{ continue }}
-    $parts = $fullPath.Substring($prefix.Length).Split([IO.Path]::DirectorySeparatorChar)
-    $layoutMatches = ($parts.Length -eq 2 -and $parts[0] -ieq 'launcher') -or
-        ($parts.Length -eq 6 -and $parts[0] -ieq '.updates' -and $parts[1] -ieq 'versions' -and
-         $parts[3] -ieq 'Unova-Together' -and $parts[4] -ieq 'launcher')
-    $fileName = [IO.Path]::GetFileName($fullPath)
-    $nameMatches = $fileName -ieq 'Pokemon Together.exe' -or $fileName -ieq 'Unova Together.exe'
-    if (!$layoutMatches -or !$nameMatches -or $process.CommandLine -notmatch $portPattern) {{ continue }}
+    $launcherRelay = $false
+    if ($fullPath.StartsWith($prefix, [StringComparison]::OrdinalIgnoreCase)) {{
+        $parts = $fullPath.Substring($prefix.Length).Split([IO.Path]::DirectorySeparatorChar)
+        $layoutMatches = ($parts.Length -eq 2 -and $parts[0] -ieq 'launcher') -or
+            ($parts.Length -eq 6 -and $parts[0] -ieq '.updates' -and $parts[1] -ieq 'versions' -and
+             $parts[3] -ieq 'Unova-Together' -and $parts[4] -ieq 'launcher')
+        $fileName = [IO.Path]::GetFileName($fullPath)
+        $nameMatches = $fileName -ieq 'Pokemon Together.exe' -or $fileName -ieq 'Unova Together.exe'
+        $launcherRelay = $layoutMatches -and $nameMatches -and $process.CommandLine -match $portPattern
+    }}
+    # Older game builds launched presence_server.py with Python. Its interpreter
+    # is outside the install, so identify it by the exact installed script and
+    # argument sequence before treating it as owned.
+    $pythonName = [IO.Path]::GetFileName($fullPath)
+    $legacyPythonServer = $process.CommandLine -match $legacyScriptPattern -and
+        $process.CommandLine -match $legacyArgsPattern
+    $legacyPythonLauncher = $process.CommandLine -match $legacyLauncherPattern -and
+        $process.CommandLine -match $portPattern
+    $legacyPythonRelay = ($pythonName -ieq 'python.exe' -or $pythonName -ieq 'pythonw.exe') -and
+        ($legacyPythonServer -or $legacyPythonLauncher)
+    if (!$launcherRelay -and !$legacyPythonRelay) {{
+        $results += [pscustomobject]@{{owned=$false;stopped=$false}}
+        continue
+    }}
     $stopped = $false
     try {{
         $result = Invoke-CimMethod -InputObject $process -MethodName Terminate -Arguments @{{Reason=[uint32]0}}
         $stopped = ($result.ReturnValue -eq 0)
     }} catch {{ $stopped = $false }}
-    $results += [pscustomobject]@{{stopped=$stopped}}
+    $results += [pscustomobject]@{{owned=$true;stopped=$stopped}}
 }}
 ConvertTo-Json -InputObject @($results) -Compress
 """
 
 
 def stop_owned_listener(home: str | Path, port: int) -> bool:
-    """Terminate only a relay executable under this install's launcher slots.
+    """Stop only a relay process started from this installation.
 
-    The listener PID, executable path, install layout, and exact relay command
-    line are checked by one PowerShell process. Termination is invoked on the
-    queried Win32_Process instance, avoiding a second PID lookup after checks.
+    Current builds run the packaged launcher with ``--presence-relay``. Older
+    game builds ran Python against this install's exact ``tools/presence_server.py``
+    with fixed host/port arguments; source launchers used ``tools/unova_launcher.py``
+    with ``--presence-relay``. The listener PID and process identity are checked
+    together, then termination is invoked on that queried process.
     """
     if type(port) is not int or not 1 <= port <= 65535:
         raise ValueError('Relay port must be between 1 and 65535.')
@@ -82,6 +105,10 @@ def stop_owned_listener(home: str | Path, port: int) -> bool:
     entries = result if isinstance(result, list) else [result]
     if not entries:
         return False
-    if any(not isinstance(entry, dict) or entry.get('stopped') is not True for entry in entries):
+    if any(not isinstance(entry, dict) for entry in entries):
+        raise RelayProcessError('Windows returned an invalid local relay status.')
+    if any(entry.get('owned') is not True for entry in entries):
+        raise RelayProcessError('A relay is listening on this port, but it was not started by this installation.')
+    if any(entry.get('stopped') is not True for entry in entries):
         raise RelayProcessError('The outdated relay belongs to this installation but Windows could not stop it.')
     return True

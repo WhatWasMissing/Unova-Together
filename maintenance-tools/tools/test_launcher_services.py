@@ -3,6 +3,7 @@ from pathlib import Path
 import hashlib, io, json, os, subprocess, tempfile, threading, unittest, zipfile
 from unittest.mock import patch
 from launcher_ui import services as s
+from launcher_ui import relay_process as relayproc
 import unova_updater as u
 import unova_storage as storage
 
@@ -221,9 +222,69 @@ class ServiceTests(unittest.TestCase):
             def __exit__(self,*args):pass
             def settimeout(self,t):pass
             def sendall(self,data):self.data=json.loads(data)
-            def recv(self,n):return b'{"type":"welcome","version":1,"buildVersion":"2.0.20","fieldZonePresence":true}\n'
-        with patch.object(s.socket,'create_connection',return_value=Connection()):
+            def recv(self,n):return b'{"type":"welcome","version":1,"buildVersion":"2.0.19","fieldZonePresence":true}\n'
+        with patch.object(s.versioning,'current_version',return_value='2.0.19'),patch.object(s.socket,'create_connection',return_value=Connection()):
             self.assertIn('reachable',s.probe({'host':'localhost','room':'test'}))
+
+    def test_probe_rejects_legacy_relay_and_missing_field_zone_capability(self):
+        class Connection:
+            def __init__(self,message):self.message=message
+            def __enter__(self):return self
+            def __exit__(self,*args):pass
+            def settimeout(self,t):pass
+            def sendall(self,data):self.data=json.loads(data)
+            def recv(self,n):return (json.dumps(self.message)+'\n').encode()
+        with patch.object(s.versioning,'current_version',return_value='2.0.20'):
+            for welcome,replaceable in (
+                ({'type':'welcome','version':1,'fieldZonePresence':True},True),
+                ({'type':'welcome','version':1,'buildVersion':'2.0.19','fieldZonePresence':True},True),
+                ({'type':'welcome','version':1,'buildVersion':'2.0.20','fieldZonePresence':False},True),
+                ({'type':'welcome','version':1,'buildVersion':'not-a-release','fieldZonePresence':True},True),
+                ({'type':'welcome','version':1,'buildVersion':'2.0.21','fieldZonePresence':True},False),
+            ):
+                with self.subTest(welcome=welcome),patch.object(s.socket,'create_connection',return_value=Connection(welcome)):
+                    with self.assertRaises(s.RelayCompatibilityError) as raised:s.probe({'host':'localhost','room':'test'})
+                    self.assertEqual(raised.exception.replaceable_local,replaceable)
+
+    def test_stale_loopback_relay_is_replaced_but_remote_relay_is_never_restarted(self):
+        stale=s.RelayCompatibilityError('old relay',replaceable_local=True,relay_build='2.0.19')
+        start=unittest.mock.Mock();restart=unittest.mock.Mock()
+        with patch.object(s,'probe',side_effect=[stale,'Presence relay reachable (build 2.0.20).']):
+            result=s.check_relay({'host':'127.0.0.1','port':8765,'room':'test'},start,restart)
+        self.assertIn('Outdated local relay replaced',result)
+        start.assert_not_called();restart.assert_called_once_with(8765)
+        restart.reset_mock()
+        with patch.object(s,'probe',side_effect=stale):
+            with self.assertRaises(s.RelayCompatibilityError):s.check_relay({'host':'relay.example','port':8765,'room':'test'},start,restart)
+        restart.assert_not_called()
+
+    def test_managed_relay_process_stopper_is_windows_only_and_fails_closed(self):
+        with tempfile.TemporaryDirectory() as directory:
+            home=Path(directory)
+            with patch.object(relayproc.sys,'platform','linux'):
+                with self.assertRaises(relayproc.RelayProcessError):relayproc.stop_owned_listener(home,8765)
+            with patch.object(relayproc.sys,'platform','win32'),patch.object(relayproc.subprocess,'run') as run:
+                with self.assertRaises(ValueError):relayproc.stop_owned_listener(home,0)
+                run.assert_not_called()
+                run.return_value=subprocess.CompletedProcess([],0,'[]','')
+                self.assertFalse(relayproc.stop_owned_listener(home,8765))
+                script=run.call_args.args[0][-1]
+                self.assertIn('Get-NetTCPConnection -State Listen -LocalPort $port',script)
+                self.assertIn("$process.CommandLine -match $portPattern",script)
+                self.assertIn('Invoke-CimMethod -InputObject $process -MethodName Terminate',script)
+                self.assertIn('presence_server.py',script)
+                self.assertIn('unova_launcher.py',script)
+                self.assertIn("$pythonName -ieq 'python.exe'",script)
+                self.assertNotIn(str(home),script)
+                run.return_value=subprocess.CompletedProcess([],0,'[{"owned":true,"stopped":true}]','')
+                self.assertTrue(relayproc.stop_owned_listener(home,8765))
+                run.return_value=subprocess.CompletedProcess([],0,'[{"owned":true,"stopped":false}]','')
+                with self.assertRaises(relayproc.RelayProcessError):relayproc.stop_owned_listener(home,8765)
+                run.return_value=subprocess.CompletedProcess([],0,'[{"owned":false,"stopped":false}]','')
+                with self.assertRaisesRegex(relayproc.RelayProcessError,'not started by this installation'):
+                    relayproc.stop_owned_listener(home,8765)
+                run.return_value=subprocess.CompletedProcess([],1,'','error')
+                with self.assertRaises(relayproc.RelayProcessError):relayproc.stop_owned_listener(home,8765)
     def test_diagnostic_export_excludes_game_data_and_redacts(self):
         logs=self.home/'transfer';logs.mkdir()
         (logs/'bridge.log').write_text('token=private-token\n{"access_key":"secret-key"}\n{"Proxy-Authorization":"Basic json-proxy-secret"}\n127.0.0.1 C:\\Users\\Private\\game.nds\nAuthorization: Bearer bearer-secret-value\nProxy-Authorization: Basic basic-secret-value\nPeers: [2001:db8::1]:8765 ::1 fe80::abcd%12')
