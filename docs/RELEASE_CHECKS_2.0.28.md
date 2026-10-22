@@ -26,4 +26,10 @@ Risk: **HIGH** (release and launcher ROM preparation). Base `main` at start: `9e
 | `Unova-Together-2.0.28-Windows-x64.zip` | 207,420,114 | `9fd8df3f96d2bd95168b8c8afb3fe7ba1ef30918c666051366a0152514021328` |
 | `Unova-Together.exe` | 247,906,692 | `8939a80d83e85078acca11aa5c570703acc2734bb005ff879d01dd641d6068ab` |
 
-Prepared in `maintenance-tools/downloads/releases/release-2.0.28-final/`. The packaged News feed matches the repository's UTF-8 `patchnotes/index.json` byte-for-byte. Publication verification will be recorded after GitHub confirms the tag and uploaded assets.
+Prepared in `maintenance-tools/downloads/releases/release-2.0.28-final/`. The packaged News feed matches the repository's UTF-8 `patchnotes/index.json` byte-for-byte.
+
+## Publication verification
+
+- **PASS — MAIN:** Merged branch work was pushed to `main` at `b3235fa3e7fe0a39663c8f0fa3e021fa44eb92e3`.
+- **PASS — RELEASE:** [GitHub release 2.0.28](https://github.com/WhatWasMissing/Unova-Together/releases/tag/v2.0.28) points to that commit and is returned by GitHub's latest-release endpoint.
+- **PASS — ASSETS:** All five uploaded assets match the prepared package's names, byte sizes and SHA-256 digests listed above. GitHub reports the same digest for each uploaded asset.
