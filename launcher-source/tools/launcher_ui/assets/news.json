@@ -2,6 +2,12 @@
   "schema": 1,
   "notes": [
     {
+      "version": "2.0.29",
+      "title": "Reliable game preparation",
+      "file": "RELEASE_NOTES_2.0.29.md",
+      "body": "Fixed a launcher hang that could leave Play stuck on “Preparing Cynthia.” The launcher now prepares optional battle scenery and the game copy in the background, and recovers if preparation fails. Your original game file and saves remain unchanged.\n\nPlease update and try again. First-time scenery setup may take a little while; the launcher remains responsive."
+    },
+    {
       "version": "2.0.28",
       "title": "Smoother game launch preparation",
       "file": "RELEASE_NOTES_2.0.28.md",
