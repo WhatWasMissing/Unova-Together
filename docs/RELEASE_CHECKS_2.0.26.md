@@ -33,3 +33,9 @@ An initial release build stopped on a nonnumeric launcher revision; it was rebui
 | `Unova-Together-2.0.26-Source.zip` | 33,012,193 | `354cae06778c891441792f67547b19b7a1c7d6a7d00a314a5477a0e6036f8c38` |
 | `Unova-Together-2.0.26-Windows-x64.zip` | 207,417,068 | `1e22da44199d2759f99edc19015b84bb76d0027d4e28d34f7cb0df70067cf8b3` |
 | `Unova-Together.exe` | 247,985,189 | `de58eb5e91e0f0c3a0eeae237cd765c8fc75565915388c6d2b6df8cc9b7dc3da` |
+
+## Publication
+
+**PASS:** Published `v2.0.26` from remote main commit `6c8a80b18c7a14e19a3716236f1f0b2aa9ab7dc3` with the repository publisher. GitHub latest-release discovery and the tag resolve to this release/commit. All five remote asset names, byte sizes and SHA-256 digests match the local final artifacts.
+
+**BLOCKED — cleanup:** Automatic approval review rejected removal of the disposable release-test folders as “blocked by policy.” These local captures, frozen-launcher test data and build work files remain untracked and are excluded from Git and release assets. No retry or alternative deletion was attempted. Existing release artifacts, ROMs, saves and installed settings were preserved.
