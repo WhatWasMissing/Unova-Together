@@ -2,6 +2,7 @@
 
 Pick a version to read what changed. The newest release is first.
 
+- [Unova Together 2.0.30 — Area battle scenery now appears](RELEASE_NOTES_2.0.30.md)
 - [Unova Together 2.0.29 — Reliable game preparation](RELEASE_NOTES_2.0.29.md)
 - [Unova Together 2.0.28 — Smoother game launch preparation](RELEASE_NOTES_2.0.28.md)
 - [Unova Together 2.0.27 — Area-based battle scenery (test release)](RELEASE_NOTES_2.0.27.md)

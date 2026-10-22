@@ -120,8 +120,11 @@ class LauncherTests(unittest.TestCase):
     def test_area_scenery_catalog_preparation_runs_in_background(self):
         self.app.rom.set(str(self.rom));self.app.player.set('Tester')
         self.app.preference_values['area_scenery']=True
+        self.app.preference_values['player_model']=7
         started=threading.Event();release=threading.Event();proc=MagicMock();proc.poll.return_value=None
         main_thread=threading.current_thread()
+        event_rom=self.home/'builds'/'Test - Cynthia Route 7.nds'
+        prepared_rom=self.home/'builds'/'Test - Cynthia Route 7 - Player Model.nds'
         catalog=self.home/'area-scenes'/'fixture-hash'/'catalog.json'
         def slow_catalog(rom,cache):
             self.assertIsNot(threading.current_thread(),main_thread)
@@ -131,6 +134,8 @@ class LauncherTests(unittest.TestCase):
         area_cache=types.ModuleType('area_scene_cache');area_cache.prepare_catalog=MagicMock(side_effect=slow_catalog)
         with patch.dict(sys.modules,{'area_scene_cache':area_cache}), \
              patch('battle_surroundings_worker.SurroundingsWorker') as surroundings, \
+             patch('launcher_ui.cynthia_event.prepare_variant',return_value=event_rom) as prepare_event, \
+             patch('launcher_ui.player_models.prepare_variant',return_value=prepared_rom) as prepare_model, \
              patch('launcher_ui.preferences.running',return_value=False), \
              patch('launcher_ui.app.subprocess.Popen',return_value=proc) as spawn:
             self.app.launch()
@@ -140,7 +145,9 @@ class LauncherTests(unittest.TestCase):
             self.assertIn('background',self.app.status.get())
             self.assertEqual(spawn.call_count,0)
             release.set();self.wait()
-            area_cache.prepare_catalog.assert_called_once_with(self.rom,self.home/'area-scenes')
+            prepare_event.assert_called_once_with(self.rom,self.home)
+            prepare_model.assert_called_once_with(event_rom,self.home,7)
+            area_cache.prepare_catalog.assert_called_once_with(prepared_rom,self.home/'area-scenes')
             self.assertEqual(spawn.call_count,1)
             self.assertEqual(spawn.call_args.kwargs['env']['UNOVA_AREA_CATALOG'],str(catalog))
             surroundings.assert_called_once()

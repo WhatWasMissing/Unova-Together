@@ -1377,7 +1377,9 @@ class Launcher(tk.Tk):
         if area_scenery:
             self.messages.put(('launch-status','Preparing nearby battle scenery in the background…'))
             from area_scene_cache import prepare_catalog
-            area_catalog=str(prepare_catalog(path,self.home/'area-scenes'))
+            # The emulator validates this catalog against the ROM it actually
+            # loads. Build it after event and player-model variants are applied.
+            area_catalog=str(prepare_catalog(launch_rom,self.home/'area-scenes'))
         return {'rom':str(launch_rom),'story_message':story_message,'area_catalog':area_catalog}
 
     def _start_prepared_game(self,context,prepared):

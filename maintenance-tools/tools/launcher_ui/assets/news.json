@@ -2,6 +2,12 @@
   "schema": 1,
   "notes": [
     {
+      "version": "2.0.30",
+      "title": "Area battle scenery now appears",
+      "file": "RELEASE_NOTES_2.0.30.md",
+      "body": "Fixed optional area-based battle scenery not appearing when the launcher prepared an event-ready game copy or selected player character. The scenery cache now matches the exact game copy that starts. Turn on **Area battle scenery** in launcher settings and restart the game to try it. Some special battles may keep their original background."
+    },
+    {
       "version": "2.0.29",
       "title": "Reliable game preparation",
       "file": "RELEASE_NOTES_2.0.29.md",
