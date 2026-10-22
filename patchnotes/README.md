@@ -2,6 +2,9 @@
 
 Pick a version to read what changed. The newest release is first.
 
+- [Unova Together 2.0.27 — Area-based battle scenery (test release)](RELEASE_NOTES_2.0.27.md)
+- [Unova Together 2.0.26 — Clearer co-op setup and scenery layering](RELEASE_NOTES_2.0.26.md)
+
 - [Unova Together 2.0.25 — Make the overworld character your own](RELEASE_NOTES_2.0.25.md)
 - [Unova Together 2.0.24 — A clearer, more responsive launcher](RELEASE_NOTES_2.0.24.md)
 - [Unova Together 2.0.23 — What changed](RELEASE_NOTES_2.0.23.md)
