@@ -520,3 +520,11 @@ The launcher now requires a relay handshake with the same release build and the 
 Focused verification passed: `test_launcher_services.py` (**30/30**), `test_presence_relay_version.py` (**1/1**), `test_patchnotes_feed.py` (**5/5**), `test_release_validation.py` (**2/2**), `test_launcher_versioning.py` (**14/14**), and launcher-tree parity (**49 files**). A Windows process integration check launched the previous 2.0.19 relay from an isolated install, confirmed the new launcher identified and stopped it, then confirmed the replacement served the 2.0.20 handshake with Teleport support. The fixture was removed after the check.
 
 The released emulator executable is unchanged from 2.0.19; this update changes launcher-side relay identity and replacement. The release package retains the corresponding 2.0.19 emulator source and carries the updated launcher and connection helpers. Live multiplayer and Teleport gameplay were not exercised in this verification.
+
+### Tailscale setup review gate — 2026-10-21
+
+Based on repository commit `784434454c8fbb2fa52d58e5ceda5081eac5180f`, the launcher blocks Tailscale host/join until the player scrolls the in-app guide to the end and checks its acknowledgment. The guide digest is stored in launcher settings; editing the guide requires a new review. The player guide, launcher guide, README, and co-op guide link to the steps and describe the LAN, ZeroTier, and group-hosted UDP choices.
+
+**PASS — LAUNCHER UI:** Python 3.12.8 / Tk 8.6: `py -3.12 -B -m unittest test_launcher_ui` passed **41/41** in `launcher-source/tools` and **40/40** in `maintenance-tools/tools`. The focused tests cover canceled host and direct launch attempts, saved acknowledgments and re-review after guide changes, and the modal scroll/checkbox/continue flow. `py -3.12 -B launcher-source/tools/check_launcher_tree_parity.py` passed for **49 files**; `py_compile` and `git diff --check` passed.
+
+**NOT RUN:** No packaged launcher was built, no cross-network session was started, and no live game session was tested. These tests use disposable UI profiles and placeholder ROM data; they do not establish Tailscale connectivity or game behavior.

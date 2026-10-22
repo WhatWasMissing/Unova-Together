@@ -1,6 +1,6 @@
 """Native launcher UI by mvq1303 / WhatWasMissing. Updater owns installation."""
 from pathlib import Path
-import json, os, queue, re, time, uuid, subprocess, sys, threading, tkinter as tk, webbrowser, zipfile
+import hashlib, json, os, queue, re, time, uuid, subprocess, sys, threading, tkinter as tk, webbrowser, zipfile
 import tomlkit
 from tkinter import filedialog, messagebox, ttk
 import unova_updater as updates
@@ -31,7 +31,7 @@ class Launcher(tk.Tk):
         self.available=tk.StringVar(value='Not checked yet');self.phase=tk.StringVar(value='No download in progress')
         self.news=self._read_news();self.pages={};self.nav={};self.images=[];self.page_name=''
         self.feature_mega_frames=[];self.feature_mega_labels=[];self.feature_mega_frame=0;self.feature_mega_after=None
-        self.preference_values={};self.cheat_choices={};self.profile=None;self.rom_timer=None
+        self.preference_values={};self.cheat_choices={};self.profile=None;self.rom_timer=None;self.tailscale_guide_ack=''
         self.play_profiles=[];self.active_profile_id='';self.repair_release=None;self._switching=False
         self.presence_process=None;self.lan_request='';self.lan_status_time=0;self.lan_started=0;self.last_lan_action='host';self.lan_was_connected=False
         self.selected_game=tk.StringVar(value=game_routes.GAMES['black2']);self.research_root=tk.StringVar(value=str(self.home/'3ds-coop') if (self.home/'3ds-coop/tools/start_joinable_session.ps1').is_file() else 'F:/pokemon-x-coop' if Path('F:/pokemon-x-coop/tools/start_joinable_session.ps1').is_file() else '');self.research_mode=tk.StringVar(value='Local two players');self.research_address=tk.StringVar(value='127.0.0.1')
@@ -455,7 +455,8 @@ class Launcher(tk.Tk):
         label(parent,textvariable=self.lan_status,size=10,color=C['muted'],wraplength=590,justify='left').pack(anchor='w',pady=(0,10))
         third=card(parent);third.pack(fill='x')
         label(third,'Next: join in-game',size=12,bold=True,bg=C['surface']).pack(anchor='w',padx=18,pady=(14,6))
-        label(third,'Host & play starts a LAN lobby. Your friend uses Join & play.\nTurn C-Gear wireless and fast-forward off.',size=10,color=C['muted'],bg=C['surface'],wraplength=590,justify='left').pack(anchor='w',padx=18,pady=(0,14))
+        label(third,'Host & play starts a LAN lobby. Your friend uses Join & play. Turn C-Gear wireless and fast-forward off. For cross-network Tailscale play, the launcher requires you to scroll through and acknowledge the setup guide first.',size=10,color=C['muted'],bg=C['surface'],wraplength=590,justify='left').pack(anchor='w',padx=18,pady=(0,8))
+        label(third,'Alternatives: use Local LAN on the same network, ZeroTier with manual firewall setup, or the experimental UDP relay hosted by your group.',size=10,color=C['muted'],bg=C['surface'],wraplength=590,justify='left').pack(anchor='w',padx=18,pady=(0,14))
         readiness=card(parent);readiness.pack(fill='x',pady=(12,0))
         label(readiness,'Battle readiness',size=12,bold=True,bg=C['surface']).pack(anchor='w',padx=18,pady=(14,6))
         self.coop_checks=tk.StringVar(value='Run checks for this profile. Test connection above checks the presence relay. In-game readiness checks native LAN and partner agreement.')
@@ -471,12 +472,78 @@ class Launcher(tk.Tk):
 
     def _connection_mode_changed(self):
         mode=self.net_mode.get()
-        self.mode_help.set({'Local LAN':'For computers on the same home network.','Tailscale backup':'Connect both PCs to the same Tailscale network.','Internet UDP':'Experimental. Requires a UDP server.','Solo':'Multiplayer off.'}.get(mode,''))
-        self.mode_action.configure(text='Open internet setup' if mode=='Internet UDP' else 'Open Tailscale guide' if mode=='Tailscale backup' else 'Open play guide')
+        self.mode_help.set({'Local LAN':'For computers on the same home network.','Tailscale backup':'Tailscale for different networks. Read the full setup before hosting or joining.','Internet UDP':'Experimental. Needs a server hosted by your group.','Solo':'Multiplayer off.'}.get(mode,''))
+        self.mode_action.configure(text='Open internet setup' if mode=='Internet UDP' else 'Read Tailscale setup' if mode=='Tailscale backup' else 'Open play guide')
 
     def _connection_guide(self):
         if self.net_mode.get()=='Internet UDP':self._internet_wizard()
         else:self.guide('TAILSCALE_COOP.md' if self.net_mode.get()=='Tailscale backup' else 'PLAYER_GUIDE.md')
+
+    def _tailscale_guide_content(self):
+        guide=self.root/'docs'/'TAILSCALE_COOP.md'
+        if not guide.is_file():guide=services.cached_guide(self.home,'TAILSCALE_COOP.md')
+        if not guide or not guide.is_file():raise OSError('The Tailscale setup guide is unavailable. Repair or update Unova Together, then try again.')
+        data=guide.read_bytes()
+        if not data or len(data)>131072:raise ValueError('The Tailscale setup guide is invalid or too large.')
+        return data.decode('utf-8'),hashlib.sha256(data).hexdigest()
+
+    def _require_tailscale_guide_review(self):
+        try:content,digest=self._tailscale_guide_content()
+        except (OSError,ValueError,UnicodeError) as exc:
+            self.lan_status.set(str(exc));return False
+        if self.tailscale_guide_ack==digest:return True
+        if not self._show_tailscale_guide_review(content):
+            self.lan_status.set('Read and acknowledge the Tailscale setup before starting a cross-network session.');return False
+        self.tailscale_guide_ack=digest;self._save()
+        return True
+
+    def _show_tailscale_guide_review(self,content):
+        window=tk.Toplevel(self);window.title('Tailscale setup · read before connecting');window.geometry('760x660');window.minsize(620,500);window.transient(self)
+        label(window,'Before you connect across networks',size=18,bold=True).pack(anchor='w',padx=18,pady=(16,4))
+        label(window,'Review the complete setup below. Host and guest must use the same Tailscale network, game version, release and room.',size=10,color=C['muted'],wraplength=710,justify='left').pack(anchor='w',padx=18,pady=(0,10))
+        body=tk.Frame(window,bg=C['surface']);body.pack(fill='both',expand=True,padx=18)
+        scroll=ttk.Scrollbar(body,orient='vertical');scroll.pack(side='right',fill='y')
+        text=tk.Text(body,wrap='word',font=(F['body'],10),bg=C['surface'],fg=C['text'],relief='flat',padx=12,pady=10,spacing1=2,spacing3=5,yscrollcommand=scroll.set)
+        text.pack(side='left',fill='both',expand=True);scroll.configure(command=text.yview)
+        def plain_markdown(source):
+            lines=[]
+            for line in source.splitlines():
+                line=re.sub(r'\[([^\]]+)\]\(([^)]+)\)',r'\1 — \2',line)
+                line=re.sub(r'^#{1,6}\s*','',line)
+                line=re.sub(r'^\s*[-*]\s+','• ',line)
+                lines.append(line.replace('**','').replace('`',''))
+            return '\n'.join(lines)
+        text.insert('1.0',plain_markdown(content));text.configure(state='disabled')
+        actions=tk.Frame(window,bg=C['background']);actions.pack(fill='x',padx=18,pady=(10,16))
+        reviewed=tk.BooleanVar(value=False);reached_end={'value':False};accepted={'value':False}
+        check=ttk.Checkbutton(actions,text='I have read the setup and checked that my group can follow these steps.',variable=reviewed,state='disabled')
+        check.pack(anchor='w',pady=(0,10))
+        controls=tk.Frame(actions,bg=C['background']);controls.pack(fill='x')
+        button(controls,'Open Tailscale Windows instructions',lambda:webbrowser.open('https://tailscale.com/docs/install/windows')).pack(side='left')
+        continue_button=button(controls,'Continue',lambda:None,kind='primary');continue_button.pack(side='right')
+        button(controls,'Cancel',window.destroy).pack(side='right',padx=(0,8))
+        set_enabled(continue_button,False)
+        def update_continue(*_):set_enabled(continue_button,reached_end['value'] and reviewed.get(),'primary')
+        reviewed.trace_add('write',update_continue)
+        def update_read_progress(*_):
+            first,last=map(float,text.yview());scroll.set(first,last)
+            if last>=0.999:
+                reached_end['value']=True;check.state(['!disabled'])
+            update_continue()
+        def scroll_text(*args):
+            text.yview(*args);update_read_progress()
+        def on_scroll(first,last):
+            scroll.set(first,last);update_read_progress()
+        def schedule_read_progress(_event=None):window.after_idle(update_read_progress)
+        scroll.configure(command=scroll_text)
+        for sequence in ('<MouseWheel>','<Button-4>','<Button-5>'):
+            text.bind(sequence,schedule_read_progress,'+')
+        def accept():
+            if reached_end['value'] and reviewed.get():accepted['value']=True;window.destroy()
+        continue_button.configure(command=accept)
+        text.configure(yscrollcommand=on_scroll)
+        window.protocol('WM_DELETE_WINDOW',window.destroy);window.grab_set();window.focus_force();window.wait_window()
+        return accepted['value']
 
     def _connection_role_changed(self):
         item=self._active_profile()
@@ -947,6 +1014,8 @@ class Launcher(tk.Tk):
             if type(data.get('music')) is bool:self.music.set(data['music'])
             if isinstance(data.get('preferences'),dict):self.preference_values={k:v for k,v in data['preferences'].items() if (k in ('pause','filter','area_scenery','companion_interactions','reduced_follower_motion','coop_exp_suppression') and type(v) is bool) or (k=='volume' and type(v) is int and 0<=v<=100) or (k=='player_model' and type(v) is int and 0<=v<=65535)}
             if isinstance(data.get('cheats'),dict):self.cheat_choices={k:{ident:flag for ident,flag in v.items() if ident in self.cheat_vars_ids() and type(flag) is bool} for k,v in list(data['cheats'].items())[-32:] if isinstance(k,str) and len(k)<=32 and isinstance(v,dict)}
+            acknowledgment=data.get('tailscale_guide_ack','')
+            if isinstance(acknowledgment,str) and re.fullmatch(r'[a-f0-9]{64}',acknowledgment):self.tailscale_guide_ack=acknowledgment
         except (OSError,ValueError,AttributeError):pass
 
     def _save(self):
@@ -954,7 +1023,7 @@ class Launcher(tk.Tk):
         if self.play_profiles:
             item=self._active_profile();item['rom']=self.rom.get();item['preferences']=dict(self.preference_values)
         try:
-            prefs.atomic(self.config_path,json.dumps({'selected_game':self.selected_game.get(),'research_root':self.research_root.get(),'research_mode':self.research_mode.get(),'research_address':self.research_address.get(),'rom':self.rom.get(),'check':self.auto.get(),'music':self.music.get(),'preferences':self.preference_values,'cheats':self.cheat_choices,'profiles':self.play_profiles,'active_profile':self.active_profile_id}))
+            prefs.atomic(self.config_path,json.dumps({'selected_game':self.selected_game.get(),'research_root':self.research_root.get(),'research_mode':self.research_mode.get(),'research_address':self.research_address.get(),'rom':self.rom.get(),'check':self.auto.get(),'music':self.music.get(),'preferences':self.preference_values,'cheats':self.cheat_choices,'profiles':self.play_profiles,'active_profile':self.active_profile_id,'tailscale_guide_ack':self.tailscale_guide_ack}))
         except OSError as exc:self.status.set('Could not save settings: '+str(exc))
 
     def _sync(self):
@@ -1091,6 +1160,7 @@ class Launcher(tk.Tk):
         if self.selected_game.get()==game_routes.GAMES['pokemon-x']:self._launch_research('host' if action=='host' else 'guest');return
         if self.busy or self._game_is_running():return
         if self.net_mode.get()=='Solo':self.lan_status.set('Choose LAN or an online mode first.');return
+        if self.net_mode.get()=='Tailscale backup' and not self._require_tailscale_guide_review():return
         self.connection_role.set('Host' if action=='host' else 'Join')
         if action=='host':self._connection_role_changed()
         self.last_lan_action=action;self._active_profile()['lan_role']=self.connection_role.get()
@@ -1106,6 +1176,7 @@ class Launcher(tk.Tk):
         if lan_action is not None:
             if lan_action not in ('host','join'):raise ValueError('Unknown LAN action')
             if self.net_mode.get()=='Solo':self.lan_status.set('Choose LAN or an online mode first.');return
+            if self.net_mode.get()=='Tailscale backup' and not self._require_tailscale_guide_review():return
             if not self.player.get().strip() or len(self.player.get().strip().encode('utf-8'))>31:self.lan_status.set('Player name must fit within 31 UTF-8 bytes.');return
         path=Path(self.rom.get())
         if not path.is_file() or path.suffix.lower()!='.nds':return

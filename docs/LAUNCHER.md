@@ -10,7 +10,7 @@ Use **Games & saves** to manage profiles, backups, or save slots. **Tools** incl
 
 ## Connect with friends
 
-Choose **Co-op** in the launcher to host or join a local game. For friends on different networks, follow the [Tailscale guide](TAILSCALE_COOP.md). The optional UDP connection requires a server supplied by your group.
+Choose **Co-op** in the launcher to host or join a game. Use **Local LAN** when everyone is on the same home network. For different networks, Tailscale is the recommended option: select **Tailscale backup**, open **Read Tailscale setup**, and review the complete guide. The launcher will ask you to scroll to the end and confirm that you have read it before **Host & play** or **Join & play** can start. If you prefer not to use Tailscale, the guide covers ZeroTier and the experimental group-hosted UDP relay, with their additional setup and limits.
 
 Everyone should use the same Unova Together release and matching game revision. Turn off fast-forward before connecting. For steps, see the [Player guide](PLAYER_GUIDE.md).
 

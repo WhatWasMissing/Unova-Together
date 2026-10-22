@@ -36,7 +36,7 @@ Everyone in a co-op session should use the same release and Redux version. The l
 
 [Features](docs/FEATURES.md) · [Player guide](docs/PLAYER_GUIDE.md) · [Mega Evolution](docs/MEGA_EVOLUTION.md) · [Cynthia’s Route 7 challenge](docs/CYNTHIA_ROUTE_7.md) · [Co-op tools](docs/COOP_TOOLS.md) · [Following Pokémon](docs/FOLLOWING_POKEMON.md) · [Known limits](docs/KNOWN_ISSUES.md) · [Bag capacity](docs/BAG_CAPACITY.md) · [Release notes](patchnotes/README.md)
 
-For play across different networks, see the [Tailscale guide](docs/TAILSCALE_COOP.md). Optional UDP connections need a server provided by your group; the project does not provide a public server.
+For play across different networks, Tailscale is the recommended setup. Before hosting or joining a Tailscale session, the launcher requires each player to review the [step-by-step guide](docs/TAILSCALE_COOP.md). If you prefer another method, use Local LAN when everyone is on the same network, try ZeroTier with manual firewall setup, or ask your group to host the experimental UDP relay. The project does not provide a public server.
 
 See [authorship](AUTHORSHIP.md), [art credits](docs/FOLLOWER_ART_CREDITS.md), and [licensing](LICENSING.md) for project and third-party notices.
 

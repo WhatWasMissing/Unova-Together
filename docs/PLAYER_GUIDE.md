@@ -6,7 +6,7 @@ Unova Together adds shared exploration, trading, co-op trainer battles, and Mega
 
 - A Windows x64 PC and the latest Unova Together launcher or portable ZIP.
 - Your own English Blaze Black 2 Redux Complete v1.4.1 game file and save. No full Unova Together game patch is currently bundled. If one is released for another Redux version, use a copy with the patch listed for that exact version. Both players need the same game version and Redux revision.
-- A network connection method. Players on the same home network can use LAN; players on different networks can use [Tailscale](TAILSCALE_COOP.md).
+- A network connection method. Players on the same home network can use Local LAN. For different networks, Tailscale is recommended; the launcher requires each player to read and acknowledge the [Tailscale setup guide](TAILSCALE_COOP.md) before hosting or joining. Other choices are listed in that guide.
 
 Unova Together does not include Pokémon ROMs, save files, or firmware. Change your controls under **Config → Input** if you want to adjust the defaults.
 
@@ -25,10 +25,10 @@ Each player uses their own save. Save from the game as usual, and avoid loading 
 | Where you are playing | Connection |
 | --- | --- |
 | Same home network | Use the launcher’s local co-op options. |
-| Different networks | Follow the [Tailscale guide](TAILSCALE_COOP.md). |
-| Different networks with a server supplied by your group | Use the optional [UDP connection guide](UDP_SERVER_GUIDE.md). |
+| Different networks (recommended) | Read the [Tailscale guide](TAILSCALE_COOP.md), then choose **Tailscale backup** in the launcher. Each player confirms the guide before connecting. |
+| Different networks without Tailscale | The [Tailscale guide](TAILSCALE_COOP.md) describes ZeroTier and the experimental group-hosted UDP relay, including what extra setup they need. |
 
-There is no public Unova Together server. Everyone should use the same release and game revision and enter the same room name.
+There is no public Unova Together server. Everyone should use the same release and game revision and enter the same room name. A group-hosted UDP relay only carries game traffic; movement sharing, trades, and invitations need a reachable player-sharing service as well.
 
 ## In-game co-op
 
@@ -40,7 +40,7 @@ Trades require both players to confirm. Keep both games open until the trade fin
 
 If a teammate disappears or a battle stops responding, let both games return to the field. If needed, close the connection and create a new LAN session. A disconnected battle may not resume, so save normally before starting another encounter.
 
-If you cannot connect, check that both players use the same release and game revision, turn off fast-forward, and confirm the host address and room name. A VPN or firewall can block connections. For different networks, [Tailscale](TAILSCALE_COOP.md) is the recommended option.
+If you cannot connect, check that both players use the same release and game revision, turn off fast-forward, and confirm the host address and room name. A VPN or firewall can block connections. For cross-network setup, start with the [Tailscale guide](TAILSCALE_COOP.md); it also covers alternatives and their extra requirements.
 
 ## More help
 
