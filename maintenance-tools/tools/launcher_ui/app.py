@@ -1351,15 +1351,37 @@ class Launcher(tk.Tk):
             item=self._active_profile();net=services.network(item['network'])
             settings=dict(self.preference_values);settings['pause']=False if net['mode']!='Solo' else settings.get('pause',False)
             model_id=settings.pop('player_model',0)
-            try:
-                self.status.set('Preparing Cynthia’s Route 7 story event…');self.update_idletasks()
-                launch_rom=cynthia_event.prepare_variant(path,self.home)
-            except cynthia_event.UnsupportedRomError as exc:
-                launch_rom=path
-                self.status.set(str(exc)+' The game will start without the Route 7 event.')
-            if model_id:launch_rom=player_models.prepare_variant(launch_rom,self.home,model_id)
-            prefs.apply(exe.parent,path,settings,selected,self.profile,self.home)
-            self._apply_save_folder(exe.parent,item,default_directory=path.parent if (model_id or launch_rom != path) else None)
+            launch_context={
+                'exe':exe,'path':path,'settings':settings,'selected':dict(selected),
+                'profile':dict(self.profile) if self.profile else None,'item':dict(item),
+                'network':dict(net),'model_id':model_id,'lan_action':lan_action,
+            }
+            self.status.set('Preparing Cynthia’s Route 7 event in the background…')
+            self._launch_context=launch_context
+            self._worker('launch-preparation',lambda:self._prepare_launch_rom(path,model_id))
+        except (OSError,ValueError,subprocess.SubprocessError) as exc:
+            self._stop_game_workers();self.status.set('Unable to start the game: '+str(exc))
+
+    def _prepare_launch_rom(self,path,model_id):
+        """Perform disk-heavy ROM hashing and variant creation away from Tk's event loop."""
+        try:
+            launch_rom=cynthia_event.prepare_variant(path,self.home)
+            story_message=''
+        except cynthia_event.UnsupportedRomError as exc:
+            launch_rom=path
+            story_message=str(exc)+' The game will start without the Route 7 event.'
+        if model_id:
+            self.messages.put(('launch-status','Preparing your selected field character…'))
+            launch_rom=player_models.prepare_variant(launch_rom,self.home,model_id)
+        return {'rom':str(launch_rom),'story_message':story_message}
+
+    def _start_prepared_game(self,context,prepared):
+        """Finish launch setup on the UI thread after the ROM copy is ready."""
+        exe=context['exe'];path=context['path'];settings=context['settings'];item=context['item'];net=context['network']
+        launch_rom=Path(prepared['rom'])
+        try:
+            prefs.apply(exe.parent,path,settings,context['selected'],context['profile'],self.home)
+            self._apply_save_folder(exe.parent,item,default_directory=path.parent if (context['model_id'] or launch_rom != path) else None)
             env=dict(os.environ);env.update({'UNOVA_PLAYER_NAME':item['player'],'UNOVA_RELAY_HOST':net['host'],'UNOVA_RELAY_PORT':str(net['port']),'UNOVA_RELAY_ROOM':net['room'],'UNOVA_TRAINER_COOP':'0' if net['mode']=='Solo' else '1','UNOVA_AUTO_CONNECT':'0' if net['mode']=='Solo' else '1'})
             companion='1' if settings.get('companion_interactions',True) else '0'
             env['UNOVA_COMPANION_INTERACTIONS']=companion
@@ -1379,15 +1401,18 @@ class Launcher(tk.Tk):
                 env['UNOVA_SURROUNDINGS_DIR']=str(directory)
             for key in ('UNOVA_LAN_ACTION','UNOVA_LAN_HOST','UNOVA_LAN_REQUEST','UNOVA_LAN_SLOTS'):env.pop(key,None)
             self.lan_request=''
+            lan_action=context['lan_action']
             if lan_action:
                 self.lan_request=uuid.uuid4().hex;self.lan_started=time.monotonic();self.lan_was_connected=False
                 env.update({'UNOVA_LAN_ACTION':lan_action,'UNOVA_LAN_HOST':net['host'],'UNOVA_LAN_REQUEST':self.lan_request,'UNOVA_LAN_SLOTS':str(item.get('lan_slots',16))})
                 self.lan_status.set('Starting LAN host…' if lan_action=='host' else 'Joining LAN host…')
             self._stop_music()
             self.game=subprocess.Popen([str(exe),str(launch_rom.resolve())],cwd=exe.parent,env=env)
-            self.status.set('Game running. Save normally and close it before starting another session.');self._sync()
+            message=('Game running. '+prepared['story_message'] if prepared.get('story_message')
+                     else 'Game running. Save normally and close it before starting another session.')
+            self.status.set(message);self._sync()
         except (OSError,ValueError,subprocess.SubprocessError) as exc:
-            self._stop_game_workers();self.status.set('Unable to start the game: '+str(exc))
+            self._stop_game_workers();self.status.set('Unable to start the game: '+str(exc));self._sync()
 
     def guide(self,name='PLAYER_GUIDE.md'):
         if name not in services.GUIDES:return
@@ -1433,6 +1458,8 @@ class Launcher(tk.Tk):
                 action,value=self.messages.get_nowait()
                 if action in ('guides','guides-offline'):
                     self.guides_busy=False;self.guide_status.set('Guides up to date' if action=='guides' else 'Offline · using saved guides');self._sync();continue
+                if action=='launch-status':
+                    self.status.set(value);continue
                 if action=='storage-progress':
                     self._storage_progress(value);continue
                 if action=='progress':
@@ -1459,6 +1486,12 @@ class Launcher(tk.Tk):
                     self.feature_mega_loading=False;self.feature_art_status.configure(text='Animation preview unavailable; showing stills.')
                     continue
                 finished_operation=self.operation;self.busy=False;self.operation=''
+                if action=='launch-preparation':
+                    context=getattr(self,'_launch_context',None);self._launch_context=None
+                    if context is None:self.status.set('Unable to start the game: launch details expired.');self._sync();continue
+                    self._start_prepared_game(context,value);continue
+                if action=='error' and finished_operation=='launch-preparation':
+                    self._launch_context=None;self.status.set('Unable to prepare the game: '+value);self._sync();continue
                 if action in ('storage-clean','storage-auto'):
                     message=storage.summary(value)
                     if action=='storage-clean' or value['removedFiles'] or value['sharedBytes']:

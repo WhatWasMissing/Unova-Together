@@ -18,10 +18,12 @@ class LauncherTests(unittest.TestCase):
         (game/'melonDS.exe').write_bytes(b'not a real executable');(game/'VERSION.txt').write_text('0.3.5')
         (game/'melonDS.toml').write_text('# private controls\n')
         self.rom=self.home/'fixture.nds';self.rom.write_bytes(b'disposable ROM placeholder')
+        self.cynthia_prepare=patch('launcher_ui.app.cynthia_event.prepare_variant',side_effect=lambda path,home:path)
+        self.cynthia_prepare.start()
         self.app=Launcher(self.home,testing=True);self.app._open_mod('black2',save=False);self.app.update_idletasks();self.app.update()
     def tearDown(self):
         if self.app is None:
-            self.temp.cleanup();return
+            self.temp.cleanup();self.cynthia_prepare.stop();return
         for child in list(self.app.winfo_children()):
             if isinstance(child,tk.Toplevel):
                 command=child.protocol('WM_DELETE_WINDOW')
@@ -29,6 +31,7 @@ class LauncherTests(unittest.TestCase):
                     try:self.app.tk.call(command)
                     except tk.TclError:child.destroy()
         self.app.destroy();self.temp.cleanup()
+        self.cynthia_prepare.stop()
     def wait(self,timeout=5):
         deadline=time.monotonic()+timeout
         while self.app.busy and time.monotonic()<deadline:self.app.update();time.sleep(.01)
@@ -93,6 +96,35 @@ class LauncherTests(unittest.TestCase):
         with patch.object(self.app,'_launch_research') as launch:
             self.app.launch();launch.assert_called_once_with(None)
             launch.reset_mock();self.app._start_lan('host');launch.assert_called_once_with('host')
+
+    def test_cynthia_preparation_runs_in_background_and_keeps_launcher_responsive(self):
+        from launcher_ui import cynthia_event
+        self.app.rom.set(str(self.rom));self.app.player.set('Tester')
+        started=threading.Event();release=threading.Event();proc=MagicMock();proc.poll.return_value=None
+        def slow_prepare(path,home):
+            started.set()
+            self.assertTrue(release.wait(3))
+            return path
+        with patch.object(cynthia_event,'prepare_variant',side_effect=slow_prepare), \
+             patch('launcher_ui.preferences.running',return_value=False), \
+             patch('launcher_ui.app.subprocess.Popen',return_value=proc) as spawn:
+            self.app.launch()
+            self.assertTrue(started.wait(1))
+            self.app.update()
+            self.assertTrue(self.app.busy)
+            self.assertIn('background',self.app.status.get())
+            self.assertEqual(spawn.call_count,0)
+            release.set();self.wait()
+            self.assertEqual(spawn.call_count,1)
+
+    def test_cynthia_preparation_failure_restores_play_controls(self):
+        from launcher_ui import cynthia_event
+        self.app.rom.set(str(self.rom))
+        with patch.object(cynthia_event,'prepare_variant',side_effect=ValueError('patch asset unavailable')):
+            self.app.launch();self.wait()
+        self.assertFalse(self.app.busy)
+        self.assertEqual(str(self.app.play['state']),'normal')
+        self.assertIn('patch asset unavailable',self.app.status.get())
 
     def test_simple_save_slots_auto_save_and_keep_existing_data(self):
         self.app.rom.set(str(self.rom));self.app.show_page('Profiles');self.app.update()
@@ -235,11 +267,13 @@ class LauncherTests(unittest.TestCase):
         proc=MagicMock();proc.poll.return_value=None
         with patch('launcher_ui.preferences.running',return_value=False),patch('launcher_ui.app.subprocess.Popen',return_value=proc) as spawn:
             self.app.launch()
+            self.wait()
             self.assertEqual(spawn.call_args.kwargs['env']['UNOVA_COOP_EXP_SUPPRESSION'],'1')
         self.app.game=None
         self.app._preference('coop_exp_suppression',False)
         with patch('launcher_ui.preferences.running',return_value=False),patch('launcher_ui.app.subprocess.Popen',return_value=proc) as spawn:
             self.app.launch()
+            self.wait()
             self.assertEqual(spawn.call_args.kwargs['env']['UNOVA_COOP_EXP_SUPPRESSION'],'0')
         self.app.game=None
     def test_mega_feature_plays_supplied_mawile_front_and_back_gifs(self):
@@ -375,7 +409,7 @@ class LauncherTests(unittest.TestCase):
     def test_duplicate_launch_running_game_and_guides(self):
         self.app.rom.set(str(self.rom));proc=MagicMock();proc.poll.return_value=None
         with patch('launcher_ui.app.subprocess.Popen',return_value=proc) as spawn, patch('launcher_ui.preferences.running',return_value=False):
-            self.app.launch();self.app.launch();self.assertEqual(spawn.call_count,1)
+            self.app.launch();self.app.launch();self.wait();self.assertEqual(spawn.call_count,1)
             self.assertEqual(spawn.call_args.args[0][1],str(self.rom.resolve()))
             self.app.release=self.feed()['release'];self.app._sync();self.assertEqual(self.app.update_button['state'],'normal')
         doc=self.home/'docs/PLAYER_GUIDE.md';doc.parent.mkdir();doc.write_text('fixture guide')
@@ -485,7 +519,7 @@ class LauncherTests(unittest.TestCase):
         self.app.net_host.set('localhost');self.app.net_room.set('friends');self.app.net_port.set('8765');self.app._save_connection()
         proc=MagicMock();proc.poll.return_value=None
         with patch('launcher_ui.preferences.running',return_value=False),patch('launcher_ui.app.subprocess.Popen',return_value=proc) as spawn:
-            self.app.launch();self.assertEqual(spawn.call_args.kwargs['env']['UNOVA_PLAYER_NAME'],'Tester')
+            self.app.launch();self.wait();self.assertEqual(spawn.call_args.kwargs['env']['UNOVA_PLAYER_NAME'],'Tester')
             self.assertEqual(spawn.call_args.kwargs['env']['UNOVA_RELAY_ROOM'],'friends')
             self.assertEqual(spawn.call_args.kwargs['env']['UNOVA_COMPANION_INTERACTIONS'],'1')
             self.assertEqual(spawn.call_args.kwargs['env']['UNOVA_EXPERIMENTAL_COMPANION'],'1')
@@ -514,6 +548,7 @@ class LauncherTests(unittest.TestCase):
         proc=MagicMock();proc.poll.return_value=None
         with patch('launcher_ui.preferences.running',return_value=False),patch('launcher_ui.app.subprocess.Popen',return_value=proc) as spawn:
             self.app.launch()
+            self.wait()
             self.assertEqual(spawn.call_args.kwargs['env']['UNOVA_COMPANION_INTERACTIONS'],'0')
             self.assertEqual(spawn.call_args.kwargs['env']['UNOVA_EXPERIMENTAL_COMPANION'],'0')
             self.assertEqual(spawn.call_args.kwargs['env']['UNOVA_FOLLOWER_REDUCED_MOTION'],'1')
@@ -572,6 +607,7 @@ class LauncherTests(unittest.TestCase):
         proc=MagicMock();proc.poll.return_value=None
         with patch('launcher_ui.preferences.running',return_value=False),patch('launcher_ui.app.subprocess.Popen',return_value=proc) as spawn:
             self.app.launch('host')
+            self.wait()
             env=spawn.call_args.kwargs['env'];self.assertEqual(env['UNOVA_LAN_ACTION'],'host')
             self.assertEqual(len(env['UNOVA_LAN_REQUEST']),32)
             self.assertEqual(env['UNOVA_LAN_SLOTS'],'16')

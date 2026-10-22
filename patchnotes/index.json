@@ -2,6 +2,12 @@
   "schema": 1,
   "notes": [
     {
+      "version": "2.0.28",
+      "title": "Smoother game launch preparation",
+      "file": "RELEASE_NOTES_2.0.28.md",
+      "body": "Starting the game no longer leaves the launcher unresponsive while it prepares the Route 7 event-ready game copy or your selected field character. Preparation runs in the background, and errors return the launcher to a usable state with a clear message. This launcher reliability update keeps your original game file and saves."
+    },
+    {
       "version": "2.0.27",
       "title": "Area-based battle scenery (test release)",
       "file": "RELEASE_NOTES_2.0.27.md",
