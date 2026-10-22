@@ -1358,12 +1358,12 @@ class Launcher(tk.Tk):
             }
             self.status.set('Preparing Cynthia’s Route 7 event in the background…')
             self._launch_context=launch_context
-            self._worker('launch-preparation',lambda:self._prepare_launch_rom(path,model_id))
+            self._worker('launch-preparation',lambda:self._prepare_launch_rom(path,model_id,settings.get('area_scenery',False)))
         except (OSError,ValueError,subprocess.SubprocessError) as exc:
             self._stop_game_workers();self.status.set('Unable to start the game: '+str(exc))
 
-    def _prepare_launch_rom(self,path,model_id):
-        """Perform disk-heavy ROM hashing and variant creation away from Tk's event loop."""
+    def _prepare_launch_rom(self,path,model_id,area_scenery=False):
+        """Perform disk-heavy launch preparation away from Tk's event loop."""
         try:
             launch_rom=cynthia_event.prepare_variant(path,self.home)
             story_message=''
@@ -1373,7 +1373,12 @@ class Launcher(tk.Tk):
         if model_id:
             self.messages.put(('launch-status','Preparing your selected field character…'))
             launch_rom=player_models.prepare_variant(launch_rom,self.home,model_id)
-        return {'rom':str(launch_rom),'story_message':story_message}
+        area_catalog=''
+        if area_scenery:
+            self.messages.put(('launch-status','Preparing nearby battle scenery in the background…'))
+            from area_scene_cache import prepare_catalog
+            area_catalog=str(prepare_catalog(path,self.home/'area-scenes'))
+        return {'rom':str(launch_rom),'story_message':story_message,'area_catalog':area_catalog}
 
     def _start_prepared_game(self,context,prepared):
         """Finish launch setup on the UI thread after the ROM copy is ready."""
@@ -1392,9 +1397,9 @@ class Launcher(tk.Tk):
             env.pop('UNOVA_AREA_CATALOG',None)
             env.pop('UNOVA_SURROUNDINGS_DIR',None)
             if settings.get('area_scenery',False):
-                from area_scene_cache import prepare_catalog
-                self.status.set('Preparing battle scenery…');self.update_idletasks()
-                env['UNOVA_AREA_CATALOG']=str(prepare_catalog(path,self.home/'area-scenes'))
+                area_catalog=prepared.get('area_catalog')
+                if not area_catalog:raise ValueError('Nearby battle scenery was not prepared.')
+                env['UNOVA_AREA_CATALOG']=str(area_catalog)
                 from battle_surroundings_worker import SurroundingsWorker
                 directory=Path(env['UNOVA_AREA_CATALOG']).parent/'nearby'
                 self.surroundings_worker=SurroundingsWorker(path,directory)
@@ -1453,6 +1458,9 @@ class Launcher(tk.Tk):
         if self.busy and self.operation=='installed':self.cancel.set();self.phase.set('Cancelling · current build remains active');self._sync()
 
     def _poll(self):
+        # Schedule first so an unexpected callback error cannot permanently
+        # stop the message pump and leave background work looking unfinished.
+        self.after(100,self._poll)
         try:
             while True:
                 action,value=self.messages.get_nowait()
@@ -1489,7 +1497,16 @@ class Launcher(tk.Tk):
                 if action=='launch-preparation':
                     context=getattr(self,'_launch_context',None);self._launch_context=None
                     if context is None:self.status.set('Unable to start the game: launch details expired.');self._sync();continue
-                    self._start_prepared_game(context,value);continue
+                    try:self._start_prepared_game(context,value)
+                    except Exception as exc:
+                        try:self._stop_game_workers()
+                        except Exception as cleanup_error:exc=RuntimeError(f'{exc}; scenery worker cleanup also failed: {cleanup_error}')
+                        if self.game is not None and self.game.poll() is None:
+                            self.status.set('Game started, but launcher setup did not finish: '+str(exc))
+                        else:
+                            self.status.set('Unable to start the game: '+str(exc))
+                        self._sync()
+                    continue
                 if action=='error' and finished_operation=='launch-preparation':
                     self._launch_context=None;self.status.set('Unable to prepare the game: '+value);self._sync();continue
                 if action in ('storage-clean','storage-auto'):
@@ -1545,7 +1562,7 @@ class Launcher(tk.Tk):
                     if finished_operation=='feed':self.news_status.set('Could not refresh · showing saved patch notes')
                 self._sync()
         except queue.Empty:pass
-        self._reap_game_workers();self._read_lan_status();self._sync();self.after(100,self._poll)
+        self._reap_game_workers();self._read_lan_status();self._sync()
 
     def _read_lan_status(self):
         if not self.lan_request or time.monotonic()-self.lan_status_time<1:return

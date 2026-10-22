@@ -1,6 +1,6 @@
 """Exercise real native launcher pages with disposable data; no game is launched."""
 from pathlib import Path
-import argparse, io, json, hashlib, tempfile, time, threading, unittest, zipfile
+import argparse, io, json, hashlib, tempfile, time, threading, unittest, zipfile, sys, types
 import tkinter as tk
 from tkinter import ttk
 from unittest.mock import patch, MagicMock
@@ -116,6 +116,48 @@ class LauncherTests(unittest.TestCase):
             self.assertEqual(spawn.call_count,0)
             release.set();self.wait()
             self.assertEqual(spawn.call_count,1)
+
+    def test_area_scenery_catalog_preparation_runs_in_background(self):
+        self.app.rom.set(str(self.rom));self.app.player.set('Tester')
+        self.app.preference_values['area_scenery']=True
+        started=threading.Event();release=threading.Event();proc=MagicMock();proc.poll.return_value=None
+        main_thread=threading.current_thread()
+        catalog=self.home/'area-scenes'/'fixture-hash'/'catalog.json'
+        def slow_catalog(rom,cache):
+            self.assertIsNot(threading.current_thread(),main_thread)
+            started.set()
+            self.assertTrue(release.wait(3))
+            return catalog
+        area_cache=types.ModuleType('area_scene_cache');area_cache.prepare_catalog=MagicMock(side_effect=slow_catalog)
+        with patch.dict(sys.modules,{'area_scene_cache':area_cache}), \
+             patch('battle_surroundings_worker.SurroundingsWorker') as surroundings, \
+             patch('launcher_ui.preferences.running',return_value=False), \
+             patch('launcher_ui.app.subprocess.Popen',return_value=proc) as spawn:
+            self.app.launch()
+            self.assertTrue(started.wait(1))
+            self.app.update()
+            self.assertTrue(self.app.busy)
+            self.assertIn('background',self.app.status.get())
+            self.assertEqual(spawn.call_count,0)
+            release.set();self.wait()
+            area_cache.prepare_catalog.assert_called_once_with(self.rom,self.home/'area-scenes')
+            self.assertEqual(spawn.call_count,1)
+            self.assertEqual(spawn.call_args.kwargs['env']['UNOVA_AREA_CATALOG'],str(catalog))
+            surroundings.assert_called_once()
+
+    def test_unexpected_launch_handoff_error_recovers_controls_and_polling(self):
+        self.app.rom.set(str(self.rom));self.app.busy=True;self.app.operation='launch-preparation'
+        self.app._launch_context={'fixture':True}
+        self.app.messages.put(('launch-preparation',{'rom':str(self.rom)}))
+        with patch.object(self.app,'after',wraps=self.app.after) as schedule, \
+             patch.object(self.app,'_start_prepared_game',side_effect=RuntimeError('unexpected setup failure')):
+            self.app._poll()
+        self.assertFalse(self.app.busy)
+        self.assertEqual(self.app.operation,'')
+        self.assertEqual(str(self.app.play['state']),'normal')
+        self.assertIn('unexpected setup failure',self.app.status.get())
+        self.assertIsNone(self.app._launch_context)
+        schedule.assert_any_call(100,self.app._poll)
 
     def test_cynthia_preparation_failure_restores_play_controls(self):
         from launcher_ui import cynthia_event
