@@ -18,7 +18,12 @@ class PatchNotesFeedTests(unittest.TestCase):
     def test_repository_index_lists_every_note_in_new_folder(self):
         notes = updater.patch_note_news(self.index['notes'])
         self.assertEqual(len(notes), len(self.index['notes']))
-        self.assertEqual(notes[0]['version'], self.latest_version)
+        note_versions = {note['version'] for note in notes}
+        self.assertIn(self.latest_version, note_versions)
+        self.assertEqual(
+            [note['version'] for note in notes],
+            sorted(note_versions, key=updater.version, reverse=True),
+        )
         self.assertEqual(notes[-1]['version'], '0.3.5')
         disk_versions = {
             match.group(1)
