@@ -286,3 +286,33 @@ def crop_face(vertices, radius):
                 if now:result.append(current)
                 previous,inside=current,now
     return result
+
+
+def polygon_overlaps_square(vertices, half_extent):
+    """Return whether an X/Z polygon touches the protected battle centre.
+
+    Faces are convex triangles or quads. Separating-axis checks include the
+    square's edges and each polygon edge, so a long prop face crossing the
+    centre is rejected even when every vertex lies outside the safe region.
+    """
+    if not math.isfinite(half_extent) or half_extent < 0:
+        raise ValueError('Invalid protected-area extent')
+    points=[(float(vertex[0]),float(vertex[2])) for vertex in vertices]
+    if not points:
+        return False
+    if not all(math.isfinite(value) for point in points for value in point):
+        raise ValueError('Non-finite polygon coordinate')
+    square=[(-half_extent,-half_extent),(-half_extent,half_extent),
+            (half_extent,half_extent),(half_extent,-half_extent)]
+    axes=[(1.0,0.0),(0.0,1.0)]
+    for first,second in zip(points,points[1:]+points[:1]):
+        edge=(second[0]-first[0],second[1]-first[1])
+        if edge!=(0.0,0.0):
+            axes.append((-edge[1],edge[0]))
+    for axis_x,axis_z in axes:
+        polygon_projection=[x*axis_x+z*axis_z for x,z in points]
+        square_projection=[x*axis_x+z*axis_z for x,z in square]
+        if (max(polygon_projection)<min(square_projection) or
+                max(square_projection)<min(polygon_projection)):
+            return False
+    return True

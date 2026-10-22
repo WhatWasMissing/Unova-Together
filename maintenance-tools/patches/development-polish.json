@@ -10,6 +10,8 @@
     "src/ARM.cpp",
     "src/ARM.h",
     "src/frontend/qt_sdl/AboutDialog.cpp",
+    "src/frontend/qt_sdl/AreaBattleScenes.h",
+    "src/frontend/qt_sdl/BattleSceneryAreaSelection.h",
     "src/frontend/qt_sdl/CheckpointStorage.h",
     "src/frontend/qt_sdl/CMakeLists.txt",
     "src/frontend/qt_sdl/ConnectionFeedback.h",
@@ -93,8 +95,8 @@
     "src/net/LAN.h",
     "src/PresenceOcclusion.h"
   ],
-  "patchSha256": "563ae281334efa40183bf07aee0d64d0653244d03253017ff4b87c144d378a9e",
+  "patchSha256": "aa8aa583ccaaa4f6800ca78fa9de4f7c51a2b9259f354873e34db9e46f0d8dec",
   "spriteVariants": 743,
-  "build": "2.0.26",
+  "build": "2.0.27",
   "hgssNormalVariants": 545
 }

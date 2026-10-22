@@ -17,7 +17,7 @@ import ndspy.color
 import ndspy.model
 from PIL import Image
 from extract_battle_surroundings import matrix_cells, terrain_model
-from field_scene_geometry import decode, crop_face
+from field_scene_geometry import decode, crop_face, polygon_overlaps_square
 from vendor.nsbmd_writer import WriteFile as writer
 from ndspy import _common
 
@@ -129,7 +129,7 @@ class FieldSource:
                         for pair,vertices in geometry:
                             transformed=[(v[0]*cosine+v[2]*sine+px,v[1]+py,-v[0]*sine+v[2]*cosine+pz,v[3],v[4]) for v in vertices]
                             cropped=crop_face(transformed,radius)
-                            if len(cropped)>=3 and (keep_centre or min(max(abs(v[0]),abs(v[2])) for v in cropped)>64):
+                            if len(cropped)>=3 and (keep_centre or not polygon_overlaps_square(cropped,64)):
                                 faces.append((('props',)+pair,cropped))
                     except (ValueError,KeyError,IndexError,struct.error) as error:
                         omitted.append(f'prop {uid}: {error}')

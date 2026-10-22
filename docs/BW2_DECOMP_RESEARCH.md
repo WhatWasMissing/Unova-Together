@@ -28,6 +28,14 @@ Trainer definitions are data, not event-script byte blobs. The decomp maps `res/
 
 Trainer AI is a separate 14-script archive at `a/1/6/9`; AI flag bits select the scripts (`docs/scripts.md:6-10, 45-53`; macros and handlers in `res/trainers/ai/`, `include/asm/tr_ai.inc`, and `src/ov170/tr_ai.c`). A Mega-capable opposing trainer would need explicit battle-runtime support in addition to trainer data and AI policy. Merely assigning a stone/item or changing the party does not establish that the original Gen 5 battle engine can transform it.
 
+## Battle-area zone selection
+
+The pinned decomp reference at `WhatWasMissing/pokebw2` commit `215b992f5c87bcadc4c5d7a40e78a309b2555f8b` shows the battle's source zone explicitly. In `src/ov036/field_encount.c`, `SaveBtlFieldStatus` gets `Field_GetPlayerStateZoneID(field)`, uses that zone for `GetZoneBattleBGID`, and stores it as `status->zoneId` (lines 265-272). `include/field/field_event.h` defines `BtlFieldStatus.zoneId`; `src/system/btl_setup.c` copies the status into the battle environment in `BtlSetup_LoadGameData` (around line 240). This makes the loaded field zone the right key for an area's battle backdrop.
+
+The runtime tracker also reports `map`, which can identify the current outdoor matrix cell, separately from `fieldZone`, the loaded zone. On the local supported Redux output ROM (game code `IREO`, SHA-256 `353fb0cf82c3e4eddfc8986efa8910b00eb1c4d6f106c220abef59d69d3a520a`), `a/0/1/2` contains 617 zone headers and `a/0/1/3` contains 409 area records. The Route 7/Mistralton example resolves loaded field zone 107 and matrix cell 337 to area 38 in both cases. The mod reads these mappings from the selected ROM; the decomp supplies the meaning of the battle field, not Redux table values.
+
+Nearby cropped map geometry still needs the matrix-cell coordinates. It is therefore used only when the matrix zone and loaded battle zone resolve to the same area; otherwise the runtime chooses the fallback arena for the loaded battle zone's area. This check does not change the decomp or game logic.
+
 ## Memory structures and address spaces
 
 Do not mix these different kinds of numbers:

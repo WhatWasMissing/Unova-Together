@@ -7,10 +7,8 @@ import threading
 import uuid
 import struct
 import time
-import ndspy.rom
-from build_battle_surroundings import FieldSource, export
 
-REVISION=3
+REVISION=4
 
 
 def scene_key(zone,x,z,y):
@@ -46,11 +44,16 @@ class SurroundingsWorker:
                     key=scene_key(zone,x,z,y)
                     if data.get('key')!=key:raise ValueError('Invalid scene key')
                     if handled.get(request)==key:continue
-                    if source is None:source=FieldSource(ndspy.rom.NintendoDSRom.fromFile(str(self.rom)))
                     destination=self.directory/f'scene-v{REVISION}-{key}'
                     report_path=destination/'scene.json'
                     if not report_path.is_file():
+                        # Cached scenes are self-contained. Read the user's ROM
+                        # only when a new local geometry build is actually needed.
+                        import ndspy.rom
+                        from build_battle_surroundings import FieldSource, export
                         temporary=self.directory/('pending-'+uuid.uuid4().hex)
+                        if source is None:
+                            source=FieldSource(ndspy.rom.NintendoDSRom.fromFile(str(self.rom)))
                         report=export(source,zone,x,z,y,temporary,self.budget)
                         report.pop('geometry',None)
                         (temporary/'scene.json').write_text(json.dumps(report))
@@ -58,10 +61,12 @@ class SurroundingsWorker:
                     else:report=json.loads(report_path.read_text())
                     if not isinstance(report,dict):raise ValueError('Invalid nearby scene cache')
                     model_name=report.get('model');model_size=report.get('bytes');model_hash=report.get('sha256')
+                    area=report.get('area')
                     omitted=report.get('omittedProps',[])
                     if (model_name!='surroundings.nsbmd' or type(model_size) is not int or model_size<0 or
                             not isinstance(model_hash,str) or len(model_hash)!=64 or
                             any(character not in '0123456789abcdef' for character in model_hash) or
+                            type(area) is not int or not 0<=area<4096 or
                             not isinstance(omitted,list)):
                         raise ValueError('Invalid nearby scene cache')
                     model=destination/model_name
@@ -69,6 +74,7 @@ class SurroundingsWorker:
                         raise ValueError('Invalid nearby scene cache')
                     result={'key':key,'model':str(model.relative_to(self.directory.parent)),
                             'sha256':model_hash,'bytes':model_size,'zone':zone,
+                            'area':area,
                             'omittedProps':len(omitted)}
                     atomic_json(request.with_name(request.name.replace('request-','ready-')),result)
                     handled[request]=key

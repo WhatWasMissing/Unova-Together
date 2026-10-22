@@ -91211,3 +91211,123 @@
 +}
 +
 +}
+--- /dev/null
++++ b/source/melonDS/src/frontend/qt_sdl/BattleSceneryAreaSelection.h
+@@ -0,0 +1,27 @@
++// Unova Together by mvq1303 / WhatWasMissing. GPL-3.0-or-later.
++#pragma once
++
++struct BattleSceneryAreaSelection {
++    int battleZone = -1;
++    int battleArea = -1;
++    int matrixZone = -1;
++    bool useNearbyGeometry = false;
++
++    explicit constexpr operator bool() const { return battleArea >= 0; }
++};
++
++// The field's loaded zone selects its battle area. The outdoor matrix cell is
++// only suitable for nearby geometry when both zone records resolve to the same
++// area; callers should otherwise use the battle area's safe fallback arena.
++template <typename AreaForZone>
++constexpr BattleSceneryAreaSelection selectBattleSceneryArea(
++    int matrixZone, int battleZone, AreaForZone areaForZone)
++{
++    const int battleArea = areaForZone(battleZone);
++    if (battleZone < 0 || battleArea < 0)
++        return {};
++
++    const int matrixArea = areaForZone(matrixZone);
++    return {battleZone, battleArea, matrixZone,
++            matrixZone >= 0 && matrixArea == battleArea};
++}
+
+--- a/source/melonDS/src/frontend/qt_sdl/AreaBattleScenes.h
++++ b/source/melonDS/src/frontend/qt_sdl/AreaBattleScenes.h
+@@ -13,6 +13,7 @@
+ #include <QCoreApplication>
+ #include <cmath>
+ #include "NDSCart.h"
++#include "BattleSceneryAreaSelection.h"
+ 
+ // The catalog is generated locally from the user's exact ROM. Changes affect
+ // only validated native battle-background file ranges, never battle logic.
+@@ -27,7 +28,8 @@
+     bool requested=!qEnvironmentVariableIsEmpty("UNOVA_AREA_CATALOG");
+ public:
+     QString status="Original battle scenery";
+-    bool needsSample() { return requested && (++frames%30==0); }
++    // Sample often enough to select the correct area before battle assets load.
++    bool needsSample() { return requested && (++frames%6==0); }
+     static QByteArray sha(const char* data,qsizetype size) {
+         return QCryptographicHash::hash(QByteArray::fromRawData(data,size),QCryptographicHash::Sha256).toHex();
+     }
+@@ -53,31 +55,51 @@
+         }
+         if(!loaded || sample.value("status").toString()!="Experimental match" ||
+            !sample.value("fieldPositionOwned").toBool()) return;
+-        const int zone=sample.value("map",-1).toInt();
++        const int matrixZone=sample.value("map",-1).toInt();
++        const int battleZone=sample.value("fieldZone",-1).toInt();
+         const auto zones=catalog.value("zones").toArray();
+-        if(zone<0 || zone>=zones.size() || zones[zone].toObject().value("zone").toInt()!=zone) return;
+-        const int area=zones[zone].toObject().value("area").toInt();
++        auto areaForZone=[&](int zone)->int {
++            if(zone<0 || zone>=zones.size()) return -1;
++            const auto record=zones[zone].toObject();
++            if(record.value("zone").toInt(-1)!=zone) return -1;
++            return record.value("area").toInt(-1);
++        };
++        // The decomp copies Field_GetPlayerStateZoneID into BtlFieldStatus.zoneId.
++        // `fieldZone` is that loaded zone; `map` is only its outdoor matrix cell.
++        const auto areaSelection=selectBattleSceneryArea(matrixZone,battleZone,areaForZone);
++        if(!areaSelection) {
++            // Never carry a previous area's background into an unresolved zone.
++            if(currentArea>=0) {
++                cart->SetAssetPatches({});currentArea=-1;currentSelection.clear();
++                status="Area scenery unavailable; original background";
++            }
++            return;
++        }
++        const int area=areaSelection.battleArea;
+         auto entry=catalog.value("areas").toObject().value(QString::number(area)).toObject();
+         QString selection=QString("area-%1").arg(area);
+         const QString nearby=qEnvironmentVariable("UNOVA_SURROUNDINGS_DIR");
+-        if(!nearby.isEmpty() && QFileInfo(nearby).canonicalFilePath().startsWith(QDir(directory).canonicalPath()+"/")) {
++        if(areaSelection.useNearbyGeometry && !nearby.isEmpty() && QFileInfo(nearby).canonicalFilePath().startsWith(QDir(directory).canonicalPath()+"/")) {
+             const double x=sample.value("worldX").toDouble(),z=sample.value("worldZ").toDouble(),y=sample.value("worldY").toDouble();
+             if(std::isfinite(x) && std::isfinite(z) && std::isfinite(y) && x>=0 && z>=0 && x<=131072 && z<=131072 && std::abs(y)<=32768) {
+                 // Two-tile buckets bound rebuild frequency. Compilation happens
+                 // in the launcher, never in the emulated frame or battle loop.
+-                const QString key=QString("%1-%2-%3-%4").arg(zone).arg(int(x/32)).arg(int(z/32)).arg(int(std::nearbyint(y)));
++                const QString key=QString("%1-%2-%3-%4").arg(matrixZone).arg(int(x/32)).arg(int(z/32)).arg(int(std::nearbyint(y)));
+                 const QString suffix=QString::number(QCoreApplication::applicationPid())+".json";
+                 if(key!=requestedKey) {
+                     QSaveFile request(QDir(nearby).filePath("request-"+suffix));
+                     if(request.open(QIODevice::WriteOnly)) {
+-                        request.write(QJsonDocument(QJsonObject{{"key",key},{"zone",zone},{"worldX",x},{"worldZ",z},{"worldY",y}}).toJson(QJsonDocument::Compact));
++                        request.write(QJsonDocument(QJsonObject{{"key",key},{"zone",matrixZone},{"worldX",x},{"worldZ",z},{"worldY",y}}).toJson(QJsonDocument::Compact));
+                         if(request.commit()) requestedKey=key;
+                     }
+                 }
+                 QFile ready(QDir(nearby).filePath("ready-"+suffix));
+                 if(ready.open(QIODevice::ReadOnly) && ready.size()<8192) {
+                     const auto candidate=QJsonDocument::fromJson(ready.readAll()).object();
+-                    if(candidate.value("key").toString()==key && !candidate.value("model").toString().isEmpty()) {
++                    if(candidate.value("key").toString()==key &&
++                       candidate.value("zone").toInt(-1)==matrixZone &&
++                       candidate.value("area").toInt(-1)==area &&
++                       !candidate.value("model").toString().isEmpty()) {
+                         entry=candidate;selection="nearby-"+key;
+                     }
+                 }
+@@ -119,7 +141,7 @@
+         const auto count=patches.size();
+         if(count!=35 || !cart->SetAssetPatches(std::move(patches))) {status="Area scenery: invalid patch ranges";return;}
+         currentArea=area;currentSelection=selection;
+-        status=selection.startsWith("nearby-")?QString("Nearby scenery: map %1; %2 unsupported props omitted").arg(zone).arg(entry.value("omittedProps").toInt()):QString("Area scenery: map %1, area %2; nearby scene preparing or unavailable").arg(zone).arg(area);
+-        qInfo("Unova Together area scenery: zone=%d area=%d slots=%zu",zone,area,count);
++        status=selection.startsWith("nearby-")?QString("Nearby scenery: area %1; %2 unsupported props omitted").arg(area).arg(entry.value("omittedProps").toInt()):QString("Area scenery: area %1; nearby scene preparing or unavailable").arg(area);
++        qInfo("Unova Together battle scenery: fieldZone=%d matrixZone=%d area=%d slots=%zu",battleZone,matrixZone,area,count);
+     }
+ };

@@ -8,6 +8,7 @@ import unittest
 from unittest.mock import patch
 
 from battle_surroundings_worker import REVISION, SurroundingsWorker, scene_key
+from field_scene_geometry import polygon_overlaps_square
 
 
 class OnePassStop:
@@ -41,11 +42,7 @@ class BattleSurroundingsWorkerTests(unittest.TestCase):
         return worker
 
     def run_worker(self):
-        with (
-            patch('battle_surroundings_worker.ndspy.rom.NintendoDSRom.fromFile', return_value=object()),
-            patch('battle_surroundings_worker.FieldSource', return_value=object()),
-        ):
-            self.worker().run()
+        self.worker().run()
 
     def write_request(self, value):
         self.request.write_text(json.dumps(value), encoding='utf-8')
@@ -113,7 +110,7 @@ class BattleSurroundingsWorkerTests(unittest.TestCase):
         digest = hashlib.sha256(model.read_bytes()).hexdigest()
         (destination / 'scene.json').write_text(json.dumps({
             'model': model.name, 'bytes': model.stat().st_size,
-            'sha256': digest, 'omittedProps': ['prop'],
+            'sha256': digest, 'area': 38, 'omittedProps': ['prop'],
         }), encoding='utf-8')
 
         self.run_worker()
@@ -121,7 +118,47 @@ class BattleSurroundingsWorkerTests(unittest.TestCase):
         result = json.loads((self.directory / 'ready-test.json').read_text(encoding='utf-8'))
         self.assertEqual(result['key'], self.key)
         self.assertEqual(result['sha256'], digest)
+        self.assertEqual(result['area'], 38)
         self.assertEqual(result['omittedProps'], 1)
+
+    def test_scene_report_without_area_returns_fallback(self):
+        self.write_request({
+            'zone': self.zone, 'worldX': self.x, 'worldZ': self.z,
+            'worldY': self.y, 'key': self.key,
+        })
+        destination = self.directory / f'scene-v{REVISION}-{self.key}'
+        destination.mkdir()
+        model = destination / 'surroundings.nsbmd'
+        model.write_bytes(b'validated scene')
+        (destination / 'scene.json').write_text(json.dumps({
+            'model': model.name, 'bytes': model.stat().st_size,
+            'sha256': hashlib.sha256(model.read_bytes()).hexdigest(),
+            'omittedProps': [],
+        }), encoding='utf-8')
+
+        self.run_worker()
+
+        result = json.loads((self.directory / 'ready-test.json').read_text(encoding='utf-8'))
+        self.assertIn('fallback', result)
+
+
+class BattleCentreClearanceTests(unittest.TestCase):
+    def test_crossing_prop_is_rejected_even_when_all_vertices_are_outside(self):
+        crossing = [(-100, 0, -12), (100, 0, -12),
+                    (100, 0, 12), (-100, 0, 12)]
+        self.assertTrue(polygon_overlaps_square(crossing, 64))
+
+    def test_prop_wholly_outside_centre_remains_available(self):
+        outside = [(70, 0, 70), (100, 0, 70), (100, 0, 100), (70, 0, 100)]
+        self.assertFalse(polygon_overlaps_square(outside, 64))
+
+    def test_touching_protected_boundary_counts_as_overlap(self):
+        touching = [(64, 0, -10), (80, 0, -10), (80, 0, 10), (64, 0, 10)]
+        self.assertTrue(polygon_overlaps_square(touching, 64))
+
+    def test_invalid_clearance_is_rejected(self):
+        with self.assertRaises(ValueError):
+            polygon_overlaps_square([(0, 0, 0)], -1)
 
 
 if __name__ == '__main__':

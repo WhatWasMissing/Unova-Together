@@ -73,6 +73,13 @@ Those are findings for the two exact files in that dated comparison, not a unive
 - Set the scenery clip in screen coordinates before translating or rotating avatar art, and include its ground shadow. Keep status labels and navigation markers separate. Apply the same rule to companions and co-op trainer sprites without changing movement/gait timing or the foot anchor. Scan only the actor's transformed bounds. See [the depth-order verification](docs/verification/FOLLOWER_DEPTH_ORDER_2026-10-22.md) and `maintenance-tools/tools/test_follower_depth.py --source-root <matching-source>` for real-renderer tests, source prerequisites, and remaining live checks.
 - Prefer official game sprites when licensing and source provenance allow; record source game, extraction method, frame layout, and attribution. Keep a clearly identified fallback for species/forms absent from the official set.
 
+## Area-reactive battle scenery
+
+- Use the game's loaded field zone as the battle-area key. In the pinned B2W2 decomp, battle setup captures `Field_GetPlayerStateZoneID` into `BtlFieldStatus.zoneId`; the overworld `map` sample can instead identify an outdoor matrix cell. Resolve both IDs through the selected ROM's zone table and use nearby field geometry only if both resolve to the same area. Otherwise retain the area's fallback arena.
+- Keep the selected background latched while the tracker reports a battle; update it from a verified field sample after returning. Keep area lookup lightweight and scene generation asynchronous, outside the emulation frame.
+- Maintain a protected open center for battlers. Reject prop polygons that intersect the protected square, including long faces whose vertices all lie outside it; checking vertices alone is insufficient. Verify crossing, boundary-touching, and wholly exterior cases.
+- Preserve the original background when zone/area metadata or generated nearby geometry fails validation. Test area lookup against the exact supported ROM and the pinned decomp reference; source tests do not prove the camera framing in a live battle.
+
 ## Launcher UI
 
 - Group navigation labels by the task players are trying to complete, and make the current page unmistakable through both selection styling and accessible text/state.
