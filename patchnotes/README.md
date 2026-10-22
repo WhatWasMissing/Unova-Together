@@ -70,3 +70,5 @@ Pick a version to read what changed. The newest release is first.
 - [Unova Together 0.3.5 — Easy setup and co-op](RELEASE_NOTES_0.3.5.md)
 
 The launcher reads these same notes from `index.json` on GitHub.
+
+- [2.0.26 — Clearer co-op setup and scenery layering](RELEASE_NOTES_2.0.26.md)

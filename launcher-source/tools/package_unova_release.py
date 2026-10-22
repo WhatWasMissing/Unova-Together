@@ -196,7 +196,7 @@ def main():
         z.write(ROOT/'tools/package_unova_release.py','Unova-Together-Source/tools/package_unova_release.py')
         for name in ('test_unova_updater.py','test_unova_single_exe.py','unova_single_exe.py','build_unova_single_exe.py','test_launcher_ui.py','test_launcher_preferences.py','test_launcher_cheat_engine.py','test_launcher_services.py','test_ensure_presence_relay.py','test_release_input_bounds.py','test_overworld_companion.py','check_lan_player_list_validation.cpp','check_battle_presence.cpp','check_post_battle_presence.cpp','check_rival_agreement.cpp','test_rival_payload.py','test_coop_boss_payload.py','test_coop_story_return.py','test_coop_field_return.py','verify_coop_runtime.py','audit_native_enemy_setup.py','verify_rival_startups.py','test_field_zone_native.py','check_field_zone.cpp',):
             z.write(tool_source(name),'Unova-Together-Source/tools/'+name)
-        for name in ('test_companion_interactions.py','test_companion_interactions_runner.py'):
+        for name in ('test_companion_interactions.py','test_companion_interactions_runner.py','test_follower_depth.py','check_follower_depth.cpp'):
             z.write(REPOSITORY_ROOT/'maintenance-tools/tools'/name,'Unova-Together-Source/tools/'+name)
         for name in ('check_launcher_tree_parity.py','test_launcher_tree_parity.py','test_release_validation.py'):
             z.write(ROOT/'tools'/name,'Unova-Together-Source/tools/'+name)
