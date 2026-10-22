@@ -155,7 +155,7 @@ def main():
         for name in ('audit_hgss_walking_sheets.py','import_hgss_walking_sheets.py','verify_hgss_import.py','test_hgss_followers.py','check_hgss_followers.cpp'):
             z.write(ROOT/'tools'/name,'Unova-Together-Source/tools/'+name)
         z.write(repo/'docs/HGSS_FOLLOWER_IMPORT.md','Unova-Together-Source/docs/HGSS_FOLLOWER_IMPORT.md')
-        for name in ('check_follower_appearance.cpp','check_pokemon_follower.cpp','check_presence_rendering.cpp','test_presence_polling.py','test_party_stats.py','test_unova_storage.py','test_native_options_menu.py'):
+        for name in ('check_follower_appearance.cpp','check_pokemon_follower.cpp','check_presence_rendering.cpp','test_presence_polling.py','test_party_stats.py','test_unova_storage.py','test_native_options_menu.py','battle_scenery_area_selection.h','check_battle_scenery_area_selection.cpp','test_battle_surroundings_worker.py'):
             z.write(ROOT/'tools'/name,'Unova-Together-Source/tools/'+name)
         z.write(ROOT/'tools/test_launcher_migration.py','Unova-Together-Source/tools/test_launcher_migration.py')
         z.write(ROOT/'tools/test_launcher_versioning.py','Unova-Together-Source/tools/test_launcher_versioning.py')
@@ -246,6 +246,9 @@ def main():
         require_release_condition('Unova-Together-Source/tools/test_coop_experience_flow.py' in names, 'Source archive is missing co-op reward-flow coverage')
         require_release_condition('Unova-Together-Source/tools/test_coop_reward_policy.py' in names, 'Source archive is missing the co-op reward-policy runner')
         require_release_condition('Unova-Together-Source/tools/test_coop_reward_policy.cpp' in names, 'Source archive is missing the co-op reward-policy test')
+        require_release_condition('Unova-Together-Source/tools/check_battle_scenery_area_selection.cpp' in names, 'Source archive is missing the battle-area selection test')
+        require_release_condition('Unova-Together-Source/tools/battle_scenery_area_selection.h' in names, 'Source archive is missing the tested battle-area selection header')
+        require_release_condition('Unova-Together-Source/tools/test_battle_surroundings_worker.py' in names, 'Source archive is missing nearby-scene worker coverage')
         require_release_condition('Unova-Together-Source/tools/package_development_polish.py' in names, 'Source archive is missing the development patch packager')
         require_release_condition('Unova-Together-Source/docs/DEVELOPER_TESTING.md' in names, 'Source archive is missing test reproduction instructions')
     stage_root.mkdir(parents=True)
