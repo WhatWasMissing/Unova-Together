@@ -530,3 +530,11 @@ The released emulator executable is unchanged from 2.0.19; this update changes l
 **PASS — FOCUSED VERIFICATION:** On Windows with Python 3.12, launcher tests passed **37/37**, maintenance-tree relay and launcher tests passed **54/54**, and launcher source parity matched **51 files**. The Windows lifecycle test launched a real legacy Python relay from a temporary install, confirmed it was stopped, then verified the replacement's current-build handshake and Teleport capability. Temporary test files were removed. No ROM, gameplay, shop, XP or battle synchronization code changed.
 
 **LIVE TEST STILL NEEDED:** A paired in-game session was not run. Confirm that both clients use the same current game/launcher release, restart the host relay through the updated launcher, and verify Teleport on the same map and across a map transition.
+
+### Tailscale setup review gate — 2026-10-21
+
+Based on repository commit `784434454c8fbb2fa52d58e5ceda5081eac5180f`, the launcher blocks Tailscale host/join until the player scrolls the in-app guide to the end and checks its acknowledgment. The guide digest is stored in launcher settings; editing the guide requires a new review. The player guide, launcher guide, README, and co-op guide link to the steps and describe the LAN, ZeroTier, and group-hosted UDP choices.
+
+**PASS — LAUNCHER UI:** Python 3.12.8 / Tk 8.6: `py -3.12 -B -m unittest test_launcher_ui` passed **41/41** in `launcher-source/tools` and **40/40** in `maintenance-tools/tools`. The focused tests cover canceled host and direct launch attempts, saved acknowledgments and re-review after guide changes, and the modal scroll/checkbox/continue flow. `py -3.12 -B launcher-source/tools/check_launcher_tree_parity.py` passed for **49 files**; `py_compile` and `git diff --check` passed.
+
+**NOT RUN:** No packaged launcher was built, no cross-network session was started, and no live game session was tested. These tests use disposable UI profiles and placeholder ROM data; they do not establish Tailscale connectivity or game behavior.

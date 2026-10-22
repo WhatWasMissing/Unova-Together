@@ -593,6 +593,66 @@ class LauncherTests(unittest.TestCase):
             self.assertEqual(spawn.call_args.kwargs['env']['UNOVA_LAN_ACTION'],'host')
         self.app.game=None
 
+    def test_tailscale_host_and_direct_launch_require_guide_review(self):
+        self.app.rom.set(str(self.rom));self.app.player.set('Tester');self.app.net_mode.set('Tailscale backup')
+        content='Read the cross-network setup.';digest=hashlib.sha256(content.encode()).hexdigest()
+        with patch.object(self.app,'_game_is_running',return_value=False),patch.object(self.app,'_tailscale_guide_content',return_value=(content,digest)),patch.object(self.app,'_show_tailscale_guide_review',return_value=False) as review,patch('launcher_ui.services.check_relay') as probe:
+            self.app._start_lan('host');self.app.launch('join')
+        self.assertEqual(review.call_count,2);probe.assert_not_called()
+        self.assertIn('Read and acknowledge',self.app.lan_status.get())
+
+    def test_tailscale_guide_acknowledgment_persists_and_changes_with_guide(self):
+        content='Tailscale steps';digest=hashlib.sha256(content.encode()).hexdigest()
+        with patch.object(self.app,'_tailscale_guide_content',return_value=(content,digest)),patch.object(self.app,'_show_tailscale_guide_review',return_value=True) as review:
+            self.assertTrue(self.app._require_tailscale_guide_review())
+            review.assert_called_once_with(content)
+        self.assertEqual(json.loads(self.app.config_path.read_text())['tailscale_guide_ack'],digest)
+        self.app.destroy();self.app=Launcher(self.home,testing=True);self.app._open_mod('black2',save=False)
+        self.assertEqual(self.app.tailscale_guide_ack,digest)
+        changed='Updated Tailscale steps';changed_digest=hashlib.sha256(changed.encode()).hexdigest()
+        with patch.object(self.app,'_tailscale_guide_content',return_value=(changed,changed_digest)),patch.object(self.app,'_show_tailscale_guide_review',return_value=False) as review:
+            self.assertFalse(self.app._require_tailscale_guide_review())
+            review.assert_called_once_with(changed)
+
+    def test_tailscale_review_requires_scroll_and_confirmation(self):
+        content='\n'.join(f'## Step {index}\nFollow the cross-network setup instructions.' for index in range(120))
+        failures=[]
+        def descendants(widget):
+            for child in widget.winfo_children():
+                yield child
+                yield from descendants(child)
+        def interact():
+            dialog=next(child for child in self.app.winfo_children() if child.winfo_class()=='Toplevel')
+            try:
+                if OUTPUT:
+                    dialog.attributes('-topmost',True);dialog.lift();dialog.focus_force();dialog.update();x,y=dialog.winfo_rootx(),dialog.winfo_rooty()
+                    ImageGrab.grab(bbox=(x,y,x+dialog.winfo_width(),y+dialog.winfo_height())).save(OUTPUT/'tailscale-setup-review.png')
+                items=list(descendants(dialog))
+                text=next(item for item in items if item.winfo_class()=='Text')
+                scroll=next(item for item in items if item.winfo_class()=='TScrollbar')
+                check=next(item for item in items if item.winfo_class()=='TCheckbutton')
+                proceed=next(item for item in items if item.winfo_class()=='Button' and item.cget('text')=='Continue')
+                self.assertTrue(check.instate(['disabled']))
+                self.assertEqual(str(proceed.cget('state')),'disabled')
+                scroll.tk.call(scroll.cget('command'),'moveto','1.0');self.app.update()
+                def confirm():
+                    try:
+                        self.assertTrue(check.instate(['!disabled']),msg=f'visible text range at bottom: {text.yview()}')
+                        check.invoke();self.app.update_idletasks()
+                        self.assertEqual(str(proceed.cget('state')),'normal')
+                        proceed.invoke()
+                    except Exception as exc:failures.append(exc)
+                    finally:
+                        if dialog.winfo_exists():dialog.destroy()
+                self.app.after(150,confirm)
+            except Exception as exc:
+                failures.append(exc)
+                if dialog.winfo_exists():dialog.destroy()
+        self.app.after(50,interact)
+        result=self.app._show_tailscale_guide_review(content)
+        self.assertEqual(failures,[])
+        self.assertTrue(result)
+
     def test_remember_join_address_and_guard_retry(self):
         self.app.connection_role.set('Join');self.app.net_host.set('192.0.2.10');self.app._save_connection()
         self.app.connection_role.set('Host');self.app._connection_role_changed()
