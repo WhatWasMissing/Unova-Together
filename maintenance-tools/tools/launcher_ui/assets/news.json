@@ -11,19 +11,19 @@
       "version": "2.0.27",
       "title": "Area-based battle scenery (test release)",
       "file": "RELEASE_NOTES_2.0.27.md",
-      "body": "Battle scenery can now reflect the area where an encounter begins, while keeping the center open for the PokÃ©mon. Enable **Area battle scenery** in launcher settings to try it. If the game cannot confirm the area, it keeps the original battle background.\n\nThis is a test release. Please try wild and trainer battles in indoor and outdoor areas, especially just after changing maps, and report any scenery that hides the action or shows the wrong area.\n\nUse the same release and supported Blaze Black 2 Redux Complete v1.4.1 game version as your friends. Existing saves remain compatible."
+      "body": "Battle scenery can now reflect the area where an encounter begins, while keeping the center open for the Pokémon. Enable **Area battle scenery** in launcher settings to try it. If the game cannot confirm the area, it keeps the original battle background.\n\nThis is a test release. Please try wild and trainer battles in indoor and outdoor areas, especially just after changing maps, and report any scenery that hides the action or shows the wrong area.\n\nUse the same release and supported Blaze Black 2 Redux Complete v1.4.1 game version as your friends. Existing saves remain compatible."
     },
     {
       "version": "2.0.26",
       "title": "Clearer co-op setup and scenery layering",
       "file": "RELEASE_NOTES_2.0.26.md",
-      "body": "- Improved scenery layering for PokÃ©mon followers, co-op players and their shadows.\n- Improved recovery from outdated local player-sharing relays that can prevent Teleport. Both players should update and reconnect through the launcher.\n- Added an in-launcher Tailscale setup walkthrough, with guidance for LAN and other connection options.\n- Refreshed Play and Features with credited Mega sprite artwork, a responsive card layout and animated previews that load when needed.\n\nUse the same release and Blaze Black 2 Redux Complete v1.4.1 game version as your friends. Existing saves remain compatible. Co-op experience remains disabled."
+      "body": "- Improved scenery layering for Pokémon followers, co-op players and their shadows.\n- Improved recovery from outdated local player-sharing relays that can prevent Teleport. Both players should update and reconnect through the launcher.\n- Added an in-launcher Tailscale setup walkthrough, with guidance for LAN and other connection options.\n- Refreshed Play and Features with credited Mega sprite artwork, a responsive card layout and animated previews that load when needed.\n\nUse the same release and Blaze Black 2 Redux Complete v1.4.1 game version as your friends. Existing saves remain compatible. Co-op experience remains disabled."
     },
     {
       "version": "2.0.25",
       "title": "Make the overworld character your own",
       "file": "RELEASE_NOTES_2.0.25.md",
-      "body": "Choose from animated people and PokÃ©mon already available in your compatible game. Search, filter, preview walking animations, save favorites, and store named looks for each game profile. Your choice applies the next time you start the game."
+      "body": "Choose from animated people and Pokémon already available in your compatible game. Search, filter, preview walking animations, save favorites, and store named looks for each game profile. Your choice applies the next time you start the game."
     },
     {
       "version": "2.0.24",
@@ -35,19 +35,19 @@
       "version": "2.0.23",
       "title": "What changed",
       "file": "RELEASE_NOTES_2.0.23.md",
-      "body": "- Updated walking PokÃ©mon with HGSS artwork for all 493 Generation 1â€“4 species, plus matching gender and alternate-form sprites.\n- Shiny PokÃ©mon keep their separate shiny artwork. PokÃ©mon and forms missing from the HGSS sheets keep their existing sprites, including Generation 5.\n- PokÃ©mon Center Marts now carry three Mega Stones per inventory, with all 49 stones spread across Unova. Each costs â‚½50,000. Battle Point counters still offer the full selection for 50 BP.\n\nUse the same release and Blaze Black 2 Redux Complete v1.4.1 game version as your friends. Existing saves remain compatible."
+      "body": "- Updated walking Pokémon with HGSS artwork for all 493 Generation 1–4 species, plus matching gender and alternate-form sprites.\n- Shiny Pokémon keep their separate shiny artwork. Pokémon and forms missing from the HGSS sheets keep their existing sprites, including Generation 5.\n- Pokémon Center Marts now carry three Mega Stones per inventory, with all 49 stones spread across Unova. Each costs ₽50,000. Battle Point counters still offer the full selection for 50 BP.\n\nUse the same release and Blaze Black 2 Redux Complete v1.4.1 game version as your friends. Existing saves remain compatible."
     },
     {
       "version": "2.0.22",
       "title": "Trade items from the Unova menu",
       "file": "RELEASE_NOTES_2.0.22.md",
-      "body": "Item trades are now available from **Unova â†’ Players â†’ Give item**. PokÃ©mon trades remain in the Players menu, and the gameâ€™s original **Options** entry is available again from the pause menu."
+      "body": "Item trades are now available from **Unova → Players → Give item**. Pokémon trades remain in the Players menu, and the game’s original **Options** entry is available again from the pause menu."
     },
     {
       "version": "2.0.21",
       "title": "Safer co-op testing and EV resets",
       "file": "RELEASE_NOTES_2.0.21.md",
-      "body": "Co-op battles now suppress experience, level-up and move-learning rewards by default while this feature is tested. Turn off **Suppress EXP in co-op battles** in launcher Settings to test normal rewards. Resetting a PokÃ©monâ€™s EVs now asks you to confirm; **No, keep them** is selected first."
+      "body": "Co-op battles now suppress experience, level-up and move-learning rewards by default while this feature is tested. Turn off **Suppress EXP in co-op battles** in launcher Settings to test normal rewards. Resetting a Pokémon’s EVs now asks you to confirm; **No, keep them** is selected first."
     },
     {
       "version": "2.0.20",
@@ -59,31 +59,31 @@
       "version": "2.0.19",
       "title": "Mega Stone shops, Teleport, and co-op testing",
       "file": "RELEASE_NOTES_2.0.19.md",
-      "body": "- Fixed a crash that could happen when opening a PokÃ© Martâ€™s buy list. Mega Stones are split between alternating Marts, so all 49 remain available across Unova without overcrowding any one shop. Each stone costs â‚½50,000.\n- Restored the relay location updates needed by the in-game Teleport option.\n- Added **Suppress EXP in co-op battles (testing)** to launcher Settings. It is off by default and applies the next time you launch; use the same choice on both computers when comparing co-op behavior."
+      "body": "- Fixed a crash that could happen when opening a Poké Mart’s buy list. Mega Stones are split between alternating Marts, so all 49 remain available across Unova without overcrowding any one shop. Each stone costs ₽50,000.\n- Restored the relay location updates needed by the in-game Teleport option.\n- Added **Suppress EXP in co-op battles (testing)** to launcher Settings. It is off by default and applies the next time you launch; use the same choice on both computers when comparing co-op behavior."
     },
     {
       "version": "2.0.18",
-      "title": "PokÃ©mon Center crash fix and launcher reliability",
+      "title": "Pokémon Center crash fix and launcher reliability",
       "file": "RELEASE_NOTES_2.0.18.md",
-      "body": "- Fixed a crash when entering a PokÃ©mon Center.\n- Cynthia is available through Practice rematches without the unsupported-trainer error.\n- Updates and launcher repair handle damaged or incomplete setup information more safely. A failed update can be retried without replacing the current game.\n- Save backups and restores use matching size and file-count limits. Damaged backups show a clear error and leave the current save intact.\n- Old-version cleanup skips damaged installation records instead of stopping the whole cleanup.\n- Games & saves, backup folders, and problem-report folders show clearer errors when files cannot be accessed or opened.\n- The emulator-settings editor reports damaged settings sections instead of crashing.\n- Prepared player-model games are checked before reuse, and cached game copies and profile storage receive additional safeguards.\n- Emulator and Multiplayer windows display the same release number as the launcher.\n- Problem reports better hide network addresses and authorization information."
+      "body": "- Fixed a crash when entering a Pokémon Center.\n- Cynthia is available through Practice rematches without the unsupported-trainer error.\n- Updates and launcher repair handle damaged or incomplete setup information more safely. A failed update can be retried without replacing the current game.\n- Save backups and restores use matching size and file-count limits. Damaged backups show a clear error and leave the current save intact.\n- Old-version cleanup skips damaged installation records instead of stopping the whole cleanup.\n- Games & saves, backup folders, and problem-report folders show clearer errors when files cannot be accessed or opened.\n- The emulator-settings editor reports damaged settings sections instead of crashing.\n- Prepared player-model games are checked before reuse, and cached game copies and profile storage receive additional safeguards.\n- Emulator and Multiplayer windows display the same release number as the launcher.\n- Problem reports better hide network addresses and authorization information."
     },
     {
       "version": "2.0.17",
       "title": "Save-loading fix",
       "file": "RELEASE_NOTES_2.0.17.md",
-      "body": "Fixed a black screen that could appear after choosing Continue. Your existing save remains intact and loads into the game as expected.\n\nCynthia's Route 7 Mega Evolution lesson now appears after defeating Skyla, gives a Mega Stone suited to an eligible PokÃ©mon, and unlocks her later rematch."
+      "body": "Fixed a black screen that could appear after choosing Continue. Your existing save remains intact and loads into the game as expected.\n\nCynthia's Route 7 Mega Evolution lesson now appears after defeating Skyla, gives a Mega Stone suited to an eligible Pokémon, and unlocks her later rematch."
     },
     {
       "version": "2.0.16",
       "title": "Complete Mega Stone shops and matching version labels",
       "file": "RELEASE_NOTES_2.0.16.md",
-      "body": "The current download includes the full 49-stone selection in every PokÃ© Mart, including Mistralton City. Scroll through the stock to Latiosite, the final stone before Cancel. Each Mega Stone costs â‚½50,000.\n\nThe game window and Multiplayer screen now show the same release number as the launcher, making it easier to confirm that friends are using matching versions.\n\nIf you used an older emulator save state, load your normal in-game save after updating so the expanded shop menu can appear."
+      "body": "The current download includes the full 49-stone selection in every Poké Mart, including Mistralton City. Scroll through the stock to Latiosite, the final stone before Cancel. Each Mega Stone costs ₽50,000.\n\nThe game window and Multiplayer screen now show the same release number as the launcher, making it easier to confirm that friends are using matching versions.\n\nIf you used an older emulator save state, load your normal in-game save after updating so the expanded shop menu can appear."
     },
     {
       "version": "2.0.15",
       "title": "Mega Evolution in double and co-op battles",
       "file": "RELEASE_NOTES_2.0.15.md",
-      "body": "Mega Evolution now works reliably in double battles and co-op battles. The selected PokÃ©mon keeps its Mega Evolution after both moves are chosen, and each co-op player can use Mega Evolution once per battle."
+      "body": "Mega Evolution now works reliably in double battles and co-op battles. The selected Pokémon keeps its Mega Evolution after both moves are chosen, and each co-op player can use Mega Evolution once per battle."
     },
     {
       "version": "2.0.14",
@@ -95,19 +95,19 @@
       "version": "2.0.13",
       "title": "Streamlined menus and field tools",
       "file": "RELEASE_NOTES_2.0.13.md",
-      "body": "Launcher settings and in-game menus have been streamlined. Standard Fly continues to use the gameâ€™s usual party menu."
+      "body": "Launcher settings and in-game menus have been streamlined. Standard Fly continues to use the game’s usual party menu."
     },
     {
       "version": "2.0.9",
       "title": "Mega Stones at every shop",
       "file": "RELEASE_NOTES_2.0.9.md",
-      "body": "Every PokÃ© Mart now sells all 49 Mega Stones for â‚½50,000 each. Both Battle Point counters also offer the full selection for 50 BP."
+      "body": "Every Poké Mart now sells all 49 Mega Stones for ₽50,000 each. Both Battle Point counters also offer the full selection for 50 BP."
     },
     {
       "version": "2.0.8",
       "title": "Mega Stone shop fix",
       "file": "RELEASE_NOTES_2.0.8.md",
-      "body": "PokÃ©mon Center Marts now show Mega Stones with their names and prices instead of blank item entries. The full Mega Stone selection is available across the mart network."
+      "body": "Pokémon Center Marts now show Mega Stones with their names and prices instead of blank item entries. The full Mega Stone selection is available across the mart network."
     },
     {
       "version": "2.0.7",
@@ -125,55 +125,55 @@
       "version": "2.0.5",
       "title": "Mega-capable trainer battles",
       "file": "RELEASE_NOTES_2.0.5.md",
-      "body": "The Gym Leaders in the final three gyms now bring Mega-capable PokÃ©mon into battle, and Cynthia can Mega Evolve her Garchomp in her Route 7 rematch. Opponents can still Mega Evolve when their PokÃ©mon moves before yours.\n\nUse the launcher to install the update. Your saves are kept."
+      "body": "The Gym Leaders in the final three gyms now bring Mega-capable Pokémon into battle, and Cynthia can Mega Evolve her Garchomp in her Route 7 rematch. Opponents can still Mega Evolve when their Pokémon moves before yours.\n\nUse the launcher to install the update. Your saves are kept."
     },
     {
       "version": "2.0.4",
       "title": "Mega Evolution in double battles",
       "file": "RELEASE_NOTES_2.0.4.md",
-      "body": "Mega Evolution now works reliably in double battles, even when the other PokÃ©mon on your side chooses its move afterward.\n\nThis update also makes the launcherâ€™s old-version cleanup easier to follow with a progress indicator, estimated time, and the locations of files being removed. In-game menus show clearer section labels and selection highlights, and you can choose a supported player character before starting the game.\n\nUse the launcher to install the update. Your saves are kept."
+      "body": "Mega Evolution now works reliably in double battles, even when the other Pokémon on your side chooses its move afterward.\n\nThis update also makes the launcher’s old-version cleanup easier to follow with a progress indicator, estimated time, and the locations of files being removed. In-game menus show clearer section labels and selection highlights, and you can choose a supported player character before starting the game.\n\nUse the launcher to install the update. Your saves are kept."
     },
     {
       "version": "2.0.3",
       "title": "What changed",
       "file": "RELEASE_NOTES_2.0.3.md",
-      "body": "Follower PokÃ©mon now stay planted while idle and during regular walking. This removes the small vertical hop while preserving their walking poses and reaction animations."
+      "body": "Follower Pokémon now stay planted while idle and during regular walking. This removes the small vertical hop while preserving their walking poses and reaction animations."
     },
     {
       "version": "2.0.2",
       "title": "What changed",
       "file": "RELEASE_NOTES_2.0.2.md",
-      "body": "- Fixes a Route 7 issue that could stop movement after loading a save.\n- Cynthiaâ€™s introduction and rematch now appear at the right points in the story.\n- Update the launcher before continuing your save so it can prepare the corrected game copy."
+      "body": "- Fixes a Route 7 issue that could stop movement after loading a save.\n- Cynthia’s introduction and rematch now appear at the right points in the story.\n- Update the launcher before continuing your save so it can prepare the corrected game copy."
     },
     {
       "version": "2.0.1",
       "title": "What changed",
       "file": "RELEASE_NOTES_2.0.1.md",
-      "body": "- In-game menu text, button hints and dialogue now fit inside their windows. Long labels end cleanly.\n- Cynthiaâ€™s rematch team is closer to Skylaâ€™s Redux level, and her Garchomp can Mega Evolve."
+      "body": "- In-game menu text, button hints and dialogue now fit inside their windows. Long labels end cleanly.\n- Cynthia’s rematch team is closer to Skyla’s Redux level, and her Garchomp can Mega Evolve."
     },
     {
       "version": "2.0.0",
       "title": "Mega Evolution and a fresh look",
       "file": "RELEASE_NOTES_2.0.0.md",
-      "body": "- Explore with **49 Mega forms**, each with a matching Mega Stone sold at PokÃ©mon Center Marts. Forty-six forms have animated battle artwork.\n- The launcherâ€™s Features page now plays the supplied front and back animations for Mega Mawile.\n- Mega Evolution works in battle, keeps the Mega form through switching and level gains, and returns the PokÃ©mon to normal when the battle ends.\n- The launcher now lets you choose an animated field character from your game. Your choice applies the next time you start the game.\n- After defeating Skyla, meet Cynthia on Route 7 to learn about Mega Evolution and receive a matching Mega Stone. Return for a rematch against her team and Mega Garchomp. The launcher makes a separate event-ready copy of supported Redux games.\n- Added in-game mod menus have a Generation 5-inspired design, with menu sounds you can turn off in **Unova â†’ Settings**.\n- The launcherâ€™s old-version cleanup keeps your active game and saves while removing unused copies."
+      "body": "- Explore with **49 Mega forms**, each with a matching Mega Stone sold at Pokémon Center Marts. Forty-six forms have animated battle artwork.\n- The launcher’s Features page now plays the supplied front and back animations for Mega Mawile.\n- Mega Evolution works in battle, keeps the Mega form through switching and level gains, and returns the Pokémon to normal when the battle ends.\n- The launcher now lets you choose an animated field character from your game. Your choice applies the next time you start the game.\n- After defeating Skyla, meet Cynthia on Route 7 to learn about Mega Evolution and receive a matching Mega Stone. Return for a rematch against her team and Mega Garchomp. The launcher makes a separate event-ready copy of supported Redux games.\n- Added in-game mod menus have a Generation 5-inspired design, with menu sounds you can turn off in **Unova → Settings**.\n- The launcher’s old-version cleanup keeps your active game and saves while removing unused copies."
     },
     {
       "version": "1.0.35",
       "title": "Mega level-ups and menu sounds",
       "file": "RELEASE_NOTES_1.0.35.md",
-      "body": "Mega PokÃ©mon can gain levels in battle and learn new moves. In-game menus now include Generation 5-style movement, confirm, and back sounds; turn the sounds off in Settings if you prefer."
+      "body": "Mega Pokémon can gain levels in battle and learn new moves. In-game menus now include Generation 5-style movement, confirm, and back sounds; turn the sounds off in Settings if you prefer."
     },
     {
       "version": "1.0.34",
       "title": "Mega Evolution and steadier follower poses",
       "file": "RELEASE_NOTES_1.0.34.md",
-      "body": "The launcher now features Mega Evolution and a guide to all 49 forms. PokÃ©mon follower poses line up more consistently as they walk."
+      "body": "The launcher now features Mega Evolution and a guide to all 49 forms. Pokémon follower poses line up more consistently as they walk."
     },
     {
       "version": "1.0.33",
-      "title": "Mega PokÃ©mon and battle animations",
+      "title": "Mega Pokémon and battle animations",
       "file": "RELEASE_NOTES_1.0.33.md",
-      "body": "Use 49 Mega forms with matching stones. Animated battle artwork is available for 46 forms, including Mega Salamenceâ€™s 67-frame front and back animations."
+      "body": "Use 49 Mega forms with matching stones. Animated battle artwork is available for 46 forms, including Mega Salamence’s 67-frame front and back animations."
     },
     {
       "version": "1.0.31",
@@ -191,13 +191,13 @@
       "version": "1.0.29",
       "title": "Smoother followers and Mega animations",
       "file": "RELEASE_NOTES_1.0.29.md",
-      "body": "Followers keep a steady pace around corners. Launcher menus have navigation, confirm, and back sounds. Mega PokÃ©mon with supplied animations play their full sequences during battle."
+      "body": "Followers keep a steady pace around corners. Launcher menus have navigation, confirm, and back sounds. Mega Pokémon with supplied animations play their full sequences during battle."
     },
     {
       "version": "1.0.28",
-      "title": "Mega PokÃ©mon animations",
+      "title": "Mega Pokémon animations",
       "file": "RELEASE_NOTES_1.0.28.md",
-      "body": "Mega PokÃ©mon with animated artwork now play through the full timed sequence during battle. Mega Salamence includes 67 frames for both front and back views."
+      "body": "Mega Pokémon with animated artwork now play through the full timed sequence during battle. Mega Salamence includes 67 frames for both front and back views."
     },
     {
       "version": "1.0.27",
@@ -209,31 +209,31 @@
       "version": "1.0.26",
       "title": "A bigger Mega roster",
       "file": "RELEASE_NOTES_1.0.26.md",
-      "body": "The game now has 49 Mega forms and matching Mega Stones. Buy stones at PokÃ©mon Center Marts for â‚½50,000 each, then give the matching stone to a PokÃ©mon to use Mega Evolution in battle."
+      "body": "The game now has 49 Mega forms and matching Mega Stones. Buy stones at Pokémon Center Marts for ₽50,000 each, then give the matching stone to a Pokémon to use Mega Evolution in battle."
     },
     {
       "version": "1.0.25",
-      "title": "More Mega PokÃ©mon",
+      "title": "More Mega Pokémon",
       "file": "RELEASE_NOTES_1.0.25.md",
-      "body": "Mega forms arrive for Ampharos, Venusaur, Charizard Y, Gengar, Alakazam, Mawile, and Garchomp. Matching stones are sold at PokÃ©mon Center Marts."
+      "body": "Mega forms arrive for Ampharos, Venusaur, Charizard Y, Gengar, Alakazam, Mawile, and Garchomp. Matching stones are sold at Pokémon Center Marts."
     },
     {
       "version": "1.0.24",
-      "title": "12 more Mega PokÃ©mon",
+      "title": "12 more Mega Pokémon",
       "file": "RELEASE_NOTES_1.0.24.md",
-      "body": "Mega forms arrive for Serperior, Arcanine, Aggron, Altaria, Banette, Gallade, Heracross, Latios, Manectric, Sableye, Salamence, and Scizor. Give each PokÃ©mon its matching stone and press L+R together while choosing a move."
+      "body": "Mega forms arrive for Serperior, Arcanine, Aggron, Altaria, Banette, Gallade, Heracross, Latios, Manectric, Sableye, Salamence, and Scizor. Give each Pokémon its matching stone and press L+R together while choosing a move."
     },
     {
       "version": "1.0.23",
       "title": "Mega Serperior is ready for another battle",
       "file": "RELEASE_NOTES_1.0.23.md",
-      "body": "Mega Serperiorâ€™s battle appearance is improved, and you can Mega Evolve again in later battles."
+      "body": "Mega Serperior’s battle appearance is improved, and you can Mega Evolve again in later battles."
     },
     {
       "version": "1.0.22",
       "title": "Open your party after Mega Evolution",
       "file": "RELEASE_NOTES_1.0.22.md",
-      "body": "You can open the PokÃ©mon menu after Mega Evolving Serperior. It remains Mega Evolved for the rest of the battle."
+      "body": "You can open the Pokémon menu after Mega Evolving Serperior. It remains Mega Evolved for the rest of the battle."
     },
     {
       "version": "1.0.21",
@@ -269,7 +269,7 @@
       "version": "1.0.16",
       "title": "Mega Serperior preview",
       "file": "RELEASE_NOTES_1.0.16.md",
-      "body": "Mega Serperiorâ€™s battle form and stats are available in this preview. Give it Serperiorite and hold L+R together while choosing a move."
+      "body": "Mega Serperior’s battle form and stats are available in this preview. Give it Serperiorite and hold L+R together while choosing a move."
     },
     {
       "version": "1.0.15",
@@ -291,7 +291,7 @@
     },
     {
       "version": "1.0.10",
-      "title": "Smoother PokÃ©mon followers",
+      "title": "Smoother Pokémon followers",
       "file": "RELEASE_NOTES_1.0.10.md",
       "body": "Followers move more smoothly, stay visible through brief connection hiccups, and update when your party or area changes. Shiny followers use the odds from your game."
     },
@@ -311,13 +311,13 @@
       "version": "1.0.7",
       "title": "Trainer search and a flight shortcut",
       "file": "RELEASE_NOTES_1.0.7.md",
-      "body": "Find practice trainers by name or class before starting a battle that does not change story progress. The Fly shortcut opens the gameâ€™s usual party menu and destinations."
+      "body": "Find practice trainers by name or class before starting a battle that does not change story progress. The Fly shortcut opens the game’s usual party menu and destinations."
     },
     {
       "version": "1.0.6",
       "title": "Spend time with your companion",
       "file": "RELEASE_NOTES_1.0.6.md",
-      "body": "Talk to, pet, praise, and play with your lead PokÃ©mon. Face it and press R+A, or tap its sprite, to open the interaction menu."
+      "body": "Talk to, pet, praise, and play with your lead Pokémon. Face it and press R+A, or tap its sprite, to open the interaction menu."
     },
     {
       "version": "1.0.5",
@@ -353,29 +353,29 @@
       "version": "1.0.0",
       "title": "Unova Together is here",
       "file": "RELEASE_NOTES_1.0.0.md",
-      "body": "Explore alongside friends, see nearby teammates, trade eligible items and PokÃ©mon, and join supported trainer battles.\n\nThe launcher includes PokÃ©mon followers, companion interactions, PokÃ©mon tools, save backups, updates, and optional battle scenery."
+      "body": "Explore alongside friends, see nearby teammates, trade eligible items and Pokémon, and join supported trainer battles.\n\nThe launcher includes Pokémon followers, companion interactions, Pokémon tools, save backups, updates, and optional battle scenery."
     },
     {
       "version": "0.4.0",
       "title": "Companion interactions",
       "file": "RELEASE_NOTES_0.4.0.md",
-      "body": "Talk to, pet, praise, and play with your lead PokÃ©mon. Companion interactions are for fun and do not change your save."
+      "body": "Talk to, pet, praise, and play with your lead Pokémon. Companion interactions are for fun and do not change your save."
     },
     {
       "version": "0.3.13",
       "title": "Quicker menus and reconnects",
       "file": "RELEASE_NOTES_0.3.13.md",
-      "body": "Switch between Players, PokÃ©mon, Co-op, and Settings with the tabs or L/R. The Options shortcut and reconnect controls are easier to use."
+      "body": "Switch between Players, Pokémon, Co-op, and Settings with the tabs or L/R. The Options shortcut and reconnect controls are easier to use."
     },
     {
       "version": "0.3.12",
       "title": "Easier co-op tools",
       "file": "RELEASE_NOTES_0.3.12.md",
-      "body": "Find PokÃ©mon tools, co-op settings, and game options more easily. Choose solo or co-op trainer battles, start practice rematches without story rewards, and see clearer teammate status."
+      "body": "Find Pokémon tools, co-op settings, and game options more easily. Choose solo or co-op trainer battles, start practice rematches without story rewards, and see clearer teammate status."
     },
     {
       "version": "0.3.11",
-      "title": "More PokÃ©mon tools",
+      "title": "More Pokémon tools",
       "file": "RELEASE_NOTES_0.3.11.md",
       "body": "Look up nearby wild encounters by season, relearn eligible level-up moves, and use supported field HMs without using a battle move slot."
     },
@@ -383,7 +383,7 @@
       "version": "0.3.10",
       "title": "Followers and party stats",
       "file": "RELEASE_NOTES_0.3.10.md",
-      "body": "All 649 base PokÃ©mon can follow you with a gentle idle animation. Check your PokÃ©monâ€™s IVs and EVs from the launcher."
+      "body": "All 649 base Pokémon can follow you with a gentle idle animation. Check your Pokémon’s IVs and EVs from the launcher."
     },
     {
       "version": "0.3.9",
@@ -395,7 +395,7 @@
       "version": "0.3.8",
       "title": "Bigger LAN sessions",
       "file": "RELEASE_NOTES_0.3.8.md",
-      "body": "Host local sessions with up to 16 players, and let guests join after the host starts.\n\nCo-op invitations and reconnecting are clearer. Traded PokÃ©mon follow the gameâ€™s obedience rules in supported Redux versions."
+      "body": "Host local sessions with up to 16 players, and let guests join after the host starts.\n\nCo-op invitations and reconnecting are clearer. Traded Pokémon follow the game’s obedience rules in supported Redux versions."
     },
     {
       "version": "0.3.7",
@@ -407,7 +407,7 @@
       "version": "0.3.6",
       "title": "Clearer teammate locations",
       "file": "RELEASE_NOTES_0.3.6.md",
-      "body": "See teammate locations and battle status more clearly. The player list explains when a teammateâ€™s location is unavailable."
+      "body": "See teammate locations and battle status more clearly. The player list explains when a teammate’s location is unavailable."
     },
     {
       "version": "0.3.5",
