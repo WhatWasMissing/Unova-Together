@@ -31,7 +31,7 @@ Start from the actual checkout and `git status --short`. Known repository areas 
 - `maintenance-tools/`: auxiliary assets, patches, references, maintenance/build utilities, and an additional launcher tooling/UI tree. Compare the corresponding launcher trees before editing; do not assume they are identical. This folder is not required for normal play.
 - `maintenance-tools/tools/publish_release.py`: the repository's release publisher; use this checked-in path rather than assuming a root-level `tools/` directory.
 - `docs/`: player and developer guidance, co-op, LAN/Tailscale/UDP, ROM/save tooling, Mega Evolution, known issues, and release checks.
-- `patchnotes/`: release notes; update when user-visible behavior changes.
+- `patchnotes/`: release notes; update when user-visible behavior changes. The launcher News page reads `main/patchnotes/index.json`, so a release prepared on another branch must also publish its note file and index entry to `main`; see [`skills.md` → Launcher News and patch notes](skills.md#launcher-news-and-patch-notes).
 
 Important reading by task:
 
