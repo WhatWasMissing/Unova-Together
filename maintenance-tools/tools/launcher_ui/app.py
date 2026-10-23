@@ -903,12 +903,12 @@ class Launcher(tk.Tk):
         appearance=card(parent);appearance.pack(fill='x',pady=(0,18))
         self.settings_sections['Appearance']=appearance
         appearance_box=tk.Frame(appearance,bg=C['surface']);appearance_box.pack(fill='x',padx=18,pady=16)
-        label(appearance_box,'PLAYER APPEARANCE',size=9,bold=True,bg=C['surface']).pack(anchor='w')
+        label(appearance_box,'TRAINER LOOKS · GEN 5 STYLE',size=9,bold=True,bg=C['surface']).pack(anchor='w')
         self.player_model_label=tk.StringVar()
         self._refresh_player_model_label()
         label(appearance_box,textvariable=self.player_model_label,size=11,bold=True,bg=C['surface']).pack(anchor='w',pady=(8,4))
-        button(appearance_box,'Choose a field character',self._choose_player_model).pack(anchor='w',pady=(6,8))
-        label(appearance_box,'Browse and preview animated people and Pokémon from your game. Filter or search the list, keep favorites, save named looks, or choose at random. Battle portraits are separate art. Only normal walking changes; bike and surf keep their original forms. Applies next launch.',size=9,color=C['muted'],bg=C['surface'],wraplength=620,justify='left').pack(anchor='w')
+        button(appearance_box,'Choose a trainer look',self._choose_player_model).pack(anchor='w',pady=(6,8))
+        label(appearance_box,'Browse animated people from your game and use Trainer outfits to find classic Gen 5 trainer-class looks. Preview, favorite, or save named looks to this game profile. Each look is a complete in-game model; clothing pieces cannot be mixed. Pokémon models are also available in the other filters. Battle portraits are separate art. Only normal walking changes; bike and surf keep their original forms. Applies next launch.',size=9,color=C['muted'],bg=C['surface'],wraplength=620,justify='left').pack(anchor='w')
         cheats=card(parent);cheats.pack(fill='x')
         self.settings_sections['Cheats']=cheats
         box=tk.Frame(cheats,bg=C['surface']);box.pack(fill='x',padx=18,pady=16)
@@ -945,10 +945,10 @@ class Launcher(tk.Tk):
         source=Path(self.rom.get())
         if not source.is_file() or source.suffix.lower()!='.nds':
             self.status.set('Choose a supported Redux game on Play before selecting a character.');return
-        window=tk.Toplevel(self);window.title('Choose field character');window.geometry('720x650');window.minsize(560,500);window.transient(self)
+        window=tk.Toplevel(self);window.title('Choose trainer look');window.geometry('720x650');window.minsize(560,500);window.transient(self)
         outer=tk.Frame(window,bg=C['background']);outer.pack(fill='both',expand=True,padx=16,pady=16)
-        label(outer,'Choose your field character',size=16,bold=True,bg=C['background']).pack(anchor='w')
-        label(outer,'Browse animated people and Pokémon from the selected game. Preview graphics are read from your ROM.',size=9,color=C['muted'],bg=C['background'],wraplength=660,justify='left').pack(anchor='w',pady=(6,12))
+        label(outer,'Choose your trainer look',size=16,bold=True,bg=C['background']).pack(anchor='w')
+        label(outer,'Use Trainer outfits to browse complete, animated trainer-class models from your selected game. Other people and Pokémon remain available in the other filters. Preview frames are read from your ROM; clothes cannot be mixed between models.',size=9,color=C['muted'],bg=C['background'],wraplength=660,justify='left').pack(anchor='w',pady=(6,12))
         query=tk.StringVar();entry=tk.Entry(outer,textvariable=query,font=(F['body'],11),highlightthickness=2,highlightcolor=C['focus']);entry.pack(fill='x',pady=(0,8))
         browse=tk.Frame(outer,bg=C['background']);browse.pack(fill='x',pady=(0,8))
         category=tk.StringVar(value=model_preferences.FILTER_ALL);category_box=ttk.Combobox(browse,textvariable=category,state='readonly',values=model_preferences.FILTERS,width=18);category_box.pack(side='left')

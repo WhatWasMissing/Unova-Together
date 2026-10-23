@@ -7,9 +7,25 @@ MAX_PRESETS = 20
 MAX_PRESET_NAME = 32
 FILTER_ALL = 'All characters'
 FILTER_NPCS = 'People'
+FILTER_TRAINER_OUTFITS = 'Trainer outfits'
 FILTER_POKEMON = 'Pokémon'
 FILTER_FAVORITES = 'Favorites'
-FILTERS = (FILTER_ALL, FILTER_NPCS, FILTER_POKEMON, FILTER_FAVORITES)
+FILTERS = (FILTER_ALL, FILTER_NPCS, FILTER_TRAINER_OUTFITS, FILTER_POKEMON, FILTER_FAVORITES)
+
+# Group complete human field models from the selected game by established
+# B2W2 trainer-class labels. These are not mix-and-match clothing parts; the
+# actor table exposes whole animated characters.
+TRAINER_OUTFIT_PREFIXES = (
+    'Youngster', 'Lass', 'School Kid ', 'Rich Boy', 'Lady', 'Pokéfan ',
+    'Ace Trainer ', 'Veteran ', 'Pokémon Breeder ', 'Pokémon Ranger ',
+    'Cyclist ', 'Waiter', 'Waitress', 'Gentleman', 'Socialite',
+    'Black Belt', 'Battle Girl', 'Backpacker ', 'Doctor', 'Nurse', 'Clerk ',
+    'Harlequin', 'Infielder', 'Striker', 'Linebacker', 'Smasher',
+    'Roughneck', 'Fisherman', 'Hiker', 'Baker', 'Worker', 'Depot Agent',
+    'Janitor', 'Pilot', 'Policeman', 'Scientist ', 'Parasol Lady',
+    'Hoopster', 'Preschooler ', 'Psychic ', 'Team Plasma Grunt ',
+    'Guitarist', 'Nursery Aide',
+)
 
 
 def normalize_favorites(value):
@@ -71,8 +87,14 @@ def filter_models(models, query='', category=FILTER_ALL, favorites=(), sort='nam
     result = []
     for model_id in models:
         is_pokemon = model_id in player_models.POKEMON_MODEL_LABELS
-        is_npc = model_id in player_models.NPC_MODEL_LABELS or model_id in player_models.SPECIAL_NPC_MODEL_LABELS
+        npc_label = player_models.NPC_MODEL_LABELS.get(model_id, '')
+        is_npc = bool(npc_label) or model_id in player_models.SPECIAL_NPC_MODEL_LABELS
+        is_trainer_outfit = bool(npc_label) and any(
+            npc_label.startswith(prefix) for prefix in TRAINER_OUTFIT_PREFIXES
+        )
         if category == FILTER_NPCS and not is_npc:
+            continue
+        if category == FILTER_TRAINER_OUTFITS and not is_trainer_outfit:
             continue
         if category == FILTER_POKEMON and not is_pokemon:
             continue
