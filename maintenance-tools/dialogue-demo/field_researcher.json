@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "id": "field-researcher-demo",
+  "start": "welcome",
+  "flags": {
+    "HAS_MEGA_STONE": false
+  },
+  "speakers": {
+    "nia": {
+      "name": "Nia",
+      "role": "Field researcher",
+      "expressions": {
+        "neutral": {"portrait": null, "color": "#5b9db0"},
+        "happy": {"portrait": null, "color": "#6eaa72"},
+        "thoughtful": {"portrait": null, "color": "#a27cb4"}
+      }
+    }
+  },
+  "nodes": [
+    {
+      "id": "welcome",
+      "speaker": "nia",
+      "expression": "happy",
+      "text": "I'm Nia, a field researcher.\nWhat would you like to know?",
+      "choices": [
+        {"label": "Ask about the route", "next": "route"},
+        {"label": "Ask about your stone", "next": "stone_owned", "when": {"flag": "HAS_MEGA_STONE", "equals": true}},
+        {"label": "Ask what stones do", "next": "stone_new", "when": {"flag": "HAS_MEGA_STONE", "equals": false}}
+      ]
+    },
+    {
+      "id": "route",
+      "speaker": "nia",
+      "expression": "thoughtful",
+      "text": "The north path is quiet.\nEast path leads to town.",
+      "next": "welcome"
+    },
+    {
+      "id": "stone_owned",
+      "speaker": "nia",
+      "expression": "happy",
+      "text": "Your stone is ready to use.\nKeep it safe for a battle.",
+      "next": "welcome"
+    },
+    {
+      "id": "stone_new",
+      "speaker": "nia",
+      "expression": "neutral",
+      "text": "Stones can change partners.\nYou may find one nearby.",
+      "next": "welcome"
+    }
+  ]
+}

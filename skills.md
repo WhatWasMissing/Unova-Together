@@ -38,6 +38,14 @@ Those are findings for the two exact files in that dated comparison, not a unive
 - Use saved event flags for one-time rewards. Temporary flags are for state intended to reset. Do not copy the base game's numeric flag, script, map, or NPC IDs directly into Redux.
 - Keep map/event edits reviewable as one change: event record, text-bank entry, script, actor resource if needed, archive ordering, persistent flag, and patcher test.
 
+## Dialogue authoring and safe archive packing
+
+- For repeatable ROM dialogue work, start with `docs/ROMHACK_DIALOGUE_WORKFLOW.md`, `maintenance-tools/tools/romhack_workflow.py`, and the sample at `maintenance-tools/dialogue-demo/field_researcher.json`. The wrapper pins the `WhatWasMissing/pokebw2` tools commit, returns JSON, and runs in dry-run mode unless `--write` is explicit. If replacing an archive, require and verify the `.bak` before atomic replacement. Never write generated NARCs into the decomp checkout or input data folder.
+- Use `event_data.py` for zone entities and `text_data.py` for script/system text. Those packers do not create a field script or portrait renderer; verify event records, text bank order/IDs, and script commands separately before building.
+- In the pinned decomp, field dialogue uses a 256×192 screen, 32×24 8-pixel tiles, and a four-tile (32-pixel) full-width talk bar. `CalcMsgWindowDimensions` measures actual glyph pixels and adds a 2-pixel margin. The dialogue preview's two-line/28-display-cell rule is conservative authoring validation, not the engine's exact string limit; re-check text against the selected font and window.
+- The ordinary field dialogue API has no generic speaker-portrait/expression command. Treat the HTML dialogue preview as a UX/data proof only; do not call it an in-game integration. Keep missing-art fallbacks, and require an image source URL, license, and credit before previewing local portrait assets. Verify the license externally before distribution; metadata alone is not proof of rights.
+- The decomp's other portrait systems are scene-specific. Do not copy a specialized overlay into field dialogue without tracing its rendering lifecycle, assets, memory ownership, and compatibility with the target Redux build.
+
 ## Trainer data, battle flow, and Mega Evolution
 
 - Trainer records, trainer parties, field scripts, trainer AI, and battle runtime are separate systems. In the reference decomp, trainer data and parties use `a/0/9/1` and `a/0/9/2`; trainer AI is a separate archive at `a/1/6/9`. Resolve each from the target Redux file rather than carrying over base trainer indices or teams.
