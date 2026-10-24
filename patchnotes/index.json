@@ -2,6 +2,12 @@
   "schema": 1,
   "notes": [
     {
+      "version": "2.0.35",
+      "title": "Custom dialogue art tools",
+      "file": "RELEASE_NOTES_2.0.35.md",
+      "body": "Adds exact-build developer tools for speaker portraits, nameplates, and framed actor dialogue on one supported English Blaze Black 2 Redux Complete v1.4.1 ROM build. The patcher creates a separate test ROM; the normal launcher and emulator gameplay binary are unchanged. See the dialogue-art test guide. No ROM, save, or firmware is included."
+    },
+    {
       "version": "2.0.34",
       "title": "Reliable AI agent previews and startup",
       "file": "RELEASE_NOTES_2.0.34.md",

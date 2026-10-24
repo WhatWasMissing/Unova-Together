@@ -30,7 +30,19 @@ DOCS = ('PLAYER_GUIDE.md', 'KNOWN_ISSUES.md', 'TAILSCALE_COOP.md', 'UDP_SERVER_G
         'LAUNCHER.md', 'COMPANION_INTERACTIONS.md', 'COOP_TOOLS.md', 'FEATURES.md',
         'ROADMAP.md', 'BAG_CAPACITY.md', 'FOLLOWING_POKEMON.md', 'FOLLOWER_ART_CREDITS.md',
         'FOLLOWER_ART_TERMS.md', 'FOLLOWER_VARIANTS.md', 'HGSS_FOLLOWER_IMPORT.md',
-        'AGENT_TOOLS.md', 'EMULATOR_AGENT_CONTROL.md')
+        'AGENT_TOOLS.md', 'EMULATOR_AGENT_CONTROL.md', 'ROMHACK_DIALOGUE_WORKFLOW.md',
+        'DIALOGUE_ART_TESTING.md', 'verification/ROM_DIALOGUE_ART_RENDERER_2026-10-24.md')
+DIALOGUE_ART_FILES = (
+    'maintenance-tools/tools/rom/dialogue_art_patch.py',
+    'maintenance-tools/tools/rom/dialogue_art_overlay_hook.c',
+    'maintenance-tools/tools/rom/requirements.txt',
+    'maintenance-tools/tools/rom/run_muted_dialogue_test.py',
+    'maintenance-tools/tools/rom/test_dialogue_art_patch.py',
+    'maintenance-tools/tools/rom/test_dialogue_art_hook_cpu.py',
+    'maintenance-tools/assets/dialogue-art/ART-CREDITS.md',
+    'maintenance-tools/assets/dialogue-art/speaker-profiles.example.json',
+    'maintenance-tools/assets/dialogue-art/field-guide-source.png',
+)
 FORBIDDEN = {'.nds', '.gba', '.sav', '.save', '.dsv', '.ramdump', '.ml1', '.ml2', '.ml3', '.ml4', '.ml5', '.ml6', '.ml7', '.ml8', '.pem', '.key', '.pyc'}
 
 def require_release_condition(condition, message):
@@ -53,6 +65,13 @@ def tool_source(name):
     source=ROOT/'tools'/name
     if source.is_file():return source
     return WORKSPACE/'tools'/name
+
+def add_dialogue_art_files(archive, prefix):
+    """Keep the patcher's expected repository-relative asset paths in both packages."""
+    for name in DIALOGUE_ART_FILES:
+        path=REPOSITORY_ROOT/name
+        require_release_condition(path.is_file(), f'Dialogue-art release file is missing: {name}')
+        archive.write(path, prefix+name)
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
@@ -117,6 +136,11 @@ def main():
     require_release_condition(
         patch_header_bytes is not None and runtime_matches_shop_overlay_source((current/'melonDS.exe').read_bytes(), patch_header_bytes),
         'Staged emulator was not built from the packaged Mega shop overlay patch source; rebuild it before packaging',
+    )
+    require_release_condition(
+        'field-guide-source.png' in asset_notice_doc.read_text(encoding='utf-8') and
+        (REPOSITORY_ROOT/'maintenance-tools/assets/dialogue-art/ART-CREDITS.md').is_file(),
+        'Dialogue-art release attribution is missing from the asset notices',
     )
     if args.base_source_archive:
         if not args.base_source_archive.is_file():
@@ -190,6 +214,7 @@ def main():
         z.writestr('Unova-Together/builds/current/melonDS.toml', portable)
         for name in HELPERS:
             z.write(tool_source(name), 'Unova-Together/tools/'+name)
+        add_dialogue_art_files(z, 'Unova-Together/')
         z.write(agent_executable, 'Unova-Together/tools/Unova Agent Tools.exe')
         z.write(agent_licenses, 'Unova-Together/tools/Unova Agent Tools LICENSES.txt')
         for path in sorted((WORKSPACE/'tools/vendor').rglob('*')):
@@ -233,6 +258,7 @@ def main():
             z.write(path, 'Unova-Together-Source/source/melonDS/'+relative.as_posix())
         for name in HELPERS:
             z.write(tool_source(name), 'Unova-Together-Source/tools/'+name)
+        add_dialogue_art_files(z, 'Unova-Together-Source/')
         z.write(agent_licenses, 'Unova-Together-Source/tools/Unova Agent Tools LICENSES.txt')
         for path in sorted((WORKSPACE/'tools/vendor').rglob('*')):
             if path.is_file() and path.suffix.lower() in {'.py','.txt','.md'}:
@@ -263,6 +289,9 @@ def main():
             z.write(ROOT/'tools'/name, 'Unova-Together-Source/tools/'+name)
         for name in ('dialogue_preview.py', 'romhack_workflow.py', 'test_dialogue_preview.py', 'test_romhack_workflow.py'):
             z.write(repo/'maintenance-tools/tools'/name, 'Unova-Together-Source/maintenance-tools/tools/'+name)
+        z.write(repo/'docs/DIALOGUE_ART_TESTING.md', 'Unova-Together-Source/docs/DIALOGUE_ART_TESTING.md')
+        z.write(repo/'docs/verification/ROM_DIALOGUE_ART_RENDERER_2026-10-24.md',
+                'Unova-Together-Source/docs/verification/ROM_DIALOGUE_ART_RENDERER_2026-10-24.md')
         z.write(repo/'maintenance-tools/dialogue-demo/field_researcher.json', 'Unova-Together-Source/maintenance-tools/dialogue-demo/field_researcher.json')
         z.write(repo/'docs/ROMHACK_DIALOGUE_WORKFLOW.md', 'Unova-Together-Source/docs/ROMHACK_DIALOGUE_WORKFLOW.md')
         for name in COMMANDS:
@@ -317,6 +346,16 @@ def main():
             'Packaged configuration contains an unsupported top-level setting',
         )
         require_release_condition(not any('/source/' in n for n in z.namelist()), 'Runtime archive unexpectedly contains source files')
+        for required in (
+            'Unova-Together/maintenance-tools/tools/rom/dialogue_art_patch.py',
+            'Unova-Together/maintenance-tools/tools/rom/run_muted_dialogue_test.py',
+            'Unova-Together/maintenance-tools/assets/dialogue-art/field-guide-source.png',
+            'Unova-Together/maintenance-tools/assets/dialogue-art/speaker-profiles.example.json',
+            'Unova-Together/maintenance-tools/assets/dialogue-art/ART-CREDITS.md',
+            'Unova-Together/docs/DIALOGUE_ART_TESTING.md',
+            'Unova-Together/docs/verification/ROM_DIALOGUE_ART_RENDERER_2026-10-24.md',
+        ):
+            require_release_condition(required in z.namelist(), f'Runtime package is missing dialogue-art tooling: {required}')
         note_files=[name for name in z.namelist() if name.startswith('Unova-Together/patchnotes/RELEASE_NOTES_') and name.endswith('.md')]
         patch_index = json.loads((repo/'patchnotes'/'index.json').read_text(encoding='utf-8'))
         require_release_condition(
@@ -365,6 +404,17 @@ def main():
             not any(n.endswith('.latest.json') or n.endswith('/.release-build-input') for n in names),
             'Source archive contains generated verification output or a build-input marker',
         )
+        for required in (
+            'Unova-Together-Source/maintenance-tools/tools/rom/dialogue_art_patch.py',
+            'Unova-Together-Source/maintenance-tools/tools/rom/dialogue_art_overlay_hook.c',
+            'Unova-Together-Source/maintenance-tools/tools/rom/test_dialogue_art_patch.py',
+            'Unova-Together-Source/maintenance-tools/tools/rom/test_dialogue_art_hook_cpu.py',
+            'Unova-Together-Source/maintenance-tools/assets/dialogue-art/field-guide-source.png',
+            'Unova-Together-Source/maintenance-tools/assets/dialogue-art/ART-CREDITS.md',
+            'Unova-Together-Source/docs/DIALOGUE_ART_TESTING.md',
+            'Unova-Together-Source/docs/verification/ROM_DIALOGUE_ART_RENDERER_2026-10-24.md',
+        ):
+            require_release_condition(required in names, f'Source archive is missing dialogue-art tooling: {required}')
     stage_root.mkdir(parents=True)
     (stage_root/'.disposable-release-stage').write_text('Temporary extracted release staging; final archives are in downloads/releases.\n', encoding='utf-8')
     with zipfile.ZipFile(runtime) as z:z.extractall(stage_root)
