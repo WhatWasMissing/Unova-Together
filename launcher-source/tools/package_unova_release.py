@@ -30,7 +30,6 @@ DOCS = ('PLAYER_GUIDE.md', 'KNOWN_ISSUES.md', 'TAILSCALE_COOP.md', 'UDP_SERVER_G
         'LAUNCHER.md', 'COMPANION_INTERACTIONS.md', 'COOP_TOOLS.md', 'FEATURES.md',
         'ROADMAP.md', 'BAG_CAPACITY.md', 'FOLLOWING_POKEMON.md', 'FOLLOWER_ART_CREDITS.md',
         'FOLLOWER_ART_TERMS.md', 'FOLLOWER_VARIANTS.md', 'HGSS_FOLLOWER_IMPORT.md',
-        'RELEASE_ASSET_NOTICES_2.0.32.md', 'AGENT_TOOLS_VERIFICATION_2.0.32.md',
         'AGENT_TOOLS.md', 'EMULATOR_AGENT_CONTROL.md')
 FORBIDDEN = {'.nds', '.gba', '.sav', '.save', '.dsv', '.ramdump', '.ml1', '.ml2', '.ml3', '.ml4', '.ml5', '.ml6', '.ml7', '.ml8', '.pem', '.key', '.pyc'}
 
@@ -68,6 +67,8 @@ def main():
     version = args.version
     if not version or any(c not in '0123456789.-abcdefghijklmnopqrstuvwxyz' for c in version):
         parser.error('Invalid version')
+    asset_notice_name = f'RELEASE_ASSET_NOTICES_{version}.md'
+    verification_name = f'AGENT_TOOLS_VERIFICATION_{version}.md'
     check_launcher_ui_mirror()
     current = args.runtime_root.resolve() if args.runtime_root else WORKSPACE/'builds/current'
     if not current.is_relative_to(WORKSPACE/'builds'):
@@ -95,7 +96,8 @@ def main():
     stage=stage_root/'Unova-Together'
     source_root=args.native_source_root.resolve() if args.native_source_root else WORKSPACE/'melonDS-source-1.1'
     freebios_notice_path=source_root/'freebios/drastic_bios_readme.txt'
-    asset_notice_doc=repo/'docs/RELEASE_ASSET_NOTICES_2.0.32.md'
+    asset_notice_doc=repo/'docs'/asset_notice_name
+    verification_doc=repo/'docs'/verification_name
     if args.native_source_root and not source_root.is_relative_to(WORKSPACE/'builds'):
         raise ValueError('Modified emulator source must be staged under workspace builds')
     patch_header=source_root/'src/Gen5ShopOverlayPatch.h'
@@ -202,7 +204,7 @@ def main():
         for path in sorted(launcher.rglob('*')):
             if path.is_file():z.write(path,'Unova-Together/launcher/'+path.relative_to(launcher).as_posix())
         z.writestr('Unova-Together/Start Unova Together.cmd','@echo off\r\ncd /d "%~dp0"\r\nstart "" "launcher\\Pokemon Together.exe" --home "%~dp0."\r\n')
-        for name in DOCS:
+        for name in (*DOCS, asset_notice_name, verification_name):
             z.write(repo/'docs'/name, 'Unova-Together/docs/'+name)
         for path in sorted((repo/'patchnotes').glob('RELEASE_NOTES_*.md')):
             z.write(path, 'Unova-Together/patchnotes/'+path.name)
@@ -247,10 +249,11 @@ def main():
         for name in ('check_launcher_tree_parity.py','test_launcher_tree_parity.py','test_release_validation.py'):
             z.write(ROOT/'tools'/name,'Unova-Together-Source/tools/'+name)
         for name in ('DEVELOPER_TESTING.md','AGENT_TOOLS.md','EMULATOR_AGENT_CONTROL.md',
-                     'RELEASE_ASSET_NOTICES_2.0.32.md','AGENT_TOOLS_VERIFICATION_2.0.32.md',
                      'FOLLOWER_ART_CREDITS.md',
                      'FOLLOWER_ART_TERMS.md','FOLLOWER_VARIANTS.md','HGSS_FOLLOWER_IMPORT.md'):
             z.write(repo/'docs'/name,'Unova-Together-Source/docs/'+name)
+        for path in (asset_notice_doc, verification_doc):
+            z.write(path, 'Unova-Together-Source/docs/'+path.name)
         for name in ('ASSET_TERMS.md','CREDITS.md'):
             z.write(REPOSITORY_ROOT/'maintenance-tools/assets/followers'/name,
                     'Unova-Together-Source/ASSET_NOTICES/hg-engine/'+name)
@@ -293,7 +296,7 @@ def main():
             z.read('Unova-Together/tools/Unova Agent Tools.exe') == agent_executable.read_bytes(),
             'Packaged agent executable differs from the verified standalone agent build',
         )
-        runtime_notice=z.read('Unova-Together/docs/RELEASE_ASSET_NOTICES_2.0.32.md').decode('utf-8').replace('\r\n','\n')
+        runtime_notice=z.read('Unova-Together/docs/'+asset_notice_name).decode('utf-8').replace('\r\n','\n')
         require_release_condition(
             runtime_notice == asset_notice_doc.read_text(encoding='utf-8') and freebios_notice_text in runtime_notice,
             'Runtime package is missing the full FreeBIOS binary redistribution notice',
@@ -345,13 +348,13 @@ def main():
                          'Unova-Together-Source/tools/test_emulator_agent.py',
                          'Unova-Together-Source/docs/AGENT_TOOLS.md',
                          'Unova-Together-Source/docs/EMULATOR_AGENT_CONTROL.md',
-                         'Unova-Together-Source/docs/AGENT_TOOLS_VERIFICATION_2.0.32.md',
-                         'Unova-Together-Source/docs/RELEASE_ASSET_NOTICES_2.0.32.md',
+                         'Unova-Together-Source/docs/'+verification_name,
+                         'Unova-Together-Source/docs/'+asset_notice_name,
                          'Unova-Together-Source/source/melonDS/tools/test_emulator_agent_protocol.cpp'):
             require_release_condition(required in names, f'Source archive is missing agent tooling: {required}')
         require_release_condition(
-            'Unova-Together-Source/docs/RELEASE_ASSET_NOTICES_2.0.32.md' in names and
-            freebios_notice_text in z.read('Unova-Together-Source/docs/RELEASE_ASSET_NOTICES_2.0.32.md').decode('utf-8').replace('\r\n','\n') and
+            'Unova-Together-Source/docs/'+asset_notice_name in names and
+            freebios_notice_text in z.read('Unova-Together-Source/docs/'+asset_notice_name).decode('utf-8').replace('\r\n','\n') and
             'Unova-Together-Source/source/melonDS/freebios/drastic_bios_readme.txt' in names and
             'Unova-Together-Source/ASSET_NOTICES/hg-engine/ASSET_TERMS.md' in names and
             'Unova-Together-Source/ASSET_NOTICES/hg-engine/CREDITS.md' in names,

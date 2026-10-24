@@ -39,6 +39,13 @@ MAX_TEXT = 256 * 1024
 MAX_MATCHES = 100
 MAX_MCP_BODY = 1024 * 1024
 ACTIVE_EMULATOR_SESSION: str | None = None
+MCP_MODERN_VERSION = '2026-07-28'
+MCP_LEGACY_VERSIONS = ('2025-11-25', '2025-06-18', '2025-03-26')
+MCP_SUPPORTED_VERSIONS = (MCP_MODERN_VERSION, *MCP_LEGACY_VERSIONS)
+MCP_VERSION_META = 'io.modelcontextprotocol/protocolVersion'
+MCP_CLIENT_INFO_META = 'io.modelcontextprotocol/clientInfo'
+MCP_CLIENT_CAPABILITIES_META = 'io.modelcontextprotocol/clientCapabilities'
+MCP_SERVER_INFO_META = 'io.modelcontextprotocol/serverInfo'
 TEXT_SUFFIXES = {'.md', '.py', '.cpp', '.h', '.hpp', '.json', '.toml', '.txt', '.yaml', '.yml', '.xml', '.csv', '.ini'}
 
 
@@ -376,7 +383,13 @@ def call_tool(name: str, args: dict[str, Any]) -> Any:
     if name == 'preview_player_model': return preview_player_model(str(args.get('rom', '')), int(args.get('modelId', -1)))
     if name == 'inspect_launcher': return launcher_status(args.get('home'))
     if name == 'list_launcher_profiles': return launcher_profiles()
-    if name == 'start_emulator': return start_emulator(args.get('rom'), args.get('save'), args.get('emulator'), args.get('profileId'), str(args.get('boot', 'auto')))
+    if name == 'start_emulator':
+        if not isinstance(args, dict) or 'emulator' in args:
+            raise ValueError('MCP callers cannot select an emulator executable; the configured project build is used.')
+        allowed = {'rom', 'save', 'profileId', 'boot'}
+        if set(args) - allowed:
+            raise ValueError('Unsupported start_emulator argument.')
+        return start_emulator(args.get('rom'), args.get('save'), None, args.get('profileId'), str(args.get('boot', 'auto')))
     if name == 'control_emulator': return control_emulator(str(args.get('action', '')), args.get('session'), args.get('buttons'), int(args.get('frames', 8)), args.get('x'), args.get('y'), args.get('checkpoint'), args.get('saveOut'))
     raise ValueError('Unknown agent tool.')
 
@@ -394,32 +407,102 @@ MCP_TOOLS = [
     {'name': 'preview_player_model', 'description': 'Decode a native 2D walk-animation texture frame from a user-selected ROM.', 'inputSchema': {'type': 'object', 'properties': {'rom': {'type': 'string'}, 'modelId': {'type': 'integer', 'minimum': 0, 'maximum': 65535}}, 'required': ['rom', 'modelId'], 'additionalProperties': False}},
     {'name': 'inspect_launcher', 'description': 'Read launcher installation integrity, configured profile and preflight checks.', 'inputSchema': {'type': 'object', 'properties': {'home': {'type': 'string'}}, 'additionalProperties': False}},
     {'name': 'list_launcher_profiles', 'description': 'List configured launcher profiles without exposing save contents.', 'inputSchema': _EMPTY},
-    {'name': 'start_emulator', 'description': 'Start the matching Windows emulator against an isolated hard-linked ROM copy and copied save. Uses the selected launcher profile when ROM is omitted.', 'inputSchema': {'type': 'object', 'properties': {'rom': {'type': 'string'}, 'save': {'type': 'string'}, 'emulator': {'type': 'string'}, 'profileId': {'type': 'string'}, 'boot': {'type': 'string', 'enum': ['auto', 'always', 'never']}}, 'additionalProperties': False}},
+    {'name': 'start_emulator', 'description': 'Start the configured project Windows emulator against an isolated hard-linked ROM copy and copied save. MCP callers cannot choose an executable path. Uses the selected launcher profile when ROM is omitted.', 'inputSchema': {'type': 'object', 'properties': {'rom': {'type': 'string'}, 'save': {'type': 'string'}, 'profileId': {'type': 'string'}, 'boot': {'type': 'string', 'enum': ['auto', 'always', 'never']}}, 'additionalProperties': False}},
     {'name': 'control_emulator', 'description': 'Send native button/touch input, wait for emulated frames, capture both screens, pause, resume, save/load a session checkpoint, or stop the isolated emulator. MCP sessions discard isolated saves on stop. No desktop input events are synthesized.', 'inputSchema': {'type': 'object', 'properties': {'action': {'type': 'string', 'enum': ['status', 'press', 'wait', 'touch', 'screenshot', 'pause', 'resume', 'save-state', 'load-state', 'stop']}, 'session': {'type': 'string'}, 'buttons': {'type': 'array', 'items': {'type': 'string'}, 'maxItems': 12}, 'frames': {'type': 'integer', 'minimum': 1, 'maximum': 3600}, 'x': {'type': 'integer', 'minimum': 0, 'maximum': 255}, 'y': {'type': 'integer', 'minimum': 0, 'maximum': 191}, 'checkpoint': {'type': 'string'}}, 'required': ['action'], 'additionalProperties': False}},
 ]
 
 
-def _mcp_response(message: dict[str, Any]) -> dict[str, Any] | None:
+def _mcp_error(identifier: Any, code: int, message: str, data: dict[str, Any] | None = None) -> dict[str, Any]:
+    error: dict[str, Any] = {'code': code, 'message': message}
+    if data is not None:
+        error['data'] = data
+    return {'jsonrpc': '2.0', 'id': identifier, 'error': error}
+
+
+def _mcp_response(message: dict[str, Any], protocol_version: str | None = None) -> dict[str, Any] | None:
+    if not isinstance(message, dict) or message.get('jsonrpc') != '2.0':
+        return _mcp_error(message.get('id') if isinstance(message, dict) else None,
+                          -32600, 'Invalid JSON-RPC request.')
     method = message.get('method')
     identifier = message.get('id')
+    has_identifier = 'id' in message
+    if not isinstance(method, str) or not method:
+        return _mcp_error(identifier, -32600, 'Invalid JSON-RPC request method.')
+    if has_identifier and (identifier is None or isinstance(identifier, bool)
+                           or not isinstance(identifier, (str, int))):
+        return _mcp_error(None, -32600, 'Invalid JSON-RPC request identifier.')
+    if not has_identifier and not method.startswith('notifications/'):
+        return _mcp_error(None, -32600, 'JSON-RPC requests must include an identifier.')
+    if has_identifier and method.startswith('notifications/'):
+        return _mcp_error(identifier, -32600, 'JSON-RPC notifications must not include an identifier.')
+    params = message.get('params', {})
+    if not isinstance(params, dict):
+        return _mcp_error(identifier, -32602, 'MCP request params must be an object.')
+    metadata = params.get('_meta')
+    if metadata is not None and not isinstance(metadata, dict):
+        return _mcp_error(identifier, -32602, 'MCP request metadata must be an object.')
+    if protocol_version is None and metadata is not None:
+        protocol_version = metadata.get(MCP_VERSION_META)
+    if metadata is not None and metadata.get(MCP_VERSION_META) in MCP_LEGACY_VERSIONS:
+        return _mcp_error(identifier, -32602, 'Legacy MCP versions use the initialize handshake, not per-request protocol metadata.')
+    modern = (protocol_version == MCP_MODERN_VERSION
+              or (metadata is not None and
+                  (MCP_VERSION_META in metadata or MCP_CLIENT_CAPABILITIES_META in metadata))
+              or (protocol_version is None and method == 'server/discover'))
+    if protocol_version is not None and protocol_version not in MCP_SUPPORTED_VERSIONS:
+        return _mcp_error(identifier, -32022, 'Unsupported protocol version',
+                          {'supported': list(MCP_SUPPORTED_VERSIONS), 'requested': protocol_version})
+    if modern:
+        if protocol_version != MCP_MODERN_VERSION:
+            return _mcp_error(identifier, -32602, 'Modern MCP requests require a protocol version in params._meta.')
+        if (metadata is None or metadata.get(MCP_VERSION_META) != MCP_MODERN_VERSION
+                or not isinstance(metadata.get(MCP_CLIENT_CAPABILITIES_META), dict)):
+            return _mcp_error(identifier, -32602, 'Modern MCP requests require protocol version and client capabilities in params._meta.')
+        if MCP_CLIENT_INFO_META in metadata:
+            client_info = metadata[MCP_CLIENT_INFO_META]
+            if (not isinstance(client_info, dict)
+                    or not isinstance(client_info.get('name'), str) or not client_info['name'].strip()
+                    or not isinstance(client_info.get('version'), str) or not client_info['version'].strip()):
+                return _mcp_error(identifier, -32602, 'Invalid MCP client information in params._meta.')
+    def success(value: dict[str, Any]) -> dict[str, Any]:
+        if modern:
+            value = {'resultType': 'complete', **value}
+            value['_meta'] = {MCP_SERVER_INFO_META: {'name': 'unova-together-agent-tools', 'version': '1.0.0'}}
+        return {'jsonrpc': '2.0', 'id': identifier, 'result': value}
+
+    if modern and method == 'initialize':
+        return _mcp_error(identifier, -32601, 'Method not found')
     if method in {'notifications/initialized', 'notifications/cancelled'}:
         return None
     if method == 'initialize':
-        requested_version = message.get('params', {}).get('protocolVersion')
-        if requested_version != '2025-03-26':
-            return {'jsonrpc': '2.0', 'id': identifier, 'error': {'code': -32602, 'message': 'Supported MCP protocol version: 2025-03-26'}}
-        result = {'protocolVersion': '2025-03-26',
+        requested_version = params.get('protocolVersion')
+        client_info = params.get('clientInfo')
+        if (not isinstance(requested_version, str) or not isinstance(params.get('capabilities'), dict)
+                or not isinstance(client_info, dict)
+                or not isinstance(client_info.get('name'), str) or not client_info['name'].strip()
+                or not isinstance(client_info.get('version'), str) or not client_info['version'].strip()):
+            return _mcp_error(identifier, -32602, 'Legacy initialize requires protocolVersion, capabilities and clientInfo.')
+        negotiated_version = requested_version if requested_version in MCP_LEGACY_VERSIONS else MCP_LEGACY_VERSIONS[0]
+        result = {'protocolVersion': negotiated_version,
                   'capabilities': {'tools': {'listChanged': False}},
                   'serverInfo': {'name': 'unova-together-agent-tools', 'version': '1.0.0'}}
+        return {'jsonrpc': '2.0', 'id': identifier, 'result': result}
+    elif method == 'server/discover' and modern:
+        return success({'supportedVersions': list(MCP_SUPPORTED_VERSIONS),
+                        'capabilities': {'tools': {}},
+                        'instructions': 'Use project inspection tools for source and documentation. Emulator control sends native emulated input and operates only on isolated ROM and save copies. The emulator executable is selected from the configured project build.',
+                        'ttlMs': 3600000, 'cacheScope': 'public'})
     elif method == 'ping': result = {}
-    elif method == 'tools/list': result = {'tools': MCP_TOOLS}
+    elif method == 'tools/list':
+        result = {'tools': MCP_TOOLS}
+        if modern:
+            result.update({'ttlMs': 3600000, 'cacheScope': 'public'})
     elif method == 'tools/call':
-        params = message.get('params', {})
         try:
             output = call_tool(str(params.get('name', '')), params.get('arguments', {}))
         except Exception as exc:
             result = {'content': [{'type': 'text', 'text': str(exc)[:1000]}], 'isError': True}
-            return {'jsonrpc': '2.0', 'id': identifier, 'result': result} if identifier is not None else None
+            return success(result) if identifier is not None else None
         if params.get('name') == 'preview_player_model':
             png = base64.b64decode(output.pop('pngBase64'), validate=True)
             result = {'content': [{'type': 'image', 'data': base64.b64encode(png).decode('ascii'), 'mimeType': 'image/png'},
@@ -433,16 +516,25 @@ def _mcp_response(message: dict[str, Any]) -> dict[str, Any] | None:
         else:
             result = {'content': [{'type': 'text', 'text': json.dumps(output, ensure_ascii=False)}],
                       'isError': False}
+        if modern:
+            result = {'resultType': 'complete', **result,
+                      '_meta': {MCP_SERVER_INFO_META: {'name': 'unova-together-agent-tools', 'version': '1.0.0'}}}
+            return {'jsonrpc': '2.0', 'id': identifier, 'result': result} if identifier is not None else None
     else:
         if identifier is None: return None
         return {'jsonrpc': '2.0', 'id': identifier, 'error': {'code': -32601, 'message': 'Method not found'}}
-    return {'jsonrpc': '2.0', 'id': identifier, 'result': result} if identifier is not None else None
+    return success(result) if identifier is not None else None
 
 
 def serve_mcp() -> int:
     """Run MCP over standard input and output for local coding clients."""
+    legacy_initialized = False
+    legacy_protocol_version: str | None = None
     for raw in sys.stdin.buffer:
         if len(raw) > MAX_MCP_BODY:
+            response = _mcp_error(None, -32600, 'MCP request exceeds the 1 MiB message limit.')
+            sys.stdout.write(json.dumps(response, ensure_ascii=False) + '\n')
+            sys.stdout.flush()
             continue
         identifier = None
         try:
@@ -450,7 +542,23 @@ def serve_mcp() -> int:
             if not isinstance(message, dict):
                 raise ValueError('JSON-RPC request must be an object.')
             identifier = message.get('id')
-            response = _mcp_response(message)
+            method = message.get('method')
+            params = message.get('params') if isinstance(message.get('params'), dict) else {}
+            metadata = params.get('_meta') if isinstance(params.get('_meta'), dict) else {}
+            request_version = metadata.get(MCP_VERSION_META)
+            modern_request = (request_version is not None or MCP_CLIENT_CAPABILITIES_META in metadata
+                              or method == 'server/discover')
+            if method == 'initialize':
+                response = _mcp_response(message)
+                if isinstance(response, dict) and isinstance(response.get('result'), dict):
+                    legacy_initialized = True
+                    legacy_protocol_version = response['result'].get('protocolVersion')
+            elif modern_request or request_version is not None:
+                response = _mcp_response(message)
+            elif not legacy_initialized and not (isinstance(method, str) and method.startswith('notifications/')):
+                response = _mcp_error(identifier, -32600, 'Legacy MCP clients must initialize before making requests.')
+            else:
+                response = _mcp_response(message, legacy_protocol_version)
             if response is not None:
                 sys.stdout.write(json.dumps(response, ensure_ascii=False) + '\n')
                 sys.stdout.flush()
@@ -476,6 +584,15 @@ def serve_http(host: str, port: int) -> int:
     allowed_hosts = {'127.0.0.1', 'localhost', '::1'}
     allowed_hosts.update(hostname.strip().lower() for hostname in os.environ.get('UNOVA_AGENT_ALLOWED_HOSTS', '').split(',') if hostname.strip())
 
+    def rpc_error(identifier: Any, code: int, message: str, data: dict[str, Any] | None = None) -> dict[str, Any]:
+        return _mcp_error(identifier, code, message, data)
+
+    def rpc_status(response: dict[str, Any] | None) -> int:
+        if not isinstance(response, dict) or not isinstance(response.get('error'), dict):
+            return 200
+        code = response['error'].get('code')
+        return 404 if code == -32601 else 400 if code in {-32600, -32602, -32020, -32022} else 200
+
     class Handler(BaseHTTPRequestHandler):
         server_version = 'UnovaAgentMCP/1.0'
         def log_message(self, _format: str, *_args: Any) -> None:
@@ -500,8 +617,16 @@ def serve_http(host: str, port: int) -> int:
             if self.headers.get_content_type().lower() != 'application/json':
                 self.send_error(415)
                 return
-            accepted = {value.strip().split(';', 1)[0].lower()
-                        for value in self.headers.get('Accept', '').split(',')}
+            accepted = set()
+            for value in self.headers.get('Accept', '').split(','):
+                parts = [part.strip() for part in value.split(';')]
+                try:
+                    quality = next((float(part.split('=', 1)[1]) for part in parts[1:]
+                                    if part.lower().startswith('q=')), 1.0)
+                except (ValueError, IndexError):
+                    quality = 0.0
+                if quality > 0:
+                    accepted.add(parts[0].lower())
             if not {'application/json', 'text/event-stream'} <= accepted:
                 self.send_error(406)
                 return
@@ -517,11 +642,11 @@ def serve_http(host: str, port: int) -> int:
             if not hmac.compare_digest(supplied.encode(), token.encode()):
                 self.send_error(401)
                 return
-            protocol_version = self.headers.get('MCP-Protocol-Version', '2025-03-26')
-            if protocol_version != '2025-03-26':
-                self.send_error(400, 'Unsupported MCP protocol version')
-                return
             message: dict[str, Any] | None = None
+            protocol_version = '2025-03-26'
+            body_version: Any = None
+            modern = False
+            status = 400
             try:
                 length = int(self.headers.get('Content-Length', '0'))
                 if not 0 < length <= MAX_MCP_BODY:
@@ -530,20 +655,98 @@ def serve_http(host: str, port: int) -> int:
                 message = json.loads(self.rfile.read(length))
                 if not isinstance(message, dict):
                     raise ValueError('JSON-RPC request must be an object.')
-                response = _mcp_response(message)
-            except Exception as exc:
+                identifier = message.get('id')
+                method = message.get('method')
+                params = message.get('params')
+                params = params if isinstance(params, dict) else {}
+                metadata = params.get('_meta')
+                metadata = metadata if isinstance(metadata, dict) else {}
+                header_version = self.headers.get('MCP-Protocol-Version')
+                body_version = metadata.get(MCP_VERSION_META)
+                method_header = self.headers.get('Mcp-Method')
+                name_header = self.headers.get('Mcp-Name')
+                modern = (header_version == MCP_MODERN_VERSION or body_version is not None
+                          or method_header is not None or name_header is not None
+                          or MCP_CLIENT_CAPABILITIES_META in metadata)
+                if modern:
+                    if body_version is None and header_version and header_version not in MCP_SUPPORTED_VERSIONS:
+                        response = rpc_error(identifier, -32022, 'Unsupported protocol version',
+                            {'supported': list(MCP_SUPPORTED_VERSIONS), 'requested': header_version})
+                        status = 400
+                    elif body_version is None:
+                        response = rpc_error(identifier, -32602, 'Modern MCP requests require a protocol version in params._meta.')
+                        status = 400
+                    elif body_version not in MCP_SUPPORTED_VERSIONS:
+                        response = rpc_error(identifier, -32022, 'Unsupported protocol version',
+                            {'supported': list(MCP_SUPPORTED_VERSIONS), 'requested': body_version})
+                        status = 400
+                    elif body_version in MCP_LEGACY_VERSIONS:
+                        response = rpc_error(identifier, -32602, 'Legacy MCP versions use the initialize handshake, not per-request protocol metadata.')
+                        status = 400
+                    elif header_version != body_version:
+                        response = rpc_error(identifier, -32020, 'MCP protocol version header does not match request metadata.',
+                            {'header': header_version, 'body': body_version})
+                        status = 400
+                    elif method_header != method:
+                        response = rpc_error(identifier, -32020, 'Mcp-Method header does not match the JSON-RPC method.',
+                            {'header': method_header, 'body': method})
+                        status = 400
+                    elif not isinstance(metadata.get(MCP_CLIENT_CAPABILITIES_META), dict):
+                        response = rpc_error(identifier, -32602, 'Modern MCP requests require client capabilities in params._meta.')
+                        status = 400
+                    elif method in {'tools/call', 'prompts/get', 'resources/read'} and (
+                            not isinstance(params.get('name') if method != 'resources/read' else params.get('uri'), str)
+                            or not (params.get('name') if method != 'resources/read' else params.get('uri'))
+                            or name_header != (params.get('uri') if method == 'resources/read' else params.get('name'))):
+                        expected_name = params.get('uri') if method == 'resources/read' else params.get('name')
+                        response = rpc_error(identifier, -32020, 'Mcp-Name header does not match the request name or URI.',
+                            {'header': name_header, 'body': expected_name})
+                        status = 400
+                    elif name_header is not None and method not in {'tools/call', 'prompts/get', 'resources/read'}:
+                        response = rpc_error(identifier, -32020, 'Mcp-Name is only valid for requests with a named resource, prompt or tool.',
+                            {'header': name_header, 'body': None})
+                        status = 400
+                    else:
+                        response = _mcp_response(message, MCP_MODERN_VERSION)
+                        status = rpc_status(response)
+                else:
+                    protocol_version = header_version or '2025-03-26'
+                    if protocol_version not in MCP_LEGACY_VERSIONS:
+                        response = rpc_error(identifier, -32022, 'Unsupported protocol version',
+                            {'supported': list(MCP_SUPPORTED_VERSIONS), 'requested': protocol_version})
+                        status = 400
+                    elif method_header is not None or name_header is not None:
+                        response = rpc_error(identifier, -32020, 'Modern MCP request headers require modern request metadata.')
+                        status = 400
+                    else:
+                        response = _mcp_response(message, protocol_version)
+                        status = rpc_status(response)
+            except json.JSONDecodeError as exc:
                 request_id = message.get('id') if isinstance(message, dict) else None
                 response = {'jsonrpc': '2.0', 'id': request_id,
                             'error': {'code': -32700, 'message': str(exc)[:500]}}
+                status = 400
+            except ValueError as exc:
+                request_id = message.get('id') if isinstance(message, dict) else None
+                response = {'jsonrpc': '2.0', 'id': request_id,
+                            'error': {'code': -32600, 'message': str(exc)[:500]}}
+                status = 400
+            except Exception as exc:
+                request_id = message.get('id') if isinstance(message, dict) else None
+                response = {'jsonrpc': '2.0', 'id': request_id,
+                            'error': {'code': -32600, 'message': str(exc)[:500]}}
+                status = 400
             if response is None:
-                self.send_response(202)
+                self.send_response(202 if status in {200, 404} else status)
                 self.end_headers()
                 return
             payload = json.dumps(response, ensure_ascii=False).encode('utf-8')
-            self.send_response(200)
+            self.send_response(status)
             self.send_header('Content-Type', 'application/json')
             self.send_header('Content-Length', str(len(payload)))
-            self.send_header('MCP-Protocol-Version', '2025-03-26')
+            negotiated = (response.get('result', {}).get('protocolVersion')
+                          if isinstance(response.get('result'), dict) else None)
+            self.send_header('MCP-Protocol-Version', negotiated or (body_version if modern else protocol_version))
             self.end_headers()
             self.wfile.write(payload)
 

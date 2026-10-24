@@ -13,7 +13,7 @@ cmake --build build/emulator-agent-protocol-check --target emulator_agent_protoc
 ctest --test-dir build/emulator-agent-protocol-check -R emulator_agent_protocol_validation --output-on-failure
 ```
 
-The API is disabled in ordinary launches. `tools/emulator_agent.py start` enables it only for the emulator process it starts.
+The API is disabled in ordinary launches. `tools/emulator_agent.py start` enables it only for the emulator process it starts. The MCP `start_emulator` tool uses the configured `builds/current/melonDS.exe`; remote MCP callers cannot select another executable. The direct local runner command above remains available for developers testing a separately built emulator.
 
 ## Start an isolated session
 
