@@ -38,7 +38,7 @@ Important reading by task:
 - Multiplayer: `docs/COOP_TOOLS.md`, `docs/KNOWN_ISSUES.md`, `docs/LAN_LOBBIES.md`, `docs/TAILSCALE_COOP.md`, `docs/UDP_SERVER_GUIDE.md`.
 - Battle/experience: `docs/XP_COMPENSATION.md`, `docs/XP_DESYNC_INVESTIGATION_2026-10-11.md`, `docs/XP_COMPENSATION_BATTLE_TEST.md`, `docs/MEGA_EVOLUTION.md`.
 - Launcher: `docs/LAUNCHER.md`, `docs/LAUNCHER_STORAGE.md`, `docs/SHARED_LAUNCHER.md`, and `maintenance-tools/tools/launcher_ui/UX-CONTRACT.md`. Compare with `launcher-source/tools/launcher_ui/` before assuming the UX contract describes that source tree.
-- ROM and Generation 5 editing: `docs/GEN5_EDITOR_RESEARCH.md`, `docs/GEN5_EDITOR_WORKFLOW.md`, `docs/GEN5_SAVE_INSPECTION.md`, `docs/CYNTHIA_ROUTE_7.md`.
+- ROM and Generation 5 editing: `docs/GEN5_EDITOR_RESEARCH.md`, `docs/GEN5_EDITOR_WORKFLOW.md`, `docs/GEN5_SAVE_INSPECTION.md`, `docs/CYNTHIA_ROUTE_7.md`, and `docs/ROMHACK_DIALOGUE_WORKFLOW.md`.
 - Release: relevant `docs/RELEASE_CHECKS_*.md`, the actual packaging scripts under `launcher-source/tools/` or `maintenance-tools/tools/`, and `maintenance-tools/tools/publish_release.py` for publishing. `maintenance-tools/README.md` describes that folder's purpose, not the release procedure.
 
 **Important:** A directory's existence does not prove the modified emulator's source or decompiled game source lives there. Discover local mounted drives, workspace paths, tools, and dependencies rather than guessing. Treat the repo as the source of truth for current functionality; dated notes may describe superseded behavior.
