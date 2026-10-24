@@ -14,8 +14,9 @@ Merged change: https://github.com/WhatWasMissing/Unova-Together/pull/3
 - Launcher test suite passed (112 tests).
 - Launcher UI parity, release validation, and patchnote feed checks passed.
 - Packaged source and Windows ZIPs passed archive integrity, payload, and private-file checks.
-- Live emulator gameplay was not run for this release. The active emulator and all saves were left untouched.
-- The main profile ROM is unpatched, so it does not exercise the separate custom dialogue-art renderer. Follow [Dialogue art testing](DIALOGUE_ART_TESTING.md) to build and run the isolated demo with a copied save.
+- The custom dialogue renderer was exercised on the 2.0.36 emulator in a muted isolated session with the separate patched demo ROM and a copied Lentimas Town save. The Emma portrait, nameplate, frame, and text rendered; the rest choice appeared; B declined; the custom farewell rendered; A closed the box. MCP stopped the session with no save export.
+- Ordinary-battle scenery was not live-tested in this release. It has source-level regression and patch-application coverage; the active game and saves were left untouched.
+- The main profile ROM is unpatched and therefore shows stock dialogue. Follow [Dialogue art testing](DIALOGUE_ART_TESTING.md) to create and run the separate demo ROM.
 
 ## Remote asset verification
 
