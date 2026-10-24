@@ -22,8 +22,10 @@ Everyone should use the same Unova Together release and matching game revision. 
 - **Features:** browse available additions and guides.
 - **Games & saves:** manage slots and backups.
 - **Updates:** check for and install the latest release.
-- **Settings:** adjust controls, display, audio, music, and reduced motion.
+- **Settings:** adjust controls, display, audio, music, and reduced motion; choose game-native trainer looks.
 - **Tools:** check installed files, repair a game installation, or clean up older copies.
+
+In **Settings → Appearance**, choose an animated trainer-class look from the **Trainer outfits** filter. These use complete field models already present in your selected game; they are not mix-and-match clothing pieces. Preview a look, save named choices to that game profile, and apply it on the next launch. Bike and surf forms keep their original characters.
 
 ## Updates and repairs
 

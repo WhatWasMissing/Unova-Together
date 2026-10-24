@@ -102,6 +102,35 @@ class PlayerModelTests(unittest.TestCase):
         self.assertEqual(model_preferences.filter_models(models, query='bulba', category='All characters'), [4096])
         self.assertEqual(model_preferences.filter_models(models, sort='number'), [11, 4096, 4715])
 
+    def test_trainer_outfits_filter_lists_native_trainer_classes_only(self):
+        models = [
+            0x001E, 0x001F, 0x0018, 0x0022, 0x0024, 0x002E, 0x002F,
+            0x000C, 0x0011, 0x0125, 0x1000, 0x126B,
+        ]
+        selected = model_preferences.filter_models(
+            models, category=model_preferences.FILTER_TRAINER_OUTFITS, sort='number'
+        )
+        self.assertEqual(
+            selected,
+            [0x000C, 0x0011, 0x0018, 0x001E, 0x001F, 0x0022, 0x0024, 0x002E, 0x002F, 0x0125],
+        )
+        self.assertTrue(all(model in player_models.NPC_MODEL_LABELS for model in selected))
+
+    def test_trainer_outfit_filter_respects_search_and_excludes_pokemon(self):
+        models = [0x001E, 0x001F, 0x0024, 0x1000]
+        self.assertEqual(
+            model_preferences.filter_models(
+                models, query='ranger', category=model_preferences.FILTER_TRAINER_OUTFITS
+            ),
+            [0x0024],
+        )
+        self.assertEqual(
+            model_preferences.filter_models(
+                [0x1000], category=model_preferences.FILTER_TRAINER_OUTFITS
+            ),
+            [],
+        )
+
     def test_preview_decoder_uses_native_i4_colors_and_walk_cycle_frames(self):
         palette = SimpleNamespace(colors=[SimpleNamespace(r=i, g=i, b=i) for i in range(16)])
         texture = SimpleNamespace(format=ndspy.texture.TextureFormat.I4, width=2, height=2, data1=bytes((0x10, 0x32)))
