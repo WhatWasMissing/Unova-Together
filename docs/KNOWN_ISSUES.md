@@ -15,7 +15,7 @@ For connection steps, see the [player guide](PLAYER_GUIDE.md) and [Tailscale gui
 
 ## Optional features
 
-- **Battle scenery is optional.** Some special battles keep their original backgrounds, and scenery may vary between areas. Turn it off in launcher settings if you prefer the original look.
+- **Battle scenery is optional.** Regular wild and trainer battles use the last verified nearby area when available. Scripted story scenes may keep their original backgrounds, and unknown locations safely fall back to the original look. Turn it off in launcher settings if you prefer the original look.
 - **Companion interactions are cosmetic.** They do not change friendship, HP, items, or save data.
 - **Encounter search covers ordinary encounters.** Gifts, scripted legendary Pokémon, and Hidden Grottos are not included.
 - **Field HMs keep their normal story requirements.** Fly still follows the game’s party and destination rules.

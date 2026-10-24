@@ -2,6 +2,7 @@
 
 Pick a version to read what changed. The newest release is first.
 
+- [Unova Together 2.0.36 — Battle scenery in regular battles](RELEASE_NOTES_2.0.36.md)
 - [Unova Together 2.0.35 — Custom dialogue art tools](RELEASE_NOTES_2.0.35.md)
 - [Unova Together 2.0.34 — Reliable AI agent previews and startup](RELEASE_NOTES_2.0.34.md)
 - [Unova Together 2.0.33 — Safer, compatible AI agent tools](RELEASE_NOTES_2.0.33.md)

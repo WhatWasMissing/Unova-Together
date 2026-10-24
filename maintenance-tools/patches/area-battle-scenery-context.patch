@@ -1,0 +1,128 @@
+--- a/source/melonDS/src/frontend/qt_sdl/OverworldDebug.cpp
++++ b/source/melonDS/src/frontend/qt_sdl/OverworldDebug.cpp
+@@ -1,5 +1,6 @@
+ #include "OverworldDebug.h"
+ #include "BattlePresence.h"
++#include "BattleSceneryContext.h"
+ #include "HeartGoldAdapter.h"
+ #include <QtEndian>
+ #include <cmath>
+@@ -212,6 +213,23 @@
+         auto result=battle;
+         result["status"]="In battle";
+         result["matches"]=0;
++        const int matrixZone=lastResolved.value("map",-1).toInt();
++        const int fieldZone=lastResolved.value("fieldZone",-1).toInt();
++        const bool verifiedFieldSample=
++            lastResolved.value("status").toString()=="Experimental match" &&
++            lastResolved.value("fieldPositionOwned").toBool();
++        if (hasBattleSceneryFieldContext(verifiedFieldSample,matrixZone,fieldZone))
++        {
++            // Battle RAM no longer contains the field actor. Carry only the
++            // last verified location for scenery selection; keep the public
++            // battle sample status and ownership flags unchanged.
++            result["map"]=lastResolved.value("map");
++            result["fieldZone"]=lastResolved.value("fieldZone");
++            result["worldX"]=lastResolved.value("worldX");
++            result["worldY"]=lastResolved.value("worldY");
++            result["worldZ"]=lastResolved.value("worldZ");
++            result["areaFieldContext"]=true;
++        }
+         return result;
+     }
+     int currentFieldZone=-1;
+--- a/source/melonDS/src/frontend/qt_sdl/AreaBattleScenes.h
++++ b/source/melonDS/src/frontend/qt_sdl/AreaBattleScenes.h
+@@ -14,6 +14,7 @@
+ #include <cmath>
+ #include "NDSCart.h"
+ #include "BattleSceneryAreaSelection.h"
++#include "BattleSceneryContext.h"
+ 
+ // The catalog is generated locally from the user's exact ROM. Changes affect
+ // only validated native battle-background file ranges, never battle logic.
+@@ -53,10 +54,24 @@
+             }
+             loaded=true;
+         }
+-        if(!loaded || sample.value("status").toString()!="Experimental match" ||
+-           !sample.value("fieldPositionOwned").toBool()) return;
++        const auto sampleStatus=sample.value("status").toString();
+         const int matrixZone=sample.value("map",-1).toInt();
+         const int battleZone=sample.value("fieldZone",-1).toInt();
++        const bool verifiedFieldSample=sampleStatus=="Experimental match" &&
++            sample.value("fieldPositionOwned").toBool() &&
++            hasBattleSceneryFieldContext(true,matrixZone,battleZone);
++        const bool retainedFieldContext=sampleStatus=="In battle" &&
++            sample.value("areaFieldContext").toBool() &&
++            hasBattleSceneryFieldContext(true,matrixZone,battleZone);
++        if(!canUseBattleScenerySample(loaded,verifiedFieldSample,
++               sampleStatus=="In battle" && sample.value("inBattle").toBool(),
++               sample.value("battleStateKnown").toBool(),retainedFieldContext)) {
++            if(loaded && sampleStatus=="In battle" && currentArea>=0) {
++                cart->SetAssetPatches({});currentArea=-1;currentSelection.clear();
++                status="Area scenery unavailable; original background";
++            }
++            return;
++        }
+         const auto zones=catalog.value("zones").toArray();
+         auto areaForZone=[&](int zone)->int {
+             if(zone<0 || zone>=zones.size()) return -1;
+--- /dev/null
++++ b/source/melonDS/src/frontend/qt_sdl/BattleSceneryContext.h
+@@ -0,0 +1,25 @@
++#pragma once
++
++// The battle hook may reuse only a field position that the tracker verified
++// immediately before entering a battle. Zone 0 is valid in Black 2/White 2.
++constexpr bool hasBattleSceneryFieldContext(bool verifiedFieldSample,
++                                            int matrixZone,
++                                            int fieldZone) noexcept
++{
++    return verifiedFieldSample &&
++        matrixZone >= 0 && matrixZone <= 65535 &&
++        fieldZone >= 0 && fieldZone <= 65535;
++}
++
++// A live field sample can select its area's scene. During battles, accept only
++// a known battle state paired with a retained, verified field context.
++constexpr bool canUseBattleScenerySample(bool catalogLoaded,
++                                         bool verifiedFieldSample,
++                                         bool inBattle,
++                                         bool battleStateKnown,
++                                         bool retainedFieldContext) noexcept
++{
++    return catalogLoaded &&
++        (verifiedFieldSample ||
++         (inBattle && battleStateKnown && retainedFieldContext));
++}
+--- a/source/melonDS/src/frontend/qt_sdl/ProjectCredits.h
++++ b/source/melonDS/src/frontend/qt_sdl/ProjectCredits.h
+@@ -17,7 +17,7 @@
+ {
+ inline constexpr char Name[] = "Unova Together";
+ // Keep the multiplayer build identifier aligned with each packaged release.
+-inline constexpr char Version[] = "2.0.28";
++inline constexpr char Version[] = "2.0.36";
+ 
+ inline QString ReleaseVersion()
+ {
+--- a/source/melonDS/res/melon.rc.in
++++ b/source/melonDS/res/melon.rc.in
+@@ -15,14 +15,14 @@
+ 		BLOCK "040904E4"
+ 		{
+ 			VALUE "CompanyName", "Melon Factory of Kuribo64"
+-			VALUE "FileVersion", "2.0.28"
++			VALUE "FileVersion", "2.0.36"
+ 			VALUE "FileDescription", "Unova Together - modified melonDS 1.1"
+ 			VALUE "InternalName", "SDnolem"
+ 			VALUE "LegalCopyright", "2016-2025 melonDS team; 2026 mvq1303 (Unova Together contributions)"
+ 			VALUE "LegalTrademarks", ""
+ 			VALUE "OriginalFilename", "melonDS.exe"
+ 			VALUE "ProductName", "Unova Together"
+-			VALUE "ProductVersion", "2.0.28"
++			VALUE "ProductVersion", "2.0.36"
+ 			VALUE "UnovaShopOverlaySourceSHA256", "${UNOVA_SHOP_OVERLAY_SOURCE_SHA256}"
+ 		}
+ 	}

@@ -2,6 +2,12 @@
   "schema": 1,
   "notes": [
     {
+      "version": "2.0.36",
+      "title": "Battle scenery in regular battles",
+      "file": "RELEASE_NOTES_2.0.36.md",
+      "body": "Optional area and nearby scenery now keep the last verified field location when an ordinary wild or trainer battle starts. Unknown locations fall back to the original background. For the dialogue-art demo, use the separate patched test ROM; the main profile ROM stays unchanged. No ROM or save is included."
+    },
+    {
       "version": "2.0.35",
       "title": "Custom dialogue art tools",
       "file": "RELEASE_NOTES_2.0.35.md",

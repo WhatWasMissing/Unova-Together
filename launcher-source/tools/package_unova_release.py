@@ -31,6 +31,7 @@ DOCS = ('PLAYER_GUIDE.md', 'KNOWN_ISSUES.md', 'TAILSCALE_COOP.md', 'UDP_SERVER_G
         'ROADMAP.md', 'BAG_CAPACITY.md', 'FOLLOWING_POKEMON.md', 'FOLLOWER_ART_CREDITS.md',
         'FOLLOWER_ART_TERMS.md', 'FOLLOWER_VARIANTS.md', 'HGSS_FOLLOWER_IMPORT.md',
         'AGENT_TOOLS.md', 'EMULATOR_AGENT_CONTROL.md', 'ROMHACK_DIALOGUE_WORKFLOW.md',
+        'verification/AREA_BATTLE_SCENERY_CONTEXT_2026-10-24.md',
         'DIALOGUE_ART_TESTING.md', 'verification/ROM_DIALOGUE_ART_RENDERER_2026-10-24.md')
 DIALOGUE_ART_FILES = (
     'maintenance-tools/tools/rom/dialogue_art_patch.py',
@@ -42,6 +43,14 @@ DIALOGUE_ART_FILES = (
     'maintenance-tools/assets/dialogue-art/ART-CREDITS.md',
     'maintenance-tools/assets/dialogue-art/speaker-profiles.example.json',
     'maintenance-tools/assets/dialogue-art/field-guide-source.png',
+)
+BATTLE_SCENERY_FIX_FILES = (
+    'maintenance-tools/tools/build_battle_scenery_patch.py',
+    'maintenance-tools/tools/battle_scenery_context.h',
+    'maintenance-tools/tools/check_battle_scenery_context.cpp',
+    'maintenance-tools/tools/test_battle_scenery_context_patch.py',
+    'maintenance-tools/patches/area-battle-scenery-context.json',
+    'maintenance-tools/patches/area-battle-scenery-context.patch',
 )
 FORBIDDEN = {'.nds', '.gba', '.sav', '.save', '.dsv', '.ramdump', '.ml1', '.ml2', '.ml3', '.ml4', '.ml5', '.ml6', '.ml7', '.ml8', '.pem', '.key', '.pyc'}
 
@@ -71,6 +80,13 @@ def add_dialogue_art_files(archive, prefix):
     for name in DIALOGUE_ART_FILES:
         path=REPOSITORY_ROOT/name
         require_release_condition(path.is_file(), f'Dialogue-art release file is missing: {name}')
+        archive.write(path, prefix+name)
+
+def add_battle_scenery_fix_files(archive, prefix):
+    """Ship the native fix, regression check and reproducible source patch."""
+    for name in BATTLE_SCENERY_FIX_FILES:
+        path=REPOSITORY_ROOT/name
+        require_release_condition(path.is_file(), f'Battle-scenery fix source is missing: {name}')
         archive.write(path, prefix+name)
 
 def main():
@@ -215,6 +231,7 @@ def main():
         for name in HELPERS:
             z.write(tool_source(name), 'Unova-Together/tools/'+name)
         add_dialogue_art_files(z, 'Unova-Together/')
+        add_battle_scenery_fix_files(z, 'Unova-Together/')
         z.write(agent_executable, 'Unova-Together/tools/Unova Agent Tools.exe')
         z.write(agent_licenses, 'Unova-Together/tools/Unova Agent Tools LICENSES.txt')
         for path in sorted((WORKSPACE/'tools/vendor').rglob('*')):
@@ -259,6 +276,7 @@ def main():
         for name in HELPERS:
             z.write(tool_source(name), 'Unova-Together-Source/tools/'+name)
         add_dialogue_art_files(z, 'Unova-Together-Source/')
+        add_battle_scenery_fix_files(z, 'Unova-Together-Source/')
         z.write(agent_licenses, 'Unova-Together-Source/tools/Unova Agent Tools LICENSES.txt')
         for path in sorted((WORKSPACE/'tools/vendor').rglob('*')):
             if path.is_file() and path.suffix.lower() in {'.py','.txt','.md'}:
@@ -279,6 +297,8 @@ def main():
                      'FOLLOWER_ART_CREDITS.md',
                      'FOLLOWER_ART_TERMS.md','FOLLOWER_VARIANTS.md','HGSS_FOLLOWER_IMPORT.md'):
             z.write(repo/'docs'/name,'Unova-Together-Source/docs/'+name)
+        z.write(repo/'docs/verification/AREA_BATTLE_SCENERY_CONTEXT_2026-10-24.md',
+                'Unova-Together-Source/docs/verification/AREA_BATTLE_SCENERY_CONTEXT_2026-10-24.md')
         for path in (asset_notice_doc, verification_doc):
             z.write(path, 'Unova-Together-Source/docs/'+path.name)
         for name in ('ASSET_TERMS.md','CREDITS.md'):
@@ -354,8 +374,12 @@ def main():
             'Unova-Together/maintenance-tools/assets/dialogue-art/ART-CREDITS.md',
             'Unova-Together/docs/DIALOGUE_ART_TESTING.md',
             'Unova-Together/docs/verification/ROM_DIALOGUE_ART_RENDERER_2026-10-24.md',
+            'Unova-Together/docs/verification/AREA_BATTLE_SCENERY_CONTEXT_2026-10-24.md',
+            'Unova-Together/maintenance-tools/patches/area-battle-scenery-context.patch',
+            'Unova-Together/maintenance-tools/patches/area-battle-scenery-context.json',
+            'Unova-Together/maintenance-tools/tools/test_battle_scenery_context_patch.py',
         ):
-            require_release_condition(required in z.namelist(), f'Runtime package is missing dialogue-art tooling: {required}')
+            require_release_condition(required in z.namelist(), f'Runtime package is missing a maintenance tool: {required}')
         note_files=[name for name in z.namelist() if name.startswith('Unova-Together/patchnotes/RELEASE_NOTES_') and name.endswith('.md')]
         patch_index = json.loads((repo/'patchnotes'/'index.json').read_text(encoding='utf-8'))
         require_release_condition(
@@ -388,6 +412,7 @@ def main():
                          'Unova-Together-Source/tools/test_emulator_agent.py',
                          'Unova-Together-Source/docs/AGENT_TOOLS.md',
                          'Unova-Together-Source/docs/EMULATOR_AGENT_CONTROL.md',
+                         'Unova-Together-Source/docs/verification/AREA_BATTLE_SCENERY_CONTEXT_2026-10-24.md',
                          'Unova-Together-Source/docs/'+verification_name,
                          'Unova-Together-Source/docs/'+asset_notice_name,
                          'Unova-Together-Source/source/melonDS/tools/test_emulator_agent_protocol.cpp'):
@@ -415,6 +440,9 @@ def main():
             'Unova-Together-Source/docs/verification/ROM_DIALOGUE_ART_RENDERER_2026-10-24.md',
         ):
             require_release_condition(required in names, f'Source archive is missing dialogue-art tooling: {required}')
+        for name in BATTLE_SCENERY_FIX_FILES:
+            required='Unova-Together-Source/'+name
+            require_release_condition(required in names, f'Source archive is missing battle-scenery fix source: {required}')
     stage_root.mkdir(parents=True)
     (stage_root/'.disposable-release-stage').write_text('Temporary extracted release staging; final archives are in downloads/releases.\n', encoding='utf-8')
     with zipfile.ZipFile(runtime) as z:z.extractall(stage_root)

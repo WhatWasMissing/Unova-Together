@@ -2,6 +2,8 @@
 
 The release includes an authoring tool; the normal launcher does not add dialogue art automatically. The sample profile targets the Lentimas Town Pokémon Center nurse (zone 460, actor UID 6) and keeps her original text and event script.
 
+**The main profile ROM remains unpatched.** Selecting it shows the game's stock dialogue window. To see the Emma portrait and custom frame, create a separate derived ROM with the steps below and run that ROM with a copied save in the muted isolated test session. Do not replace the source ROM or use the live save.
+
 ## Build a separate test ROM
 
 Use your own English Blaze Black 2 Redux Complete v1.4.1 IREO ROM. The patcher checks the exact source fingerprint listed in [the dialogue workflow](ROMHACK_DIALOGUE_WORKFLOW.md), refuses other builds, and will not overwrite an existing output.

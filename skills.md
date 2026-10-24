@@ -174,3 +174,9 @@ cleanup raises AgentError or OSError instead of masking it. See
 [2.0.34 verification](docs/AGENT_TOOLS_VERIFICATION_2.0.34.md) and the packaged
 verifier in launcher-source/tools/verify_unova_packaged.py. Unit, package and
 live API evidence do not imply multiplayer gameplay verification.
+
+## Battle scenery context in ordinary battles
+
+- The battle presence tracker reports `status="In battle"` as soon as it verifies battle ownership and stops publishing a live field position. Area and nearby battle-scene selection must carry the last verified field zone and world coordinates through that transition; do not mark that retained location as a currently owned field position.
+- Accept the retained context only with a known battle state and validated zone bounds. If it is missing or unknown, clear any stale battle-asset patches and keep the original background. Never infer a battle location from the legacy matrix field or a prior unresolved sample.
+- In the 2.0.34 source baseline, `OverworldTracker::Sample()` and `AreaBattleScenes::update()` had incompatible gates: the tracker switched to `In battle`, while scenery returned unless it saw an `Experimental match` with `fieldPositionOwned=true`. Verify this boundary with the focused `check_battle_scenery_context.cpp` test and build the complete `melonDS` target. A source/build check is not gameplay verification; if the active desktop session is in use, do not start or control a second emulator. See [the 2.0.36 scenery verification](docs/verification/AREA_BATTLE_SCENERY_CONTEXT_2026-10-24.md).
