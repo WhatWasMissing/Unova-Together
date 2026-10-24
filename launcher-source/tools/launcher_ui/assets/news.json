@@ -2,6 +2,12 @@
   "schema": 1,
   "notes": [
     {
+      "version": "2.0.34",
+      "title": "Reliable AI agent previews and startup",
+      "file": "RELEASE_NOTES_2.0.34.md",
+      "body": "Fixes field-model preview errors, isolated emulator startup failures caused by copied settings, and Windows MCP tool discovery failures caused by text encoding. Failed launches retain useful diagnostics. Native emulator controls continue to use a private profile and copied save without desktop keyboard or mouse simulation. No game ROM, user save or real firmware dump is included."
+    },
+    {
       "version": "2.0.33",
       "title": "Safer, compatible AI agent tools",
       "file": "RELEASE_NOTES_2.0.33.md",

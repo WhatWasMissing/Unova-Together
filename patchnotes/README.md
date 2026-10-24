@@ -2,6 +2,7 @@
 
 Pick a version to read what changed. The newest release is first.
 
+- [Unova Together 2.0.34 — Reliable AI agent previews and startup](RELEASE_NOTES_2.0.34.md)
 - [Unova Together 2.0.33 — Safer, compatible AI agent tools](RELEASE_NOTES_2.0.33.md)
 - [Unova Together 2.0.32 — Tools for AI coding agents](RELEASE_NOTES_2.0.32.md)
 - [Unova Together 2.0.31 — Trainer outfit filters and dialogue tools](RELEASE_NOTES_2.0.31.md)

@@ -237,3 +237,5 @@ Before reporting completion, answer internally:
 If any answer exposes a critical gap, do not present the task as fully verified. Resolve the gap or stop with a precise handoff.
 
 Release consolidation and cleanup guidance: see [skills.md — Release branch consolidation](skills.md#release-branch-consolidation).
+
+Agent encoding, preview and private-profile regression guidance: see [skills.md](skills.md#agent-transport-preview-and-private-profile-regression-discipline).

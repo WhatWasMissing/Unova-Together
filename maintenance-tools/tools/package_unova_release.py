@@ -104,6 +104,7 @@ def main():
     for name, values in config.items():
         if not name.startswith('Instance') or not isinstance(values, dict):
             continue
+        controls.append(f'[{name}]')
         for section in ('Keyboard', 'Joystick'):
             bindings = values.get(section, {})
             if bindings:

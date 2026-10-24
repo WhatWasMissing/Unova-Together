@@ -14,6 +14,58 @@ from emulator_agent import (AgentError, MARKER_NAME, SESSION_NAME, _emulator_env
 
 
 class EmulatorAgentSessionTests(unittest.TestCase):
+    def test_failed_start_keeps_diagnostic_when_cleanup_cannot_confirm_exit(self):
+        import argparse
+        import shutil
+        root = Path(tempfile.mkdtemp(prefix='unova-agent-exit-diagnostic-'))
+        try:
+            source = root / 'melonDS.exe'
+            source.write_bytes(b'fixture; never executed')
+            rom = root / 'test.nds'
+            rom.write_bytes(b'fixture')
+            session_root = root / 'session'
+            session_root.mkdir()
+            process = mock.Mock(pid=12345)
+            process.poll.return_value = 1
+            def failed_process(*args, **kwargs):
+                kwargs['stdout'].write(b'original native failure diagnostic\n')
+                kwargs['stdout'].flush()
+                return process
+            with mock.patch.object(emulator_agent.tempfile, 'mkdtemp', return_value=str(session_root)), \
+                 mock.patch.object(emulator_agent.subprocess, 'Popen', side_effect=failed_process), \
+                 mock.patch.object(emulator_agent, '_safe_remove_session', side_effect=PermissionError('identity uncertain')):
+                with self.assertRaisesRegex(AgentError, 'Emulator exited before its control endpoint became ready') as caught:
+                    _launch(argparse.Namespace(emulator=str(source), rom=str(rom), save=None, boot='auto'))
+            self.assertIn('Session retained at', str(caught.exception))
+            self.assertIn('identity uncertain', str(caught.exception))
+            self.assertIn('original native failure diagnostic', str(caught.exception))
+            self.assertTrue((session_root / SESSION_NAME).is_file())
+        finally:
+            shutil.rmtree(root)
+
+    def test_private_config_promotes_only_missing_instance_parents(self):
+        import shutil
+        import tomllib
+        root = Path(tempfile.mkdtemp(prefix='unova-agent-parent-tables-'))
+        try:
+            install = root / 'installed'
+            install.mkdir()
+            source = install / 'melonDS.exe'
+            source.write_bytes(b'fixture; never executed')
+            text = ('[Instance0.Keyboard]\nA = 1\n[Instance0.Joystick]\nA = 2\n'
+                    '[Instance1] # explicit\nVolume = 100\n[Instance1.Keyboard]\nB = 3\n')
+            config = install / 'melonDS.toml'
+            config.write_text(text, encoding='utf-8')
+            private = _prepare_private_emulator(root, source)
+            copied = (private.parent / 'portable/melonDS.toml').read_text(encoding='utf-8')
+            self.assertIn('[Instance0]\n', copied)
+            self.assertEqual(copied.count('[Instance0]'), 1)
+            self.assertEqual(copied.count('[Instance1]'), 1)
+            self.assertEqual(tomllib.loads(copied), tomllib.loads(text))
+            self.assertEqual(config.read_text(encoding='utf-8'), text)
+        finally:
+            shutil.rmtree(root)
+
     def make_session(self, pid: int, executable: str) -> tuple[Path, Path]:
         root = Path(tempfile.mkdtemp(prefix="unova-agent-test-"))
         marker = "test-marker"

@@ -12,6 +12,7 @@ import binascii
 import ctypes
 import json
 import os
+import re
 from pathlib import Path
 import secrets
 import shutil
@@ -264,7 +265,14 @@ def _prepare_private_emulator(root: Path, emulator: Path) -> Path:
                      else source.parent / "melonDS.toml")
     private_config = portable / "melonDS.toml"
     if source_config.is_file():
-        shutil.copy2(source_config, private_config)
+        # Explicit parents let melonDS add scalar defaults before serializing.
+        config = source_config.read_text(encoding="utf-8-sig")
+        parents = set(re.findall(r"(?m)^\s*\[(Instance\d+)\.[^\]]+\]", config))
+        for parent in sorted(parents):
+            if not re.search(r"(?m)^\s*\[" + re.escape(parent) + r"\]\s*(?:#.*)?$", config):
+                config = re.sub(r"(?m)^(\s*\[" + re.escape(parent) + r"\.)",
+                                lambda match: f"[{parent}]\n" + match.group(1), config, count=1)
+        private_config.write_text(config, encoding="utf-8")
     else:
         # An explicit table lets a first-run session persist its normal
         # defaults without depending on an implicit table from a TOML child.
@@ -404,8 +412,12 @@ def _launch(args: argparse.Namespace) -> dict[str, Any]:
                 pass
             raise AgentError("Emulator started but its control endpoint did not become ready. "
                 f"Session left at {session_file} for safe inspection.\n{log_text}")
-        _safe_remove_session(session_file)
-        raise AgentError(f"Emulator exited before its control endpoint became ready.\n{log_text}")
+        try:
+            _safe_remove_session(session_file)
+            cleanup_note = ""
+        except (AgentError, OSError) as cleanup_error:
+            cleanup_note = f"\nSession retained at {session_file}: {cleanup_error}"
+        raise AgentError(f"Emulator exited before its control endpoint became ready.\n{log_text}{cleanup_note}")
     except Exception:
         # Keep a live or uncertain process's session so cleanup never races it.
         raise

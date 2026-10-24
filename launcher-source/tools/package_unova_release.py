@@ -141,6 +141,7 @@ def main():
     for name, values in config.items():
         if not name.startswith('Instance') or not isinstance(values, dict):
             continue
+        controls.append(f'[{name}]')
         for section in ('Keyboard', 'Joystick'):
             bindings = values.get(section, {})
             if bindings:
@@ -240,7 +241,7 @@ def main():
             if path.is_file() and '__pycache__' not in path.parts:
                 z.write(path,'Unova-Together-Source/tools/launcher_ui/'+path.relative_to(ROOT/'tools/launcher_ui').as_posix())
         z.write(ROOT/'tools/package_unova_release.py','Unova-Together-Source/tools/package_unova_release.py')
-        for name in ('test_unova_agent.py','test_emulator_agent.py'):
+        for name in ('test_unova_agent.py','test_emulator_agent.py','verify_unova_packaged.py'):
             z.write(tool_source(name),'Unova-Together-Source/tools/'+name)
         for name in ('test_unova_updater.py','test_unova_single_exe.py','unova_single_exe.py','build_unova_single_exe.py','test_launcher_ui.py','test_launcher_preferences.py','test_launcher_cheat_engine.py','test_launcher_services.py','test_ensure_presence_relay.py','test_release_input_bounds.py','test_overworld_companion.py','check_lan_player_list_validation.cpp','check_battle_presence.cpp','check_post_battle_presence.cpp','check_rival_agreement.cpp','test_rival_payload.py','test_coop_boss_payload.py','test_coop_story_return.py','test_coop_field_return.py','verify_coop_runtime.py','audit_native_enemy_setup.py','verify_rival_startups.py','test_field_zone_native.py','check_field_zone.cpp',):
             z.write(tool_source(name),'Unova-Together-Source/tools/'+name)

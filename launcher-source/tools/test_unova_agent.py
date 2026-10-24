@@ -16,6 +16,37 @@ import unova_agent as agent
 
 
 class ProjectAgentTests(unittest.TestCase):
+    def test_model_preview_unpacks_frames_and_label(self):
+        from PIL import Image
+        rom = self.root / 'preview.nds'
+        rom.write_bytes(b'fixture')
+        with mock.patch.object(agent.player_models, 'load_preview',
+                               return_value=([(Image.new('RGBA', (8, 16)), 100)], 'Walking')):
+            result = agent._mcp_response({'jsonrpc': '2.0', 'id': 1, 'method': 'tools/call',
+                'params': {'name': 'preview_player_model',
+                           'arguments': {'rom': str(rom), 'modelId': 4715}}})['result']
+        self.assertFalse(result['isError'], result)
+        self.assertEqual(result['content'][0]['mimeType'], 'image/png')
+        self.assertTrue(base64.b64decode(result['content'][0]['data']).startswith(b'\x89PNG\r\n\x1a\n'))
+        metadata = json.loads(result['content'][1]['text'])
+        self.assertEqual((metadata['frameCount'], metadata['width'], metadata['height']), (1, 8, 16))
+        self.assertEqual(metadata['animation'], 'Walking')
+
+    def test_stdio_forces_utf8_under_windows_codepage_override(self):
+        requests = [{'jsonrpc': '2.0', 'id': 1, 'method': 'initialize', 'params': {
+            'protocolVersion': '2025-11-25', 'capabilities': {},
+            'clientInfo': {'name': 'encoding-test', 'version': '1'}}},
+            {'jsonrpc': '2.0', 'id': 2, 'method': 'tools/list'}]
+        environment = dict(os.environ, PYTHONIOENCODING='cp1252', PYTHONUTF8='0')
+        process = subprocess.run([sys.executable, str(Path(agent.__file__)),
+            '--project-root', str(self.root), 'mcp'],
+            input=('\n'.join(json.dumps(r) for r in requests) + '\n').encode('utf-8'),
+            capture_output=True, env=environment, timeout=15)
+        self.assertEqual(process.returncode, 0, process.stderr)
+        responses = [json.loads(line) for line in process.stdout.decode('utf-8').splitlines()]
+        self.assertEqual(len(responses[1]['result']['tools']), 13)
+        self.assertIn('Pokémon', process.stdout.decode('utf-8'))
+
     def setUp(self):
         self.root = Path(tempfile.mkdtemp(prefix='unova-agent-project-'))
         (self.root / 'docs').mkdir()

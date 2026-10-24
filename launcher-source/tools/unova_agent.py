@@ -219,7 +219,7 @@ def preview_player_model(rom_path: str, model_id: int) -> dict[str, Any]:
     rom = Path(rom_path).expanduser().resolve(strict=True)
     if not rom.is_file() or rom.suffix.lower() != '.nds':
         raise ValueError('Select an existing Nintendo DS .nds ROM.')
-    frames = player_models.load_preview(rom, model_id)
+    frames, preview_label = player_models.load_preview(rom, model_id)
     if not frames:
         raise ValueError('This model has no supported preview frames.')
     image, duration = frames[0]
@@ -227,6 +227,7 @@ def preview_player_model(rom_path: str, model_id: int) -> dict[str, Any]:
     image.save(stream, format='PNG')
     return {'modelId': model_id, 'name': player_models.display_name(model_id), 'frameCount': len(frames),
             'frameDurationMs': duration, 'width': image.width, 'height': image.height,
+            'animation': preview_label,
             'pngBase64': base64.b64encode(stream.getvalue()).decode('ascii'),
             'evidence': 'ROM-derived 2D field texture preview; not a live 3D scene.'}
 
@@ -765,6 +766,10 @@ def serve_http(host: str, port: int) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
+    # MCP stdio is UTF-8 even when a frozen Windows process defaults to ACP.
+    for stream in (sys.stdin, sys.stdout, sys.stderr):
+        if hasattr(stream, 'reconfigure'):
+            stream.reconfigure(encoding='utf-8')
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--project-root', help='project checkout to inspect (defaults to this installation)')
     parser.add_argument('--emulator-source', help='matching unpacked melonDS source tree, when available')

@@ -156,3 +156,18 @@ The reviewed ROM currently exposes 227 moving human actors, 619 Pokémon field m
 - Keep the agent surface explicit and schema-validated. Do not expose arbitrary command execution or game memory writes. Label screenshots and source checks as evidence, not a gameplay oracle. Keep stdio for local coding clients and, when remote MCP access is required, use a separately authenticated endpoint bound to loopback and a trusted tunnel. ChatGPT cannot connect directly to a local stdio server; check the current OpenAI connection guidance before documenting setup.
 - Package the exact native source tree used for the emulator binary, including protocol tests, the Python runner, MCP adapter, client setup guide and verification record. A runtime zip alone cannot provide matching native source; validate the executable's source fingerprint and assert the source archive contains every agent helper before publication.
 - Reproduce with the source-tree protocol test, Python runner safety tests, MCP dispatcher tests, a live isolated ROM session (native input, frame wait, screen capture and clean stop), and the release archive guards. Keep evidence for source/unit, emulator integration and live gameplay distinct; test fixtures should not claim full multiplayer or feature-level correctness.
+
+
+## Agent transport, preview and private-profile regression discipline
+
+For Windows frozen MCP tools, explicitly configure standard streams as UTF-8 in
+main; environment overrides alone do not reliably change PyInstaller's encoding.
+Test the real executable with strict UTF-8 decoding and forced code-page settings.
+Consume player_models.load_preview as (frames, label), and test image content
+using both a helper fixture and user-ROM integration. Declare missing InstanceN
+parents only in private copied TOML, preserving source values; also declare them
+in generated release settings. Keep the original startup error/log when safe
+cleanup raises AgentError or OSError instead of masking it. See
+[2.0.34 verification](docs/AGENT_TOOLS_VERIFICATION_2.0.34.md) and the packaged
+verifier in launcher-source/tools/verify_unova_packaged.py. Unit, package and
+live API evidence do not imply multiplayer gameplay verification.
