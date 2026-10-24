@@ -1,0 +1,5 @@
+# Runtime build validated with CPython 3.12.8 on Windows x64.
+ndspy==4.2.0
+Pillow==12.3.0
+tomlkit==0.15.1
+PyInstaller==6.22.3

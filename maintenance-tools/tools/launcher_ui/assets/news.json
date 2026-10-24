@@ -2,6 +2,12 @@
   "schema": 1,
   "notes": [
     {
+      "version": "2.0.32",
+      "title": "Tools for AI coding agents",
+      "file": "RELEASE_NOTES_2.0.32.md",
+      "body": "AI coding agents can inspect project source, docs and assets through MCP, check ROMs and saves, preview field models, inspect launcher profiles, and play in an isolated melonDS session without desktop input simulation. Includes local MCP setup, a loopback-only authenticated HTTP endpoint, source and tests. No ROM, save or extracted game asset is included."
+    },
+    {
       "version": "2.0.31",
       "title": "Trainer outfit filters and dialogue tools",
       "file": "RELEASE_NOTES_2.0.31.md",

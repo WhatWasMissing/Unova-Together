@@ -5,18 +5,24 @@ from importlib import metadata
 from launcher_ui import versioning
 
 ROOT=Path(__file__).resolve().parents[1]
-WORKSPACE=ROOT
+REPOSITORY_ROOT=ROOT.parent
+WORKSPACE=next((parent for parent in (REPOSITORY_ROOT,*REPOSITORY_ROOT.parents)
+                if (parent/'builds').is_dir()),REPOSITORY_ROOT)
 assets=ROOT/'tools/launcher_ui'
 parser=argparse.ArgumentParser(description=__doc__)
-parser.add_argument('--output-dir',type=Path,default=WORKSPACE/'builds/release-launcher-1.0.20')
-parser.add_argument('--work-dir',type=Path,default=WORKSPACE/'test-fixtures/release-launcher-1.0.20')
-parser.add_argument('--revision',default='2026101402')
+parser.add_argument('--output-dir',type=Path,default=WORKSPACE/'builds/release-launcher-2.0.32')
+parser.add_argument('--work-dir',type=Path,default=WORKSPACE/'builds/launcher-pyinstaller-2.0.32')
+parser.add_argument('--revision',default='2026102402')
 parser.add_argument('--version',default=versioning.current_version())
 parser.add_argument('--bootstrap',type=Path,help='Built permanent launcher entry / client repair executable')
 args=parser.parse_args()
 output=args.output_dir.resolve();work=args.work_dir.resolve()
-if not output.is_relative_to(WORKSPACE/'builds') or not work.is_relative_to(WORKSPACE/'test-fixtures'):
-    parser.error('Output and work folders must stay inside builds/ and test-fixtures/.')
+if not output.is_relative_to(WORKSPACE/'builds') or not work.is_relative_to(WORKSPACE/'builds'):
+    parser.error('Output and work folders must stay inside builds/.')
+if output.exists() and any(output.iterdir()):
+    parser.error('Output folder must be fresh.')
+if work.exists() and any(work.iterdir()):
+    parser.error('Work folder must be fresh.')
 versioning.numbers(args.version)
 work.mkdir(parents=True,exist_ok=True)
 (work/'.disposable-test-output').write_text('Temporary launcher build work.',encoding='utf-8')

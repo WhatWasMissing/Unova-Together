@@ -1,8 +1,8 @@
 # Unova Together
 
-**Current release: 2.0.26.** Play Blaze Black 2 Redux with friends, explore with your Pokémon, and discover **49 Mega forms**.
+**Current release: 2.0.32.** Play Blaze Black 2 Redux with friends, explore with your Pokémon, and discover **49 Mega forms**. Developers can use the included MCP tools to inspect project code and control an isolated emulator directly.
 
-[Download Unova Together 2.0.26](https://github.com/WhatWasMissing/Unova-Together/releases/latest)
+[Download Unova Together 2.0.32](https://github.com/WhatWasMissing/Unova-Together/releases/latest)
 
 Unova Together is a free fan project by **mvq1303 / WhatWasMissing**, built on melonDS. It requires an English **Blaze Black 2 Redux Complete v1.4.1** game file. The launcher prepares the Cynthia Route 7 event in a separate copy for this version. No full game patch is currently bundled; if a compatible Unova Together patch is released for another Redux version, use the patch listed for that exact version. Downloads do not include game files, saves, or firmware.
 
@@ -35,6 +35,8 @@ Everyone in a co-op session should use the same release and Redux version. The l
 ## Guides
 
 [Features](docs/FEATURES.md) · [Player guide](docs/PLAYER_GUIDE.md) · [Mega Evolution](docs/MEGA_EVOLUTION.md) · [Cynthia’s Route 7 challenge](docs/CYNTHIA_ROUTE_7.md) · [Co-op tools](docs/COOP_TOOLS.md) · [Following Pokémon](docs/FOLLOWING_POKEMON.md) · [Known limits](docs/KNOWN_ISSUES.md) · [Bag capacity](docs/BAG_CAPACITY.md) · [Release notes](patchnotes/README.md)
+
+Developers and coding agents can use the [AI agent tools](docs/AGENT_TOOLS.md) to search source, inspect ROM-resident assets, validate saves and control melonDS without desktop input simulation.
 
 For play across different networks, Tailscale is the recommended setup. Before hosting or joining a Tailscale session, the launcher requires each player to review the [step-by-step guide](docs/TAILSCALE_COOP.md). If you prefer another method, use Local LAN when everyone is on the same network, try ZeroTier with manual firewall setup, or ask your group to host the experimental UDP relay. The project does not provide a public server.
 

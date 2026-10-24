@@ -38,6 +38,7 @@ Important reading by task:
 - Multiplayer: `docs/COOP_TOOLS.md`, `docs/KNOWN_ISSUES.md`, `docs/LAN_LOBBIES.md`, `docs/TAILSCALE_COOP.md`, `docs/UDP_SERVER_GUIDE.md`.
 - Battle/experience: `docs/XP_COMPENSATION.md`, `docs/XP_DESYNC_INVESTIGATION_2026-10-11.md`, `docs/XP_COMPENSATION_BATTLE_TEST.md`, `docs/MEGA_EVOLUTION.md`.
 - Launcher: `docs/LAUNCHER.md`, `docs/LAUNCHER_STORAGE.md`, `docs/SHARED_LAUNCHER.md`, and `maintenance-tools/tools/launcher_ui/UX-CONTRACT.md`. Compare with `launcher-source/tools/launcher_ui/` before assuming the UX contract describes that source tree.
+- AI agent tooling: `docs/AGENT_TOOLS.md` and `docs/EMULATOR_AGENT_CONTROL.md`; follow the local-only control, isolated-session and source-provenance guidance in root `skills.md` before extending these interfaces.
 - ROM and Generation 5 editing: `docs/GEN5_EDITOR_RESEARCH.md`, `docs/GEN5_EDITOR_WORKFLOW.md`, `docs/GEN5_SAVE_INSPECTION.md`, `docs/CYNTHIA_ROUTE_7.md`, and `docs/ROMHACK_DIALOGUE_WORKFLOW.md`.
 - Release: relevant `docs/RELEASE_CHECKS_*.md`, the actual packaging scripts under `launcher-source/tools/` or `maintenance-tools/tools/`, and `maintenance-tools/tools/publish_release.py` for publishing. `maintenance-tools/README.md` describes that folder's purpose, not the release procedure.
 
@@ -170,6 +171,8 @@ Optimize for **cost per verified outcome**, not minimum tokens per message. Batc
 ## 10. Autonomous work boundaries
 
 You are authorized to independently create and execute reasonable subtasks **necessary for the user's active request**: inspect dependencies, add regression tests, implement code, update relevant docs, run safe tests, and review the resulting diff. Do not wait for the user to restate each obvious substep.
+
+**Subagent use is explicitly authorized and expected when available.** For substantial multi-step development, reviews, test work, or audits, proactively delegate independent work when that can materially reduce elapsed time or improve coverage. Keep assignments bounded and non-overlapping; the primary agent remains responsible for integrating results, resolving conflicts, reviewing delegated changes, running final verification, and carrying out any authorized release or publication. Avoid delegation for small tasks or work whose steps are tightly serial. Follow [`skills.md` → Parallel subagent development](skills.md#parallel-subagent-development) for the reusable workflow.
 
 **Require explicit approval** before: publishing releases, deploying public services, modifying production/remote data, spending money, creating unrelated projects, installing system-wide software, changing account/model subscription settings, deleting real ROMs or saves, destructive repository operations, force-pushing, or sending data to third parties. **Branch publication is separate from a release:** create local feature branches and commits when authorized by the task, but do not push or publish branches unless the user requested it or explicitly authorized remote publication. Never merge, tag, or release merely because a branch was pushed.
 

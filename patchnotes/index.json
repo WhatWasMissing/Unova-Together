@@ -2,6 +2,12 @@
   "schema": 1,
   "notes": [
     {
+      "version": "2.0.32",
+      "title": "Tools for AI coding agents",
+      "file": "RELEASE_NOTES_2.0.32.md",
+      "body": "AI coding agents can inspect project source, docs and assets through MCP, check ROMs and saves, preview field models, inspect launcher profiles, and control an isolated melonDS session through its local API. The release includes local MCP setup, a loopback-only authenticated HTTP endpoint, emulator protocol and runner source, repeatable tests, credited follower and Mega artwork, the cleared Mega Evolution sound cue, and independent FreeBIOS replacements with notices. No game ROM, user save or real firmware dump is included."
+    },
+    {
       "version": "2.0.31",
       "title": "Trainer outfit filters and dialogue tools",
       "file": "RELEASE_NOTES_2.0.31.md",

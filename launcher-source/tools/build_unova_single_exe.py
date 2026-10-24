@@ -10,19 +10,23 @@ REPO=ROOT.parent
 WORKSPACE=ROOT.parent.parent.parent
 PRIVATE={'.nds','.gba','.sav','.save','.dsv','.ramdump','.ml1','.ml2','.ml3','.ml4','.ml5','.ml6','.ml7','.ml8','.pem','.key','.pyc'}
 
+def is_generated_native_source(relative: Path) -> bool:
+    return relative.name == '.release-build-input' or relative.name.endswith('.latest.json')
+
 def tool_source(name):
     source=ROOT/'tools'/name
     if source.is_file():return source
     return WORKSPACE/'tools'/name
 
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('--runtime-root',type=Path);parser.add_argument('--work-dir',type=Path);parser.add_argument('--output-dir',type=Path);parser.add_argument('--pyinstaller-python',type=Path);parser.add_argument('--base-source-archive',type=Path,help='Previous official source archive to preserve the matching emulator source')
+    parser=argparse.ArgumentParser();parser.add_argument('--runtime-root',type=Path);parser.add_argument('--work-dir',type=Path);parser.add_argument('--output-dir',type=Path);parser.add_argument('--pyinstaller-python',type=Path);parser.add_argument('--base-source-archive',type=Path,help='Previous official source archive used to verify matching source provenance');parser.add_argument('--native-source-root',type=Path,help='Exact modified emulator source tree used for the staged binary')
     parser.add_argument('--launcher-source',type=Path,help='Matching source archive for a retained frozen launcher')
     args=parser.parse_args()
     installed=args.runtime_root.resolve() if args.runtime_root else WORKSPACE/'builds/unova-together-0.3.5/Unova-Together'
     if not installed.is_relative_to(WORKSPACE/'builds'):raise ValueError('Runtime must be staged under builds')
     work=(args.work_dir.resolve() if args.work_dir else WORKSPACE/'test-fixtures/single-exe-build-20261009')
-    if not work.is_relative_to(WORKSPACE/'test-fixtures'):raise ValueError('Single-EXE work directory must stay within test-fixtures')
+    if not (work.is_relative_to(WORKSPACE/'test-fixtures') or work.is_relative_to(WORKSPACE/'builds')):
+        raise ValueError('Single-EXE work directory must stay within test-fixtures or builds')
     if args.work_dir and work.exists() and any(work.iterdir()):raise FileExistsError('Single-EXE work directory must be fresh')
     work.mkdir(parents=True,exist_ok=True)
     (work/'.disposable-test-output').write_text('Temporary one-file package build work.',encoding='utf-8')
@@ -33,16 +37,29 @@ def main():
         with zipfile.ZipFile(args.base_source_archive) as base:
             if not any(name.startswith('Unova-Together-Source/source/melonDS/') for name in base.namelist()):
                 raise ValueError('Base corresponding-source archive is missing the packaged emulator source.')
+    native_source=args.native_source_root.resolve() if args.native_source_root else None
+    if native_source and not native_source.is_relative_to(WORKSPACE/'builds'):
+        raise ValueError('Modified emulator source must be staged under workspace builds')
     with zipfile.ZipFile(source,'w',zipfile.ZIP_DEFLATED,compresslevel=6) as bundle:
         for name in ('launcher_migration.py','unova_launcher_bootstrap.py','build_unova_bootstrap.py','test_launcher_migration.py'):
             bundle.write(WORKSPACE/'tools'/name,'tools/'+name)
         bundle.write(tool_source('test_launcher_versioning.py'),'tools/test_launcher_versioning.py')
-        if args.base_source_archive:
+        if native_source:
+            for directory,dirs,names in os.walk(native_source):
+                dirs[:]=[d for d in dirs if d not in {'.git','build','__pycache__','test-fixtures','diagnostics'}]
+                for name in sorted(names):
+                    path=Path(directory)/name
+                    if path.is_symlink() or path.suffix.lower() in PRIVATE|{'.exe','.dll','.obj','.o','.a','.log'}:continue
+                    relative=path.relative_to(native_source)
+                    if is_generated_native_source(relative):continue
+                    bundle.write(path,'source/melonDS/'+relative.as_posix())
+        elif args.base_source_archive:
             base_prefix='Unova-Together-Source/source/melonDS/'
             with zipfile.ZipFile(args.base_source_archive) as base:
                 for name in sorted(n for n in base.namelist() if n.startswith(base_prefix)):
                     relative=Path(name[len(base_prefix):])
                     if not relative.parts or any(part in {'.git','build','__pycache__','test-fixtures','diagnostics'} for part in relative.parts):continue
+                    if is_generated_native_source(relative):continue
                     if relative.suffix.lower() in PRIVATE|{'.exe','.dll','.obj','.o','.a','.log'}:raise ValueError('Private/generated file in base emulator source: '+relative.as_posix())
                     bundle.writestr('source/melonDS/'+relative.as_posix(),base.read(name))
         else:
@@ -52,12 +69,15 @@ def main():
                 for name in sorted(names):
                     path=Path(directory)/name
                     if path.is_symlink() or path.suffix.lower() in PRIVATE|{'.exe','.dll','.obj','.o','.a','.log'}:continue
-                    relative=path.relative_to(primary).as_posix()
-                    bundle.write(path,'source/melonDS/'+relative)
+                    relative=path.relative_to(primary)
+                    if is_generated_native_source(relative):continue
+                    bundle.write(path,'source/melonDS/'+relative.as_posix())
         for path in sorted((ROOT/'tools/launcher_ui').rglob('*')):
             if path.is_file() and '__pycache__' not in path.parts:bundle.write(path,'tools/launcher_ui/'+path.relative_to(ROOT/'tools/launcher_ui').as_posix())
-        for name in ('unova_launcher.py','unova_updater.py','unova_single_exe.py','build_unova_launcher.py','build_unova_single_exe.py','generate_launcher_settings.py','test_launcher_all_settings.py','test_launcher_ui.py','test_launcher_services.py','test_launcher_preferences.py','test_unova_updater.py','test_unova_single_exe.py','verify_launcher_native_lan.py','verify_lan_coop.py','check_battle_presence.cpp','check_field_zone.cpp','check_presence_rendering.cpp','test_presence_server.py','test_presence_relay_version.py','presence_server.py','check_lan_group_pair.cpp','test_gen5_obedience.py','check_obedience_patch.cpp'):
+        for name in ('unova_launcher.py','unova_updater.py','unova_single_exe.py','build_unova_launcher.py','build_unova_single_exe.py','unova_agent.py','emulator_agent.py','test_unova_agent.py','test_emulator_agent.py','generate_launcher_settings.py','test_launcher_all_settings.py','test_launcher_ui.py','test_launcher_services.py','test_launcher_preferences.py','test_unova_updater.py','test_unova_single_exe.py','verify_launcher_native_lan.py','verify_lan_coop.py','check_battle_presence.cpp','check_field_zone.cpp','check_presence_rendering.cpp','test_presence_server.py','test_presence_relay_version.py','presence_server.py','check_lan_group_pair.cpp','test_gen5_obedience.py','check_obedience_patch.cpp'):
             bundle.write(tool_source(name),'tools/'+name)
+        for name in ('AGENT_TOOLS.md','EMULATOR_AGENT_CONTROL.md','DEVELOPER_TESTING.md'):
+            bundle.write(REPO/'docs'/name,'docs/'+name)
         for name in ('test_overworld_companion.py','test_companion_interactions.py','check_pokemon_follower.cpp','probe_native_item_menu.py','test_party_stats.py','test_field_tools.py','test_field_hms.py','probe_native_field_hms.py','complete_follower_assets.py','verify_complete_followers.py'):
             bundle.write(tool_source(name),'tools/'+name)
         for name in ('coop_social.py','test_coop_social.py','item_trading_relay.py','pokemon_trading_relay.py'):
@@ -105,6 +125,11 @@ def main():
                     target.writestr(name,current.read(name))
             for name in sorted(replacements):target.writestr(name,baseline.read(name))
         revised.replace(source)
+    with zipfile.ZipFile(source) as corresponding_source:
+        leaked_generated=[name for name in corresponding_source.namelist()
+                          if Path(name).name == '.release-build-input' or Path(name).name.endswith('.latest.json')]
+        if leaked_generated:
+            raise ValueError('Generated verification output in corresponding source: '+', '.join(leaked_generated[:5]))
     archive=assets/'runtime.zip';entries=[]
     def add(bundle,path,relative):
         if path.suffix.lower() in PRIVATE:raise ValueError('Private/game file cannot be bundled: '+relative)
