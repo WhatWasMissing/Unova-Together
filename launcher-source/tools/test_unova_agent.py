@@ -152,7 +152,7 @@ class ProjectAgentTests(unittest.TestCase):
     def test_stdio_reports_oversized_message_and_continues(self):
         metadata = {agent.MCP_VERSION_META: agent.MCP_MODERN_VERSION,
             agent.MCP_CLIENT_CAPABILITIES_META: {}}
-        oversized = 'x' * (agent.MAX_MCP_BODY + 1) + '\n'
+        oversized = 'x' * (agent.MAX_MCP_BODY * 3 + 17) + '\n'
         request = json.dumps({'jsonrpc': '2.0', 'id': 'discover', 'method': 'server/discover',
             'params': {'_meta': metadata}}) + '\n'
         process = subprocess.run([sys.executable, str(Path(agent.__file__)), '--project-root', str(self.root), 'mcp'],

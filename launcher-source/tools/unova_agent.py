@@ -530,8 +530,13 @@ def serve_mcp() -> int:
     """Run MCP over standard input and output for local coding clients."""
     legacy_initialized = False
     legacy_protocol_version: str | None = None
-    for raw in sys.stdin.buffer:
+    while True:
+        raw = sys.stdin.buffer.readline(MAX_MCP_BODY + 1)
+        if not raw:
+            break
         if len(raw) > MAX_MCP_BODY:
+            while raw and not raw.endswith(b'\n'):
+                raw = sys.stdin.buffer.readline(MAX_MCP_BODY + 1)
             response = _mcp_error(None, -32600, 'MCP request exceeds the 1 MiB message limit.')
             sys.stdout.write(json.dumps(response, ensure_ascii=False) + '\n')
             sys.stdout.flush()
