@@ -42,4 +42,44 @@ No portrait art is bundled. With no image, the demo uses a small expression-awar
 
 ## Engine boundary
 
-At the pinned source revision, the field dialogue code provides ordinary text windows, menus, and event-script conditions; it does not expose a general field portrait/expression command. The demo is an interactive local preview, **not an in-game ROM implementation**. The decomp contains specialized scene/portrait rendering elsewhere, but that does not make those systems reusable from an ordinary field NPC. A future in-game version needs a compatible renderer and a validated integration into the decomp build/Redux patch flow. No Sovereign of the Skies code, dialogue, or art was copied.
+At the pinned source revision, field dialogue has ordinary text windows and event scripts but no general portrait/expression command. The HTML dialogue demo is a preview. The exact-build actor renderer below is a separate in-game implementation. No Sovereign of the Skies code, dialogue, or art was copied.
+
+## In-game actor dialogue art
+
+The exact-build renderer in `maintenance-tools/tools/rom/` now displays the generated portrait, nameplate, and framed panel in an actual actor conversation. The native text printer, page advance, cursor, Yes/No menu, and close behavior remain in use. The supported input is the user-provided Redux `IREO` ROM with SHA-256 `353fb0cf82c3e4eddfc8986efa8910b00eb1c4d6f106c220abef59d69d3a520a`. This fingerprint is mandatory; the patcher refuses other builds and existing output paths. It writes a separate ROM.
+
+Use Python 3.11 or later, the dependencies in `maintenance-tools/tools/rom/requirements.txt`, and an ARM GNU toolchain providing `arm-none-eabi-gcc`, `objcopy`, and `nm`. The tool also checks `C:\SysGCC\arm-eabi\bin` when those programs are absent from PATH. Dependencies can be installed in a private virtual environment.
+
+```powershell
+python maintenance-tools/tools/rom/dialogue_art_patch.py `
+  --base-rom "<your supported source ROM>" `
+  --speaker-profiles maintenance-tools/assets/dialogue-art/speaker-profiles.example.json `
+  --output-rom "<new private output ROM>"
+```
+
+The example deliberately assigns the Emma demo skin to the central Lentimas Town Pokémon Center nurse: zone 460, actor UID 6. It does not alter the nurse's scripts or text. The actor placement at UID 3 is a different worker; the running nurse script and the exact ROM's event member 606 identify UID 6. Unconfigured speakers retain their stock dialogue windows.
+
+Each manifest profile has `name`, `zone_id`, `actor_uid`, and `art`. Names support 1–8 Latin letters, spaces, or hyphens and are drawn in uppercase pixel lettering. Artwork must resolve inside `maintenance-tools/assets/dialogue-art/`. Up to 64 exact speaker profiles are supported. Wildcard IDs require the explicit test-only `--allow-wildcard-speaker-profiles` flag. The default without a manifest adds no speaker art.
+
+The patch extends the existing ITCM autoload image, reserves its new space by updating the ITCM arena floor, and branches directly to RAM helpers. Overlay 36, its BSS, and its full 64 KiB field heap keep their original sizes and addresses. `0x08000000` is the GBA slot address space, not mapped DS ROM: the abandoned post-data implementation was invalid despite booting successfully. The TwlSDK autoload table in this exact ROM has four words per entry; ndspy's generic three-word section parser must not be used to rewrite it.
+
+The standard path changes only configured actor conversations. Signs and ordinary system messages retain their stock rendering. `--field-system-art` retains the older fixed narrator-art experiment as an explicit diagnostic option; it is **NOT RUN** in the final verification and is not part of the verified actor workflow. Diagnostic actor lifecycle modes are for no-profile fault isolation, not normal play.
+
+To run an isolated, silent test with the installed runner:
+
+```powershell
+python maintenance-tools/tools/rom/run_muted_dialogue_test.py `
+  --runner "<installation>/tools/emulator_agent.py" `
+  --emulator "<installation>/builds/current/melonDS.exe" `
+  --rom "<derived ROM>" --save "<source save to copy>"
+```
+
+This writes a fresh private configuration with volume zero and uses SDL's dummy audio driver. Its returned `session.json` can be passed to the configured Unova MCP controls. Stop that session with `control_emulator` and no save-export path. Keep frame waits below the request timeout; 480 frames worked in the tested runtime, while one 1,400-frame request timed out even though the same session remained alive.
+
+Run focused checks with:
+
+```powershell
+python -m unittest maintenance-tools.tools.rom.test_dialogue_art_patch maintenance-tools.tools.rom.test_dialogue_art_hook_cpu -v
+```
+
+The CPU tests compile and execute the real helper code in Unicorn, with game functions replaced by explicit stubs. They verify the hook ABI, state updates, and fallback paths; the separate live scenarios in [the renderer verification record](verification/ROM_DIALOGUE_ART_RENDERER_2026-10-24.md) establish actual game rendering. The private patched ROM and save are not distributable release assets.

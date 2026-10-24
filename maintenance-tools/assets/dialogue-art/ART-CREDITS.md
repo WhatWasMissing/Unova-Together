@@ -1,0 +1,3 @@
+# Dialogue art credits
+
+`field-guide-source.png` was generated with OpenAI ImageGen on 2026-10-24 for this Unova Together dialogue-art prototype. The two user-supplied screenshots were visual references for layout and palette only; no game character, sprite, portrait or ROM-extracted image was used. The character, ornaments and panel are original generated artwork. The source has a blank nameplate; the patcher adds the configured speaker name. The example assigns this original Emma demo skin to one existing nurse interaction to demonstrate the renderer. It is not canonical Pokémon character artwork.

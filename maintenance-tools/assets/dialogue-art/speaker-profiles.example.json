@@ -1,0 +1,10 @@
+{
+  "profiles": [
+    {
+      "name": "Emma",
+      "zone_id": 460,
+      "actor_uid": 6,
+      "art": "field-guide-source.png"
+    }
+  ]
+}
