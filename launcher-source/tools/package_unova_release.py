@@ -202,6 +202,12 @@ def main():
             z.write(ROOT/'tools'/name,'Unova-Together-Source/tools/'+name)
         z.write(repo/'docs/DEVELOPER_TESTING.md','Unova-Together-Source/docs/DEVELOPER_TESTING.md')
         z.write(ROOT/'tools/test_patchnotes_feed.py','Unova-Together-Source/tools/test_patchnotes_feed.py')
+        for name in ('test_player_models.py',):
+            z.write(ROOT/'tools'/name, 'Unova-Together-Source/tools/'+name)
+        for name in ('dialogue_preview.py', 'romhack_workflow.py', 'test_dialogue_preview.py', 'test_romhack_workflow.py'):
+            z.write(repo/'maintenance-tools/tools'/name, 'Unova-Together-Source/maintenance-tools/tools/'+name)
+        z.write(repo/'maintenance-tools/dialogue-demo/field_researcher.json', 'Unova-Together-Source/maintenance-tools/dialogue-demo/field_researcher.json')
+        z.write(repo/'docs/ROMHACK_DIALOGUE_WORKFLOW.md', 'Unova-Together-Source/docs/ROMHACK_DIALOGUE_WORKFLOW.md')
         for name in COMMANDS:
             z.write(WORKSPACE/name, 'Unova-Together-Source/'+name)
         z.write(source_root/'LICENSE', 'Unova-Together-Source/LICENSE')

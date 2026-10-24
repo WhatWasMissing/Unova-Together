@@ -232,3 +232,5 @@ Before reporting completion, answer internally:
 - Did I verify the exact committed/published tree, rather than trusting a summary or a successful API response?
 
 If any answer exposes a critical gap, do not present the task as fully verified. Resolve the gap or stop with a precise handoff.
+
+Release consolidation and cleanup guidance: see [skills.md — Release branch consolidation](skills.md#release-branch-consolidation).

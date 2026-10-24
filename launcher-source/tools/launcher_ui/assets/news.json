@@ -2,6 +2,12 @@
   "schema": 1,
   "notes": [
     {
+      "version": "2.0.31",
+      "title": "Trainer outfit filters and dialogue tools",
+      "file": "RELEASE_NOTES_2.0.31.md",
+      "body": "- Filter player appearance by trainer outfit to find matching walking characters more easily.\n- Includes the 2.0.30 fix for optional area battle scenery with prepared game copies.\n- Adds developer tools for validating and previewing branching dialogue and safely packing event/text archives. These are local authoring tools; no new in-game dialogue event is installed.\n\nUse the same release and supported Blaze Black 2 Redux Complete v1.4.1 game version as your friends. Co-op experience remains disabled."
+    },
+    {
       "version": "2.0.30",
       "title": "Area battle scenery now appears",
       "file": "RELEASE_NOTES_2.0.30.md",
