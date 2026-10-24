@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "baselineRelease": "Unova Together 2.0.34 native source",
+  "baselineArchive": "Unova-Together-2.0.34-Source.zip",
+  "baselineArchiveSha256": "de592d351d8e2ea24f8b79769bf4d7ebdb6445e1ebc23183c95c0421902ac0bb",
+  "baselineFiles": {
+    "src/frontend/qt_sdl/OverworldDebug.cpp": "d477a7929d59b92ae3883806e11e8270564c7ce97b7245a7a98d0850dfe2fe39",
+    "src/frontend/qt_sdl/AreaBattleScenes.h": "bfb50ef4088eaab9dab17bec919cef131c994d853bddc5acf5b69c8c2790aeb9",
+    "src/frontend/qt_sdl/ProjectCredits.h": "44b33201f36f0578ad865a3f55f41de0a509c1d7a305bc5cfd7a6e2deb00c018",
+    "res/melon.rc.in": "d43a84083a0e0d837a0694bafc2e913dbd5435b9dbb190005ce6c48219325e7f"
+  },
+  "patch": "area-battle-scenery-context.patch",
+  "patchSha256": "1c040d51cc7f7bc274e39efd1abb0c1f20436286b2336a1b2405d4be76e682c9",
+  "resultFiles": {
+    "src/frontend/qt_sdl/OverworldDebug.cpp": "6bc2bef8de603771f7f3e167e5381762feb959c82a31407c6be62524eaaf1ba9",
+    "src/frontend/qt_sdl/AreaBattleScenes.h": "a6a78830c4141af1cbfe652c32300d8ad89c242bbf74784a5baa1557658f58c0",
+    "src/frontend/qt_sdl/BattleSceneryContext.h": "6e24d548efd54a68b15380bdfda77b3938a4d2d17d34b791a8d4781ed6c6c2a7",
+    "src/frontend/qt_sdl/ProjectCredits.h": "3aab3b20a1e2f8b4af97cd18a2abe5d57356d1e09d6005fbb6e1579fdb5a826e",
+    "res/melon.rc.in": "0da2eca2c70242ec1a69f8cc7d2b059d83fe1dcea6e4285a02eb1c2389e18b1c"
+  },
+  "scope": "Carry the last verified field zone and coordinates into a known ordinary battle, so optional area and nearby scenery can select safely; clear stale patches and retain native scenery when the battle context is unknown."
+}
